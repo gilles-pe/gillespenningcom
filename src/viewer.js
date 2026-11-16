@@ -10,7 +10,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
 
   setModelLanguage(lang);
-  const { scene, rooms } = buildScene();
+  const { scene, rooms, outline, center } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -53,9 +53,39 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); stageW = w; stageH = h;
-    const v = THREE.MathUtils.degToRad(camera.fov) / 2, hfov = Math.atan(Math.tan(v) * camera.aspect);
-    overviewDist = Math.max(6.4 / Math.tan(hfov), 4.6 / Math.tan(v));
     setGoal();
+  }
+  // Camera distance at which all points fit into [-halfW, halfW] x [-below, above] (NDC), seen from azimuth az.
+  // Moves target t so the points are centred in that window. Every size constraint is linear in dist, so no search is needed.
+  const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), upv = new THREE.Vector3(), dv = new THREE.Vector3();
+  function fitView(pts, t, az, halfW, above, below) {
+    fwd.set(-Math.cos(EL) * Math.sin(az), -Math.sin(EL), -Math.cos(EL) * Math.cos(az));
+    rgt.set(Math.cos(az), 0, -Math.sin(az)); upv.crossVectors(rgt, fwd);
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2), th = tv * camera.aspect;
+    let dist = 1;
+    for (let it = 0; it < 4; it++) {
+      dist = 1;
+      let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      for (const p of pts) {
+        dv.copy(p).sub(t);
+        const x = dv.dot(rgt), y = dv.dot(upv), f = dv.dot(fwd);
+        dist = Math.max(dist, Math.abs(x) / (halfW * th) - f, (y >= 0 ? y / (above * tv) : -y / (below * tv)) - f);
+      }
+      for (const p of pts) {
+        dv.copy(p).sub(t);
+        const dp = dist + dv.dot(fwd), x = dv.dot(rgt) / (dp * th), y = dv.dot(upv) / (dp * tv);
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      }
+      t.addScaledVector(rgt, (x0 + x1) / 2 * dist * th).addScaledVector(upv, ((y0 + y1) / 2 - (above - below) / 2) * dist * tv);
+    }
+    return dist;
+  }
+  const BAR = 64;                                          // the room bar floats over the bottom of the stage on desktop
+  const roomPts = {};
+  for (const r of Object.values(rooms)) {
+    roomPts[r.id] = [];
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) for (const y of [0, r.h])
+      roomPts[r.id].push(new THREE.Vector3(r.cx + sx * r.w / 2, y, r.cz + sz * r.d / 2));
   }
   function setGoal() {
     if (openId) {
@@ -64,8 +94,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const pw = phone() ? 0 : (panelEl.offsetWidth || 300) + 2 * 16;
       const free = Math.max(0.4, (stageW - pw) / stageW);
       goal.shift = pw / 2;
-      goal.t.copy(r.center); goal.t.y += 0.3; goal.dist = overviewDist * (phone() ? 0.3 : 0.66 / Math.sqrt(free)); goal.az = -r.x * 0.32 + userAz * 0.5;
-    } else { goal.t.set(0, 0.2, 0.3); goal.dist = overviewDist; goal.az = userAz; goal.shift = 0; }
+      goal.t.copy(r.center); goal.t.y += 0.3; goal.az = -r.x * 0.32 + userAz * 0.5;
+      // Zoom to the room's own size: it fills the free part of the stage (right of the panel on desktop).
+      const bar = phone() ? 0 : 2 * BAR / stageH;
+      goal.dist = fitView(roomPts[openId], goal.t, goal.az, 0.93 * free, 0.93, Math.max(0.5, 0.93 - bar));
+    } else {
+      goal.t.copy(center); goal.az = userAz; goal.shift = 0;
+      const bar = phone() ? 0 : 2 * 24 / stageH;           // the bar may cover the front edge of the base a little
+      goal.dist = overviewDist = fitView(outline, goal.t, 0, 0.95, 0.95, Math.max(0.5, 0.95 - bar));
+    }
   }
   new ResizeObserver(resize).observe(stage); resize();
   Object.assign(view, { az: goal.az, dist: goal.dist, shift: goal.shift }); view.t.copy(goal.t);
@@ -149,10 +186,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const isOpen = r.id === openId, isHot = r.id === hoverId && !openId;
       r.open += ((isOpen ? 1 : 0) - r.open) * k;
       r.glow += ((isOpen ? 1 : isHot ? 0.35 : 0) - r.glow) * (reduced ? 1 : 1 - Math.exp(-dt * 6));
-      r.door.position.z = 0.2 - r.open * 1.35;
+      r.door.position.z = r.doorZ - r.open * r.doorSlide;
       r.light.intensity = r.glow * 9;
       r.floor.material.emissiveIntensity = r.glow * 0.12;
-      r.hotGeo.setDrawRange(0, Math.floor(r.open * 80) * 36);
+      r.hotGeo.setDrawRange(0, Math.floor(r.open * r.hotSegs) * 36);
       labels[r.id].classList.toggle('hot', isHot);
       v3.copy(r.labelAt).project(camera);
       labels[r.id].style.left = `${(v3.x * 0.5 + 0.5) * 100}%`;

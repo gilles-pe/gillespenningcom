@@ -3,8 +3,9 @@
 import * as THREE from 'three';
 import content from './content.js';
 
-const W = 4, D = 3.6, G = 1.3, T = 0.14;          // room width, depth, corridor gap, wall thickness
-const WALL_FRONT = -D / 2 + T / 2 + 0.006;        // z of the lettering/pictures, just in front of the back wall
+const T = 0.14;                                   // wall thickness
+const wallZ = d => -d / 2 + T / 2 + 0.006;        // z of the lettering/pictures, just in front of a back wall of a room of depth d
+const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 const FONT = "'Newsreader Variable', Georgia, serif";
 const PETROL = '#12383a', CREAM = '#f6eee3';
 const C = {
@@ -23,20 +24,35 @@ export function setModelLanguage(lang) {
   LANG = lang; fontRedraws.forEach(f => f());
 }
 
+// The floor plan. One table: everything else (floor, walls, door, lettering, pictures,
+// furniture, light, hit box, hotspots, camera framing) is derived from these numbers.
+//   x, z   side and row (-1 left/back, 1 right/front): which wall faces the corridor, view angle, order
+//   w, d   inner size in world units (x and z); h wall height
+//   cx, cz world position of the room centre
+// Left column outer wall x = -5.2/-4.9, corridor between the columns jogs from x = 0.0 (back) to x = 0.75 (front).
 export const ROOMS = {
-  projects: { x: -1, z: -1, h: 2.1 },
-  about:    { x:  1, z: -1, h: 2.1 },
-  ai:       { x: -1, z:  1, h: 1.6 },
-  writing:  { x:  1, z:  1, h: 1.6 },
+  projects: { x: -1, z: -1, w: 4.6, d: 2.4, h: 2.1, cx: -2.9, cz: -3.7 },   // gallery, 11.0 m2
+  about:    { x:  1, z: -1, w: 3.2, d: 2.6, h: 2.1, cx:  2.2, cz: -3.6 },   // study, smallest, 8.3 m2
+  ai:       { x: -1, z:  1, w: 5.0, d: 4.4, h: 1.6, cx: -2.4, cz:  1.3 },   // largest, 22 m2
+  writing:  { x:  1, z:  1, w: 3.4, d: 4.0, h: 1.6, cx:  3.1, cz:  1.5 },   // lounge, 13.6 m2
 };
+// Base plate and brass line geometry (world coordinates).
+const BASE = { x0: -5.7, x1: 5.3, z0: -5.4, z1: 4.3 };
+const CORR = { frontX: 0.75, backX: 0.0, jogZ: -1.7 };                      // corridor centre lines, z of the jog
+// Door: a sliding pane in the corridor-side wall, near the front end of that wall.
+function doorSpec(r) {
+  const dw = clamp(r.d * 0.36, 1.0, 1.6), z0 = r.d / 2 - dw / 2 - 0.35;
+  const room = z0 - dw / 2 + r.d / 2 - T / 2 - 0.03;                      // free run towards the back wall
+  return { dw, z0, slide: Math.min(dw * 0.9, room) };
+}
 
 // ---- Image slots -----------------------------------------------------------
 // One table for every picture surface. A file public/slots/<name>.webp replaces the
 // placeholder automatically. Keep this table in sync with DESIGN.md ("Image slots").
 // size = world units [width, height] of the picture; its ratio is the slot's aspect ratio.
 export const SLOTS = [
-  { name: 'ai-wall-1',        room: 'ai',       size: [1.2, 0.6],   text: 'Consultation', tint: '#b9c7a6' },
-  { name: 'ai-wall-2',        room: 'ai',       size: [1.2, 0.6],   text: 'Progress',     tint: '#cdd9c0' },
+  { name: 'ai-wall-1',        room: 'ai',       size: [1.3, 0.65],  text: 'Consultation', tint: '#b9c7a6' },
+  { name: 'ai-wall-2',        room: 'ai',       size: [1.3, 0.65],  text: 'Progress',     tint: '#cdd9c0' },
   { name: 'projects-board-1', room: 'projects', size: [0.72, 0.54], text: 'Wimmelbild',   tint: '#b9c7a6' },
   { name: 'projects-board-2', room: 'projects', size: [0.72, 0.54], text: 'AI Monitor',   tint: '#b9c7a6' },
   { name: 'projects-board-3', room: 'projects', size: [0.72, 0.54], text: 'DocEase',      tint: '#b9c7a6' },
@@ -142,8 +158,8 @@ function slotMaterial(name) {
   return m;
 }
 // Flat picture on a wall, with a thin wooden frame behind it.
-function wallPicture(parent, name, x, y, frameColor = C.woodDark) {
-  const [w, h] = SLOT[name].size, f = 0.035;
+function wallPicture(parent, name, x, y, d, frameColor = C.woodDark) {
+  const [w, h] = SLOT[name].size, f = 0.035, WALL_FRONT = wallZ(d);
   const frame = new THREE.Mesh(new THREE.BoxGeometry(w + 2 * f, h + 2 * f, 0.03), wood(frameColor));
   frame.position.set(x, y, WALL_FRONT + 0.015); frame.castShadow = true; parent.add(frame);
   const pic = new THREE.Mesh(new THREE.PlaneGeometry(w, h), slotMaterial(name));
@@ -152,14 +168,16 @@ function wallPicture(parent, name, x, y, frameColor = C.woodDark) {
 }
 
 // ---- Room names on the back wall ---------------------------------------------
-const LETTERING = {                        // x, y, width, height of the plane (room coordinates)
-  projects: { x: 0,     y: 1.68, w: 3.2, h: 0.58, color: PETROL },
-  about:    { x: 0,     y: 1.76, w: 2.8, h: 0.52, color: PETROL },
-  ai:       { x: 0,     y: 1.37, w: 3.2, h: 0.4, color: PETROL },
-  writing:  { x: 0,     y: 1.37, w: 3.2, h: 0.4, color: PETROL },
+const LETTERING = {                        // plane height, and drop from the wall top to the plane centre
+  projects: { h: 0.58, drop: 0.42 },
+  about:    { h: 0.52, drop: 0.34 },
+  ai:       { h: 0.44, drop: 0.23 },
+  writing:  { h: 0.42, drop: 0.23 },
 };
-function lettering(parent, id) {
-  const L = LETTERING[id], c = canvas(2048, Math.round(2048 * L.h / L.w)), k = c.getContext('2d');
+function lettering(parent, id, r) {
+  const L = { ...LETTERING[id], x: 0, w: clamp(r.w * 0.75, 2.4, 3.4), color: PETROL };
+  L.y = r.h - L.drop;
+  const c = canvas(2048, Math.round(2048 * L.h / L.w)), k = c.getContext('2d');
   const t = tex(c);
   whenFont(() => {
     const text = modelText().rooms[id];
@@ -171,22 +189,24 @@ function lettering(parent, id) {
     t.needsUpdate = true;
   });
   const m = new THREE.Mesh(new THREE.PlaneGeometry(L.w, L.h), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false }));
-  m.position.set(L.x, L.y, WALL_FRONT + 0.003); m.renderOrder = 2; parent.add(m);
+  m.position.set(L.x, L.y, wallZ(r.d) + 0.003); m.renderOrder = 2; parent.add(m);
 }
 
 // ---- Window light on the floor ---------------------------------------------------
-let lightMat;
-function windowLight(parent) {
-  if (!lightMat) {
-    const c = canvas(512, 512), k = c.getContext('2d');
-    if ('filter' in k) k.filter = 'blur(10px)';
-    k.fillStyle = 'rgba(255,246,222,0.55)';
-    [[40, 70], [210, 60], [370, 50]].forEach(([x, wd]) => {
-      k.beginPath(); k.moveTo(x, 0); k.lineTo(x + wd, 0); k.lineTo(x + wd + 190, 512); k.lineTo(x + 190, 512); k.fill();
-    });
-    lightMat = new THREE.MeshBasicMaterial({ map: tex(c), transparent: true, opacity: 0.5, depthWrite: false });
+// Drawn at 128 px per world unit, so stripes keep the same width, spacing and slant in every room.
+function windowLight(parent, r) {
+  const pw = r.w * 0.92, pd = r.d * 0.92, S = 128;
+  const c = canvas(Math.round(pw * S), Math.round(pd * S)), k = c.getContext('2d');
+  if ('filter' in k) k.filter = 'blur(10px)';
+  k.fillStyle = 'rgba(255,246,222,0.55)';
+  const skew = 1.5 * S * pd / 4;                                          // slant over the full depth
+  const widths = [70, 60, 50];
+  for (let x = 40, i = 0; x < c.width; x += 165, i++) {
+    const wd = widths[i % 3];
+    k.beginPath(); k.moveTo(x, 0); k.lineTo(x + wd, 0); k.lineTo(x + wd + skew, c.height); k.lineTo(x + skew, c.height); k.fill();
   }
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.92, D * 0.92), lightMat);
+  const lightMat = new THREE.MeshBasicMaterial({ map: tex(c), transparent: true, opacity: 0.5, depthWrite: false });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(pw, pd), lightMat);
   m.rotation.x = -Math.PI / 2; m.position.y = 0.065; m.renderOrder = 1; parent.add(m);
 }
 
@@ -247,8 +267,8 @@ function shelf(parent, x, z, w, h, rotY = 0) {
 }
 
 // Satin glass door with a thin frame. viewer.js slides it along z via door.position.z.
-function glassDoor(h, x, z) {
-  const dh = h - 0.25, dw = 1.5;
+function glassDoor(h, x, z, dw) {
+  const dh = h - 0.25;
   const door = new THREE.Mesh(new THREE.BoxGeometry(0.04, dh, dw),
     new THREE.MeshStandardMaterial({ color: C.glass, transparent: true, opacity: 0.8, roughness: 0.35, metalness: 0.05, depthWrite: false }));
   door.position.set(x, 0.02 + dh / 2, z); door.renderOrder = 3;
@@ -259,127 +279,172 @@ function glassDoor(h, x, z) {
   return door;
 }
 
+// Brass path as a polyline with rounded corners: straight runs and real bends, like a taped floor line.
+function brassPath(pts, radius) {
+  const path = new THREE.CurvePath(), V = (x, z) => new THREE.Vector3(x, 0.02, z);
+  let cur = pts[0];
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i], n = pts[i + 1];
+    let end = b;
+    if (n) {
+      const l1 = Math.hypot(b[0] - a[0], b[1] - a[1]), l2 = Math.hypot(n[0] - b[0], n[1] - b[1]);
+      const rr = Math.min(radius, l1 / 2, l2 / 2);
+      const p1 = [b[0] + (a[0] - b[0]) / l1 * rr, b[1] + (a[1] - b[1]) / l1 * rr];
+      const p2 = [b[0] + (n[0] - b[0]) / l2 * rr, b[1] + (n[1] - b[1]) / l2 * rr];
+      path.add(new THREE.LineCurve3(V(...cur), V(...p1)));
+      path.add(new THREE.QuadraticBezierCurve3(V(...p1), V(...b), V(...p2)));
+      cur = p2; continue;
+    }
+    path.add(new THREE.LineCurve3(V(...cur), V(...end)));
+  }
+  return path;
+}
+
 export function buildScene() {
   const scene = new THREE.Scene();
   const rooms = {};
 
   // Base and corridor
-  const BW = 2 * W + G + 1.6, BD = 2 * D + G + 1.6;
-  box(scene, BW, 0.6, BD, 0, -0.66, 0, mat(C.base, { roughness: 0.95 }));
-  box(scene, BW - 0.5, 0.06, BD - 0.5, 0, -0.06, 0, floorMat(C.corridor, [3, 5])).material.emissiveIntensity = 0;
+  const BW = BASE.x1 - BASE.x0, BD = BASE.z1 - BASE.z0, bx = (BASE.x0 + BASE.x1) / 2, bz = (BASE.z0 + BASE.z1) / 2;
+  box(scene, BW, 0.6, BD, bx, -0.66, bz, mat(C.base, { roughness: 0.95 }));
+  box(scene, BW - 0.5, 0.06, BD - 0.5, bx, -0.06, bz, floorMat(C.corridor, [(BW - 0.5) / 3.5, (BD - 0.5) / 1.9]));
 
   // Brass line: one dim path per room, plus a bright one drawn on demand
   const brassDim = mat(C.brass, { metalness: 0.6, roughness: 0.4 });
   const brassHot = new THREE.MeshStandardMaterial({ color: 0xffd27a, emissive: 0xd9a03c, emissiveIntensity: 0.9, metalness: 0.5, roughness: 0.3 });
+  const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
-    const cx = r.x * (G / 2 + W / 2), cz = r.z * (G / 2 + D / 2);
-    g.position.set(cx, 0, cz); scene.add(g);
-    const wallM = wallMat(WALL_TONE[id]), sideM = wallMat(C.wall);
-    const floor = box(g, W, 0.08, D, 0, -0.02, 0, floorMat(C.floor, [2, 3]));
-    box(g, W + T, r.h, T, 0, 0, -D / 2, wallM);                               // back wall
-    box(g, T, r.h, D, r.x * W / 2, 0, 0, sideM);                              // outer side wall
-    box(g, T, 0.34, D, -r.x * W / 2, 0, 0, sideM);                            // kerb to the corridor
-    box(g, W, 0.34, T, 0, 0, D / 2, sideM);                                   // front kerb
-    const door = glassDoor(r.h, -r.x * (W / 2 - 0.02), 0.2); g.add(door);
-    const light = new THREE.PointLight(0xffc98a, 0, 7, 1.6); light.position.set(0, 1.5, 0.2); g.add(light);
+    g.position.set(r.cx, 0, r.cz); scene.add(g);
+    const { w, d } = r, wallM = wallMat(WALL_TONE[id]), sideM = wallMat(C.wall);
+    const floor = box(g, w, 0.08, d, 0, -0.02, 0, floorMat(C.floor, [w / 2, d / 1.2]));
+    box(g, w + T, r.h, T, 0, 0, -d / 2, wallM);                               // back wall
+    box(g, T, r.h, d, r.x * w / 2, 0, 0, sideM);                              // outer side wall
+    box(g, T, 0.34, d, -r.x * w / 2, 0, 0, sideM);                            // kerb to the corridor
+    box(g, w, 0.34, T, 0, 0, d / 2, sideM);                                   // front kerb
+    const ds = doorSpec(r);
+    const door = glassDoor(r.h, -r.x * (w / 2 - 0.02), ds.z0, ds.dw); g.add(door);
+    const light = new THREE.PointLight(0xffc98a, 0, Math.max(w, d) * 1.7, 1.6); light.position.set(0, 1.5, d * 0.05); g.add(light);
 
-    const hit = new THREE.Mesh(new THREE.BoxGeometry(W, r.h, D), new THREE.MeshBasicMaterial({ visible: false }));
+    const hit = new THREE.Mesh(new THREE.BoxGeometry(w, r.h, d), new THREE.MeshBasicMaterial({ visible: false }));
     hit.position.y = r.h / 2; hit.userData.room = id; g.add(hit);
 
-    // path: entrance -> corridor -> door
-    const doorX = cx - r.x * (W / 2 + 0.05);
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0.02, BD / 2 - 0.3), new THREE.Vector3(0, 0.02, cz + 1.6),
-      new THREE.Vector3(r.x * 0.12, 0.02, cz + 0.7), new THREE.Vector3(doorX, 0.02, cz + 0.2),
-    ], false, 'catmullrom', 0.4);
-    const SEG = 80;
+    // path: entrance (front edge) -> front corridor -> [jog] -> door
+    const doorX = r.cx - r.x * (w / 2 + 0.08), doorZ = r.cz + ds.z0;
+    const via = r.z > 0 ? [] : [[CORR.frontX, CORR.jogZ], [CORR.backX, CORR.jogZ]];
+    const lane = r.z > 0 ? CORR.frontX : CORR.backX;
+    const curve = brassPath([[CORR.frontX, BASE.z1 - 0.3], ...via, [lane, doorZ], [doorX, doorZ]], 0.32);
     scene.add(new THREE.Mesh(new THREE.TubeGeometry(curve, SEG, 0.022, 6), brassDim));
     const hotGeo = new THREE.TubeGeometry(curve, SEG, 0.04, 6); hotGeo.setDrawRange(0, 0);
     scene.add(new THREE.Mesh(hotGeo, brassHot));
 
-    windowLight(g);
-    lettering(g, id);
-    rooms[id] = { ...r, id, group: g, floor, door, light, hit, hotGeo, hotCount: SEG * 6 * 6,
-      center: new THREE.Vector3(cx, 0.5, cz), labelAt: new THREE.Vector3(cx, r.h + 0.35, cz - D / 2), open: 0, glow: 0 };
+    windowLight(g, r);
+    lettering(g, id, r);
+    rooms[id] = { ...r, id, group: g, floor, door, light, hit, hotGeo, hotSegs: SEG, hotCount: SEG * 6 * 6,
+      doorZ: ds.z0, doorSlide: ds.slide,
+      center: new THREE.Vector3(r.cx, 0.5, r.cz), labelAt: new THREE.Vector3(r.cx, r.h + 0.35, r.cz - d / 2), open: 0, glow: 0 };
     furnish(id, g, r);
   }
-  return { scene, rooms };
+  // Outline of the whole model, for the camera: base corners plus the top of every room.
+  const outline = [];
+  for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
+  for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz) };
+}
+
+// Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
+function layout(id) {
+  const { w, d } = ROOMS[id], back = -d / 2;
+  if (id === 'projects') {
+    const pitch = 1.1, z = back + 0.42, xs = [0, 1, 2, 3].map(n => (n - 1.5) * pitch);
+    return { xs, z, spotZ: z + 0.6 };
+  }
+  if (id === 'about') {
+    const shelfW = 1.2;
+    return { desk: [-0.35, 0.3], shelf: [w / 2 - 0.15 - shelfW / 2, back + 0.25, shelfW], pic: [-0.65, 1.12] };
+  }
+  if (id === 'ai') return { desk: [0.1, 0.1], pics: [-0.9, 0.9] };
+  const shelfW = 1.5;                                                   // writing
+  return { table: [0, 0.5], shelf: [w / 2 - 0.15 - shelfW / 2, back + 0.25, shelfW], lamp: [-w / 2 + 0.36, back + 0.68] };
 }
 
 function furnish(id, g, r) {
-  const w = wood(), cream = mat(C.cream);
+  const w = wood(), cream = mat(C.cream), L = layout(id), { w: RW, d: RD } = r;
   if (id === 'projects') {
-    [1, 2, 3, 4].forEach(n => {
-      const x = -1.38 + (n - 1) * 0.92;
-      box(g, 0.78, 0.5, 0.6, x, 0, -0.9, w);
-      const face = slotMaterial(`projects-board-${n}`);
+    L.xs.forEach((x, i) => {
+      box(g, 0.78, 0.5, 0.6, x, 0, L.z, w);
+      const face = slotMaterial(`projects-board-${i + 1}`);
       const b = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.54, 0.04), [cream, cream, cream, cream, face, cream]);
-      b.position.set(x, 0.86, -0.9); b.rotation.x = -0.18; b.castShadow = true; g.add(b);
+      b.position.set(x, 0.86, L.z); b.rotation.x = -0.18; b.castShadow = true; g.add(b);
     });
-    plant(g, -1.6, 1.2, 1.1);
+    plant(g, -RW / 2 + 0.4, RD / 2 - 0.45, 1.1);
   }
   if (id === 'about') {
-    box(g, 1.7, 0.07, 0.8, -0.3, 0.62, 0.2, w);
-    [[-1.05, -0.1], [0.45, -0.1], [-1.05, 0.5], [0.45, 0.5]].forEach(([x, z]) => box(g, 0.07, 0.62, 0.07, x, 0, z, w));
-    box(g, 0.5, 0.03, 0.36, -0.55, 0.69, 0.2, cream).rotation.y = 0.1;
-    box(g, 0.5, 0.03, 0.36, -0.03, 0.69, 0.2, cream).rotation.y = -0.1;
-    box(g, 0.5, 0.45, 0.5, -0.3, 0, -0.6, cream); box(g, 0.5, 0.5, 0.1, -0.3, 0.45, -0.82, cream);
-    cyl(g, 0.03, 0.08, 0.3, 0.35, 0.69, 0.05, mat(C.brass, { metalness: 0.5 }));
-    cyl(g, 0.1, 0.17, 0.14, 0.35, 0.97, 0.05, new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.8 }));
-    shelf(g, 1.2, -D / 2 + 0.25, 1.6, 1.45);
-    wallPicture(g, 'about-wall-1', -0.45, 1.12);
-    plant(g, -1.6, -1.3, 1.3);
+    const [dx, dz] = L.desk;
+    box(g, 1.3, 0.07, 0.7, dx, 0.62, dz, w);
+    [[-0.58, -0.28], [0.58, -0.28], [-0.58, 0.28], [0.58, 0.28]].forEach(([x, z]) => box(g, 0.07, 0.62, 0.07, dx + x, 0, dz + z, w));
+    box(g, 0.45, 0.03, 0.33, dx - 0.3, 0.69, dz, cream).rotation.y = 0.1;
+    box(g, 0.45, 0.03, 0.33, dx + 0.18, 0.69, dz, cream).rotation.y = -0.1;
+    box(g, 0.5, 0.45, 0.5, dx, 0, dz - 0.75, cream); box(g, 0.5, 0.5, 0.1, dx, 0.45, dz - 0.97, cream);
+    cyl(g, 0.03, 0.08, 0.3, dx + 0.45, 0.69, dz - 0.15, mat(C.brass, { metalness: 0.5 }));
+    cyl(g, 0.1, 0.17, 0.14, dx + 0.45, 0.97, dz - 0.15, new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.8 }));
+    shelf(g, L.shelf[0], L.shelf[1], L.shelf[2], 1.45);
+    wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
+    plant(g, RW / 2 - 0.4, RD / 2 - 0.4, 1.0);
   }
   if (id === 'ai') {
-    const desk = cyl(g, 1.0, 1.0, 0.6, 0.1, 0, 0.5, w, 32); desk.scale.z = 0.42;
-    box(g, 0.42, 0.02, 0.3, -0.1, 0.6, 0.5, mat(0xd8d8d4)); box(g, 0.42, 0.28, 0.02, -0.1, 0.62, 0.36, mat(0xd8d8d4)).rotation.x = -0.2;
-    box(g, 0.3, 0.1, 0.22, 0.6, 0.6, 0.5, mat(C.book[2]));
-    box(g, 0.45, 0.5, 0.45, 0.1, 0, -0.35, cream);
-    wallPicture(g, 'ai-wall-1', -0.75, 0.82);
-    wallPicture(g, 'ai-wall-2', 0.75, 0.82);
-    plant(g, -1.65, -1.2, 1.2); plant(g, 1.55, 0.9, 0.9);
+    const [dx, dz] = L.desk;
+    const desk = cyl(g, 1.05, 1.05, 0.6, dx, 0, dz, w, 32); desk.scale.z = 0.45;
+    box(g, 0.42, 0.02, 0.3, dx - 0.2, 0.6, dz + 0.02, mat(0xd8d8d4)); box(g, 0.42, 0.28, 0.02, dx - 0.2, 0.62, dz - 0.12, mat(0xd8d8d4)).rotation.x = -0.2;
+    box(g, 0.3, 0.1, 0.22, dx + 0.5, 0.6, dz + 0.05, mat(C.book[2]));
+    box(g, 0.45, 0.5, 0.45, dx, 0, dz - 0.85, cream);
+    wallPicture(g, 'ai-wall-1', L.pics[0], 0.8, RD);
+    wallPicture(g, 'ai-wall-2', L.pics[1], 0.8, RD);
+    plant(g, -RW / 2 + 0.4, -RD / 2 + 0.5, 1.2); plant(g, RW / 2 - 0.5, RD / 2 - 0.8, 0.9);
   }
   if (id === 'writing') {
-    cyl(g, 1.35, 1.35, 0.02, -0.1, 0.06, 0.35, mat(0xe9dcc6), 40);            // rug
-    cyl(g, 0.6, 0.6, 0.07, -0.1, 0.4, 0.35, w, 32); cyl(g, 0.3, 0.36, 0.4, -0.1, 0, 0.35, w);
-    box(g, 0.46, 0.015, 0.35, -0.2, 0.47, 0.35, cream);                       // paper on the table
+    const [tx, tz] = L.table;
+    cyl(g, 1.15, 1.15, 0.02, tx, 0.06, tz, mat(0xe9dcc6), 40);                // rug
+    cyl(g, 0.52, 0.52, 0.07, tx, 0.4, tz, w, 32); cyl(g, 0.28, 0.34, 0.4, tx, 0, tz, w);
+    box(g, 0.46, 0.015, 0.35, tx - 0.05, 0.47, tz, cream);                    // paper on the table
     const sheet = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.33), slotMaterial('writing-table-1'));
-    sheet.rotation.x = -Math.PI / 2; sheet.position.set(-0.2, 0.4865, 0.35); g.add(sheet);
-    cyl(g, 0.02, 0.02, 0.26, 0.2, 0.47, 0.3, mat(0x333333)); cyl(g, 0.05, 0.05, 0.14, 0.2, 0.7, 0.3, mat(0x333333));
-    [[-1.0, -0.35, 0.5], [0.95, 0.05, -0.6]].forEach(([x, z, ry]) => {
-      const a = new THREE.Group(); a.position.set(x, 0, z); a.rotation.y = ry; g.add(a);
+    sheet.rotation.x = -Math.PI / 2; sheet.position.set(tx - 0.05, 0.4865, tz); g.add(sheet);
+    cyl(g, 0.02, 0.02, 0.26, tx + 0.28, 0.47, tz - 0.05, mat(0x333333)); cyl(g, 0.05, 0.05, 0.14, tx + 0.28, 0.7, tz - 0.05, mat(0x333333));
+    [[-1.0, 0.0, 0.5], [1.0, -0.15, -0.6]].forEach(([x, z, ry]) => {
+      const a = new THREE.Group(); a.position.set(tx + x, 0, tz + z); a.rotation.y = ry; g.add(a);
       box(a, 0.6, 0.38, 0.6, 0, 0, 0, cream); box(a, 0.6, 0.42, 0.14, 0, 0.38, -0.23, cream);
     });
-    cyl(g, 0.02, 0.02, 1.25, -1.6, 0, -0.9, mat(C.brass, { metalness: 0.5 }));
-    cyl(g, 0.12, 0.22, 0.2, -1.6, 1.2, -0.9, new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.9 }));
-    shelf(g, 1.1, -D / 2 + 0.25, 1.6, 1.0);
-    plant(g, 1.6, -1.25, 1.1);
+    cyl(g, 0.02, 0.02, 1.25, L.lamp[0], 0, L.lamp[1], mat(C.brass, { metalness: 0.5 }));
+    cyl(g, 0.12, 0.22, 0.2, L.lamp[0], 1.2, L.lamp[1], new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.9 }));
+    shelf(g, L.shelf[0], L.shelf[1], L.shelf[2], 1.0);
+    plant(g, -RW / 2 + 0.4, RD / 2 - 0.5, 1.1);
   }
 }
 
 // Clickable things inside each room: [label key, link, x, y, z] in room coordinates.
 // Label texts are in content.js (model.spots). A null link is a placeholder without destination.
+// Positions come from the same layout() as the furniture, so they follow the room's size.
+const LAY = Object.fromEntries(Object.keys(ROOMS).map(id => [id, layout(id)]));
 export const HOTSPOTS = {
   ai: [
-    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -0.3, 0.62, 0.9],
-    ['monitor', 'https://ai.gillespenning.com/', 0.5, 0.3, 1.2],
+    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.ai.desk[0] - 0.4, 0.62, LAY.ai.desk[1] + 0.8],
+    ['monitor', 'https://ai.gillespenning.com/', LAY.ai.desk[0] + 0.5, 0.3, LAY.ai.desk[1] + 1.3],
   ],
   // Under the plinths, so the pictures on the boards stay visible.
   projects: [
-    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -1.38, 0.1, -0.3],
-    ['monitorShort', 'https://ai.gillespenning.com/', -0.46, 0.1, -0.3],
-    ['docease', null, 0.46, 0.1, -0.3],
-    ['elbstrand', null, 1.38, 0.1, -0.3],
+    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.projects.xs[0], 0.1, LAY.projects.spotZ],
+    ['monitorShort', 'https://ai.gillespenning.com/', LAY.projects.xs[1], 0.1, LAY.projects.spotZ],
+    ['docease', null, LAY.projects.xs[2], 0.1, LAY.projects.spotZ],
+    ['elbstrand', null, LAY.projects.xs[3], 0.1, LAY.projects.spotZ],
   ],
   writing: [
-    ['signal', 'https://medtechsignal.substack.com/', 1.1, 0.3, -D / 2 + 0.55],
-    ['speaking', '#speaking', -0.1, 0.62, 0.9],
-    ['linkedin', 'https://www.linkedin.com/in/gillespenning/', 1.0, 0.45, 1.2],
+    ['signal', 'https://medtechsignal.substack.com/', LAY.writing.shelf[0], 0.3, LAY.writing.shelf[1] + 0.3],
+    ['speaking', '#speaking', LAY.writing.table[0] - 0.1, 0.62, LAY.writing.table[1] + 0.55],
+    ['linkedin', 'https://www.linkedin.com/in/gillespenning/', LAY.writing.table[0] + 0.7, 0.45, LAY.writing.table[1] + 1.0],
   ],
   about: [
-    ['story', '#about', -0.3, 0.9, 0.7],
-    ['linkedin', 'https://www.linkedin.com/in/gillespenning/', 1.2, 0.3, -D / 2 + 0.55],
+    ['story', '#about', LAY.about.desk[0], 0.9, LAY.about.desk[1] + 0.4],
+    ['linkedin', 'https://www.linkedin.com/in/gillespenning/', LAY.about.shelf[0], 0.3, LAY.about.shelf[1] + 0.3],
   ],
 };

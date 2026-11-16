@@ -22,10 +22,19 @@ Those are material colours in `src/scene.js`, not page tokens.
 All sizes (spacing, radii, control heights, font sizes) come from the tokens in `src/tokens.css`.
 The limits on the number of steps are in `AGENTS.md`. Do not add in-between values.
 
+## Model layout
+The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
+and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,
+Writing & Speaking (lounge) front right. A corridor leads from the entrance at the front edge and jogs sideways
+between the front and back row; the brass line follows it with bends to each room's glass door.
+Sizes, wall heights and positions live once in the `ROOMS` table in `src/scene.js`. Floor, walls, door, lettering,
+picture slots, furniture, hotspots and the camera framing are derived from it, so a room can be resized there.
+
 ## Image slots
 Every picture surface in the model has a fixed slot name. A file `public/slots/<slot>.webp`
 replaces the drawn placeholder on that surface. If the file is missing, the placeholder stays.
-Slots are defined once in `src/scene.js` (`SLOTS`). Keep this table in sync.
+Slots are defined once in `src/scene.js` (`SLOTS`). Keep this table in sync. Slot sizes in the model are fixed per slot,
+not per room; only their position follows the room (the wall pictures of the AI room are 1.3 x 0.65 units).
 
 | Slot | Room | Surface | Aspect | Minimum size |
 |---|---|---|---|---|

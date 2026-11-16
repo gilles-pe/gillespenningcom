@@ -91,6 +91,9 @@ until a later entry replaces it.
   top of the script (0, 1px and 2px hairlines). Replaces the "planned" check in `AGENTS.md`.
 - **D-022 Pictures unlit (2026-11-16).** Picture surfaces (slot pictures and their placeholders) use an unlit, non-tone-mapped
   material, so they show the file's own brightness against the lightened model (D-016) instead of going grey in the light rig.
+- **D-023 Brass text colour (2026-11-16, to be confirmed by the owner).** The kicker line below the headline is 20 px at
+  small heights and the brass accent (3.35:1) fails AA there. A darker shade of the same accent, `--brass-ink` (#8a6016, 4.85:1
+  on cream), is used for small brass text. `--brass` stays for lines, hover and focus marks and large text.
 
 ## Open questions
 

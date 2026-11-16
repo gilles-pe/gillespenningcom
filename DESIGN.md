@@ -10,7 +10,8 @@ The visual system of gillespenning.com. Values live once, in `src/tokens.css`.
 | `--petrol` | #12383a | headings, primary buttons, room names in the model |
 | `--ink` | #2a2f2c | body text |
 | `--line` | #d9cbb6 | hairlines |
-| `--brass` | #a9792b | single accent (kicker, brass line) |
+| `--brass` | #a9792b | single accent: brass line, hover and focus marks, large text only (3.35:1) |
+| `--brass-ink` | #8a6016 | the same accent as darker text colour for small text (4.85:1 on cream), used by the kicker line |
 
 The 3D model adds pale limestone-cream walls, pale oak, soft sage (Projects wall), pale green satin glass and a muted
 grey-green base (decision D-016: light and airy, soft shadows). Those are material colours in the `C` table in

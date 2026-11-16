@@ -27,7 +27,7 @@ h1, h2, h3 { overflow-wrap: break-word; }
 .hero { display: grid; grid-template-columns: minmax(280px, 30%) 1fr; gap: var(--s4); padding: 0 var(--s5) var(--s5); align-items: center; }
 .intro { display: grid; gap: var(--s4); max-width: 480px; }
 h1 { font-size: var(--t5); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: var(--petrol); text-wrap: balance; }
-.kicker { font-size: var(--t4); color: var(--brass); }
+.kicker { font-size: var(--t4); color: var(--brass-ink); }
 .intro hr { width: var(--s6); margin: 0; border: 0; border-top: 2px solid var(--brass); }
 .actions { display: flex; flex-direction: column; align-items: stretch; gap: var(--s2); max-width: calc(var(--s7) * 3); }
 .actions .btn { justify-content: center; }

@@ -47,7 +47,7 @@ function openRoom(id, auto = false) {
   panel.hidden = false;
   // Phone: the room's text and links sit under the model, with a way back to the overview.
   const all = document.createElement('button');
-  all.type = 'button'; all.className = 'allrooms'; all.textContent = '← All rooms';
+  all.type = 'button'; all.className = 'allrooms'; all.textContent = 'All rooms';
   all.addEventListener('click', closeRoom);
   dock.replaceChildren(all, ...[...article.children].map(n => n.cloneNode(true)));
   dock.hidden = false;

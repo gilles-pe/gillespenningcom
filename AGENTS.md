@@ -12,22 +12,25 @@ curious about the person. It serves four goals at once:
 4. Promotion of his projects.
 
 ## Status
-Planning phase. Nothing is built yet. Do not build, scaffold a framework or pick a
-visual direction until the owner has approved the plan in `docs/decisions.md`.
+Draft phase. A first version of the home page exists on the branch `draft/four-room-home`
+(Vite and Three.js, four-room model). Direction, projects and confirmed links are in
+`docs/decisions.md`. `PRODUCT.md` has not been written yet.
 
 ## Read before work
 1. This file.
 2. `docs/decisions.md` - dated owner decisions and open questions. Decisions there are binding.
 3. `TODO.md` - active backlog.
-4. `PRODUCT.md` - who the page is for and what it must do (does not exist yet, see Design tooling).
-5. `DESIGN.md` - the visual system (does not exist yet, see Design tooling).
+4. `DESIGN.md` - palette, fonts and image slots.
+5. `docs/design-review.md` - latest design review with open points.
+6. `PRODUCT.md` - who the page is for and what it must do (does not exist yet, see Design tooling).
 
 ## Projects the page presents
 - **AI in Medicine Monitor** - live at `https://ai.gillespenning.com`, repository
   `gilles-pe/ai-in-medicine-monitor`. It has its own strict evidence rules. This page
   links to it and may quote it, but never restates or re-interprets its evidence.
   Any quantified claim about medical AI links to the monitor or the original source.
-- **Second project** - named by the owner, not yet confirmed. Ask before describing it.
+- **Wimmelbild** - live at `https://wimmelbild.gillespenning.com/en/`.
+- **DocEase** and **Elbstrand** - name only until the owner supplies text and links.
 
 ## Design constraints - binding (owner decision 2026-11-16)
 The owner wants a small, fixed set of sizes so the page stays consistent over time.

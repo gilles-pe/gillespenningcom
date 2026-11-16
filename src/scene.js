@@ -7,7 +7,7 @@ const WALL_FRONT = -D / 2 + T / 2 + 0.006;        // z of the lettering/pictures
 const FONT = "'Newsreader Variable', Georgia, serif";
 const PETROL = '#12383a', CREAM = '#f6eee3';
 const C = {
-  wall: 0xefe4d2, wallGreen: 0x8d9a78, floor: 0xd9b382, corridor: 0xc99f6c, base: 0x1f4a47,
+  wall: 0xefe4d2, wallGreen: 0xa9b690, floor: 0xd9b382, corridor: 0xc99f6c, base: 0x1f4a47,
   wood: 0xc79a62, woodDark: 0xa97c48, cream: 0xf2e8d8, glass: 0xdcebe0, brass: 0xb8862f,
   leaf: 0x6f8f4e, leaf2: 0x86a05f, pot: 0xe9dfcf, book: [0xe8dcc6, 0xcdb994, 0x9db0a0, 0xd9c7a8, 0x7f9488],
 };
@@ -144,10 +144,10 @@ function wallPicture(parent, name, x, y, frameColor = C.woodDark) {
 
 // ---- Room names on the back wall ---------------------------------------------
 const LETTERING = {                        // x, y, width, height of the plane (room coordinates)
-  projects: { x: 0,     y: 1.72, w: 3.0, h: 0.42, color: CREAM },
-  about:    { x: 0,     y: 1.8,  w: 2.4, h: 0.40, color: PETROL },
-  ai:       { x: 0,     y: 1.38, w: 2.6, h: 0.30, color: PETROL },
-  writing:  { x: 0,     y: 1.32, w: 2.6, h: 0.30, color: PETROL },
+  projects: { x: 0,     y: 1.68, w: 3.2, h: 0.58, color: PETROL },
+  about:    { x: 0,     y: 1.76, w: 2.8, h: 0.52, color: PETROL },
+  ai:       { x: 0,     y: 1.37, w: 3.2, h: 0.4, color: PETROL },
+  writing:  { x: 0,     y: 1.37, w: 3.2, h: 0.4, color: PETROL },
 };
 function lettering(parent, id, text) {
   const L = LETTERING[id], c = canvas(2048, Math.round(2048 * L.h / L.w)), k = c.getContext('2d');
@@ -352,22 +352,23 @@ function furnish(id, g, r) {
 // Clickable things inside each room: [label, link, x, y, z] in room coordinates.
 export const HOTSPOTS = {
   ai: [
-    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', 0, 0.62, 1.0],
-    ['AI in Medicine Monitor', 'https://ai.gillespenning.com/', 0, 0.3, 1.0],
+    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -0.3, 0.62, 0.9],
+    ['AI in Medicine Monitor', 'https://ai.gillespenning.com/', 0.5, 0.3, 1.2],
   ],
+  // Under the plinths, so the pictures on the boards stay visible.
   projects: [
-    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -1.38, 1.0, -0.9],
-    ['AI Monitor', 'https://ai.gillespenning.com/', -0.46, 1.3, -0.9],
-    ['DocEase', null, 0.46, 1.0, -0.9],
-    ['Elbstrand', null, 1.38, 1.3, -0.9],
+    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -1.38, 0.1, -0.3],
+    ['AI Monitor', 'https://ai.gillespenning.com/', -0.46, 0.1, -0.3],
+    ['DocEase', null, 0.46, 0.1, -0.3],
+    ['Elbstrand', null, 1.38, 0.1, -0.3],
   ],
   writing: [
-    ['MedTech Signal', 'https://medtechsignal.substack.com/', 1.1, 0.8, -D / 2 + 0.3],
-    ['Speaking topics', '#writing', 0.1, 0.95, 0.35],
-    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.25, 0.95, 0.9],
+    ['MedTech Signal', 'https://medtechsignal.substack.com/', 1.1, 0.3, -D / 2 + 0.55],
+    ['Speaking topics', '#speaking', -0.1, 0.62, 0.9],
+    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.0, 0.45, 1.2],
   ],
   about: [
-    ['My story', '#about', -0.3, 0.95, 0.2],
-    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.2, 1.0, -D / 2 + 0.3],
+    ['My story', '#about', -0.3, 0.9, 0.7],
+    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.2, 0.3, -D / 2 + 0.55],
   ],
 };

@@ -10,10 +10,10 @@
   <header class="top">
     <a class="brand" href="./">Gilles Penning</a>
     <nav aria-label="Rooms">
-      <a href="#ai" data-room="ai">AI &amp; Digital Health</a>
-      <a href="#writing" data-room="writing">Writing &amp; Speaking</a>
       <a href="#projects" data-room="projects">Projects</a>
       <a href="#about" data-room="about">About Me</a>
+      <a href="#ai" data-room="ai">AI &amp; Digital Health</a>
+      <a href="#writing" data-room="writing">Writing &amp; Speaking</a>
       <a class="book" href="#speaking">Book a talk</a>
     </nav>
   </header>
@@ -31,8 +31,8 @@
           <a class="btn" href="#speaking">Explore speaking topics</a>
         </div>
         <div class="direct">
-          <a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild <span aria-hidden="true">→</span></a>
-          <a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor <span aria-hidden="true">→</span></a>
+          <a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a>
+          <a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor</a>
         </div>
       </div>
 
@@ -42,28 +42,37 @@
         <div class="labels" id="labels"></div>
         <div class="spots" id="spots"></div>
         <div class="bar" id="bar" role="group" aria-label="Enter a room"></div>
-        <button class="back" id="back" hidden>← All rooms</button>
+        <button class="back" id="back" hidden>All rooms</button>
         <aside class="panel" id="panel" aria-live="polite" hidden></aside>
         <div class="dock" id="dock" aria-live="polite" hidden></div>
       </div>
     </section>
 
     <section class="rooms" id="rooms" aria-label="The four rooms">
+      <article id="projects" data-room="projects">
+        <h2>Projects</h2>
+        <p>Two projects are live. DocEase and Elbstrand follow.</p>
+        <ul class="links">
+          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a><span>The patient’s path</span></li>
+          <li><a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor</a><span>Studies and benchmarks</span></li>
+          <li><span class="pill muted">DocEase</span><span>Details to follow</span></li>
+          <li><span class="pill muted">Elbstrand</span><span>Details to follow</span></li>
+        </ul>
+      </article>
+      <article id="about" data-room="about">
+        <h2>About Me</h2>
+        <p>I started in surgery in 2001, moved into telemedicine in 2004, and from 2008 worked on system integration and digital workflows in the operating room.</p>
+        <p>Since then MedTech has been my field: marketing, sales and sales leadership, large teams, change management and entrepreneurial work.</p>
+        <ul class="links">
+          <li><a class="pill" href="https://www.linkedin.com/in/gillespenning/">LinkedIn</a><span>Full profile</span></li>
+        </ul>
+      </article>
       <article id="ai" data-room="ai">
         <h2>AI &amp; Digital Health</h2>
         <p>AI, longitudinal data and digitalisation in medicine. Two ways in: one follows the patient, the other follows the evidence.</p>
         <ul class="links">
-          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild <span aria-hidden="true">→</span></a><span>The patient’s path</span></li>
-          <li><a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor <span aria-hidden="true">→</span></a><span>Studies and benchmarks</span></li>
-        </ul>
-      </article>
-      <article id="projects" data-room="projects">
-        <h2>Projects</h2>
-        <ul class="links">
-          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild <span aria-hidden="true">→</span></a><span>The patient’s path</span></li>
-          <li><a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor <span aria-hidden="true">→</span></a><span>Studies and benchmarks</span></li>
-          <li><span class="pill muted">DocEase</span><span>Details to follow</span></li>
-          <li><span class="pill muted">Elbstrand</span><span>Details to follow</span></li>
+          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a><span>The patient’s path</span></li>
+          <li><a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor</a><span>Studies and benchmarks</span></li>
         </ul>
       </article>
       <article id="writing" data-room="writing">
@@ -75,16 +84,8 @@
         </ul>
         <p class="cta"><a class="btn primary" href="#speaking">Book a talk</a></p>
         <ul class="links">
-          <li><a class="pill" href="https://medtechsignal.substack.com/">MedTech Signal <span aria-hidden="true">→</span></a><span>Newsletter</span></li>
-          <li><a class="pill" href="https://www.linkedin.com/in/gillespenning/">LinkedIn <span aria-hidden="true">→</span></a><span>Profile</span></li>
-        </ul>
-      </article>
-      <article id="about" data-room="about">
-        <h2>About Me</h2>
-        <p>I started in surgery in 2001, moved into telemedicine in 2004, and from 2008 worked on system integration and digital workflows in the operating room.</p>
-        <p>Since then MedTech has been my field: marketing, sales and sales leadership, large teams, change management and entrepreneurial work.</p>
-        <ul class="links">
-          <li><a class="pill" href="https://www.linkedin.com/in/gillespenning/">LinkedIn <span aria-hidden="true">→</span></a><span>Full profile</span></li>
+          <li><a class="pill" href="https://medtechsignal.substack.com/">MedTech Signal</a><span>Newsletter</span></li>
+          <li><a class="pill" href="https://www.linkedin.com/in/gillespenning/">LinkedIn</a><span>Profile</span></li>
         </ul>
       </article>
     </section>
@@ -97,6 +98,7 @@
           <li>Why is change so hard in healthcare?</li>
           <li>What changes when healthcare has longitudinal data?</li>
         </ul>
+        <p>Talks are available in English and German.</p>
         <p>Enquiries go through LinkedIn.</p>
         <p><a class="btn primary" href="https://www.linkedin.com/in/gillespenning/" rel="noopener">Contact on LinkedIn</a></p>
       </div>

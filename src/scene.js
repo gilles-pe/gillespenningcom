@@ -307,8 +307,17 @@ export function buildScene() {
 
   // Base and corridor
   const BW = BASE.x1 - BASE.x0, BD = BASE.z1 - BASE.z0, bx = (BASE.x0 + BASE.x1) / 2, bz = (BASE.z0 + BASE.z1) / 2;
-  box(scene, BW, 0.6, BD, bx, -0.66, bz, mat(C.base, { roughness: 0.95 }));
-  box(scene, BW - 0.5, 0.06, BD - 0.5, bx, -0.06, bz, floorMat(C.corridor, [(BW - 0.5) / 3.5, (BD - 0.5) / 1.9]));
+  // The base is a slab with a lower part around a recess on the underside (the cellar, see buildCellar).
+  const baseMat = mat(C.base, { roughness: 0.95 }), occluders = [];
+  const SLAB = 0.15, LOW = 0.45, lowY = -0.66, H = CELLAR;
+  occluders.push(box(scene, BW, SLAB, BD, bx, lowY + LOW, bz, baseMat));
+  const hx0 = H.x - H.w / 2, hx1 = H.x + H.w / 2, hz0 = H.z - H.d / 2, hz1 = H.z + H.d / 2;
+  occluders.push(
+    box(scene, hx0 - BASE.x0, LOW, BD, (BASE.x0 + hx0) / 2, lowY, bz, baseMat),
+    box(scene, BASE.x1 - hx1, LOW, BD, (hx1 + BASE.x1) / 2, lowY, bz, baseMat),
+    box(scene, H.w, LOW, hz0 - BASE.z0, H.x, lowY, (BASE.z0 + hz0) / 2, baseMat),
+    box(scene, H.w, LOW, BASE.z1 - hz1, H.x, lowY, (hz1 + BASE.z1) / 2, baseMat));
+  occluders.push(box(scene, BW - 0.5, 0.06, BD - 0.5, bx, -0.06, bz, floorMat(C.corridor, [(BW - 0.5) / 3.5, (BD - 0.5) / 1.9]))));
 
   // Brass line: one dim path per room, plus a bright one drawn on demand
   const brassDim = mat(C.brass, { metalness: 0.6, roughness: 0.4 });

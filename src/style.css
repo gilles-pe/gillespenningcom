@@ -91,7 +91,7 @@ html:not(.js):not(.static) .hero { grid-template-columns: 1fr; }
 .spot.soon { background: var(--paper); color: var(--ink); border: 1px dashed var(--ink); font-weight: 400; }
 .spot.on { opacity: 1; pointer-events: auto; }
 a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decoration: underline; text-underline-offset: var(--s1); }
-.bar { position: absolute; left: 50%; bottom: var(--s3); transform: translateX(-50%); display: flex; gap: var(--s1); padding: var(--s1); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); }
+.bar { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - var(--s4)); flex-wrap: wrap; justify-content: center; bottom: var(--s3); display: flex; gap: var(--s1); padding: var(--s1); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); }
 .bar button { height: var(--h2); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: transparent; border: 0; border-radius: var(--r1); cursor: pointer; white-space: nowrap; }
 .bar button:hover { background: var(--cream); }
 .bar button[aria-pressed=true] { background: var(--petrol); color: var(--paper); }
@@ -156,6 +156,11 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
   html.js .top { padding: var(--s2) var(--s5); }
 }
 
+/* Narrow desktop: the room bar wraps to two rows, so the card stops higher. */
+@media (min-width: 801px) and (max-width: 1000px) {
+  .panel { max-height: calc(100% - var(--s6) - var(--s7) - var(--s3)); }
+}
+
 @media (max-width: 1100px) {
   :lang(de) { hyphens: auto; }
   .top { gap: var(--s3); }
@@ -190,7 +195,7 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
   .stage.static .labels { inset: auto; position: static; height: auto; padding: var(--s2) var(--s3) 0; }
   .label { font-size: var(--t2); height: var(--h3); padding: 0 var(--s3); }
   .panel, .spots, .back { display: none; }
-  .bar { position: static; transform: none; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); background: transparent; border: 0; border-radius: 0; padding: var(--s2) var(--s3) 0; }
+  .bar { position: static; width: auto; max-width: none; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); background: transparent; border: 0; border-radius: 0; padding: var(--s2) var(--s3) 0; }
   .bar button { min-width: 0; white-space: normal; line-height: 1.1; height: var(--h3); padding: 0 var(--s2); font-size: var(--t2); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); }
   .bar button[aria-pressed=true] { background: var(--petrol); border-color: var(--petrol); color: var(--paper); }
   .dock { display: grid; gap: var(--s3); padding: var(--s3) var(--s3) 0; font-size: var(--t2); }

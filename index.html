@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gilles Penning – Healthcare & MedTech</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <meta name="description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
+  <meta name="theme-color" content="#f6eee3">
+  <link rel="canonical" href="https://gillespenning.com/">
+  <link rel="alternate" hreflang="en" href="https://gillespenning.com/">
+  <link rel="alternate" hreflang="de" href="https://gillespenning.com/?lang=de">
+  <link rel="alternate" hreflang="x-default" href="https://gillespenning.com/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gilles Penning">
+  <meta property="og:url" content="https://gillespenning.com/">
+  <meta property="og:title" content="Gilles Penning – Healthcare &amp; MedTech">
+  <meta property="og:description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="de_DE">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Gilles Penning – Healthcare &amp; MedTech">
+  <meta name="twitter:description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./">Gilles Penning</a>
+    <nav aria-label="Rooms" data-i18n-attr="aria-label:nav.label">
+      <a href="#projects" data-room="projects" data-i18n="nav.projects">Projects</a>
+      <a href="#about" data-room="about" data-i18n="nav.about">About Me</a>
+      <a href="#ai" data-room="ai" data-i18n="nav.ai">AI &amp; Digital Health</a>
+      <a href="#writing" data-room="writing" data-i18n="nav.writing">Writing &amp; Speaking</a>
+      <a class="book" href="#speaking" data-i18n="nav.book">Contact</a>
+    </nav>
+    <div class="lang" id="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:ui.langLabel">
+      <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true" data-i18n-attr="aria-label:ui.langEn">EN</button>
+      <button type="button" data-lang="de" lang="de" aria-label="Deutsch" aria-pressed="false" data-i18n-attr="aria-label:ui.langDe">DE</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="intro">
+        <h1 data-i18n="hero.h1">Why is change so hard in healthcare?</h1>
+        <p class="kicker" data-i18n="hero.kicker">Healthcare &amp; MedTech</p>
+        <p data-i18n="hero.p1">As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care.</p>
+        <hr>
+        <p data-i18n="hero.p2">I’ve spent my career in MedTech, working with some very interesting people. Here I share the ideas I come across, the projects I work on, and what I learn from the people I meet.</p>
+        <div class="actions">
+          <a class="btn primary" href="https://ai.gillespenning.com/" data-i18n="hero.monitor">Open the AI in Medicine Monitor</a>
+          <a class="btn" href="https://medtechsignal.substack.com/" data-i18n="hero.read">Read MedTech Signal</a>
+        </div>
+        <p class="more"><a href="#speaking" data-i18n="hero.explore">Explore speaking topics</a></p>
+      </div>
+
+      <div class="stage" id="stage">
+        <canvas id="scene" aria-hidden="true" aria-label="Interactive 3D model of the four rooms. Drag or use the arrow keys to rotate it, plus and minus to zoom, Home to reset the view. The rooms are also in the room bar." data-i18n-attr="aria-label:stage.canvas"></canvas>
+        <img class="fallback" src="/reference-four-rooms.webp" alt="Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking." data-i18n-attr="alt:stage.alt" hidden>
+        <div class="labels" id="labels"></div>
+        <div class="spots" id="spots"></div>
+        <div class="bar" id="bar" role="group" aria-label="Enter a room" data-i18n-attr="aria-label:stage.bar"></div>
+        <button class="back" id="back" data-i18n="ui.allRooms" hidden>All rooms</button>
+        <aside class="panel" id="panel" aria-live="polite" hidden></aside>
+        <div class="dock" id="dock" aria-live="polite" hidden></div>
+      </div>
+    </section>
+
+    <div class="source" id="source">
+    <section class="rooms" id="rooms" aria-label="The four rooms" data-i18n-attr="aria-label:rooms.label">
+      <article id="projects" data-room="projects">
+        <h2 data-i18n="rooms.projects.h">Projects</h2>
+        <p data-i18n="rooms.projects.p">Three projects are linked here. DocEase is coming soon.</p>
+        <ul class="links">
+          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a><span data-i18n="rooms.projects.wimmelbild">The patient’s path</span></li>
+          <li><a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor</a><span data-i18n="rooms.projects.monitor">Studies and benchmarks</span></li>
+          <li><span class="pill muted">DocEase</span><span data-i18n="ui.soon">Coming soon</span></li>
+          <li><a class="pill" href="https://penning.info/">Elbstrand</a></li>
+        </ul>
+      </article>
+      <article id="about" data-room="about">
+        <h2 data-i18n="rooms.about.h">About Me</h2>
+        <p data-i18n="rooms.about.p1">I started in surgery in 2001, moved into telemedicine in 2004, and from 2008 worked on system integration and digital workflows in the operating room.</p>
+        <p data-i18n="rooms.about.p2">Since then MedTech has been my field: marketing, sales and sales leadership, large teams, change management and entrepreneurial work.</p>
+        <ul class="links">
+          <li><a class="pill" href="https://www.linkedin.com/in/gillespenning/">LinkedIn</a><span data-i18n="rooms.about.linkedin">Full profile</span></li>
+        </ul>
+      </article>
+      <article id="ai" data-room="ai">
+        <h2 data-i18n="rooms.ai.h">AI &amp; Digital Health</h2>
+        <p data-i18n-html="rooms.ai.pHtml">AI, longitudinal data and digitalisation in medicine. Two ways in: <a href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a> follows the patient, the <a href="https://ai.gillespenning.com/">AI in Medicine Monitor</a> follows the evidence.</p>
+      </article>
+      <article id="writing" data-room="writing">
+        <h2 data-i18n="rooms.writing.h">Writing &amp; Speaking</h2>
+        <p data-i18n-html="rooms.writing.pHtml">The questions my talks start from are listed in the <a href="#speaking">speaking section</a>.</p>
+        <p class="cta"><a class="btn primary" href="#speaking" data-i18n="rooms.writing.book">Contact</a></p>
+        <!-- Without JavaScript these are plain text links. With JavaScript they get their logo marks (src/icons.js). -->
+        <div class="social-row" data-social="labelled">
+          <a href="https://medtechsignal.substack.com/" rel="me noopener">MedTech Signal</a>
+          <a href="https://bsky.app/profile/gillespe.bsky.social" rel="me noopener">Bluesky</a>
+          <a href="https://www.linkedin.com/in/gillespenning/" rel="me noopener">LinkedIn</a>
+        </div>
+        <!-- Without JavaScript: one link to the archive. With JavaScript: the latest news (src/news.js). -->
+        <div class="news" data-news><a class="pill" href="https://ai.gillespenning.com/news/">News</a></div>
+      </article>
+    </section>
+
+    <section class="speaking" id="speaking" aria-labelledby="speaking-h">
+      <h2 id="speaking-h" data-i18n="speaking.h">Contact</h2>
+      <div class="speaking-body">
+        <p data-i18n="speaking.intro">Speaking topics start from a question:</p>
+        <ul class="questions">
+          <li data-i18n="speaking.q1">Why is change so hard in healthcare?</li>
+          <li data-i18n="speaking.q2">What changes when healthcare has longitudinal data?</li>
+        </ul>
+        <p data-i18n="speaking.langs">Talks are available in English and German.</p>
+        <p data-i18n="speaking.enquiries">Enquiries go through LinkedIn or email.</p>
+        <p class="contact-row"><a class="btn primary" href="https://www.linkedin.com/in/gillespenning/" rel="noopener" data-i18n="speaking.contact">Contact on LinkedIn</a> <a class="btn" href="mailto:nr@gillespenning.com" data-i18n="speaking.email">nr@gillespenning.com</a></p>
+      </div>
+    </section>
+    </div>
+  </main>
+
+  <footer class="strip">
+    <nav aria-label="More links" data-i18n-attr="aria-label:strip.label">
+      <a href="https://wimmelbild.gillespenning.com/en/" data-i18n="strip.wimmelbild">Wimmelbild</a>
+      <!-- Plain text links without JavaScript; with JavaScript they become logo marks with accessible names. -->
+      <div id="social" class="social" data-social="icons">
+        <a href="https://medtechsignal.substack.com/" rel="me noopener">Substack</a>
+        <a href="https://bsky.app/profile/gillespe.bsky.social" rel="me noopener">Bluesky</a>
+        <a href="https://www.linkedin.com/in/gillespenning/" rel="me noopener">LinkedIn</a>
+      </div>
+      <p class="latest" id="latest" hidden></p>
+      <a class="legal" href="legal.html" data-i18n="strip.legal">Legal &amp; privacy</a>
+    </nav>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

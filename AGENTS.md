@@ -12,22 +12,25 @@ curious about the person. It serves four goals at once:
 4. Promotion of his projects.
 
 ## Status
-Planning phase. Nothing is built yet. Do not build, scaffold a framework or pick a
-visual direction until the owner has approved the plan in `docs/decisions.md`.
+Draft phase, publishing prepared. A first version of the home page exists on the branch `draft/four-room-home`
+(Vite and Three.js, four-room model). Direction, projects and confirmed links are in
+`docs/decisions.md`. `PRODUCT.md` has not been written yet.
 
 ## Read before work
 1. This file.
 2. `docs/decisions.md` - dated owner decisions and open questions. Decisions there are binding.
 3. `TODO.md` - active backlog.
-4. `PRODUCT.md` - who the page is for and what it must do (does not exist yet, see Design tooling).
-5. `DESIGN.md` - the visual system (does not exist yet, see Design tooling).
+4. `DESIGN.md` - palette, fonts and image slots.
+5. `docs/design-review.md` - latest design review with open points.
+6. `PRODUCT.md` - who the page is for and what it must do (does not exist yet, see Design tooling).
 
 ## Projects the page presents
 - **AI in Medicine Monitor** - live at `https://ai.gillespenning.com`, repository
   `gilles-pe/ai-in-medicine-monitor`. It has its own strict evidence rules. This page
   links to it and may quote it, but never restates or re-interprets its evidence.
   Any quantified claim about medical AI links to the monitor or the original source.
-- **Second project** - named by the owner, not yet confirmed. Ask before describing it.
+- **Wimmelbild** - live at `https://wimmelbild.gillespenning.com/en/`.
+- **Elbstrand** - linked to `https://penning.info/` (D-027). **DocEase** - "Coming soon", no link until the owner supplies one.
 
 ## Design constraints - binding (owner decision 2026-11-16)
 The owner wants a small, fixed set of sizes so the page stays consistent over time.
@@ -49,8 +52,8 @@ Rules:
 - Components use tokens only. No raw pixel, colour or radius values in component code.
 - No in-between values. If a layout seems to need one, change the layout.
 - Adding, removing or changing a step needs an owner decision logged in `docs/decisions.md`.
-- A check script that fails on off-scale values is planned (see `TODO.md`). Once it exists,
-  run it before declaring work ready.
+- `npm run check` (`scripts/check-tokens.mjs`) fails on off-scale values in `src/style.css`. Run it before declaring
+  work ready. Its documented exceptions (0, 1px and 2px hairlines) are listed at the top of the script.
 
 ## Design tooling - Impeccable
 The Impeccable design skill is vendored in `.claude/skills/impeccable/` with its
@@ -80,7 +83,18 @@ design, critique, audit and polish work.
 - Log every owner decision in `docs/decisions.md` with its date. Never infer approval
   from silence.
 
+## Image slots
+- Pictures in the 3D model are swapped only by slot filename: put `public/slots/<slot>.webp` in place. Never edit image code for a content swap.
+- Slot names, aspect ratios and minimum sizes are listed in `DESIGN.md` and in `public/slots/README.md`.
+- A new picture surface needs a row in `DESIGN.md` and an entry in the `SLOTS` table in `src/scene.js`.
+
 ## Hosting and domain
 `gillespenning.com` is reserved for this site. The monitor stays on the subdomain
-`ai.gillespenning.com` and must keep working. Hosting target and stack are not decided
-yet (see `docs/decisions.md`).
+`ai.gillespenning.com` and must keep working.
+
+- Stack: Vite and Three.js, static build into `dist/` (`npm run build`).
+- Target: GitHub Pages, deployed by `.github/workflows/pages.yml` on push to `main` (and manual dispatch).
+  `public/CNAME` holds the domain. Nothing is live until the owner enables Pages (source "GitHub Actions") and merges to `main`.
+- The domain switch (DNS of `gillespenning.com`) is an owner step and must not touch `ai.gillespenning.com`.
+- No analytics, no cookies, no external fonts or scripts. The page stores only the language choice and loads the news list
+  from `ai.gillespenning.com` (see D-020). The legal page `legal.html` carries the owner-supplied imprint and privacy text (D-028).

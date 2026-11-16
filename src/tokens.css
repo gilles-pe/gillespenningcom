@@ -1,0 +1,15 @@
+/* Single source of design values. See AGENTS.md: no values outside these scales. */
+:root {
+  --s1: 4px; --s2: 8px; --s3: 16px; --s4: 24px; --s5: 40px; --s6: 64px; --s7: 104px;
+  --r0: 0; --r1: 6px; --r-full: 999px;
+  --h1: 32px; --h2: 40px; --h3: 48px;
+  --t1: 14px; --t2: 16px; --t3: 20px; --t4: 28px; --t5: 40px; --t6: 64px;
+  --font: 'Newsreader Variable', Georgia, serif;
+  --cream: #f6eee3;
+  --paper: #fbf6ee;
+  --petrol: #12383a;
+  --ink: #2a2f2c;
+  --line: #d9cbb6;
+  --brass: #a9792b;
+  --brass-ink: #8a6016;   /* brass for small text on cream or paper: 4.85:1 (--brass is 3.35:1, graphics and large text only) */
+}

@@ -36,6 +36,13 @@ between the front and back row; the brass line follows it with bends to each roo
 Sizes, wall heights and positions live once in the `ROOMS` table in `src/scene.js`. Floor, walls, door, lettering,
 picture slots, furniture, hotspots and the camera framing are derived from it, so a room can be resized there.
 
+Hidden underside (maintainers only, not mentioned in the README or the UI, see D-024 and D-025): the base is a slab with a lower part
+around a recess on its underside, the cellar (`CELLAR` and `buildCellar` in `src/scene.js`): cream lining, a thin wooden frame, a small point
+light and a fax machine built from boxes and cylinders, standing on the recess "floor" (the underside of the slab), so it reads upright when the
+model is turned over. The sheet in its slot carries the sentence from `model.egg.note` as a canvas texture. Clicking it is handled in
+`src/egg.js` (raycast against the machine and the base, so it only hits when it faces the camera). The model can be turned freely
+(`src/viewer.js`); the camera orbit centre drifts to the recess when zoomed in on the underside. The legal page `legal.html` is described in D-028.
+
 ## Social links and news
 Social marks (Substack, Bluesky, LinkedIn) are inline SVG from `src/icons.js`: 20 px glyph (`--t3`) in a 40 px (48 px phone) target, petrol, brass on hover and focus.
 News comes from `src/news.js` (snapshot plus live feed) and is rendered by `src/widgets.js`.

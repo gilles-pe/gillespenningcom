@@ -17,14 +17,16 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const css = readFileSync(fileURLToPath(new URL('../src/style.css', import.meta.url)), 'utf8');
+const FILES = ['style.css', 'legal.css'];   // legal.css belongs to legal.html
 const tokens = readFileSync(fileURLToPath(new URL('../src/tokens.css', import.meta.url)), 'utf8');
 const defined = new Set([...tokens.matchAll(/(--[\w-]+)\s*:/g)].map(m => m[1]));
 
+const fails = [];
+for (const file of FILES) {
+const css = readFileSync(fileURLToPath(new URL(`../src/${file}`, import.meta.url)), 'utf8');
 const clean = css.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '));
 const lines = clean.split('\n');
-const fails = [];
-const fail = (i, prop, val, why) => fails.push(`src/style.css:${i + 1}  ${prop}: ${val.trim()}  -> ${why}`);
+const fail = (i, prop, val, why) => fails.push(`src/${file}:${i + 1}  ${prop}: ${val.trim()}  -> ${why}`);
 
 const SPACING = /^(margin|padding)(-(top|right|bottom|left|inline|block)(-(start|end))?)?$|^(gap|row-gap|column-gap)$/;
 const HEIGHT = /^(height|min-height|max-height)$/;
@@ -59,6 +61,7 @@ lines.forEach((line, i) => {
     }
   }
 });
+}
 
 if (fails.length) { console.error(`check-tokens: ${fails.length} violation(s)\n` + fails.join('\n')); process.exit(1); }
-console.log('check-tokens: ok (src/style.css uses only the token scales)');
+console.log('check-tokens: ok (src/style.css and src/legal.css use only the token scales)');

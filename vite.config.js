@@ -5,5 +5,6 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 export default defineConfig({
   base: './',
   plugins: process.env.SINGLE ? [viteSingleFile()] : [],
-  build: process.env.SINGLE ? { outDir: 'dist-single', assetsInlineLimit: 100000000 } : {},
+  // legal.html is a second, script-free page built next to index.html.
+  build: process.env.SINGLE ? { outDir: 'dist-single', assetsInlineLimit: 100000000 } : { rollupOptions: { input: { main: 'index.html', legal: 'legal.html' } } },
 });

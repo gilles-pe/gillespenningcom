@@ -51,6 +51,7 @@ a.btn:hover, a.pill:hover { border-color: var(--brass); }
 /* "Latest:" line. It takes the space that is left and is cut with an ellipsis when short. */
 .latest { flex: 1 1 0; min-width: 0; margin-left: auto; display: flex; align-items: center; gap: var(--s2); font-size: var(--t2); color: var(--ink); white-space: nowrap; }
 .latest-label { flex: none; }
+.strip a.legal { flex: none; font-size: var(--t1); font-weight: 400; color: var(--ink); }
 .strip .latest a { display: block; flex: 0 1 auto; min-width: 0; min-height: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; line-height: var(--h2); color: var(--petrol); }
 /* Social links: logo mark (20 px glyph from the font-size token, single colour) in a 40 px target; brass on hover and focus. */
 .social-link { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-width: var(--h2); height: var(--h2); padding: 0 var(--s2); font-size: var(--t3); color: var(--petrol); text-decoration: none; border-radius: var(--r1); }
@@ -74,6 +75,7 @@ a.btn:hover, a.pill:hover { border-color: var(--brass); }
 .stage { position: relative; height: min(78vh, calc(var(--s7) * 7)); min-height: calc(var(--s7) * 4); }
 html:not(.js):not(.static) .stage { display: none; }
 html:not(.js):not(.static) .hero { grid-template-columns: 1fr; }
+#scene:focus-visible { outline-offset: calc(var(--s1) * -1); }
 #scene { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
 .fallback { width: 100%; height: 100%; object-fit: cover; object-position: 85% 50%; border-radius: var(--r1); }
 .labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
@@ -90,12 +92,16 @@ html:not(.js):not(.static) .hero { grid-template-columns: 1fr; }
 .spot { position: absolute; transform: translate(-50%, -100%); display: inline-flex; align-items: center; height: var(--h2); padding: 0 var(--s3); font-size: var(--t2); font-weight: 600; color: var(--paper); background: var(--petrol); border: 1px solid var(--petrol); border-radius: var(--r1); text-decoration: none; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .4s; }
 .spot.soon { background: var(--paper); color: var(--ink); border: 1px dashed var(--ink); font-weight: 400; }
 .spot.on { opacity: 1; pointer-events: auto; }
+.spot.on.away { opacity: 0; pointer-events: none; }
 a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decoration: underline; text-underline-offset: var(--s1); }
 .bar { position: absolute; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - var(--s4)); flex-wrap: wrap; justify-content: center; bottom: var(--s3); display: flex; gap: var(--s1); padding: var(--s1); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); }
 .bar button { height: var(--h2); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: transparent; border: 0; border-radius: var(--r1); cursor: pointer; white-space: nowrap; }
 .bar button:hover { background: var(--cream); }
 .bar button[aria-pressed=true] { background: var(--petrol); color: var(--paper); }
-.back { position: absolute; top: var(--s3); left: var(--s3); height: var(--h2); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer; }
+.back, .reset { position: absolute; top: var(--s3); height: var(--h2); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer; }
+.back:hover, .reset:hover { border-color: var(--brass); }
+.back { left: var(--s3); }
+.reset { right: var(--s3); }
 
 /* ---- Room card (desktop panel and phone dock) ---- */
 /* Width is three of the largest spacing steps; the card scrolls inside when a room has a lot to say. */
@@ -108,6 +114,7 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
 .speaking-part h3:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 .speaking-body { display: grid; gap: var(--s2); justify-items: start; }
 .cta { margin: 0; }
+.contact-row { display: flex; flex-wrap: wrap; gap: var(--s2); }
 .questions { display: grid; gap: var(--s2); font-style: italic; color: var(--petrol); }
 .links { display: grid; gap: var(--s2); }
 .links li { display: grid; gap: var(--s1); }
@@ -207,7 +214,8 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
   .strip a { min-height: var(--h3); }
   .social-link { min-width: var(--h3); height: var(--h3); }
   .news-list a, .news-all { min-height: var(--h3); }
-  .latest { flex: 1 1 100%; margin-left: 0; }
+  .latest { flex: 1 1 100%; margin-left: 0; order: 3; }
+  .strip a.legal { margin-left: auto; }
   .strip .latest a { line-height: var(--h3); }
   .more a { min-height: var(--h3); }
   .speaking { grid-template-columns: 1fr; gap: var(--s4); padding: var(--s5) var(--s3); }
@@ -216,4 +224,11 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
   .rooms article.current h2 { color: var(--brass); }
 }
 @media (max-width: 360px) { .top { flex-wrap: wrap; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot { transition: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .egg { transition: none; } }
+
+/* ---- Note near the fax machine (see src/egg.js). Exists only after the machine was clicked. ---- */
+.egg { position: absolute; width: min(calc(var(--s7) * 2), calc(100% - var(--s3))); padding: var(--s3); display: grid; gap: var(--s2); justify-items: start; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); font-size: var(--t2); transition: opacity .3s, visibility .3s; }
+.egg p { font-size: var(--t3); line-height: 1.25; color: var(--petrol); }
+.egg-close { height: var(--h2); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: transparent; border: 1px solid var(--petrol); border-radius: var(--r1); cursor: pointer; }
+.egg-close:hover { border-color: var(--brass); }
+.egg.away { opacity: 0; visibility: hidden; }

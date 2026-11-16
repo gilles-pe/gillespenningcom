@@ -10,6 +10,8 @@ export const LINKS = {
   signal: 'https://medtechsignal.substack.com/',
   linkedin: 'https://www.linkedin.com/in/gillespenning/',
   bluesky: 'https://bsky.app/profile/gillespe.bsky.social',
+  elbstrand: 'https://penning.info/',
+  mail: 'mailto:nr@gillespenning.com',
 };
 const a = (href, text) => `<a href="${href}">${text}</a>`;
 
@@ -21,7 +23,7 @@ export const content = {
     },
     ui: {
       allRooms: 'All rooms',
-      soon: 'Details to follow',
+      soon: 'Coming soon',
       langLabel: 'Language',
       langEn: 'English',
       langDe: 'Deutsch',
@@ -33,7 +35,7 @@ export const content = {
       about: 'About Me',
       ai: 'AI & Digital Health',
       writing: 'Writing & Speaking',
-      book: 'Book a talk',
+      book: 'Contact',
     },
     hero: {
       h1: 'Why is change so hard in healthcare?',
@@ -46,6 +48,7 @@ export const content = {
     },
     strip: {
       label: 'More links',
+      legal: 'Legal & privacy',
       wimmelbild: 'Wimmelbild',
     },
     social: {
@@ -67,7 +70,7 @@ export const content = {
       label: 'The four rooms',
       projects: {
         h: 'Projects',
-        p: 'Two projects are live. DocEase and Elbstrand follow.',
+        p: 'Three projects are linked here. DocEase is coming soon.',
         wimmelbild: 'The patient’s path',
         monitor: 'Studies and benchmarks',
       },
@@ -84,17 +87,18 @@ export const content = {
       writing: {
         h: 'Writing & Speaking',
         pHtml: `The questions my talks start from are listed in the ${a('#speaking', 'speaking section')}.`,
-        book: 'Book a talk',
+        book: 'Contact',
       },
     },
     speaking: {
-      h: 'Book a talk',
+      h: 'Contact',
       intro: 'Speaking topics start from a question:',
       q1: 'Why is change so hard in healthcare?',
       q2: 'What changes when healthcare has longitudinal data?',
       langs: 'Talks are available in English and German.',
-      enquiries: 'Enquiries go through LinkedIn.',
+      enquiries: 'Enquiries go through LinkedIn or email.',
       contact: 'Contact on LinkedIn',
+      email: 'nr@gillespenning.com',
     },
     model: {
       rooms: { projects: 'Projects', about: 'About Me', ai: 'AI & Digital Health', writing: 'Writing & Speaking' },
@@ -127,7 +131,7 @@ export const content = {
     },
     ui: {
       allRooms: 'Alle Räume',
-      soon: 'Details folgen',
+      soon: 'Demnächst',
       langLabel: 'Sprache',
       langEn: 'English',
       langDe: 'Deutsch',
@@ -139,7 +143,7 @@ export const content = {
       about: 'Über mich',
       ai: 'KI & Digital Health',
       writing: 'Schreiben & Vorträge',
-      book: 'Vortrag buchen',
+      book: 'Kontakt',
     },
     hero: {
       h1: 'Warum ist Veränderung im Gesundheitswesen so schwer?',
@@ -152,6 +156,7 @@ export const content = {
     },
     strip: {
       label: 'Weitere Links',
+      legal: 'Impressum & Datenschutz',
       wimmelbild: 'Wimmelbild',
     },
     social: {
@@ -173,7 +178,7 @@ export const content = {
       label: 'Die vier Räume',
       projects: {
         h: 'Projekte',
-        p: 'Zwei Projekte sind online. DocEase und Elbstrand folgen.',
+        p: 'Drei Projekte sind hier verlinkt. DocEase kommt demnächst.',
         wimmelbild: 'Der Weg des Patienten',
         monitor: 'Studien und Benchmarks',
       },
@@ -190,17 +195,18 @@ export const content = {
       writing: {
         h: 'Schreiben & Vorträge',
         pHtml: `Die Fragen, von denen meine Vorträge ausgehen, stehen im ${a('#speaking', 'Abschnitt zu Vorträgen')}.`,
-        book: 'Vortrag buchen',
+        book: 'Kontakt',
       },
     },
     speaking: {
-      h: 'Vortrag buchen',
+      h: 'Kontakt',
       intro: 'Meine Vortragsthemen beginnen mit einer Frage:',
       q1: 'Warum ist Veränderung im Gesundheitswesen so schwer?',
       q2: 'Was ändert sich, wenn das Gesundheitswesen Längsschnittdaten hat?',
       langs: 'Vorträge gibt es auf Deutsch und auf Englisch.',
-      enquiries: 'Anfragen laufen über LinkedIn.',
+      enquiries: 'Anfragen laufen über LinkedIn oder E-Mail.',
       contact: 'Auf LinkedIn kontaktieren',
+      email: 'nr@gillespenning.com',
     },
     model: {
       rooms: { projects: 'Projekte', about: 'Über mich', ai: 'KI & Digital Health', writing: 'Schreiben & Vorträge' },

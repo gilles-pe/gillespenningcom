@@ -12,6 +12,9 @@ const back = document.getElementById('back');
 const bar = document.getElementById('bar');
 const dock = document.getElementById('dock');
 const spotsEl = document.getElementById('spots');
+const resetBtn = document.createElement('button');   // appears only after the model was turned or zoomed away from the default
+resetBtn.type = 'button'; resetBtn.className = 'reset'; resetBtn.hidden = true;
+stage.append(resetBtn);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => matchMedia('(max-width: 800px)').matches;
 const ORDER = ['projects', 'about', 'ai', 'writing'];
@@ -67,6 +70,7 @@ function showSpeaking() {
 
 function openRoom(id, auto = false, { speaking = false } = {}) {
   if (mode === 'loading') { pending = { id, speaking }; return; }
+  const wasCurrent = current === id;
   current = id;
   document.querySelectorAll('.top nav a').forEach(a => a.classList.toggle('active', a.dataset.room === id));
   document.querySelectorAll('.rooms article').forEach(a => {
@@ -87,7 +91,7 @@ function openRoom(id, auto = false, { speaking = false } = {}) {
   dock.replaceChildren(all, ...roomNodes(id));
   dock.hidden = false;
   if (mobile() && !auto) stage.scrollIntoView({ block: 'start' });
-  api.open(id);
+  api.open(id, { keepView: auto && wasCurrent });
   if (speaking) showSpeaking();
 }
 function closeRoom() {
@@ -107,7 +111,12 @@ function tapCanvas(id) {
   else if (mobile()) closeRoom();
 }
 back.addEventListener('click', closeRoom);
-addEventListener('keydown', e => { if (e.key === 'Escape' && current) closeRoom(); });
+resetBtn.addEventListener('click', () => { api?.reset(); canvas.focus({ preventScroll: true }); });
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  api?.reset(); api?.closeNote();
+  if (current) closeRoom();
+});
 // Links to the room texts (#projects, #speaking ...) open the room in the model; without 3D they scroll to the section.
 document.addEventListener('click', e => {
   const a = e.target.closest?.('a[href^="#"]');
@@ -126,6 +135,7 @@ function setLang(next, { save = true } = {}) {
   if (!LANGS.includes(next)) return;
   lang = next;
   applyStatic(lang);
+  resetBtn.textContent = t(lang, 'ui.resetView');
   renderAll();
   langBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
   for (const id of ORDER) { labels[id].textContent = name(id); bar.querySelector(`[data-room="${id}"]`).textContent = name(id); }
@@ -151,8 +161,12 @@ stage.addEventListener('pointermove', cancelAuto, { passive: true });
 
 // Text and links are usable before the 3D code arrives.
 import('./viewer.js').then(({ startViewer }) => {
-  api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas });
+  api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
+    onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) canvas.focus({ preventScroll: true }); } });
   if (!api) return useStatic();
+  // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
+  canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0; canvas.setAttribute('role', 'application');
+  if (import.meta.env.DEV) window.__gp = api.debug;
   mode = '3d';
   if (pending) { const p = pending; pending = null; openRoom(p.id, false, p); }
   if (!reduced && !mobile()) autoTimer = setTimeout(() => { if (!current) openRoom('ai', true); }, 4000);

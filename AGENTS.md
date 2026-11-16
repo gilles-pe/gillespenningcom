@@ -30,7 +30,7 @@ Draft phase, publishing prepared. A first version of the home page exists on the
   links to it and may quote it, but never restates or re-interprets its evidence.
   Any quantified claim about medical AI links to the monitor or the original source.
 - **Wimmelbild** - live at `https://wimmelbild.gillespenning.com/en/`.
-- **DocEase** and **Elbstrand** - name only until the owner supplies text and links.
+- **Elbstrand** - linked to `https://penning.info/` (D-027). **DocEase** - "Coming soon", no link until the owner supplies one.
 
 ## Design constraints - binding (owner decision 2026-11-16)
 The owner wants a small, fixed set of sizes so the page stays consistent over time.
@@ -97,4 +97,4 @@ design, critique, audit and polish work.
   `public/CNAME` holds the domain. Nothing is live until the owner enables Pages (source "GitHub Actions") and merges to `main`.
 - The domain switch (DNS of `gillespenning.com`) is an owner step and must not touch `ai.gillespenning.com`.
 - No analytics, no cookies, no external fonts or scripts. The page stores only the language choice and loads the news list
-  from `ai.gillespenning.com` (see D-020). Legal imprint and privacy policy are not written: the owner supplies them.
+  from `ai.gillespenning.com` (see D-020). The legal page `legal.html` carries the owner-supplied imprint and privacy text (D-028).

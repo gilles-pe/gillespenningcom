@@ -95,6 +95,35 @@ until a later entry replaces it.
   small heights and the brass accent (3.35:1) fails AA there. A darker shade of the same accent, `--brass-ink` (#8a6016, 4.85:1
   on cream), is used for small brass text. `--brass` stays for lines, hover and focus marks and large text.
 
+- **D-024 Free rotation of the model (owner decision 2026-11-16).** The model can be turned freely: drag with mouse or one finger
+  orbits azimuth without limit and elevation all the way round (upside down and from below). Camera: `view`/`goal` in `src/viewer.js` now
+  carry `az`, `el`, `dist`; the camera up vector is the tangent of the elevation arc, so there is no flip or jump at the poles, and the
+  horizontal drag sense mirrors when upside down. Zoom: wheel over the canvas (no ctrl/cmd, only when the page itself does not scroll),
+  pinch with two fingers, `+`/`-`; clamped to 0.2 to 1.8 times the default distance. Touch rule: a one-finger drag that starts mostly
+  vertical stays page scroll (`touch-action: pan-y`); one that starts mostly horizontal locks as an orbit (azimuth and elevation);
+  two fingers always pinch-zoom and orbit. Keyboard (canvas focused, `role="application"` with a label): arrows orbit, `+`/`-` zoom,
+  Home or 0 resets. Opening a room, "All rooms", Escape and the "Reset view" button (shown only when away from the default) glide back
+  to the default pose. Hotspots fade out when the camera is below or edge-on to the model. Clicks on the underside no longer open rooms.
+- **D-025 Hidden cellar with a fax machine (owner decision 2026-11-16).** On the underside of the base a small cellar is recessed
+  (cream walls, a frame, a small light) with a fax machine. Nothing on the page hints at it; it is found only by turning the model over.
+  Clicking it (only when it faces the camera) shakes the machine and feeds a sheet out of the slot (1.2 s), then shows a note: EN "This is
+  where healthcare keeps its interoperability." / DE "Hier bewahrt das Gesundheitswesen seine Interoperabilität auf." (also printed on the
+  sheet). Not in the tab order, not announced; the note is created on first click, is a labelled region with a close button, and closes
+  with Escape or "Reset view". Reduced motion: no shaking, sheet and note appear at once. Not mentioned in README or visible UI.
+- **D-026 "Contact" replaces "Book a talk" (owner decision 2026-11-16).** Header button, Writing & Speaking card button and the heading of
+  the speaking part read "Contact" / "Kontakt"; behaviour unchanged. The speaking part has an email link `mailto:nr@gillespenning.com`
+  (owner-approved address) next to "Contact on LinkedIn"; its enquiries line now says "LinkedIn or email". Supersedes "Book a talk" in D-014/D-015.
+- **D-027 DocEase "Coming soon", Elbstrand linked (owner decision 2026-11-16).** DocEase shows "Coming soon" / "Demnächst" (list entry and
+  hotspot title) and stays a non-link. Elbstrand links to `https://penning.info/` (list entry and Projects hotspot). The Projects line reads
+  "Three projects are linked here. DocEase is coming soon."
+- **D-028 Legal page (owner decision 2026-11-16).** `legal.html` at the site root (second Vite entry, built to `dist/legal.html`, own
+  stylesheet `src/legal.css` on the same tokens, no JavaScript, `noindex`, not in the sitemap): German first, then English. Impressum:
+  Gilles Penning, 22587 Hamburg (Blankenese), `nr@gillespenning.com`, one sentence "private website"; no street, phone or VAT id. Privacy: four
+  sentences per language (GitHub Pages hosting and access data; no cookies, no tracking, only the language in local storage; news from
+  ai.gillespenning.com, external links transmit data only when clicked; requests to `nr@gillespenning.com`). Linked from the footer strip
+  as "Legal & privacy" / "Impressum & Datenschutz" (14 px, ink colour) and in the no-JavaScript source. Replaces the "legal pages not
+  written" part of D-020 and open question 8 (the owner supplied the content; a lawyer has not reviewed it).
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

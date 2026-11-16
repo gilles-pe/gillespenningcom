@@ -10,7 +10,8 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `meta.title` | Gilles Penning – Healthcare & MedTech | Gilles Penning – Gesundheitswesen & MedTech |
 | `meta.description` | Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking. | Gilles Penning über Veränderung im Gesundheitswesen: KI und Digital Health, Projekte, Schreiben und Vorträge. |
 | `ui.allRooms` | All rooms | Alle Räume |
-| `ui.soon` | Details to follow | Details folgen |
+| `ui.soon` | Coming soon | Demnächst |
+| `ui.resetView` | Reset view | Ansicht zurücksetzen |
 | `ui.langLabel` | Language | Sprache |
 | `ui.langEn` | English | English |
 | `ui.langDe` | Deutsch | Deutsch |
@@ -19,7 +20,7 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `nav.about` | About Me | Über mich |
 | `nav.ai` | AI & Digital Health | KI & Digital Health |
 | `nav.writing` | Writing & Speaking | Schreiben & Vorträge |
-| `nav.book` | Book a talk | Vortrag buchen |
+| `nav.book` | Contact | Kontakt |
 | `hero.h1` | Why is change so hard in healthcare? | Warum ist Veränderung im Gesundheitswesen so schwer? |
 | `hero.kicker` | Healthcare & MedTech | Gesundheitswesen & MedTech |
 | `hero.p1` | As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care. | Mit der alternden Bevölkerung wächst der Bedarf an Versorgung. Daten und KI eröffnen neue Möglichkeiten, und Menschen entscheiden, was davon im Versorgungsalltag ankommt. |
@@ -28,6 +29,7 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `hero.read` | Read MedTech Signal | MedTech Signal lesen |
 | `hero.explore` | Explore speaking topics | Vortragsthemen ansehen |
 | `strip.label` | More links | Weitere Links |
+| `strip.legal` | Legal & privacy | Impressum & Datenschutz |
 | `strip.wimmelbild` | Wimmelbild | Wimmelbild |
 | `social.substack` | MedTech Signal on Substack | MedTech Signal auf Substack |
 | `social.substackText` | MedTech Signal | MedTech Signal |
@@ -36,10 +38,11 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `news.latest` | Latest | Aktuell |
 | `news.all` | All news | Alle Beiträge |
 | `stage.alt` | Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking. | Architekturmodell eines Hauses mit vier Räumen: Projekte, Über mich, KI und Digital Health, Schreiben und Vorträge. |
+| `stage.canvas` | Interactive 3D model of the four rooms. Drag or use the arrow keys to rotate it, plus and minus to zoom, Home to reset the view. The rooms are also in the room bar. | Interaktives 3D-Modell der vier Räume. Zum Drehen ziehen oder die Pfeiltasten nutzen, mit Plus und Minus zoomen, mit Pos1 die Ansicht zurücksetzen. Die Räume stehen auch in der Raumleiste. |
 | `stage.bar` | Enter a room | Raum betreten |
 | `rooms.label` | The four rooms | Die vier Räume |
 | `rooms.projects.h` | Projects | Projekte |
-| `rooms.projects.p` | Two projects are live. DocEase and Elbstrand follow. | Zwei Projekte sind online. DocEase und Elbstrand folgen. |
+| `rooms.projects.p` | Three projects are linked here. DocEase is coming soon. | Drei Projekte sind hier verlinkt. DocEase kommt demnächst. |
 | `rooms.projects.wimmelbild` | The patient’s path | Der Weg des Patienten |
 | `rooms.projects.monitor` | Studies and benchmarks | Studien und Benchmarks |
 | `rooms.about.h` | About Me | Über mich |
@@ -50,18 +53,22 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `rooms.ai.pHtml` | AI, longitudinal data and digitalisation in medicine. Two ways in: [Wimmelbild](https://wimmelbild.gillespenning.com/en/) follows the patient, the [AI in Medicine Monitor](https://ai.gillespenning.com/) follows the evidence. | KI, Längsschnittdaten und Digitalisierung in der Medizin. Es gibt zwei Zugänge: [Wimmelbild](https://wimmelbild.gillespenning.com/en/) folgt dem Patienten, der [AI in Medicine Monitor](https://ai.gillespenning.com/) folgt der Evidenz. |
 | `rooms.writing.h` | Writing & Speaking | Schreiben & Vorträge |
 | `rooms.writing.pHtml` | The questions my talks start from are listed in the [speaking section](#speaking). | Die Fragen, von denen meine Vorträge ausgehen, stehen im [Abschnitt zu Vorträgen](#speaking). |
-| `rooms.writing.book` | Book a talk | Vortrag buchen |
-| `speaking.h` | Book a talk | Vortrag buchen |
+| `rooms.writing.book` | Contact | Kontakt |
+| `speaking.h` | Contact | Kontakt |
 | `speaking.intro` | Speaking topics start from a question: | Meine Vortragsthemen beginnen mit einer Frage: |
 | `speaking.q1` | Why is change so hard in healthcare? | Warum ist Veränderung im Gesundheitswesen so schwer? |
 | `speaking.q2` | What changes when healthcare has longitudinal data? | Was ändert sich, wenn das Gesundheitswesen Längsschnittdaten hat? |
 | `speaking.langs` | Talks are available in English and German. | Vorträge gibt es auf Deutsch und auf Englisch. |
-| `speaking.enquiries` | Enquiries go through LinkedIn. | Anfragen laufen über LinkedIn. |
+| `speaking.enquiries` | Enquiries go through LinkedIn or email. | Anfragen laufen über LinkedIn oder E-Mail. |
 | `speaking.contact` | Contact on LinkedIn | Auf LinkedIn kontaktieren |
+| `speaking.email` | nr@gillespenning.com | nr@gillespenning.com |
 | `model.rooms.projects` | Projects | Projekte |
 | `model.rooms.about` | About Me | Über mich |
 | `model.rooms.ai` | AI & Digital Health | KI & Digital Health |
 | `model.rooms.writing` | Writing & Speaking | Schreiben & Vorträge |
+| `model.egg.note` | This is where healthcare keeps its interoperability. | Hier bewahrt das Gesundheitswesen seine Interoperabilität auf. |
+| `model.egg.label` | Note from the cellar | Notiz aus dem Keller |
+| `model.egg.close` | Close | Schließen |
 | `model.slots.ai-wall-1` | Consultation | Sprechstunde |
 | `model.slots.ai-wall-2` | Progress | Verlauf |
 | `model.slots.writing-table-1` | Writing | Schreiben |
@@ -80,3 +87,11 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 News titles and summaries come from the AI in Medicine Monitor feed in both languages and are shown verbatim. They are not
 part of `src/content.js` and are not proofread here. The footer line reads "Latest: <title>" / "Aktuell: <Titel>"; dates are
 formatted per language (for example 6 Nov 2026 and 6. Nov. 2026).
+
+`legal.html` is a plain page without JavaScript and is not part of `src/content.js`. It carries German first, then English, with the
+texts decided by the owner: legal notice (name, 22587 Hamburg (Blankenese), email, one sentence) and four privacy sentences per language.
+German privacy text for proofreading: "Diese Website wird auf GitHub Pages gehostet; beim Aufruf der Seite verarbeitet GitHub technische
+Zugriffsdaten wie die IP-Adresse. Die Website setzt keine Cookies und nutzt weder Tracking noch Analyse; im lokalen Speicher des Browsers
+wird nur die gewählte Sprache abgelegt. Die Liste der Neuigkeiten wird von ai.gillespenning.com geladen, das ebenfalls auf GitHub Pages
+gehostet wird; Links auf externe Seiten wie Substack, Bluesky und LinkedIn übermitteln erst nach einem Klick Daten. Fragen und Anliegen zu
+personenbezogenen Daten (Auskunft, Löschung) richten Sie bitte an nr@gillespenning.com."

@@ -312,13 +312,13 @@ const EGG_PAPER = { w: 0.19, h: 0.27 };
 function drawPaper(c) {
   const k = c.getContext('2d'), w = c.width, h = c.height;
   k.fillStyle = '#fffdf8'; k.fillRect(0, 0, w, h);
-  k.fillStyle = 'rgba(18,56,58,0.18)'; k.fillRect(w * 0.1, h * 0.075, w * 0.8, 2);
+  k.fillStyle = 'rgba(18,56,58,0.18)'; k.fillRect(w * 0.1, h * 0.27, w * 0.8, 2);
   k.fillStyle = PETROL; k.textAlign = 'left'; k.textBaseline = 'alphabetic';
-  const fs = w * 0.092; k.font = `600 ${fs}px ${FONT}`;
+  const fs = w * 0.108; k.font = `600 ${fs}px ${FONT}`;
   const words = (modelText().egg?.note ?? '').split(' '), lines = []; let cur = '';
   for (const wd of words) { const tst = cur ? `${cur} ${wd}` : wd; if (k.measureText(tst).width > w * 0.8 && cur) { lines.push(cur); cur = wd; } else cur = tst; }
   if (cur) lines.push(cur);
-  lines.forEach((ln, i) => k.fillText(ln, w * 0.1, h * 0.19 + i * fs * 1.3));
+  lines.forEach((ln, i) => k.fillText(ln, w * 0.1, h * 0.36 + i * fs * 1.3));
 }
 function buildCellar(scene, occluders) {
   const H = CELLAR, top = -0.66 + 0.45, bottom = -0.66;               // ceiling and opening of the recess (world y)
@@ -375,13 +375,13 @@ function buildCellar(scene, occluders) {
   const sheet = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({ map: sheetTex, roughness: 0.9, emissive: 0xffffff, emissiveMap: sheetTex, emissiveIntensity: 0.35 }));
   sheet.rotation.x = A - Math.PI / 2; g.add(sheet); pick.push(sheet);
   const dir = new THREE.Vector3(0, -Math.sin(A), Math.cos(A)), slot = new THREE.Vector3(0, slotY + 0.004, front);
-  const E0 = 0.07, E1 = 0.2;
+  const E0 = 0.07, E1 = 0.22;
   const feed = p => sheet.position.copy(slot).addScaledVector(dir, E0 + (E1 - E0) * p);
   feed(0);
   const anchor = new THREE.Object3D(); anchor.position.set(0, 0.3, 0.1); g.add(anchor);
   // `shake` moves the machine (not the sheet's own feed) a little: x/z in metres, roll in radians.
   const shake = (x, z, roll) => { g.position.set(x, 0, z); g.rotation.z = roll; };
-  return { pick, occluders, anchor, feed, shake, lamp };
+  return { pick, occluders, anchor, feed, shake, lamp, center: new THREE.Vector3(H.x, bottom - 0.1, H.z) };
 }
 
 export function buildScene() {
@@ -530,7 +530,7 @@ export const HOTSPOTS = {
     ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.projects.xs[0], 0.1, LAY.projects.spotZ],
     ['monitorShort', 'https://ai.gillespenning.com/', LAY.projects.xs[1], 0.1, LAY.projects.spotZ],
     ['docease', null, LAY.projects.xs[2], 0.1, LAY.projects.spotZ],
-    ['elbstrand', null, LAY.projects.xs[3], 0.1, LAY.projects.spotZ],
+    ['elbstrand', 'https://penning.info/', LAY.projects.xs[3], 0.1, LAY.projects.spotZ],
   ],
   writing: [
     ['signal', 'https://medtechsignal.substack.com/', LAY.writing.shelf[0], 0.3, LAY.writing.shelf[1] + 0.3],

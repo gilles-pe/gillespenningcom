@@ -9,7 +9,7 @@ const ease = u => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
 export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
   const parts = new Set(cellar.pick), things = [...cellar.pick, ...cellar.occluders];
   const ray = new THREE.Raycaster(), v = new THREE.Vector3(), dir = new THREE.Vector3();
-  let curLang = lang, note = null, text = null, closeBtn = null, anim = null, away = false;
+  let opened = false, curLang = lang, note = null, text = null, closeBtn = null, anim = null, away = false;
 
   // True when the machine is the first thing a ray meets, so it is only found from the side it can be seen from.
   const hit = r => { const h = r.intersectObjects(things, false)[0]; return !!h && parts.has(h.object); };
@@ -31,13 +31,14 @@ export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
   }
   function show() {
     if (!note) build();
-    if (note.hidden === false && note.isConnected && !note.classList.contains('closed')) return;
-    note.hidden = false; note.classList.remove('closed');
+    if (opened) return;
+    opened = true; note.hidden = false; note.classList.remove('closed');
     closeBtn.focus({ preventScroll: true });
   }
   function close(restoreFocus = false) {
     anim = null; cellar.shake(0, 0, 0); cellar.feed(0);
-    if (!note || note.hidden) return;
+    if (!note || !opened) return;
+    opened = false;
     const had = note.contains(document.activeElement);
     note.hidden = true; note.classList.add('closed');
     if (had || restoreFocus) canvas.focus({ preventScroll: true });
@@ -71,7 +72,7 @@ export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
       dir.copy(target).sub(camera.position).normalize(); ray.set(camera.position, dir);
       const gone = !hit(ray) || Math.abs(v.x) > 1 || Math.abs(v.y) > 1 || v.z > 1;
       if (gone !== away) { away = gone; note.classList.toggle('away', gone); }
-      const nw = note.offsetWidth, nh = note.offsetHeight, gap = 40;
+      const nw = note.offsetWidth, nh = note.offsetHeight, gap = Math.min(Math.max(w * 0.14, 56), 150);
       let l = px + gap; if (l + nw > w - 4) l = px - gap - nw;
       l = Math.min(Math.max(l, 4), Math.max(4, w - nw - 4));
       const tp = Math.min(Math.max(py - nh / 2, 4), Math.max(4, h - nh - 4));

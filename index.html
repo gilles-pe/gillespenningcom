@@ -31,7 +31,7 @@
       <a href="#about" data-room="about" data-i18n="nav.about">About Me</a>
       <a href="#ai" data-room="ai" data-i18n="nav.ai">AI &amp; Digital Health</a>
       <a href="#writing" data-room="writing" data-i18n="nav.writing">Writing &amp; Speaking</a>
-      <a class="book" href="#speaking" data-i18n="nav.book">Book a talk</a>
+      <a class="book" href="#speaking" data-i18n="nav.book">Contact</a>
     </nav>
     <div class="lang" id="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:ui.langLabel">
       <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true" data-i18n-attr="aria-label:ui.langEn">EN</button>
@@ -55,7 +55,7 @@
       </div>
 
       <div class="stage" id="stage">
-        <canvas id="scene" aria-hidden="true"></canvas>
+        <canvas id="scene" aria-hidden="true" aria-label="Interactive 3D model of the four rooms. Drag or use the arrow keys to rotate it, plus and minus to zoom, Home to reset the view. The rooms are also in the room bar." data-i18n-attr="aria-label:stage.canvas"></canvas>
         <img class="fallback" src="/reference-four-rooms.webp" alt="Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking." data-i18n-attr="alt:stage.alt" hidden>
         <div class="labels" id="labels"></div>
         <div class="spots" id="spots"></div>
@@ -70,12 +70,12 @@
     <section class="rooms" id="rooms" aria-label="The four rooms" data-i18n-attr="aria-label:rooms.label">
       <article id="projects" data-room="projects">
         <h2 data-i18n="rooms.projects.h">Projects</h2>
-        <p data-i18n="rooms.projects.p">Two projects are live. DocEase and Elbstrand follow.</p>
+        <p data-i18n="rooms.projects.p">Three projects are linked here. DocEase is coming soon.</p>
         <ul class="links">
           <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a><span data-i18n="rooms.projects.wimmelbild">The patient’s path</span></li>
           <li><a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor</a><span data-i18n="rooms.projects.monitor">Studies and benchmarks</span></li>
-          <li><span class="pill muted">DocEase</span><span data-i18n="ui.soon">Details to follow</span></li>
-          <li><span class="pill muted">Elbstrand</span><span data-i18n="ui.soon">Details to follow</span></li>
+          <li><span class="pill muted">DocEase</span><span data-i18n="ui.soon">Coming soon</span></li>
+          <li><a class="pill" href="https://penning.info/">Elbstrand</a></li>
         </ul>
       </article>
       <article id="about" data-room="about">
@@ -93,7 +93,7 @@
       <article id="writing" data-room="writing">
         <h2 data-i18n="rooms.writing.h">Writing &amp; Speaking</h2>
         <p data-i18n-html="rooms.writing.pHtml">The questions my talks start from are listed in the <a href="#speaking">speaking section</a>.</p>
-        <p class="cta"><a class="btn primary" href="#speaking" data-i18n="rooms.writing.book">Book a talk</a></p>
+        <p class="cta"><a class="btn primary" href="#speaking" data-i18n="rooms.writing.book">Contact</a></p>
         <!-- Without JavaScript these are plain text links. With JavaScript they get their logo marks (src/icons.js). -->
         <div class="social-row" data-social="labelled">
           <a href="https://medtechsignal.substack.com/" rel="me noopener">MedTech Signal</a>
@@ -106,7 +106,7 @@
     </section>
 
     <section class="speaking" id="speaking" aria-labelledby="speaking-h">
-      <h2 id="speaking-h" data-i18n="speaking.h">Book a talk</h2>
+      <h2 id="speaking-h" data-i18n="speaking.h">Contact</h2>
       <div class="speaking-body">
         <p data-i18n="speaking.intro">Speaking topics start from a question:</p>
         <ul class="questions">
@@ -114,8 +114,8 @@
           <li data-i18n="speaking.q2">What changes when healthcare has longitudinal data?</li>
         </ul>
         <p data-i18n="speaking.langs">Talks are available in English and German.</p>
-        <p data-i18n="speaking.enquiries">Enquiries go through LinkedIn.</p>
-        <p><a class="btn primary" href="https://www.linkedin.com/in/gillespenning/" rel="noopener" data-i18n="speaking.contact">Contact on LinkedIn</a></p>
+        <p data-i18n="speaking.enquiries">Enquiries go through LinkedIn or email.</p>
+        <p class="contact-row"><a class="btn primary" href="https://www.linkedin.com/in/gillespenning/" rel="noopener" data-i18n="speaking.contact">Contact on LinkedIn</a> <a class="btn" href="mailto:nr@gillespenning.com" data-i18n="speaking.email">nr@gillespenning.com</a></p>
       </div>
     </section>
     </div>
@@ -131,6 +131,7 @@
         <a href="https://www.linkedin.com/in/gillespenning/" rel="me noopener">LinkedIn</a>
       </div>
       <p class="latest" id="latest" hidden></p>
+      <a class="legal" href="legal.html" data-i18n="strip.legal">Legal &amp; privacy</a>
     </nav>
   </footer>
 

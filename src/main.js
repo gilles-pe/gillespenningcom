@@ -7,6 +7,7 @@ const labelsEl = document.getElementById('labels');
 const panel = document.getElementById('panel');
 const back = document.getElementById('back');
 const bar = document.getElementById('bar');
+const dock = document.getElementById('dock');
 const spotsEl = document.getElementById('spots');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => matchMedia('(max-width: 800px)').matches;
@@ -44,11 +45,19 @@ function openRoom(id, auto = false) {
   stage.classList.add('open'); back.hidden = false;
   panel.replaceChildren(...[...article.children].filter(n => !n.matches('.links')).map(n => n.cloneNode(true)));
   panel.hidden = false;
+  // Phone: the room's text and links sit under the model, with a way back to the overview.
+  const all = document.createElement('button');
+  all.type = 'button'; all.className = 'allrooms'; all.textContent = '← All rooms';
+  all.addEventListener('click', closeRoom);
+  dock.replaceChildren(all, ...[...article.children].map(n => n.cloneNode(true)));
+  dock.hidden = false;
+  if (mobile() && !auto) { all.focus({ preventScroll: true }); stage.scrollIntoView({ block: 'start' }); }
   api.open(id);
 }
 function closeRoom() {
   const was = current; current = null;
-  stage.classList.remove('open'); panel.hidden = true; back.hidden = true;
+  stage.classList.remove('open'); panel.hidden = true; back.hidden = true; dock.hidden = true;
+  if (mobile() && was) bar.querySelector(`[data-room=${was}]`)?.focus({ preventScroll: true });
   bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', false));
   document.querySelectorAll('.top nav a').forEach(a => a.classList.remove('active'));
   api?.open(null);
@@ -73,5 +82,5 @@ stage.addEventListener('pointermove', cancelAuto, { passive: true });
 import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, onPick: openRoom });
   if (!api) return useStatic();
-  if (!reduced) autoTimer = setTimeout(() => { if (!current) openRoom('ai', true); }, 4000);
+  if (!reduced && !mobile()) autoTimer = setTimeout(() => { if (!current) openRoom('ai', true); }, 4000);
 }).catch(useStatic);

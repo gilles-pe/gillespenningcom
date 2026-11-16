@@ -9,15 +9,24 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, onPick })
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
 
   const { scene, rooms } = buildScene();
-  scene.add(new THREE.HemisphereLight(0xfff4e2, 0xcbb89a, 1.5));
-  const sun = new THREE.DirectionalLight(0xffe2b8, 2.6);
-  sun.position.set(-7, 10, 6); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
-  Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
-  sun.shadow.bias = -0.0004; sun.shadow.radius = 6; scene.add(sun);
+  // Default light rig, only if the scene does not bring its own (room point lights do not count).
+  let sceneLit = false;
+  scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
+  if (!sceneLit) {
+    scene.add(new THREE.HemisphereLight(0xfff4e2, 0xcbb89a, 1.5));
+    const sun = new THREE.DirectionalLight(0xffe2b8, 2.6);
+    sun.position.set(-7, 10, 6); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
+    sun.shadow.bias = -0.0004; sun.shadow.radius = 6; scene.add(sun);
+  }
+  const phone = () => matchMedia('(max-width: 800px)').matches;
 
   // Hotspots are real links, placed over the objects they belong to.
   const spots = [];
-  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [text, href, x, y, z] of list) {
+  // The speaking hotspot leads to the #speaking section (its href in scene.js still says #writing).
+  const target = (text, href) => (text === 'Speaking topics' && href === '#writing') ? '#speaking' : href;
+  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [text, href0, x, y, z] of list) {
+    const href = target(text, href0);
     const el = document.createElement(href ? 'a' : 'span');
     el.className = 'spot' + (href ? '' : ' soon'); el.textContent = text; el.tabIndex = -1;
     if (href) el.href = href; else el.title = 'Details to follow';
@@ -41,7 +50,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, onPick })
   function setGoal() {
     if (openId) {
       const r = rooms[openId];
-      goal.t.copy(r.center); goal.t.y += 0.3; goal.dist = overviewDist * 0.66; goal.az = -r.x * 0.32 + userAz * 0.5;
+      goal.t.copy(r.center); goal.t.y += 0.3; goal.dist = overviewDist * (phone() ? 0.3 : 0.66); goal.az = -r.x * 0.32 + userAz * 0.5;
     } else { goal.t.set(0, 0.2, 0.3); goal.dist = overviewDist; goal.az = userAz; }
   }
   new ResizeObserver(resize).observe(stage); resize();

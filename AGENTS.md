@@ -80,6 +80,11 @@ design, critique, audit and polish work.
 - Log every owner decision in `docs/decisions.md` with its date. Never infer approval
   from silence.
 
+## Image slots
+- Pictures in the 3D model are swapped only by slot filename: put `public/slots/<slot>.webp` in place. Never edit image code for a content swap.
+- Slot names, aspect ratios and minimum sizes are listed in `DESIGN.md` and in `public/slots/README.md`.
+- A new picture surface needs a row in `DESIGN.md` and an entry in the `SLOTS` table in `src/scene.js`.
+
 ## Hosting and domain
 `gillespenning.com` is reserved for this site. The monitor stays on the subdomain
 `ai.gillespenning.com` and must keep working. Hosting target and stack are not decided

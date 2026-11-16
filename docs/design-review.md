@@ -39,9 +39,9 @@ Status: FIXED, PARTLY or OPEN.
    driver notice of the headless test browser.
 9. Projects panel showed only a heading. FIXED with one factual line: "Two projects are live. DocEase and Elbstrand follow."
 10. Duplicated copy: the two speaking questions appear in the Writing room, the rooms section and #speaking; "Book a talk"
-    appears in nav, panel and section. OPEN (content decision; the panel is cloned from the rooms section).
+    appears in nav, panel and section. FIXED (D-013): questions only in #speaking, one pointer sentence in the Writing room.
 11. Room-section lists are repeated link groups (Wimmelbild and the monitor each appear up to three times on the page).
-    OPEN (content decision).
+    FIXED (D-013): the AI article uses inline links; the Projects list is the one listing.
 12. Panel width (300px), 2px rules and a few calc() values in style.css are not on the token scales. OPEN: needs an
     owner decision or the planned check script; not changed.
 13. Kicker-style line "Healthcare & MedTech" under the h1 in brass (3.3:1, passes only as large text) restates the

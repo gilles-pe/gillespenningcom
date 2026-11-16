@@ -33,13 +33,23 @@ until a later entry replaces it.
   (see `DESIGN.md`).
 - **D-011 Working mode.** The main session orchestrates; implementation runs in subagents
   on smaller models, which hand back after two failed attempts at the same problem.
+- **D-012 Bilingual site.** The site is English (default) and German. All text lives in
+  `src/content.js`; the static HTML stays complete English. Language switch EN / DE in the top
+  navigation, remembered in the browser, `?lang=de` supported, never chosen from the browser
+  language. Project names are not translated. German copy is listed for proofreading in
+  `docs/german-copy-review.md`.
+- **D-013 No repeated content.** The two speaking questions appear only in `#speaking`.
+  "Book a talk" appears in the nav and in the Writing & Speaking room, and the section
+  `#speaking` has its LinkedIn button. Wimmelbild and the monitor have two permanent hero links,
+  the room hotspots and one list in the Projects article; the AI & Digital Health article
+  names them in text with inline links.
 
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.
 2. Who is the primary audience, and what should a visitor do at the end
    (contact, booking, CV download, newsletter)?
-3. Should the page also get a German version later?
+3. ~~German version~~ decided, see D-012. Open: does Wimmelbild have a German address? Both languages link to `https://wimmelbild.gillespenning.com/en/` until it is confirmed.
 4. Which material exists: photos, CV, past talks, press, logos?
 5. Deployment to GitHub Pages and the domain switch are not set up yet.
 6. Confirm the exact values of the design scales.

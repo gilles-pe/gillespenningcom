@@ -1,13 +1,15 @@
 import * as THREE from 'three';
-import { buildScene, HOTSPOTS } from './scene.js';
+import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
+import { t } from './i18n.js';
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, onPick }) {
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
 
+  setModelLanguage(lang);
   const { scene, rooms } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
@@ -23,13 +25,23 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, onPick })
 
   // Hotspots are real links, placed over the objects they belong to.
   const spots = [];
-  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [text, href, x, y, z] of list) {
+  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [key, href, x, y, z] of list) {
     const el = document.createElement(href ? 'a' : 'span');
-    el.className = 'spot' + (href ? '' : ' soon'); el.textContent = text; el.tabIndex = -1;
-    if (href) el.href = href; else el.title = 'Details to follow';
+    el.className = 'spot' + (href ? '' : ' soon'); el.tabIndex = -1;
+    if (href) el.href = href;
+    const sp = { key, el };
     spotsEl.append(el);
-    spots.push({ id, el, w: 0, h: 0, px: 0, py: 0, pos: new THREE.Vector3(x, y, z).add(rooms[id].group.position) });
+    spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos: new THREE.Vector3(x, y, z).add(rooms[id].group.position) });
   }
+
+  let curLang = lang;
+  function labelSpots() {
+    for (const s of spots) {
+      s.el.textContent = t(curLang, `model.spots.${s.sp.key}`);
+      if (!s.el.href) s.el.title = t(curLang, 'ui.soon');
+    }
+  }
+  labelSpots();
 
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
   const EL = 0.74;                                        // elevation in radians
@@ -154,5 +166,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, onPick })
   return {
     open(id) { openId = id; hoverId = null; if (!id) userAz = 0; setGoal(); },
     hover(id) { hoverId = id; },
+    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); },
   };
 }

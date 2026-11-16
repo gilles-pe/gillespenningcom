@@ -1,6 +1,7 @@
 // The four-room model, built from plain Three.js geometry and canvas textures.
 // No external assets: wood, plaster, lettering and picture placeholders are drawn here.
 import * as THREE from 'three';
+import content from './content.js';
 
 const W = 4, D = 3.6, G = 1.3, T = 0.14;          // room width, depth, corridor gap, wall thickness
 const WALL_FRONT = -D / 2 + T / 2 + 0.006;        // z of the lettering/pictures, just in front of the back wall
@@ -14,11 +15,19 @@ const C = {
 // Slightly different wall tone per room, so the four rooms do not read as copies.
 const WALL_TONE = { projects: C.wallGreen, about: 0xf0e3cf, ai: 0xeee6d4, writing: 0xf2e5d0 };
 
+// Lettering and placeholder texts follow the page language. setModelLanguage() redraws them.
+let LANG = 'en';
+const modelText = () => content[LANG].model;
+export function setModelLanguage(lang) {
+  if (!content[lang] || lang === LANG) return;
+  LANG = lang; fontRedraws.forEach(f => f());
+}
+
 export const ROOMS = {
-  projects: { x: -1, z: -1, h: 2.1, label: 'Projects' },
-  about:    { x:  1, z: -1, h: 2.1, label: 'About Me' },
-  ai:       { x: -1, z:  1, h: 1.6, label: 'AI & Digital Health' },
-  writing:  { x:  1, z:  1, h: 1.6, label: 'Writing & Speaking' },
+  projects: { x: -1, z: -1, h: 2.1 },
+  about:    { x:  1, z: -1, h: 2.1 },
+  ai:       { x: -1, z:  1, h: 1.6 },
+  writing:  { x:  1, z:  1, h: 1.6 },
 };
 
 // ---- Image slots -----------------------------------------------------------
@@ -110,7 +119,7 @@ function drawPlaceholder(slot, c) {
   k.beginPath(); k.moveTo(0, h); k.bezierCurveTo(w * 0.27, h * 0.57, w * 0.58, h * 0.86, w, h * 0.63); k.lineTo(w, h); k.fill();
   k.fillStyle = PETROL; k.textAlign = 'center'; k.textBaseline = 'middle';
   const fs = Math.min(w, h) * (w >= h ? 0.2 : 0.16);
-  k.font = `600 ${fs}px ${FONT}`; k.fillText(slot.text, w / 2, h * 0.36, w * 0.9);
+  k.font = `600 ${fs}px ${FONT}`; k.fillText(modelText().slots[slot.name] ?? slot.text, w / 2, h * 0.36, w * 0.9);
 }
 // Returns a material that shows the placeholder now and public/slots/<name>.webp if it exists.
 function slotMaterial(name) {
@@ -149,10 +158,11 @@ const LETTERING = {                        // x, y, width, height of the plane (
   ai:       { x: 0,     y: 1.37, w: 3.2, h: 0.4, color: PETROL },
   writing:  { x: 0,     y: 1.37, w: 3.2, h: 0.4, color: PETROL },
 };
-function lettering(parent, id, text) {
+function lettering(parent, id) {
   const L = LETTERING[id], c = canvas(2048, Math.round(2048 * L.h / L.w)), k = c.getContext('2d');
   const t = tex(c);
   whenFont(() => {
+    const text = modelText().rooms[id];
     k.clearRect(0, 0, c.width, c.height);
     let fs = c.height * 0.66; k.font = `600 ${fs}px ${FONT}`;
     const tw = k.measureText(text).width; if (tw > c.width * 0.96) { fs *= c.width * 0.96 / tw; k.font = `600 ${fs}px ${FONT}`; }
@@ -290,7 +300,7 @@ export function buildScene() {
     scene.add(new THREE.Mesh(hotGeo, brassHot));
 
     windowLight(g);
-    lettering(g, id, r.label);
+    lettering(g, id);
     rooms[id] = { ...r, id, group: g, floor, door, light, hit, hotGeo, hotCount: SEG * 6 * 6,
       center: new THREE.Vector3(cx, 0.5, cz), labelAt: new THREE.Vector3(cx, r.h + 0.35, cz - D / 2), open: 0, glow: 0 };
     furnish(id, g, r);
@@ -349,26 +359,27 @@ function furnish(id, g, r) {
   }
 }
 
-// Clickable things inside each room: [label, link, x, y, z] in room coordinates.
+// Clickable things inside each room: [label key, link, x, y, z] in room coordinates.
+// Label texts are in content.js (model.spots). A null link is a placeholder without destination.
 export const HOTSPOTS = {
   ai: [
-    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -0.3, 0.62, 0.9],
-    ['AI in Medicine Monitor', 'https://ai.gillespenning.com/', 0.5, 0.3, 1.2],
+    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -0.3, 0.62, 0.9],
+    ['monitor', 'https://ai.gillespenning.com/', 0.5, 0.3, 1.2],
   ],
   // Under the plinths, so the pictures on the boards stay visible.
   projects: [
-    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -1.38, 0.1, -0.3],
-    ['AI Monitor', 'https://ai.gillespenning.com/', -0.46, 0.1, -0.3],
-    ['DocEase', null, 0.46, 0.1, -0.3],
-    ['Elbstrand', null, 1.38, 0.1, -0.3],
+    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -1.38, 0.1, -0.3],
+    ['monitorShort', 'https://ai.gillespenning.com/', -0.46, 0.1, -0.3],
+    ['docease', null, 0.46, 0.1, -0.3],
+    ['elbstrand', null, 1.38, 0.1, -0.3],
   ],
   writing: [
-    ['MedTech Signal', 'https://medtechsignal.substack.com/', 1.1, 0.3, -D / 2 + 0.55],
-    ['Speaking topics', '#speaking', -0.1, 0.62, 0.9],
-    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.0, 0.45, 1.2],
+    ['signal', 'https://medtechsignal.substack.com/', 1.1, 0.3, -D / 2 + 0.55],
+    ['speaking', '#speaking', -0.1, 0.62, 0.9],
+    ['linkedin', 'https://www.linkedin.com/in/gillespenning/', 1.0, 0.45, 1.2],
   ],
   about: [
-    ['My story', '#about', -0.3, 0.9, 0.7],
-    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.2, 0.3, -D / 2 + 0.55],
+    ['story', '#about', -0.3, 0.9, 0.7],
+    ['linkedin', 'https://www.linkedin.com/in/gillespenning/', 1.2, 0.3, -D / 2 + 0.55],
   ],
 };

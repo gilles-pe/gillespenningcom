@@ -7,6 +7,9 @@ a { color: inherit; }
 ::selection { background: var(--petrol); color: var(--paper); }
 h1, h2, p, ul { margin: 0; padding: 0; }
 ul { list-style: none; }
+h1, h2 { overflow-wrap: break-word; }
+/* German words are longer: the headline steps down one size so it stays inside its column. */
+html:lang(de) h1 { font-size: var(--t5); }
 
 .top { display: flex; align-items: center; gap: var(--s5); padding: var(--s4) var(--s5); }
 .brand { display: inline-flex; align-items: center; min-height: var(--h2); font-size: var(--t4); font-weight: 600; color: var(--petrol); text-decoration: none; white-space: nowrap; }
@@ -16,6 +19,10 @@ ul { list-style: none; }
 .top nav a.book { display: inline-flex; align-items: center; height: var(--h2); padding: 0 var(--s3); font-size: var(--t2); color: var(--paper); background: var(--petrol); border: 1px solid var(--petrol); border-radius: var(--r1); }
 .top nav a.book:hover { border-color: var(--brass); background: var(--petrol); }
 .top nav { align-items: center; }
+.lang { display: flex; gap: var(--s1); }
+.lang button { min-width: var(--h2); height: var(--h2); padding: 0 var(--s2); font: 600 var(--t2) var(--font); letter-spacing: 0.02em; color: var(--petrol); background: transparent; border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer; }
+.lang button:hover { border-color: var(--brass); }
+.lang button[aria-pressed=true] { background: var(--petrol); border-color: var(--petrol); color: var(--paper); }
 
 .hero { display: grid; grid-template-columns: minmax(280px, 30%) 1fr; gap: var(--s4); padding: 0 var(--s5) var(--s5); align-items: center; min-height: calc(100vh - 104px); }
 .intro { display: grid; gap: var(--s4); max-width: 440px; }
@@ -34,7 +41,7 @@ a.btn:hover, a.pill:hover { border-color: var(--brass); }
 .stage { position: relative; height: min(78vh, 760px); min-height: 420px; }
 #scene { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
 .fallback { width: 100%; height: 100%; object-fit: cover; object-position: 85% 50%; border-radius: var(--r1); }
-.labels { position: absolute; inset: 0; pointer-events: none; }
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .label { position: absolute; transform: translate(-50%, -50%); height: var(--h2); padding: 0 var(--s3); font: 600 var(--t3)/1 var(--font); color: var(--petrol); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer; white-space: nowrap; transition: opacity .3s; }
 .label:hover { border-color: var(--brass); }
 /* The wall lettering is the visible room name. The buttons stay for keyboard and screen readers and appear only when focused. */
@@ -74,6 +81,9 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
 .questions { display: grid; gap: var(--s2); font-style: italic; color: var(--petrol); }
 
 @media (max-width: 1100px) {
+  :lang(de) { hyphens: auto; }
+  .top { flex-wrap: wrap; gap: var(--s2) var(--s3); }
+  .top nav { gap: var(--s3); flex-wrap: wrap; }
   h1 { font-size: var(--t5); }
   .rooms { grid-template-columns: repeat(2, 1fr); }
 }
@@ -82,7 +92,8 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
   .speaking h2 { font-size: var(--t5); }
   .speaking .questions { font-size: var(--t3); }
   .top { padding: var(--s3); gap: var(--s3); }
-  .top nav { margin-left: auto; }
+  .top nav { margin-left: auto; gap: var(--s2); }
+  .lang button { min-width: var(--h3); height: var(--h3); }
   .top nav a:not(.book) { display: none; }
   .top nav a.book { height: var(--h3); }
   .brand { font-size: var(--t3); }
@@ -116,4 +127,5 @@ a.spot:hover { border-color: var(--brass); background: var(--petrol); text-decor
   .rooms { grid-template-columns: 1fr; padding: var(--s5) var(--s3); }
   .rooms article.current h2 { color: var(--brass); }
 }
+@media (max-width: 360px) { html:lang(de) h1 { font-size: var(--t4); } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot { transition: none; } }

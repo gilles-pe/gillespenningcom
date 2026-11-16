@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gilles Penning – Healthcare & MedTech</title>
+  <script>document.documentElement.classList.add('js');</script>
   <meta name="description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
 </head>
 <body>
@@ -31,13 +32,10 @@
         <hr>
         <p data-i18n="hero.p2">I’ve spent my career in MedTech, working with some very interesting people. Here I share the ideas I come across, the projects I work on, and what I learn from the people I meet.</p>
         <div class="actions">
-          <a class="btn primary" href="https://medtechsignal.substack.com/" data-i18n="hero.read">Read MedTech Signal</a>
-          <a class="btn" href="#speaking" data-i18n="hero.explore">Explore speaking topics</a>
+          <a class="btn primary" href="https://ai.gillespenning.com/" data-i18n="hero.monitor">Open the AI in Medicine Monitor</a>
+          <a class="btn" href="https://medtechsignal.substack.com/" data-i18n="hero.read">Read MedTech Signal</a>
         </div>
-        <div class="direct">
-          <a class="pill" href="https://wimmelbild.gillespenning.com/en/">Wimmelbild</a>
-          <a class="pill" href="https://ai.gillespenning.com/">AI in Medicine Monitor</a>
-        </div>
+        <p class="more"><a href="#speaking" data-i18n="hero.explore">Explore speaking topics</a></p>
       </div>
 
       <div class="stage" id="stage">
@@ -52,6 +50,7 @@
       </div>
     </section>
 
+    <div class="source" id="source">
     <section class="rooms" id="rooms" aria-label="The four rooms" data-i18n-attr="aria-label:rooms.label">
       <article id="projects" data-room="projects">
         <h2 data-i18n="rooms.projects.h">Projects</h2>
@@ -98,7 +97,16 @@
         <p><a class="btn primary" href="https://www.linkedin.com/in/gillespenning/" rel="noopener" data-i18n="speaking.contact">Contact on LinkedIn</a></p>
       </div>
     </section>
+    </div>
   </main>
+
+  <footer class="strip">
+    <nav aria-label="More links" data-i18n-attr="aria-label:strip.label">
+      <a href="https://wimmelbild.gillespenning.com/en/" data-i18n="strip.wimmelbild">Wimmelbild</a>
+      <!-- #social: empty on purpose. Social links are added here later; it takes no space while empty. -->
+      <div id="social" class="social"></div>
+    </nav>
+  </footer>
 
   <script type="module" src="/src/main.js"></script>
 </body>

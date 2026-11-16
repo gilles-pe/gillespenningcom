@@ -7,7 +7,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
   setModelLanguage(lang);
   const { scene, rooms, outline, center } = buildScene();
@@ -15,11 +15,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
   if (!sceneLit) {
-    scene.add(new THREE.HemisphereLight(0xfff4e2, 0xcbb89a, 1.5));
-    const sun = new THREE.DirectionalLight(0xffe2b8, 2.6);
+    scene.add(new THREE.HemisphereLight(0xfff6e8, 0xe0d0b6, 1.95));
+    const sun = new THREE.DirectionalLight(0xffeed8, 1.7);
     sun.position.set(-7, 10, 6); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
     Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
-    sun.shadow.bias = -0.0004; sun.shadow.radius = 6; scene.add(sun);
+    sun.shadow.bias = -0.0004; sun.shadow.radius = 6; sun.shadow.intensity = 0.5; scene.add(sun);
   }
   const phone = () => matchMedia('(max-width: 800px)').matches;
 
@@ -91,7 +91,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (openId) {
       const r = rooms[openId];
       // Desktop: the text panel stands at the left of the stage, so the room is framed in the space to its right.
-      const pw = phone() ? 0 : (panelEl.offsetWidth || 300) + 2 * 16;
+      const pw = phone() ? 0 : (panelEl.offsetWidth || 312) + 2 * 16;
       const free = Math.max(0.4, (stageW - pw) / stageW);
       goal.shift = pw / 2;
       goal.t.copy(r.center); goal.t.y += 0.3; goal.az = -r.x * 0.32 + userAz * 0.5;
@@ -117,20 +117,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return ray.intersectObjects(hits)[0]?.object.userData.room ?? null;
   };
   let drag = null;
-  canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, az: userAz, moved: false }; });
+  canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, az: userAz, moved: false }; });
   addEventListener('pointermove', e => {
     if (drag) {
       const dx = e.clientX - drag.x;
-      if (Math.abs(dx) > 5) drag.moved = true;
+      if (Math.abs(dx) > 5 || Math.abs(e.clientY - drag.y) > 5) drag.moved = true;
       userAz = THREE.MathUtils.clamp(drag.az - dx * 0.004, -0.45, 0.45); setGoal();
     } else if (e.target === canvas && !openId) {
       hoverId = pick(e); canvas.style.cursor = hoverId ? 'pointer' : 'grab';
     }
   });
   addEventListener('pointerup', e => {
-    if (drag && !drag.moved && e.target === canvas && !openId) { const id = pick(e); if (id) onPick(id); }
+    if (drag && !drag.moved && e.target === canvas) onPick(pick(e));
     drag = null;
   });
+  addEventListener('pointercancel', () => { drag = null; });   // the browser took over (vertical page scroll)
   canvas.addEventListener('pointerleave', () => { hoverId = null; });
 
   let visible = true;

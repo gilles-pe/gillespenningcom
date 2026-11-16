@@ -38,8 +38,13 @@ export const content = {
       kicker: 'Healthcare & MedTech',
       p1: 'As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care.',
       p2: 'I’ve spent my career in MedTech, working with some very interesting people. Here I share the ideas I come across, the projects I work on, and what I learn from the people I meet.',
+      monitor: 'Open the AI in Medicine Monitor',
       read: 'Read MedTech Signal',
       explore: 'Explore speaking topics',
+    },
+    strip: {
+      label: 'More links',
+      wimmelbild: 'Wimmelbild',
     },
     stage: {
       alt: 'Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking.',
@@ -126,8 +131,13 @@ export const content = {
       kicker: 'Gesundheitswesen & MedTech',
       p1: 'Mit der alternden Bevölkerung wächst der Bedarf an Versorgung. Daten und KI eröffnen neue Möglichkeiten, und Menschen entscheiden, was davon im Versorgungsalltag ankommt.',
       p2: 'Mein Berufsleben gehört der MedTech, und ich durfte mit einigen sehr interessanten Menschen zusammenarbeiten. Hier teile ich Ideen, auf die ich stoße, Projekte, an denen ich arbeite, und was ich von den Menschen lerne, denen ich begegne.',
+      monitor: 'Zum AI in Medicine Monitor',
       read: 'MedTech Signal lesen',
       explore: 'Vortragsthemen ansehen',
+    },
+    strip: {
+      label: 'Weitere Links',
+      wimmelbild: 'Wimmelbild',
     },
     stage: {
       alt: 'Architekturmodell eines Hauses mit vier Räumen: Projekte, Über mich, KI und Digital Health, Schreiben und Vorträge.',

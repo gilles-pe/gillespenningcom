@@ -9,12 +9,12 @@ const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
 const FONT = "'Newsreader Variable', Georgia, serif";
 const PETROL = '#12383a', CREAM = '#f6eee3';
 const C = {
-  wall: 0xefe4d2, wallGreen: 0xa9b690, floor: 0xd9b382, corridor: 0xc99f6c, base: 0x1f4a47,
-  wood: 0xc79a62, woodDark: 0xa97c48, cream: 0xf2e8d8, glass: 0xdcebe0, brass: 0xb8862f,
+  wall: 0xf1e7d4, wallGreen: 0xbfc9a8, floor: 0xe5cda5, corridor: 0xdcc39b, base: 0x72877f,
+  wood: 0xd9bf93, woodDark: 0xbfa479, cream: 0xf5eee0, glass: 0xe3efe6, brass: 0xb8862f,
   leaf: 0x6f8f4e, leaf2: 0x86a05f, pot: 0xe9dfcf, book: [0xe8dcc6, 0xcdb994, 0x9db0a0, 0xd9c7a8, 0x7f9488],
 };
 // Slightly different wall tone per room, so the four rooms do not read as copies.
-const WALL_TONE = { projects: C.wallGreen, about: 0xf0e3cf, ai: 0xeee6d4, writing: 0xf2e5d0 };
+const WALL_TONE = { projects: C.wallGreen, about: 0xf2e8d6, ai: 0xf1e9d9, writing: 0xf4e9d6 };
 
 // Lettering and placeholder texts follow the page language. setModelLanguage() redraws them.
 let LANG = 'en';
@@ -97,11 +97,11 @@ function woodMap(base, planks, repeat) {
       k.fillStyle = `rgb(${255 * tone | 0},${250 * tone | 0},${240 * tone | 0})`; k.fillRect(0, y0, 512, ph);
       for (let i = 0; i < 26; i++) {
         const y = y0 + 3 + r() * (ph - 6), a = 0.05 + r() * 0.09, ph2 = r() * 6, amp = 0.8 + r() * 2.2;
-        k.strokeStyle = `rgba(120,78,36,${a})`; k.lineWidth = 0.6 + r() * 1.4; k.beginPath();
+        k.strokeStyle = `rgba(130,98,58,${a * 0.8})`; k.lineWidth = 0.6 + r() * 1.4; k.beginPath();
         for (let x = 0; x <= 512; x += 16) { const yy = y + Math.sin(x * 0.018 + ph2) * amp; x ? k.lineTo(x, yy) : k.moveTo(x, yy); }
         k.stroke();
       }
-      if (planks) { k.fillStyle = 'rgba(90,56,24,0.38)'; k.fillRect(0, y0, 512, 1.5); }
+      if (planks) { k.fillStyle = 'rgba(110,80,46,0.26)'; k.fillRect(0, y0, 512, 1.5); }
     }
     woodCache.set(key, c);
   }
@@ -120,7 +120,7 @@ function plaster() {
   if (!plasterMap) {
     const c = canvas(256, 256), k = c.getContext('2d'), r = rng(11);
     k.fillStyle = '#ffffff'; k.fillRect(0, 0, 256, 256);
-    for (let i = 0; i < 2600; i++) { k.fillStyle = `rgba(${r() < 0.5 ? '120,100,70' : '255,255,255'},${0.025 + r() * 0.04})`; k.fillRect(r() * 256, r() * 256, 1 + r() * 3, 1 + r() * 3); }
+    for (let i = 0; i < 2600; i++) { k.fillStyle = `rgba(${r() < 0.5 ? '130,115,90' : '255,255,255'},${0.025 + r() * 0.04})`; k.fillRect(r() * 256, r() * 256, 1 + r() * 3, 1 + r() * 3); }
     plasterMap = tex(c, { wrap: true });
   }
   return plasterMap;

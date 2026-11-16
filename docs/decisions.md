@@ -18,13 +18,29 @@ until a later entry replaces it.
 - **D-005 Impeccable.** The Impeccable design skill is used for design work and is
   vendored in the repository. Its automatic hook is not enabled.
 
+- **D-006 Direction.** The home page is a "four-room home" architectural model (Projects,
+  About Me, AI & Digital Health, Writing & Speaking), built as a real Three.js model in a
+  warm editorial style: cream, dark petrol, brass, light wood. The site is in English.
+  Stack: Vite and Three.js, static build for GitHub Pages.
+- **D-007 Projects.** Wimmelbild (`wimmelbild.gillespenning.com/en/`), AI in Medicine
+  Monitor, DocEase and Elbstrand. DocEase and Elbstrand show the name only until the
+  owner supplies text and links.
+- **D-008 Confirmed links.** MedTech Signal (`medtechsignal.substack.com`) and LinkedIn
+  (`linkedin.com/in/gillespenning`). LinkedIn is the contact channel for speaking
+  enquiries until the owner names another.
+- **D-009 Talks.** Talks are available in English and German.
+- **D-010 Image slots.** Pictures in the model are exchangeable by fixed slot filenames
+  (see `DESIGN.md`).
+- **D-011 Working mode.** The main session orchestrates; implementation runs in subagents
+  on smaller models, which hand back after two failed attempts at the same problem.
+
 ## Open questions
 
-1. Which second project does the page present next to the monitor?
+1. Texts and links for DocEase and Elbstrand.
 2. Who is the primary audience, and what should a visitor do at the end
    (contact, booking, CV download, newsletter)?
-3. Languages: German, English or both?
+3. Should the page also get a German version later?
 4. Which material exists: photos, CV, past talks, press, logos?
-5. Stack and hosting (proposal: static site on GitHub Pages with the custom domain).
+5. Deployment to GitHub Pages and the domain switch are not set up yet.
 6. Confirm the exact values of the design scales.
 7. Enable the Impeccable design hook, yes or no?

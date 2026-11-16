@@ -25,6 +25,7 @@ export const content = {
       langLabel: 'Language',
       langEn: 'English',
       langDe: 'Deutsch',
+      resetView: 'Reset view',
     },
     nav: {
       label: 'Rooms',
@@ -60,6 +61,7 @@ export const content = {
     stage: {
       alt: 'Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking.',
       bar: 'Enter a room',
+      canvas: 'Interactive 3D model of the four rooms. Drag or use the arrow keys to rotate it, plus and minus to zoom, Home to reset the view. The rooms are also in the room bar.',
     },
     rooms: {
       label: 'The four rooms',
@@ -96,6 +98,7 @@ export const content = {
     },
     model: {
       rooms: { projects: 'Projects', about: 'About Me', ai: 'AI & Digital Health', writing: 'Writing & Speaking' },
+      egg: { note: 'This is where healthcare keeps its interoperability.', label: 'Note from the cellar', close: 'Close' },
       slots: {
         'ai-wall-1': 'Consultation',
         'ai-wall-2': 'Progress',
@@ -128,6 +131,7 @@ export const content = {
       langLabel: 'Sprache',
       langEn: 'English',
       langDe: 'Deutsch',
+      resetView: 'Ansicht zurücksetzen',
     },
     nav: {
       label: 'Räume',
@@ -163,6 +167,7 @@ export const content = {
     stage: {
       alt: 'Architekturmodell eines Hauses mit vier Räumen: Projekte, Über mich, KI und Digital Health, Schreiben und Vorträge.',
       bar: 'Raum betreten',
+      canvas: 'Interaktives 3D-Modell der vier Räume. Zum Drehen ziehen oder die Pfeiltasten nutzen, mit Plus und Minus zoomen, mit Pos1 die Ansicht zurücksetzen. Die Räume stehen auch in der Raumleiste.',
     },
     rooms: {
       label: 'Die vier Räume',
@@ -199,6 +204,7 @@ export const content = {
     },
     model: {
       rooms: { projects: 'Projekte', about: 'Über mich', ai: 'KI & Digital Health', writing: 'Schreiben & Vorträge' },
+      egg: { note: 'Hier bewahrt das Gesundheitswesen seine Interoperabilität auf.', label: 'Notiz aus dem Keller', close: 'Schließen' },
       slots: {
         'ai-wall-1': 'Sprechstunde',
         'ai-wall-2': 'Verlauf',

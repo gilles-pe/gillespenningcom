@@ -9,6 +9,7 @@ export const LINKS = {
   monitor: 'https://ai.gillespenning.com/',
   signal: 'https://medtechsignal.substack.com/',
   linkedin: 'https://www.linkedin.com/in/gillespenning/',
+  bluesky: 'https://bsky.app/profile/gillespe.bsky.social',
 };
 const a = (href, text) => `<a href="${href}">${text}</a>`;
 
@@ -46,6 +47,16 @@ export const content = {
       label: 'More links',
       wimmelbild: 'Wimmelbild',
     },
+    social: {
+      substack: 'MedTech Signal on Substack',
+      substackText: 'MedTech Signal',
+      bluesky: 'Bluesky',
+      linkedin: 'LinkedIn',
+    },
+    news: {
+      latest: 'Latest',
+      all: 'All news',
+    },
     stage: {
       alt: 'Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking.',
       bar: 'Enter a room',
@@ -72,7 +83,6 @@ export const content = {
         h: 'Writing & Speaking',
         pHtml: `The questions my talks start from are listed in the ${a('#speaking', 'speaking section')}.`,
         book: 'Book a talk',
-        signal: 'Newsletter',
       },
     },
     speaking: {
@@ -99,6 +109,7 @@ export const content = {
         docease: 'DocEase',
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
+        bluesky: 'Bluesky',
         speaking: 'Speaking topics',
         linkedin: 'LinkedIn',
         story: 'My story',
@@ -139,6 +150,16 @@ export const content = {
       label: 'Weitere Links',
       wimmelbild: 'Wimmelbild',
     },
+    social: {
+      substack: 'MedTech Signal auf Substack',
+      substackText: 'MedTech Signal',
+      bluesky: 'Bluesky',
+      linkedin: 'LinkedIn',
+    },
+    news: {
+      latest: 'Aktuell',
+      all: 'Alle Beiträge',
+    },
     stage: {
       alt: 'Architekturmodell eines Hauses mit vier Räumen: Projekte, Über mich, KI und Digital Health, Schreiben und Vorträge.',
       bar: 'Raum betreten',
@@ -165,7 +186,6 @@ export const content = {
         h: 'Schreiben & Vorträge',
         pHtml: `Die Fragen, von denen meine Vorträge ausgehen, stehen im ${a('#speaking', 'Abschnitt zu Vorträgen')}.`,
         book: 'Vortrag buchen',
-        signal: 'Newsletter',
       },
     },
     speaking: {
@@ -192,6 +212,7 @@ export const content = {
         docease: 'DocEase',
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
+        bluesky: 'Bluesky',
         speaking: 'Vortragsthemen',
         linkedin: 'LinkedIn',
         story: 'Meine Geschichte',

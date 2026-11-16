@@ -6,6 +6,22 @@
   <title>Gilles Penning – Healthcare & MedTech</title>
   <script>document.documentElement.classList.add('js');</script>
   <meta name="description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
+  <meta name="theme-color" content="#f6eee3">
+  <link rel="canonical" href="https://gillespenning.com/">
+  <link rel="alternate" hreflang="en" href="https://gillespenning.com/">
+  <link rel="alternate" hreflang="de" href="https://gillespenning.com/?lang=de">
+  <link rel="alternate" hreflang="x-default" href="https://gillespenning.com/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gilles Penning">
+  <meta property="og:url" content="https://gillespenning.com/">
+  <meta property="og:title" content="Gilles Penning – Healthcare &amp; MedTech">
+  <meta property="og:description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="de_DE">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Gilles Penning – Healthcare &amp; MedTech">
+  <meta name="twitter:description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
 </head>
 <body>
   <header class="top">
@@ -78,9 +94,14 @@
         <h2 data-i18n="rooms.writing.h">Writing &amp; Speaking</h2>
         <p data-i18n-html="rooms.writing.pHtml">The questions my talks start from are listed in the <a href="#speaking">speaking section</a>.</p>
         <p class="cta"><a class="btn primary" href="#speaking" data-i18n="rooms.writing.book">Book a talk</a></p>
-        <ul class="links">
-          <li><a class="pill" href="https://medtechsignal.substack.com/">MedTech Signal</a><span data-i18n="rooms.writing.signal">Newsletter</span></li>
-        </ul>
+        <!-- Without JavaScript these are plain text links. With JavaScript they get their logo marks (src/icons.js). -->
+        <div class="social-row" data-social="labelled">
+          <a href="https://medtechsignal.substack.com/" rel="me noopener">MedTech Signal</a>
+          <a href="https://bsky.app/profile/gillespe.bsky.social" rel="me noopener">Bluesky</a>
+          <a href="https://www.linkedin.com/in/gillespenning/" rel="me noopener">LinkedIn</a>
+        </div>
+        <!-- Without JavaScript: one link to the archive. With JavaScript: the latest news (src/news.js). -->
+        <div class="news" data-news><a class="pill" href="https://ai.gillespenning.com/news/">News</a></div>
       </article>
     </section>
 
@@ -103,8 +124,13 @@
   <footer class="strip">
     <nav aria-label="More links" data-i18n-attr="aria-label:strip.label">
       <a href="https://wimmelbild.gillespenning.com/en/" data-i18n="strip.wimmelbild">Wimmelbild</a>
-      <!-- #social: empty on purpose. Social links are added here later; it takes no space while empty. -->
-      <div id="social" class="social"></div>
+      <!-- Plain text links without JavaScript; with JavaScript they become logo marks with accessible names. -->
+      <div id="social" class="social" data-social="icons">
+        <a href="https://medtechsignal.substack.com/" rel="me noopener">Substack</a>
+        <a href="https://bsky.app/profile/gillespe.bsky.social" rel="me noopener">Bluesky</a>
+        <a href="https://www.linkedin.com/in/gillespenning/" rel="me noopener">LinkedIn</a>
+      </div>
+      <p class="latest" id="latest" hidden></p>
     </nav>
   </footer>
 

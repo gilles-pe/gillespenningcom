@@ -24,8 +24,7 @@ All sizes (spacing, radii, control heights, font sizes) come from the tokens in 
 The limits on the number of steps are in `AGENTS.md`. Do not add in-between values.
 
 ## Page layout
-Desktop is one screen (`100svh`): header, intro left and model right, a slim strip at the bottom (Wimmelbild, and an
-empty `#social` container for later). Room content opens in the card (`#panel`) inside the model area. Phone: header,
+Desktop is one screen (`100svh`): header, intro left and model right, a slim strip at the bottom (Wimmelbild, the social logo links in `#social`, and one "Latest:" news line). Room content opens in the card (`#panel`) inside the model area. Phone: header,
 intro, model, room bar, room content (dock), strip. See D-014 and D-015 in `docs/decisions.md`.
 
 ## Model layout
@@ -35,6 +34,10 @@ Writing & Speaking (lounge) front right. A corridor leads from the entrance at t
 between the front and back row; the brass line follows it with bends to each room's glass door.
 Sizes, wall heights and positions live once in the `ROOMS` table in `src/scene.js`. Floor, walls, door, lettering,
 picture slots, furniture, hotspots and the camera framing are derived from it, so a room can be resized there.
+
+## Social links and news
+Social marks (Substack, Bluesky, LinkedIn) are inline SVG from `src/icons.js`: 20 px glyph (`--t3`) in a 40 px (48 px phone) target, petrol, brass on hover and focus.
+News comes from `src/news.js` (snapshot plus live feed) and is rendered by `src/widgets.js`.
 
 ## Image slots
 Every picture surface in the model has a fixed slot name. A file `public/slots/<slot>.webp`
@@ -54,6 +57,7 @@ not per room; only their position follows the room (the wall pictures of the AI 
 | `about-wall-1` | About Me | framed picture on back wall | 3:4 portrait | 900 x 1200 px |
 
 Rules:
+- Pictures are drawn unlit (not tone-mapped), so they show the brightness of the file (D-022).
 - Format is WebP. Wrong aspect ratios are cropped to fit (centre crop), not stretched.
 - Keep files small (aim for under 200 KB each).
 - A new picture surface needs a row here and an entry in `SLOTS` in `src/scene.js`.

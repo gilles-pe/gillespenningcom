@@ -143,7 +143,8 @@ function slotMaterial(name) {
   const long = 512, c = aspect >= 1 ? canvas(long, Math.round(long / aspect)) : canvas(Math.round(long * aspect), long);
   const placeholder = tex(c);
   whenFont(() => { drawPlaceholder(slot, c); placeholder.needsUpdate = true; });
-  const m = new THREE.MeshStandardMaterial({ map: placeholder, roughness: 0.8 });
+  // Unlit and not tone-mapped: a picture shows its own colours, as bright as the file, whatever the light rig does (D-016: light, friendly look).
+  const m = new THREE.MeshBasicMaterial({ map: placeholder, toneMapped: false });
   const img = new Image(); img.decoding = 'async';
   img.onload = () => {
     if (!img.naturalWidth) return;
@@ -442,6 +443,7 @@ export const HOTSPOTS = {
     ['signal', 'https://medtechsignal.substack.com/', LAY.writing.shelf[0], 0.3, LAY.writing.shelf[1] + 0.3],
     ['speaking', '#speaking', LAY.writing.table[0] - 0.1, 0.62, LAY.writing.table[1] + 0.55],
     ['linkedin', 'https://www.linkedin.com/in/gillespenning/', LAY.writing.table[0] + 0.7, 0.45, LAY.writing.table[1] + 1.0],
+    ['bluesky', 'https://bsky.app/profile/gillespe.bsky.social', LAY.writing.table[0] + 1.0, 0.3, LAY.writing.table[1] - 0.1],
   ],
   about: [
     ['story', '#about', LAY.about.desk[0], 0.9, LAY.about.desk[1] + 0.4],

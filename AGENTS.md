@@ -12,7 +12,7 @@ curious about the person. It serves four goals at once:
 4. Promotion of his projects.
 
 ## Status
-Draft phase. A first version of the home page exists on the branch `draft/four-room-home`
+Draft phase, publishing prepared. A first version of the home page exists on the branch `draft/four-room-home`
 (Vite and Three.js, four-room model). Direction, projects and confirmed links are in
 `docs/decisions.md`. `PRODUCT.md` has not been written yet.
 
@@ -52,8 +52,8 @@ Rules:
 - Components use tokens only. No raw pixel, colour or radius values in component code.
 - No in-between values. If a layout seems to need one, change the layout.
 - Adding, removing or changing a step needs an owner decision logged in `docs/decisions.md`.
-- A check script that fails on off-scale values is planned (see `TODO.md`). Once it exists,
-  run it before declaring work ready.
+- `npm run check` (`scripts/check-tokens.mjs`) fails on off-scale values in `src/style.css`. Run it before declaring
+  work ready. Its documented exceptions (0, 1px and 2px hairlines) are listed at the top of the script.
 
 ## Design tooling - Impeccable
 The Impeccable design skill is vendored in `.claude/skills/impeccable/` with its
@@ -90,5 +90,11 @@ design, critique, audit and polish work.
 
 ## Hosting and domain
 `gillespenning.com` is reserved for this site. The monitor stays on the subdomain
-`ai.gillespenning.com` and must keep working. Hosting target and stack are not decided
-yet (see `docs/decisions.md`).
+`ai.gillespenning.com` and must keep working.
+
+- Stack: Vite and Three.js, static build into `dist/` (`npm run build`).
+- Target: GitHub Pages, deployed by `.github/workflows/pages.yml` on push to `main` (and manual dispatch).
+  `public/CNAME` holds the domain. Nothing is live until the owner enables Pages (source "GitHub Actions") and merges to `main`.
+- The domain switch (DNS of `gillespenning.com`) is an owner step and must not touch `ai.gillespenning.com`.
+- No analytics, no cookies, no external fonts or scripts. The page stores only the language choice and loads the news list
+  from `ai.gillespenning.com` (see D-020). Legal imprint and privacy policy are not written: the owner supplies them.

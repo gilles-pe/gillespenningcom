@@ -1,7 +1,7 @@
 # German copy for review
 
 Generated from `src/content.js`. Edit the texts there; this table is only for proofreading.
-Project names (Wimmelbild, AI in Medicine Monitor, DocEase, Elbstrand, MedTech Signal, LinkedIn) are not translated.
+Project and service names (Wimmelbild, AI in Medicine Monitor, DocEase, Elbstrand, MedTech Signal, Substack, Bluesky, LinkedIn) are not translated.
 Links in the text are shown as Markdown links. Both languages use the confirmed Wimmelbild link
 `https://wimmelbild.gillespenning.com/en/` (see the open question in `docs/decisions.md`).
 
@@ -29,6 +29,12 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `hero.explore` | Explore speaking topics | Vortragsthemen ansehen |
 | `strip.label` | More links | Weitere Links |
 | `strip.wimmelbild` | Wimmelbild | Wimmelbild |
+| `social.substack` | MedTech Signal on Substack | MedTech Signal auf Substack |
+| `social.substackText` | MedTech Signal | MedTech Signal |
+| `social.bluesky` | Bluesky | Bluesky |
+| `social.linkedin` | LinkedIn | LinkedIn |
+| `news.latest` | Latest | Aktuell |
+| `news.all` | All news | Alle Beiträge |
 | `stage.alt` | Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking. | Architekturmodell eines Hauses mit vier Räumen: Projekte, Über mich, KI und Digital Health, Schreiben und Vorträge. |
 | `stage.bar` | Enter a room | Raum betreten |
 | `rooms.label` | The four rooms | Die vier Räume |
@@ -45,7 +51,6 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `rooms.writing.h` | Writing & Speaking | Schreiben & Vorträge |
 | `rooms.writing.pHtml` | The questions my talks start from are listed in the [speaking section](#speaking). | Die Fragen, von denen meine Vorträge ausgehen, stehen im [Abschnitt zu Vorträgen](#speaking). |
 | `rooms.writing.book` | Book a talk | Vortrag buchen |
-| `rooms.writing.signal` | Newsletter | Newsletter |
 | `speaking.h` | Book a talk | Vortrag buchen |
 | `speaking.intro` | Speaking topics start from a question: | Meine Vortragsthemen beginnen mit einer Frage: |
 | `speaking.q1` | Why is change so hard in healthcare? | Warum ist Veränderung im Gesundheitswesen so schwer? |
@@ -68,6 +73,10 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `model.spots.elbstrand` | Elbstrand | Elbstrand |
 | `model.spots.signal` | MedTech Signal | MedTech Signal |
 | `model.spots.speaking` | Speaking topics | Vortragsthemen |
+| `model.spots.bluesky` | Bluesky | Bluesky |
 | `model.spots.linkedin` | LinkedIn | LinkedIn |
 | `model.spots.story` | My story | Meine Geschichte |
 
+News titles and summaries come from the AI in Medicine Monitor feed in both languages and are shown verbatim. They are not
+part of `src/content.js` and are not proofread here. The footer line reads "Latest: <title>" / "Aktuell: <Titel>"; dates are
+formatted per language (for example 6 Nov 2026 and 6. Nov. 2026).

@@ -1,6 +1,8 @@
 import '@fontsource-variable/newsreader';
 import './style.css';
 import { t, initialLang, rememberLang, applyStatic, LANGS } from './i18n.js';
+import { renderSocial, renderNews, renderLatest } from './widgets.js';
+import { onNews, refreshNews } from './news.js';
 
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('scene');
@@ -75,7 +77,9 @@ function openRoom(id, auto = false, { speaking = false } = {}) {
   if (!api) { if (!auto) document.getElementById(speaking ? 'speaking' : id).scrollIntoView(); return; }
   stage.classList.add('open'); back.hidden = false;
   panel.replaceChildren(...roomNodes(id));
-  panel.scrollTop = 0; panel.hidden = false;
+  // The card scrolls inside: make it a named, keyboard-focusable region so the keyboard can scroll it in every browser.
+  panel.tabIndex = 0; panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', name(id));
+  panel.hidden = false; panel.scrollTop = 0;   // reset after un-hiding: a hidden element keeps its old scroll position
   // Phone: the room's content sits in the dock under the model; the room bar stays visible.
   const all = document.createElement('button');
   all.type = 'button'; all.className = 'allrooms'; all.textContent = t(lang, 'ui.allRooms');
@@ -114,11 +118,15 @@ document.addEventListener('click', e => {
 });
 
 // Language switch: static text, room names, 3D lettering, and the open room's panel and dock.
+// Social links and news are rendered into every placeholder on the page (source sections, footer, open card).
+function renderAll() { renderSocial(lang); renderNews(lang); renderLatest(lang); }
+onNews(renderAll);
 const langBtns = [...document.querySelectorAll('#lang button')];
 function setLang(next, { save = true } = {}) {
   if (!LANGS.includes(next)) return;
   lang = next;
   applyStatic(lang);
+  renderAll();
   langBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
   for (const id of ORDER) { labels[id].textContent = name(id); bar.querySelector(`[data-room="${id}"]`).textContent = name(id); }
   api?.setLanguage(lang);
@@ -127,6 +135,7 @@ function setLang(next, { save = true } = {}) {
 }
 langBtns.forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) setLang(b.dataset.lang); }));
 setLang(lang, { save: false });
+refreshNews();   // snapshot is already on screen; the live feed replaces it if it arrives and is valid
 
 function useStatic() {
   mode = 'static'; html.classList.remove('js'); html.classList.add('static'); source.hidden = false;

@@ -59,6 +59,39 @@ until a later entry replaces it.
 - **D-016 Lighter model (owner decision 2026-11-16).** The 3D model is pale and airy: limestone-cream walls, pale oak,
   soft sage Projects wall, a muted grey-green base, soft low-contrast shadows. Text and UI colours are unchanged.
 
+- **D-017 Social links with logos (owner decision 2026-11-16).** Substack (`https://medtechsignal.substack.com/`),
+  Bluesky (`https://bsky.app/profile/gillespe.bsky.social`) and LinkedIn (`https://www.linkedin.com/in/gillespenning/`)
+  are shown as logo marks with accessible names, in one colour (petrol, brass on hover and focus), in the footer strip
+  (`#social`, desktop and phone) and in the Writing & Speaking card. The marks are inline SVG paths in `src/icons.js`,
+  copied once from the `simple-icons` package (CC0; Substack and Bluesky from 16.38.0, LinkedIn from 13.21.0 because later
+  versions dropped it). No dependency, no icon font, no external request. Links carry `rel="me noopener"`. The Writing room
+  also has a Bluesky hotspot. The old "MedTech Signal / Newsletter" list line in the Writing card is replaced by this row.
+- **D-018 News from the AI in Medicine Monitor (owner decision 2026-11-16).** The monitor publishes an owner-approved feed
+  (`https://ai.gillespenning.com/data/news.json`, permalinks `https://ai.gillespenning.com/news/#<id>`, archive
+  `https://ai.gillespenning.com/news/`). The page ships a snapshot (`src/news-snapshot.json`, approved items only, newest
+  first, regenerated with `scripts/update-news-snapshot.mjs`), renders from it at once, then tries the live feed once
+  (timeout 4 s, no credentials). A valid live feed replaces the list; any failure keeps the snapshot silently. Titles and
+  summaries are shown verbatim in the current language (CSS clamping only). Shown as one "Latest:" line in the footer strip
+  (newest title, linked to its Substack source, else the first source, else the monitor permalink) and as the three newest
+  items plus "All news" in the Writing & Speaking card (and in the no-WebGL source section). Without JavaScript the section
+  has one plain "News" link to the archive.
+- **D-019 Publishing preparation (owner decision 2026-11-16).** Target is GitHub Pages, deployed by
+  `.github/workflows/pages.yml` on push to `main` and on manual dispatch (Node 22, `npm ci`, `npm run build`, upload `dist`).
+  `public/CNAME` holds `gillespenning.com`. `index.html` has the canonical link, Open Graph and Twitter title and
+  description (English), `hreflang` alternates for `https://gillespenning.com/` and `https://gillespenning.com/?lang=de`, an
+  SVG favicon (`public/favicon.svg`, "GP" monogram, petrol on cream) and `theme-color`. `public/robots.txt` and
+  `public/sitemap.xml` exist. No analytics, no cookies, no external fonts or scripts. Prepared only: nothing is live and
+  the domain switch is an owner step.
+- **D-020 Privacy note (2026-11-16).** The page stores only the language choice (`localStorage`, key `gp-lang`) and loads the
+  news list from `ai.gillespenning.com` (a request without credentials; the monitor sees the visitor's IP address like any
+  web host). No cookies, no analytics. No legal imprint and no privacy policy have been written: the owner must supply them
+  (see open questions).
+- **D-021 Token check (2026-11-16).** `scripts/check-tokens.mjs` (`npm run check`) fails on raw px values for font-size,
+  border-radius, heights and spacing in `src/style.css` and on tokens used for the wrong property. Exceptions are listed at the
+  top of the script (0, 1px and 2px hairlines). Replaces the "planned" check in `AGENTS.md`.
+- **D-022 Pictures unlit (2026-11-16).** Picture surfaces (slot pictures and their placeholders) use an unlit, non-tone-mapped
+  material, so they show the file's own brightness against the lightened model (D-016) instead of going grey in the light rig.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.
@@ -66,6 +99,8 @@ until a later entry replaces it.
    (contact, booking, CV download, newsletter)?
 3. ~~German version~~ decided, see D-012. Open: does Wimmelbild have a German address? Both languages link to `https://wimmelbild.gillespenning.com/en/` until it is confirmed.
 4. Which material exists: photos, CV, past talks, press, logos?
-5. Deployment to GitHub Pages and the domain switch are not set up yet.
+5. Deployment is prepared (D-019). Open owner steps: enable Pages with source "GitHub Actions", merge to `main`, switch the DNS of `gillespenning.com`.
 6. Confirm the exact values of the design scales.
 7. Enable the Impeccable design hook, yes or no?
+8. Legal imprint and privacy policy for the live site (owner must supply the texts, D-020).
+9. A share image (Open Graph picture) for link previews. None exists, so previews show text only.

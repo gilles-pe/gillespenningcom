@@ -56,7 +56,7 @@ function textBoard(text) {
   const k = c.getContext('2d');
   k.fillStyle = '#f7f0e2'; k.fillRect(0, 0, 512, 384);
   k.fillStyle = '#b9c7a6'; k.beginPath(); k.moveTo(0, 384); k.bezierCurveTo(140, 220, 300, 330, 512, 240); k.lineTo(512, 384); k.fill();
-  k.fillStyle = '#12383a'; k.font = '600 72px Georgia, serif'; k.textAlign = 'center'; k.fillText(text, 256, 150);
+  k.fillStyle = '#12383a'; k.font = '600 76px Georgia, serif'; k.textAlign = 'center'; k.fillText(text, 256, 150);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 
@@ -112,13 +112,13 @@ export function buildScene() {
 function furnish(id, g, r) {
   const wood = mat(C.wood), cream = mat(C.cream);
   if (id === 'projects') {
-    ['DocEase', 'Elbstrand'].forEach((name, i) => {
-      const x = -0.9 + i * 1.5;
-      box(g, 1.0, 0.5, 0.7, x, 0, -0.9, wood);
-      const b = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.62, 0.04), [cream, cream, cream, cream, new THREE.MeshStandardMaterial({ map: textBoard(name), roughness: 0.8 }), cream]);
+    ['Wimmelbild', 'AI Monitor', 'DocEase', 'Elbstrand'].forEach((name, i) => {
+      const x = -1.38 + i * 0.92;
+      box(g, 0.78, 0.5, 0.6, x, 0, -0.9, wood);
+      const b = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.54, 0.04), [cream, cream, cream, cream, new THREE.MeshStandardMaterial({ map: textBoard(name), roughness: 0.8 }), cream]);
       b.position.set(x, 0.86, -0.9); b.rotation.x = -0.18; b.castShadow = true; g.add(b);
     });
-    plant(g, -1.6, -1.3, 1.4);
+    plant(g, -1.6, 1.2, 1.1);
   }
   if (id === 'about') {
     box(g, 1.7, 0.07, 0.8, -0.3, 0.62, 0.2, wood);
@@ -158,3 +158,26 @@ function furnish(id, g, r) {
     plant(g, 1.6, -1.25, 1.1);
   }
 }
+
+// Clickable things inside each room: [label, link, x, y, z] in room coordinates.
+export const HOTSPOTS = {
+  ai: [
+    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -0.95, 1.45, -D / 2 + 0.1],
+    ['AI in Medicine Monitor', 'https://ai.gillespenning.com/', 0.75, 1.45, -D / 2 + 0.1],
+  ],
+  projects: [
+    ['Wimmelbild', 'https://wimmelbild.gillespenning.com/en/', -1.38, 1.2, -0.9],
+    ['AI Monitor', 'https://ai.gillespenning.com/', -0.46, 1.85, -0.9],
+    ['DocEase', null, 0.46, 1.2, -0.9],
+    ['Elbstrand', null, 1.38, 1.85, -0.9],
+  ],
+  writing: [
+    ['MedTech Signal', 'https://medtechsignal.substack.com/', 0.75, 1.5, -D / 2 + 0.3],
+    ['Speaking topics', '#writing', 0.1, 0.95, 0.35],
+    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.25, 0.95, 0.9],
+  ],
+  about: [
+    ['My story', '#about', -0.3, 0.95, 0.2],
+    ['LinkedIn', 'https://www.linkedin.com/in/gillespenning/', 1.0, 1.9, -D / 2 + 0.3],
+  ],
+};

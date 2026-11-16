@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { buildScene } from './scene.js';
+import { buildScene, HOTSPOTS } from './scene.js';
 
-export function startViewer({ canvas, stage, labels, reduced, onPick }) {
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, onPick }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -15,6 +15,16 @@ export function startViewer({ canvas, stage, labels, reduced, onPick }) {
   Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
   sun.shadow.bias = -0.0004; sun.shadow.radius = 6; scene.add(sun);
 
+  // Hotspots are real links, placed over the objects they belong to.
+  const spots = [];
+  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [text, href, x, y, z] of list) {
+    const el = document.createElement(href ? 'a' : 'span');
+    el.className = 'spot' + (href ? '' : ' soon'); el.textContent = text; el.tabIndex = -1;
+    if (href) el.href = href; else el.title = 'Details to follow';
+    spotsEl.append(el);
+    spots.push({ id, el, pos: new THREE.Vector3(x, y, z).add(rooms[id].group.position) });
+  }
+
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
   const EL = 0.74;                                        // elevation in radians
   const view = { az: 0, dist: 30, t: new THREE.Vector3(0, 0.2, 0.3) };
@@ -22,7 +32,7 @@ export function startViewer({ canvas, stage, labels, reduced, onPick }) {
   let overviewDist = 30, openId = null, hoverId = null, userAz = 0;
 
   function resize() {
-    const w = stage.clientWidth, h = stage.clientHeight;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
     const v = THREE.MathUtils.degToRad(camera.fov) / 2, hfov = Math.atan(Math.tan(v) * camera.aspect);
     overviewDist = Math.max(6.4 / Math.tan(hfov), 4.6 / Math.tan(v));
@@ -31,7 +41,7 @@ export function startViewer({ canvas, stage, labels, reduced, onPick }) {
   function setGoal() {
     if (openId) {
       const r = rooms[openId];
-      goal.t.copy(r.center); goal.t.x += 0.9; goal.dist = overviewDist * 0.66; goal.az = -r.x * 0.32 + userAz * 0.5;
+      goal.t.copy(r.center); goal.t.y += 0.3; goal.dist = overviewDist * 0.66; goal.az = -r.x * 0.32 + userAz * 0.5;
     } else { goal.t.set(0, 0.2, 0.3); goal.dist = overviewDist; goal.az = userAz; }
   }
   new ResizeObserver(resize).observe(stage); resize();
@@ -91,6 +101,13 @@ export function startViewer({ canvas, stage, labels, reduced, onPick }) {
       v3.copy(r.labelAt).project(camera);
       labels[r.id].style.left = `${(v3.x * 0.5 + 0.5) * 100}%`;
       labels[r.id].style.top = `${(-v3.y * 0.5 + 0.5) * 100}%`;
+    }
+    for (const s of spots) {
+      const on = s.id === openId && rooms[s.id].open > 0.7;
+      if (on !== s.on) { s.on = on; s.el.classList.toggle('on', on); if (s.el.href) s.el.tabIndex = on ? 0 : -1; }
+      if (rooms[s.id].open < 0.05) continue;
+      v3.copy(s.pos).project(camera);
+      s.el.style.left = `${(v3.x * 0.5 + 0.5) * 100}%`; s.el.style.top = `${(-v3.y * 0.5 + 0.5) * 100}%`;
     }
     renderer.render(scene, camera);
   }

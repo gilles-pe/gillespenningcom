@@ -38,6 +38,8 @@ export const ROOMS = {
 };
 // Base plate and brass line geometry (world coordinates).
 const BASE = { x0: -5.7, x1: 5.3, z0: -5.4, z1: 4.3 };
+// Recess in the underside of the base (a small cellar, see buildCellar). Centre and inner size in world units.
+const CELLAR = { x: 0.5, z: -0.6, w: 1.8, d: 1.3 };
 const CORR = { frontX: 0.75, backX: 0.0, jogZ: -1.7 };                      // corridor centre lines, z of the jog
 // Door: a sliding pane in the corridor-side wall, near the front end of that wall.
 function doorSpec(r) {
@@ -301,6 +303,87 @@ function brassPath(pts, radius) {
   return path;
 }
 
+
+// ---- The cellar on the underside of the base ------------------------------------------
+// A recess cut into the bottom of the base: cream walls, a small light, and a fax machine standing on the "floor"
+// (which is the underside of the slab, so the machine hangs downwards and reads upright when the model is turned over).
+// Nothing in the normal views can see it. viewer.js and egg.js make it clickable.
+const EGG_PAPER = { w: 0.19, h: 0.27 };
+function drawPaper(c) {
+  const k = c.getContext('2d'), w = c.width, h = c.height;
+  k.fillStyle = '#fffdf8'; k.fillRect(0, 0, w, h);
+  k.fillStyle = 'rgba(18,56,58,0.18)'; k.fillRect(w * 0.1, h * 0.075, w * 0.8, 2);
+  k.fillStyle = PETROL; k.textAlign = 'left'; k.textBaseline = 'alphabetic';
+  const fs = w * 0.092; k.font = `600 ${fs}px ${FONT}`;
+  const words = (modelText().egg?.note ?? '').split(' '), lines = []; let cur = '';
+  for (const wd of words) { const tst = cur ? `${cur} ${wd}` : wd; if (k.measureText(tst).width > w * 0.8 && cur) { lines.push(cur); cur = wd; } else cur = tst; }
+  if (cur) lines.push(cur);
+  lines.forEach((ln, i) => k.fillText(ln, w * 0.1, h * 0.19 + i * fs * 1.3));
+}
+function buildCellar(scene, occluders) {
+  const H = CELLAR, top = -0.66 + 0.45, bottom = -0.66;               // ceiling and opening of the recess (world y)
+  const cream = new THREE.MeshStandardMaterial({ color: C.cream, roughness: 0.95, side: THREE.BackSide, emissive: 0xf3e4c8, emissiveIntensity: 0.25 });
+  const lining = new THREE.Mesh(new THREE.BoxGeometry(H.w - 0.004, top - bottom - 0.004, H.d - 0.004), cream);
+  lining.position.set(H.x, (top + bottom) / 2 - 0.0, H.z); scene.add(lining);
+  // Thin frame around the opening, so it reads as a niche.
+  const fm = new THREE.MeshStandardMaterial({ color: C.woodDark, roughness: 0.7 }), ft = 0.05, fd = 0.03;
+  for (const [fw, fh, fx, fz] of [[H.w + 2 * ft, fd, H.x, H.z - H.d / 2 - ft / 2], [H.w + 2 * ft, fd, H.x, H.z + H.d / 2 + ft / 2]]) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(fw, fd, ft), fm); m.position.set(fx, bottom - fd / 2 + 0.002, fz); scene.add(m);
+  }
+  for (const sx of [-1, 1]) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(ft, fd, H.d), fm); m.position.set(H.x + sx * (H.w / 2 + ft / 2), bottom - fd / 2 + 0.002, H.z); scene.add(m);
+  }
+  const lamp = new THREE.PointLight(0xffe2b0, 3.2, 3.2, 1.4); lamp.position.set(H.x, bottom - 0.12, H.z - 0.15); scene.add(lamp);
+
+  // Everything of the machine is built upright in `g` (y up from the standing surface, front towards +z)
+  // and the group is turned over so that it stands on the ceiling of the recess and its front faces world -z.
+  const root = new THREE.Group(); root.position.set(H.x, top, H.z + 0.05); root.rotation.x = Math.PI; scene.add(root);
+  const g = new THREE.Group(); root.add(g);
+  const putty = new THREE.MeshStandardMaterial({ color: 0xdcd5c6, roughness: 0.6 }), dark = new THREE.MeshStandardMaterial({ color: 0x3a403e, roughness: 0.5 });
+  const key = new THREE.MeshStandardMaterial({ color: 0xf3ede0, roughness: 0.5 });
+  const screen = new THREE.MeshStandardMaterial({ color: 0xa9c4ad, emissive: 0x7fa28a, emissiveIntensity: 0.6, roughness: 0.4 });
+  const woodM = wood(C.woodDark);
+  const pick = [];
+  const add = (geo, m, x, y, z, rx = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.x = rx; g.add(o); pick.push(o); return o; };
+  const bx = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+  add(bx(0.72, 0.2, 0.44), woodM, 0, 0.1, 0);                            // little cabinet
+  const bodyY = 0.2, bodyH = 0.16, front = 0.17;
+  add(bx(0.54, bodyH, 0.34), putty, 0, bodyY + bodyH / 2, 0);            // body
+  add(bx(0.4, 0.1, 0.06), putty, 0, bodyY + bodyH + 0.04, -0.12, -0.3); // rear paper holder
+  add(bx(0.19, 0.15, 0.006), new THREE.MeshStandardMaterial({ color: 0xfffdf8, roughness: 0.9 }), 0, bodyY + bodyH + 0.1, -0.165, -0.3); // blank sheet waiting at the back
+  const panelY = bodyY + bodyH + 0.012, panelZ = 0.07, tilt = 0.16;      // control panel, tilted towards the user
+  add(bx(0.33, 0.012, 0.15), dark, 0.07, panelY, panelZ, tilt);
+  const onPanel = (x, dz, h) => [x, panelY + h - Math.sin(tilt) * dz, panelZ + dz];
+  add(bx(0.12, 0.014, 0.045), screen, ...onPanel(-0.01, -0.02, 0.012), tilt);
+  const dot = new THREE.CylinderGeometry(0.0105, 0.0105, 0.01, 10);
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) add(dot, key, ...onPanel(0.105 + c * 0.045, (r - 1.5) * 0.03, 0.01), tilt);
+  // handset on a cradle at the left
+  add(bx(0.13, 0.03, 0.28), dark, -0.19, bodyY + bodyH + 0.015, 0.0);
+  add(bx(0.045, 0.03, 0.26), dark, -0.19, bodyY + bodyH + 0.05, 0.0);
+  add(new THREE.CylinderGeometry(0.036, 0.036, 0.03, 16), dark, -0.19, bodyY + bodyH + 0.055, 0.125);
+  add(new THREE.CylinderGeometry(0.036, 0.036, 0.03, 16), dark, -0.19, bodyY + bodyH + 0.055, -0.125);
+  // paper slot on the front, and the tray below it
+  const A = 0.26, slotY = bodyY + 0.075;
+  add(bx(0.32, 0.014, 0.012), dark, 0, slotY, front + 0.001);
+  const trayLen = 0.22;
+  add(bx(0.26, 0.012, trayLen), putty, 0, slotY - Math.sin(A) * trayLen / 2 - 0.008, front + Math.cos(A) * trayLen / 2, A);
+  // The sheet: its leading edge (page bottom) is the pivot; the page extends back into the machine.
+  const sheetTex = new THREE.CanvasTexture(canvas(512, Math.round(512 * EGG_PAPER.h / EGG_PAPER.w)));
+  sheetTex.colorSpace = THREE.SRGBColorSpace; sheetTex.anisotropy = 8;
+  whenFont(() => { drawPaper(sheetTex.image); sheetTex.needsUpdate = true; });
+  const sg = new THREE.PlaneGeometry(EGG_PAPER.w, EGG_PAPER.h); sg.translate(0, EGG_PAPER.h / 2, 0);
+  const sheet = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({ map: sheetTex, roughness: 0.9, emissive: 0xffffff, emissiveMap: sheetTex, emissiveIntensity: 0.35 }));
+  sheet.rotation.x = A - Math.PI / 2; g.add(sheet); pick.push(sheet);
+  const dir = new THREE.Vector3(0, -Math.sin(A), Math.cos(A)), slot = new THREE.Vector3(0, slotY + 0.004, front);
+  const E0 = 0.07, E1 = 0.2;
+  const feed = p => sheet.position.copy(slot).addScaledVector(dir, E0 + (E1 - E0) * p);
+  feed(0);
+  const anchor = new THREE.Object3D(); anchor.position.set(0, 0.3, 0.1); g.add(anchor);
+  // `shake` moves the machine (not the sheet's own feed) a little: x/z in metres, roll in radians.
+  const shake = (x, z, roll) => { g.position.set(x, 0, z); g.rotation.z = roll; };
+  return { pick, occluders, anchor, feed, shake, lamp };
+}
+
 export function buildScene() {
   const scene = new THREE.Scene();
   const rooms = {};
@@ -317,7 +400,7 @@ export function buildScene() {
     box(scene, BASE.x1 - hx1, LOW, BD, (hx1 + BASE.x1) / 2, lowY, bz, baseMat),
     box(scene, H.w, LOW, hz0 - BASE.z0, H.x, lowY, (BASE.z0 + hz0) / 2, baseMat),
     box(scene, H.w, LOW, BASE.z1 - hz1, H.x, lowY, (hz1 + BASE.z1) / 2, baseMat));
-  occluders.push(box(scene, BW - 0.5, 0.06, BD - 0.5, bx, -0.06, bz, floorMat(C.corridor, [(BW - 0.5) / 3.5, (BD - 0.5) / 1.9]))));
+  occluders.push(box(scene, BW - 0.5, 0.06, BD - 0.5, bx, -0.06, bz, floorMat(C.corridor, [(BW - 0.5) / 3.5, (BD - 0.5) / 1.9])));
 
   // Brass line: one dim path per room, plus a bright one drawn on demand
   const brassDim = mat(C.brass, { metalness: 0.6, roughness: 0.4 });
@@ -360,7 +443,8 @@ export function buildScene() {
   const outline = [];
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz) };
+  const cellar = buildCellar(scene, occluders);
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.

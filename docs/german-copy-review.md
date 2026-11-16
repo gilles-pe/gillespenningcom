@@ -24,8 +24,11 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `hero.kicker` | Healthcare & MedTech | Gesundheitswesen & MedTech |
 | `hero.p1` | As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care. | Mit der alternden Bevölkerung wächst der Bedarf an Versorgung. Daten und KI eröffnen neue Möglichkeiten, und Menschen entscheiden, was davon im Versorgungsalltag ankommt. |
 | `hero.p2` | I’ve spent my career in MedTech, working with some very interesting people. Here I share the ideas I come across, the projects I work on, and what I learn from the people I meet. | Mein Berufsleben gehört der MedTech, und ich durfte mit einigen sehr interessanten Menschen zusammenarbeiten. Hier teile ich Ideen, auf die ich stoße, Projekte, an denen ich arbeite, und was ich von den Menschen lerne, denen ich begegne. |
+| `hero.monitor` | Open the AI in Medicine Monitor | Zum AI in Medicine Monitor |
 | `hero.read` | Read MedTech Signal | MedTech Signal lesen |
 | `hero.explore` | Explore speaking topics | Vortragsthemen ansehen |
+| `strip.label` | More links | Weitere Links |
+| `strip.wimmelbild` | Wimmelbild | Wimmelbild |
 | `stage.alt` | Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking. | Architekturmodell eines Hauses mit vier Räumen: Projekte, Über mich, KI und Digital Health, Schreiben und Vorträge. |
 | `stage.bar` | Enter a room | Raum betreten |
 | `rooms.label` | The four rooms | Die vier Räume |

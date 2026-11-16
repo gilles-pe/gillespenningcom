@@ -48,6 +48,16 @@ Status: FIXED, PARTLY or OPEN.
     page title. The craft floor bans kickers; DESIGN.md names it as the accent use. OPEN, owner decision: keep, or
     delete and let the h1 carry it.
 
+## Update 2026-11-16 (compact page, D-014 to D-016)
+- Item 4 (phone: model below the fold) is superseded: on phone the order is now intro, model, room bar, content, strip.
+- Item 10/11 (duplicated copy and links): the room sections and `#speaking` are no longer visible below the hero; their
+  content appears once, in the room card. Wimmelbild sits in the footer strip, the monitor and MedTech Signal are the hero
+  buttons (still also in the Projects card and as hotspots).
+- Item 12 (off-scale panel width): the card width is now three of the largest spacing steps (312 px, derived from
+  `--s7`); the 2px rules remain.
+- Item 13 (kicker line) remains OPEN.
+- The model was lightened (D-016); wall lettering stays petrol and readable. Not re-measured for contrast ratio.
+
 ## AI-design tells found
 - Everything pill-shaped (bar, floating labels, back button, hotspots): FIXED, now 6px radius like the other buttons.
 - Glass panel (translucent paper plus backdrop blur on the panel; translucent bar and labels): FIXED, solid paper.

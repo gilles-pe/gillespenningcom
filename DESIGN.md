@@ -12,8 +12,9 @@ The visual system of gillespenning.com. Values live once, in `src/tokens.css`.
 | `--line` | #d9cbb6 | hairlines |
 | `--brass` | #a9792b | single accent (kicker, brass line) |
 
-The 3D model adds warm wall tones, light wood, pale green satin glass and a dark petrol base.
-Those are material colours in `src/scene.js`, not page tokens.
+The 3D model adds pale limestone-cream walls, pale oak, soft sage (Projects wall), pale green satin glass and a muted
+grey-green base (decision D-016: light and airy, soft shadows). Those are material colours in the `C` table in
+`src/scene.js` and the light rig in `src/viewer.js`, not page tokens.
 
 ## Fonts
 - `--font`: Newsreader Variable, fallback Georgia, serif. Used for everything, including the lettering on the model walls.
@@ -21,6 +22,11 @@ Those are material colours in `src/scene.js`, not page tokens.
 ## Sizes
 All sizes (spacing, radii, control heights, font sizes) come from the tokens in `src/tokens.css`.
 The limits on the number of steps are in `AGENTS.md`. Do not add in-between values.
+
+## Page layout
+Desktop is one screen (`100svh`): header, intro left and model right, a slim strip at the bottom (Wimmelbild, and an
+empty `#social` container for later). Room content opens in the card (`#panel`) inside the model area. Phone: header,
+intro, model, room bar, room content (dock), strip. See D-014 and D-015 in `docs/decisions.md`.
 
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long

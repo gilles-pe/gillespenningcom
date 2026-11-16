@@ -44,6 +44,21 @@ until a later entry replaces it.
   the room hotspots and one list in the Projects article; the AI & Digital Health article
   names them in text with inline links.
 
+- **D-014 Compact page (owner decision 2026-11-16).** The page is compact. On a desktop (wider than 800 px, at
+  least 640 px high) everything fits on one screen without scrolling: header, intro and model, and a slim strip of
+  permanent links at the bottom. No text is deleted or rewritten in either language. The room texts and the speaking
+  text are no longer sections below the hero: they appear in the room card of the model (the speaking text is part of
+  the Writing & Speaking card). The sections stay in the HTML as the English source, hidden while the 3D model runs and
+  shown as normal sections when JavaScript or WebGL is unavailable. On a phone a second tap on the same room (bar or
+  model), or a tap on the model outside the room, zooms back out. Supersedes the page structure of D-006 where it
+  conflicts; D-013 stays valid for copy, but the hero no longer carries the Wimmelbild and monitor buttons.
+- **D-015 Calls to action (owner decision 2026-11-16).** The two foreground actions are the AI in Medicine Monitor
+  ("Open the AI in Medicine Monitor", primary) and the MedTech Signal newsletter ("Read MedTech Signal"). "Explore
+  speaking topics" is a plain text link under them; "Book a talk" in the header is a secondary (outline) button. The
+  footer strip keeps Wimmelbild and has an empty container `#social` for social links to be added later.
+- **D-016 Lighter model (owner decision 2026-11-16).** The 3D model is pale and airy: limestone-cream walls, pale oak,
+  soft sage Projects wall, a muted grey-green base, soft low-contrast shadows. Text and UI colours are unchanged.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

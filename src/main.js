@@ -115,7 +115,6 @@ function openRoom(id, auto = false, { speaking = false } = {}) {
     dock.hidden = true;
     dock.replaceChildren();
   }
-  if (mobile() && !auto) stage.scrollIntoView({ block: 'start' });
   api.open(id, { keepView: auto && wasCurrent });
   if (speaking) showSpeaking();
 }
@@ -190,7 +189,7 @@ function useStatic() {
 // Text and links are usable before the 3D code arrives.
 import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
-    onAway: away => { const had = resetBtn === document.activeElement; stage.classList.toggle('exploring', away); resetBtn.hidden = !away; if (had && !away) canvas.focus({ preventScroll: true }); } });
+    onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) canvas.focus({ preventScroll: true }); } });
   if (!api) return useStatic();
   // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
   canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0; canvas.setAttribute('role', 'application');

@@ -215,6 +215,7 @@ until a later entry replaces it.
 - **D-042 (2026-11-17) Mobile overview framing (owner feedback).** Lower the initial overview within the tall mobile canvas to centre the model better in the exposed space. Keep desktop and individual room views unchanged; reset returns to the adjusted overview.
 - **D-043 (2026-11-17) Overview camera and unobstructed exploration (owner feedback).** Start the model a little farther out, with a lower elevation and a slight view from the left on desktop and mobile. The translucent intro is visible in the overview but hidden when a room is open or the camera has been moved manually, preventing wall text and interactive objects from sitting behind it. Restore the intro on reset / return to the untouched overview. Keep the keyboard and static fallback paths intact.
 - **D-044 (2026-11-17) Narrow-phone vertical composition (owner screenshot).** Reduce the tall mobile canvas by one spacing step and aim the overview farther down within it, so there is more air above the model and less blank space before the two-by-two room controls.
+- **D-045 (2026-11-17) Keep context visible while exploring (owner correction).** Supersedes the intro-hiding part of D-043. The intro must remain visible when a room is opened or the view is moved. On mobile, opening a room moves the model into its own shorter row below the intro so wall labels and props do not sit behind the text. On desktop, the intro stays beside the model. The overview retains its translucent overlap.
 
 ## Open questions
 

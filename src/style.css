@@ -223,13 +223,15 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   html.js .hero:has(.stage:not(.static)) { align-items: start; }
   html.js .hero:has(.stage:not(.static)) .intro { grid-area: 1 / 1; position: relative; z-index: 2; padding: var(--s3); background: color-mix(in srgb, var(--paper) 78%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); pointer-events: none; }
   html.js .hero:has(.stage:not(.static)) .intro a { pointer-events: auto; }
-  /* The introduction belongs to the overview. Once a room is explored,
-     remove it from the image so wall text and interactive objects stay clear. */
-  html.js .hero:has(.stage.open) .intro,
-  html.js .hero:has(.stage.exploring) .intro { opacity: 0; visibility: hidden; pointer-events: none; }
   html.js .stage:not(.static) { grid-area: 1 / 1; }
   html.js .stage:not(.static) #scene { height: calc(100svh + var(--s7)); }
   html.js .stage:not(.static) .labels, html.js .stage:not(.static) .spots { height: calc(100svh + var(--s7)); }
+  /* In a room, separate text and model instead of removing the text. */
+  html.js .hero:has(.stage.open) .intro { grid-area: 1 / 1; }
+  html.js .stage.open:not(.static) { grid-area: 2 / 1; }
+  html.js .stage.open:not(.static) #scene,
+  html.js .stage.open:not(.static) .labels,
+  html.js .stage.open:not(.static) .spots { height: min(125vw, 70svh); }
   h1, html:lang(de) h1 { font-size: var(--t4); line-height: 1.1; }
   .intro p { font-size: var(--t2); }
   .intro hr { display: none; }
@@ -267,10 +269,6 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .rooms article.current h2 { color: var(--brass); }
 }
 @media (max-width: 360px) { .top { flex-wrap: wrap; } }
-@media (min-width: 801px) {
-  html.js .hero:has(.stage.open) .intro,
-  html.js .hero:has(.stage.exploring) .intro { opacity: 0; visibility: hidden; pointer-events: none; }
-}
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .egg, .photo-card, .pop-card, .album-modal, .album-book, .album-photo-mount, .album-thumb, .album-btn { transition: none; } }
 
 /* ---- Note near the fax machine (see src/egg.js). Exists only after the machine was clicked. ---- */

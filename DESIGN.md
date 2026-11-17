@@ -45,6 +45,8 @@ The intro links lead with the AI in Medicine Monitor, then the AI Medicine Wimme
 
 On the desktop 3D view, the header and footer strip use 58% cream and a 4 px blur so the model remains visible through both. Text-heavy intro and preview cards retain their stronger paper opacity. See D-049.
 
+The left chair in Writing & Speaking is a tailored upholstered lounge chair: rounded back and arms, separate seat and back cushions, subtle woven surface, restrained seams, splayed oak legs, and one sage cushion. Its low, warm palette suits the architectural model. Keep the right chair unchanged for an in-room comparison. See D-050.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,

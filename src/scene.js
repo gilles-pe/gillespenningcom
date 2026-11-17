@@ -1,3 +1,4 @@
+import { createEnterprise } from './enterprise.js';
 // The four-room model, built from plain Three.js geometry and canvas textures.
 // No external assets: wood, plaster, lettering and picture placeholders are drawn here.
 import * as THREE from 'three';
@@ -605,78 +606,12 @@ function layout(id) {
 }
 
 // ---- Detailed props & room assemblies -----------------------------------------------
-function enterpriseModel(parent, x, y, z, rotY = -0.5) {
-  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
-  const hull = mat(0xdce1de, { metalness: 0.28, roughness: 0.48 });
-  const panel = mat(0xb8c4c2, { metalness: 0.22, roughness: 0.54 });
-  const dark = mat(0x425963, { metalness: 0.3, roughness: 0.48 });
-  const red = mat(0xc15b47, { emissive: 0x722819, emissiveIntensity: 0.35, roughness: 0.36 });
-  const blue = mat(0x61adcc, { emissive: 0x397d9c, emissiveIntensity: 0.55, roughness: 0.36 });
-  const gold = mat(0xc59c56, { emissive: 0x704319, emissiveIntensity: 0.2, metalness: 0.45 });
-  const brass = mat(C.brass, { metalness: 0.55, roughness: 0.35 });
-
-  // Museum-style display stand and discreet nameplate.
-  const base = new THREE.Mesh(new RoundedBoxGeometry(0.24, 0.018, 0.12, 2, 0.008), wood(C.woodDark));
-  base.position.y = 0.009; base.castShadow = true; g.add(base);
-  cyl(g, 0.008, 0.009, 0.105, 0, 0.018, 0.025, brass, 12);
-  const plaque = box(g, 0.13, 0.004, 0.025, 0, 0.018, 0.045, brass);
-  const ship = new THREE.Group(); ship.position.set(0, 0.143, 0); ship.rotation.x = -0.10; g.add(ship);
-
-  // The long, bevelled oval saucer is the defining Sovereign-class silhouette.
-  const profile = [[0, -0.011], [0.083, -0.011], [0.102, -0.006], [0.113, 0.001], [0.104, 0.008], [0.075, 0.017], [0, 0.019]];
-  const saucer = new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r, h]) => new THREE.Vector2(r, h)), 40), hull);
-  saucer.scale.z = 1.48; saucer.position.set(0, 0.008, -0.078); saucer.castShadow = true; ship.add(saucer);
-  const inlay = new THREE.Mesh(new THREE.CylinderGeometry(0.073, 0.078, 0.003, 32), panel);
-  inlay.scale.z = 1.48; inlay.position.set(0, 0.029, -0.078); ship.add(inlay);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.106, 0.0028, 5, 48), dark);
-  rim.rotation.x = Math.PI / 2; rim.scale.y = 1.48; rim.position.set(0, 0.008, -0.078); ship.add(rim);
-  const bridge = new THREE.Mesh(new THREE.SphereGeometry(0.016, 16, 10), hull);
-  bridge.scale.set(1, 0.35, 1.45); bridge.position.set(0, 0.036, -0.089); ship.add(bridge);
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.007, 12, 8), dark);
-  dome.scale.y = 0.4; dome.position.set(0, 0.042, -0.089); ship.add(dome);
-
-  // Tapered engineering hull under the saucer, with a forward glowing deflector.
-  const eng = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 14), hull);
-  eng.scale.set(0.049, 0.033, 0.145); eng.position.set(0, -0.019, 0.081); eng.castShadow = true; ship.add(eng);
-  const spine = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.018, 0.095), panel);
-  spine.position.set(0, 0.009, 0.033); ship.add(spine);
-  const deflector = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.009, 18), gold);
-  deflector.rotation.x = Math.PI / 2; deflector.position.set(0, -0.02, -0.052); ship.add(deflector);
-  const deflectorRim = new THREE.Mesh(new THREE.TorusGeometry(0.019, 0.002, 5, 20), dark);
-  deflectorRim.position.set(0, -0.02, -0.058); ship.add(deflectorRim);
-
-  for (const sx of [-1, 1]) {
-    // Swept pylons leave a clear gap between hull and each long nacelle.
-    const shape = new THREE.Shape();
-    shape.moveTo(sx * 0.028, 0.07); shape.lineTo(sx * 0.19, 0.15);
-    shape.lineTo(sx * 0.19, 0.178); shape.lineTo(sx * 0.035, 0.11); shape.closePath();
-    const pylon = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 0.009, bevelEnabled: false }), panel);
-    pylon.rotation.x = Math.PI / 2; pylon.position.y = 0.011; pylon.castShadow = true; ship.add(pylon);
-    const nacelle = new THREE.Mesh(new THREE.CapsuleGeometry(0.019, 0.20, 5, 10), hull);
-    nacelle.rotation.x = Math.PI / 2; nacelle.position.set(sx * 0.19, 0.042, 0.15); nacelle.castShadow = true; ship.add(nacelle);
-    const grille = new THREE.Mesh(new THREE.BoxGeometry(0.019, 0.004, 0.165), blue);
-    grille.position.set(sx * 0.19, 0.062, 0.16); ship.add(grille);
-    const bussard = new THREE.Mesh(new THREE.SphereGeometry(0.015, 12, 8), red);
-    bussard.position.set(sx * 0.19, 0.042, 0.027); ship.add(bussard);
-    const tail = new THREE.Mesh(new THREE.SphereGeometry(0.011, 10, 8), blue);
-    tail.position.set(sx * 0.19, 0.042, 0.273); ship.add(tail);
-    for (let i = 0; i < 5; i++) {
-      const window = new THREE.Mesh(new THREE.BoxGeometry(0.007, 0.0025, 0.003), dark);
-      window.position.set(sx * (0.045 + i * 0.010), 0.026, -0.14 + i * 0.012); ship.add(window);
-    }
-  }
-
-  const registryCanvas = canvas(512, 128), k = registryCanvas.getContext('2d');
-  k.fillStyle = '#dce1de'; k.fillRect(0, 0, 512, 128);
-  k.fillStyle = '#34474d'; k.textAlign = 'center'; k.textBaseline = 'middle';
-  k.font = '600 47px sans-serif'; k.fillText('NCC-1701-E', 256, 66);
-  const registry = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.023), new THREE.MeshBasicMaterial({ map: tex(registryCanvas), toneMapped: false }));
-  registry.rotation.x = -Math.PI / 2; registry.position.set(0, 0.033, -0.171); ship.add(registry);
-
-  const anchor = new THREE.Object3D(); anchor.position.set(0, 0.27, 0); g.add(anchor);
+function enterpriseModel(parent, x, y, z, rotY = -0.5, era = 'tos') {
+  const g = createEnterprise(era); g.scale.setScalar(0.08);
+  g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
+  const anchor = new THREE.Object3D(); anchor.position.set(0, 1.8, 0); g.add(anchor);
   const picks = [];
-  ship.traverse(o => { if (o.isMesh) { o.userData.project = 'enterprise'; o.userData.anchor = anchor; picks.push(o); } });
-  for (const o of [base, plaque]) { o.userData.project = 'enterprise'; o.userData.anchor = anchor; picks.push(o); }
+  g.traverse(o => { if (o.isMesh) { o.userData.project = era === 'tng' ? 'enterpriseD' : 'enterprise'; o.userData.anchor = anchor; picks.push(o); } });
   return picks;
 }
 
@@ -1335,14 +1270,15 @@ function furnish(id, g, r) {
     for (const [key, project, tx] of [['substack', 'signal', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
       trophyPicks.push(...trophyPlaque(sh, key, project, tx, sh.userData.upperY, 0.05));
     }
-    // On top of the About Me shelf: books with leaning end book, brass lamp, and USS Enterprise-E
+    // On top of the About Me shelf: books with leaning end book, brass lamp, and two distinct Enterprise miniatures
     const topPal = [0xebe3d3, 0xd8cbb4, 0xc9d0bd];
     for (let i = 0; i < 3; i++) box(sh, 0.048, 0.23, 0.16, -0.44 + i * 0.056, shelfH, 0.03, mat(topPal[i]));
     const lean = box(sh, 0.044, 0.22, 0.15, -0.22, shelfH, 0.03, mat(0xd8cbb4));
     lean.rotation.z = -0.25;
     cyl(sh, 0.03, 0.08, 0.28, 0.02, shelfH, 0.01, mat(C.brass, { metalness: 0.5 }));
     cyl(sh, 0.1, 0.17, 0.14, 0.02, shelfH + 0.26, 0.01, new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.8 }));
-    trophyPicks.push(...enterpriseModel(sh, 0.36, shelfH, 0.02, -1.42));
+    trophyPicks.push(...enterpriseModel(sh, 0.22, shelfH, 0.02, -1.12, 'tos'));
+    trophyPicks.push(...enterpriseModel(sh, 0.49, shelfH, 0.02, -0.82, 'tng'));
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
     plant(g, RW / 2 - 0.4, RD / 2 - 0.4, 1.0);
@@ -1404,7 +1340,8 @@ export const HOTSPOTS = {
     ['photo', null, LAY.about.pic[0], LAY.about.pic[1], -ROOMS.about.d / 2 + 0.1, 'photo'],
     ['story', null, LAY.about.desk[0] - 0.24, 0.85, LAY.about.desk[1] + 0.03, 'story'],
     ['album', null, LAY.about.desk[0] + 0.18, 0.74, LAY.about.desk[1] + 0.07, 'album'],
-    ['enterprise', null, LAY.about.shelf[0] + 0.36, 1.35, LAY.about.shelf[1] + 0.02, 'enterprise'],
+    ['enterprise', null, LAY.about.shelf[0] + 0.25, 1.40, LAY.about.shelf[1] + 0.02, 'enterprise'],
+    ['enterpriseD', null, LAY.about.shelf[0] + 0.49, 1.40, LAY.about.shelf[1] + 0.02, 'enterpriseD'],
     ['signal', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'signal'],
     ['bluesky', LINKS.bluesky, LAY.about.shelf[0] + 0.25, 0.9, LAY.about.shelf[1] + 0.05, 'bluesky'],
     ['linkedin', LINKS.linkedin, LAY.about.shelf[0] + 0.44, 0.9, LAY.about.shelf[1] + 0.05, 'linkedin'],

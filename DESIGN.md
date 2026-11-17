@@ -131,3 +131,6 @@ For generated or supplied images:
 - No text baked into illustrations. Real screenshots may contain their own text.
 - No stock-AI look: no glossy 3D, no neon, no lens flare, no generic smiling-people scenes, no gradients as decoration.
 - Flat, quiet and a little imperfect, like a print in a well-made exhibition model.
+
+### Enterprise miniatures and inspection (D-059)
+Two original procedural miniatures replace the Enterprise-E: Constitution-class NCC-1701 and Galaxy-class NCC-1701-D. Small dark wood stands, brass nameplates, bevelled saucers, readable silhouettes and restrained red/blue engine accents follow the diorama palette. First tap opens a persistent preview with View model / Engage warp controls. The lazy-loaded inspector uses a native modal dialog, separate bounded WebGL renderer, touch orbit/pinch, keyboard arrows, Escape and reset. Warp runs only on request, with distinct TOS acceleration and TNG charge/stretch/flash. Reduced motion keeps a static model with explanatory status. Resources are disposed on close. No downloaded Sketchfab binary is included; downloads currently require authentication. Mobile visual/FPS verification remains pending.

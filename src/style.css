@@ -395,3 +395,18 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .album-modal, .album-book { transition: none; }
   .album-spread.turn-forward .album-page, .album-spread.turn-back .album-page { animation: none; }
 }
+.ship-dialog { width: min(calc(var(--s7) * 8), calc(100vw - var(--s4))); max-height: calc(100dvh - var(--s4)); overflow: auto; padding: var(--s4); border: 1px solid var(--line); border-radius: var(--r1); background: var(--paper); color: var(--ink); }
+.ship-dialog::backdrop { background: color-mix(in srgb, var(--ink) 68%, transparent); }
+.ship-dialog h2 { padding-right: var(--s5); font-family: var(--serif); font-size: var(--t4); line-height: 1.15; color: var(--petrol); }
+.ship-close { position: absolute; right: var(--s3); top: var(--s3); width: var(--h2); height: var(--h2); font-size: var(--t4); }
+.ship-viewport { width: 100%; height: min(48dvh, calc(var(--s7) * 4)); min-height: calc(var(--s7) * 2); }
+.ship-viewport canvas { display: block; touch-action: none; }
+.ship-dialog p { font-size: var(--t1); line-height: 1.4; color: var(--muted); }
+.ship-actions { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
+.ship-actions[hidden] { display: none; }
+.ship-actions button, .ship-close { cursor: pointer; background: var(--surface); color: var(--petrol); border: 1px solid var(--line); border-radius: var(--r1); }
+.ship-actions button { min-height: var(--h3); padding: var(--s2) var(--s3); font: inherit; }
+.ship-actions button:last-child { color: var(--surface); background: var(--petrol); }
+.ship-actions button:disabled { opacity: .55; cursor: wait; }
+.ship-status { margin-top: var(--s3); }
+@media (max-width: 800px) { .ship-dialog { padding: var(--s3); } .ship-dialog h2 { font-size: var(--t3); } .ship-viewport { height: 40dvh; } }

@@ -1,3 +1,4 @@
+import { enterpriseCopy } from './enterprise-copy.js';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { t } from './i18n.js';
@@ -265,12 +266,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const projParts = new Set(projectPicks), projThings = [...projectPicks, ...occluders];
   const projRay = new THREE.Raycaster();
   const SOCIAL_CARDS = new Set(['signal', 'bluesky', 'linkedin']);
-  const ABOUT_CARDS = new Set(['story', 'enterprise', ...SOCIAL_CARDS]);
+  const ABOUT_CARDS = new Set(['story', 'enterprise', 'enterpriseD', ...SOCIAL_CARDS]);
   const popAllowed = (roomId, key) =>
     roomId === 'projects' || roomId === 'ai'
     || (roomId === 'writing' && SOCIAL_CARDS.has(key))
     || (roomId === 'about' && ABOUT_CARDS.has(key));
-  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popTimeline = null, popClose = null;
+  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popTimeline = null, popClose = null, shipActions = null;
   let popKey = null, popTimer = null;
   const projectHit = ndcPos => {
     projRay.setFromCamera(ndcPos, camera);
@@ -300,6 +301,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function fillPop() {
     if (!popEl || !popKey) return;
+    const isShip = popKey === 'enterprise' || popKey === 'enterpriseD';
+    const shipCopy = enterpriseCopy[curLang];
+    shipActions.hidden = !isShip;
+    shipActions.children[0].textContent = shipCopy.inspect;
+    shipActions.children[1].textContent = shipCopy.warp;
     if (popKey === 'story') {
       const title = t(curLang, 'model.spots.story');
       popEl.setAttribute('aria-label', title);
@@ -316,7 +322,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     popEl.setAttribute('aria-label', data.title);
     popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
     popTitle.textContent = data.title;
-    popText.textContent = data.text;
+    popText.textContent = isShip ? shipCopy[popKey === 'enterpriseD' ? 'tng' : 'tos'] : data.text;
     popTimeline.replaceChildren();
     popTimeline.hidden = !Array.isArray(data.timeline);
     for (const entry of data.timeline || []) {
@@ -325,7 +331,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const label = document.createElement('span'); label.textContent = entry.label;
       row.append(year, label); popTimeline.append(row);
     }
-    if (data.timeline) {
+    if (data.timeline || isShip) {
       popImg.hidden = true;
       popImg.removeAttribute('src');
     } else if (data.icon && PATHS[data.icon]) {
@@ -369,9 +375,22 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popText = document.createElement('p'); popText.className = 'pop-text';
       popTimeline = document.createElement('ol'); popTimeline.className = 'pop-timeline'; popTimeline.hidden = true;
       popEl.addEventListener('pointerenter', stopAutoCard);
-      popEl.addEventListener('pointerleave', () => { if (popKey && popKey !== 'rack') startAutoCard(() => closePop(false)); });
+      popEl.addEventListener('pointerleave', () => { if (popKey && !['rack', 'enterprise', 'enterpriseD'].includes(popKey)) startAutoCard(() => closePop(false)); });
       popBody.append(popImg, popTitle, popText, popTimeline);
-      popEl.append(popClose, popBody);
+      shipActions = document.createElement('div'); shipActions.className = 'ship-actions'; shipActions.hidden = true;
+      for (const launch of [false, true]) {
+        const action = document.createElement('button'); action.type = 'button';
+        action.addEventListener('click', async () => {
+          const key = popKey; action.disabled = true;
+          try {
+            const { showEnterprise } = await import('./enterprise-inspector.js');
+            if (popKey === key && !showEnterprise(key === 'enterpriseD' ? 'tng' : 'tos', enterpriseCopy[curLang], reduced, launch)) popText.textContent = enterpriseCopy[curLang].error;
+          } catch { popText.textContent = enterpriseCopy[curLang].error; }
+          finally { action.disabled = false; }
+        });
+        shipActions.append(action);
+      }
+      popEl.append(popClose, popBody, shipActions);
       stage.append(popEl);
     }
     clearTimeout(popTimer);
@@ -386,7 +405,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     void popEl.offsetWidth;
     popEl.classList.add('on');
     popClose.focus({ preventScroll: true });
-    if (key !== 'rack') startAutoCard(() => closePop(false));
+    if (!['rack', 'enterprise', 'enterpriseD'].includes(key)) startAutoCard(() => closePop(false));
   }
   function togglePop(key) {
     if (popKey === key) closePop(true);

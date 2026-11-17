@@ -32,3 +32,11 @@
 - [x] Add implementation specification and both model source links: [docs/enterprise-models.md](docs/enterprise-models.md).
 - [ ] Obtain both downloadable, license-cleared GLBs; source references are not the actual binary models.
 - [ ] Owner: switch repository visibility to Private in GitHub settings while keeping GitHub Pages active (requires suitable GitHub plan).
+
+## Implementation update - 2026-11-17 (D-059)
+- [x] Replace the previous E miniature with two original procedural NCC-1701 and NCC-1701-D miniatures, each with a stand/nameplate and distinct silhouette.
+- [x] Persistent first-tap preview, explicit View model / Engage warp actions, separate inspectable model, reset and keyboard controls.
+- [x] Implement separate optional TOS accelerating departure and TNG charge/stretch/flash effects; reduced-motion static fallback.
+- [x] Build/token checks and CPU geometry/bounds checks passed.
+- [ ] Acquire the referenced Sketchfab binaries through an authenticated download (HTTP 401 without a session). Current shipped miniatures are original procedural geometry, not those files; external asset tasks above remain open.
+- [ ] Verify actual appearance, mobile GPU memory/FPS and interaction on a WebGL-capable desktop and phone. Cloud browser cannot reach the local preview.

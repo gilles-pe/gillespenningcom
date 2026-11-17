@@ -197,6 +197,9 @@ until a later entry replaces it.
     1. **AI Medicine Wimmel Book** (`https://wimmelbild.gillespenning.com/en/`) — *Fun time to explore AI impact*
     2. **AI in Medicine Monitor** (`https://ai.gillespenning.com/`) — *Serious way to track progress*
     3. **Read MedTech Signal** (`https://medtechsignal.substack.com/`) — *My thoughts and writing on this*
+- **D-038 (2026-11-17) Substack on Table Book & Standing Keynote Photo on Shelf in Writing & Speaking (owner decision 2026-11-17):**
+  - **MedTech Signal (Substack) on Table Book:** Repurposed the book/sheet on the round table in *Writing & Speaking* (`writing-table-1.webp`, 800 x 600) as the MedTech Signal Substack publication cover. Clicking the book on the table opens the MedTech Signal card and links to `https://medtechsignal.substack.com/`.
+  - **Standing Speaking Photo on Bookshelf:** Added a framed, kickstand-supported photograph (`writing-shelf-1.webp`, 768 x 1024, 3:4 portrait) standing upright on top of the bookshelf in *Writing & Speaking*, showing Gilles Penning speaking on stage in Marburg (14.11.2026: *"KI, Daten und die Apotheke der Zukunft"*). Clicking the photo (or its hotspot / tooltip) opens a photo modal card with full image, caption, and dismiss controls.
 
 ## Open questions
 

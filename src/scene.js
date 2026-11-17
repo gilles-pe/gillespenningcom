@@ -64,7 +64,8 @@ export const SLOTS = [
   { name: 'projects-board-2', room: 'projects', size: [0.72, 0.54], text: 'AI Monitor',   tint: '#b9c7a6' },
   { name: 'projects-board-3', room: 'projects', size: [0.72, 0.54], text: 'Praxisfaden',  tint: '#b9c7a6' },
   { name: 'projects-board-4', room: 'projects', size: [0.72, 0.54], text: 'Elbstrand',    tint: '#b9c7a6' },
-  { name: 'writing-table-1',  room: 'writing',  size: [0.44, 0.33], text: 'Writing',      tint: '#d9c7a8' },
+  { name: 'writing-table-1',  room: 'writing',  size: [0.44, 0.33], text: 'MedTech Signal', tint: '#d9c7a8' },
+  { name: 'writing-shelf-1',  room: 'writing',  size: [0.30, 0.40], text: 'Speaking',     tint: '#d9c7a8' },
   { name: 'about-wall-1',     room: 'about',    size: [0.54, 0.72], text: 'About',        tint: '#b9c7a6' },
 ];
 const SLOT = Object.fromEntries(SLOTS.map(s => [s.name, s]));
@@ -173,6 +174,19 @@ function wallPicture(parent, name, x, y, d, frameColor = C.woodDark) {
   const pic = new THREE.Mesh(new THREE.PlaneGeometry(w, h), slotMaterial(name));
   pic.position.set(x, y, WALL_FRONT + 0.032); pic.name = name; pic.userData.frame = frame; parent.add(pic);
   return pic;
+}
+// Freestanding framed picture with kickstand, e.g. for standing on a shelf or desk.
+function standingPicture(parent, name, x, y, z, rotY = 0, frameColor = C.woodDark) {
+  const [w, h] = SLOT[name].size, f = 0.024;
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
+  const tilt = new THREE.Group(); tilt.rotation.x = -0.14; g.add(tilt);
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(w + 2 * f, h + 2 * f, 0.02), wood(frameColor));
+  frame.position.set(0, (h + 2 * f) / 2, 0); frame.castShadow = true; tilt.add(frame);
+  const pic = new THREE.Mesh(new THREE.PlaneGeometry(w, h), slotMaterial(name));
+  pic.position.set(0, (h + 2 * f) / 2, 0.011); pic.name = name; pic.userData.frame = frame; tilt.add(pic);
+  const leg = box(g, 0.018, h * 0.65, 0.012, 0, h * 0.3, -h * 0.11, wood(frameColor));
+  leg.rotation.x = 0.26;
+  return { pick: [pic, frame, leg], anchor: pic };
 }
 
 // ---- Room names on the back wall ---------------------------------------------
@@ -531,6 +545,7 @@ export function buildScene() {
       center: new THREE.Vector3(r.cx, 0.5, r.cz), labelAt: new THREE.Vector3(r.cx, r.h + 0.35, r.cz - d / 2), open: 0, glow: 0 };
     const extra = furnish(id, g, r);
     if (extra?.photo) rooms[id].photo = extra.photo;
+    if (extra?.speakingPic) rooms[id].speakingPic = extra.speakingPic;
     if (extra?.projectPicks) projectPicks.push(...extra.projectPicks);
     if (extra?.trophyPicks) trophyPicks.push(...extra.trophyPicks);
     if (extra?.storyPicks) storyPicks.push(...extra.storyPicks);
@@ -540,7 +555,7 @@ export function buildScene() {
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, projectPicks, trophyPicks, storyPicks };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -1001,12 +1016,17 @@ function furnish(id, g, r) {
     return { projectPicks };
   }
   if (id === 'writing') {
+    const projectPicks = [];
     const [tx, tz] = L.table;
     cyl(g, 1.15, 1.15, 0.02, tx, 0.06, tz, mat(0xe9dcc6), 40);                // rug
     cyl(g, 0.52, 0.52, 0.07, tx, 0.4, tz, w, 32); cyl(g, 0.28, 0.34, 0.4, tx, 0, tz, w);
-    box(g, 0.46, 0.015, 0.35, tx - 0.05, 0.47, tz, cream);                    // paper on the table
+    const paperBase = box(g, 0.46, 0.015, 0.35, tx - 0.05, 0.47, tz, cream);                    // paper on the table
     const sheet = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.33), slotMaterial('writing-table-1'));
     sheet.rotation.x = -Math.PI / 2; sheet.position.set(tx - 0.05, 0.4865, tz); g.add(sheet);
+    projectPicks.push(
+      tagProject(sheet, 'signal', g, sheet.position),
+      tagProject(paperBase, 'signal', g, sheet.position),
+    );
     tableMic(g, tx + 0.28, 0.47, tz - 0.05);
     [[-1.0, 0.0, 0.5], [1.0, -0.15, -0.6]].forEach(([x, z, ry]) => {
       podcastArmchair(g, tx + x, tz + z, ry);
@@ -1014,7 +1034,9 @@ function furnish(id, g, r) {
     cyl(g, 0.02, 0.02, 1.25, L.lamp[0], 0, L.lamp[1], mat(C.brass, { metalness: 0.5 }));
     cyl(g, 0.12, 0.22, 0.2, L.lamp[0], 1.2, L.lamp[1], new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.9 }));
     cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], 1.0, 0, { imperfect: true });
+    const speakingPic = standingPicture(g, 'writing-shelf-1', L.shelf[0] - 0.22, 1.06, L.shelf[1] + 0.02, 0.12);
     plant(g, -RW / 2 + 0.4, RD / 2 - 0.5, 1.1);
+    return { projectPicks, speakingPic };
   }
 }
 
@@ -1036,7 +1058,8 @@ export const HOTSPOTS = {
     ['elbstrand', 'https://penning.info/', LAY.projects.xs[3], 0.1, LAY.projects.spotZ, 'elbstrand'],
   ],
   writing: [
-    ['signal', 'https://medtechsignal.substack.com/', LAY.writing.shelf[0], 0.3, LAY.writing.shelf[1] + 0.3, 'signal'],
+    ['signal', 'https://medtechsignal.substack.com/', LAY.writing.table[0] - 0.05, 0.52, LAY.writing.table[1], 'signal'],
+    ['speaking', null, LAY.writing.shelf[0] - 0.22, 1.30, LAY.writing.shelf[1] + 0.02, 'speaking'],
   ],
   about: [
     ['photo', null, LAY.about.pic[0], LAY.about.pic[1], -ROOMS.about.d / 2 + 0.1, 'photo'],

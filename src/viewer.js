@@ -12,7 +12,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, projectPicks, trophyPicks, storyPicks } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -35,7 +35,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (href) el.href = href;
     const pos = new THREE.Vector3(x, y, z).add(rooms[id].group.position);
     const sp = { key, el, project };
-    if (project === 'photo') el.addEventListener('click', e => { e.preventDefault(); togglePhoto(); });
+    if (project === 'photo') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('photo'); });
+    else if (project === 'speaking') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('speaking'); });
     else if (project) el.addEventListener('click', e => { e.preventDefault(); togglePop(project); });
     spotsEl.append(el);
     spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos });
@@ -171,23 +172,32 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     aim(); checkAway();
   }
   const egg = createEgg({ cellar, camera, stage, canvas, reduced, lang });
-  const photoParts = new Set(photo.pick), photoThings = [...photo.pick, ...occluders];
+  const allPhotoPicks = [...(photo?.pick ?? []), ...(speakingPhoto?.pick ?? [])];
+  const photoParts = new Set(allPhotoPicks), photoThings = [...allPhotoPicks, ...occluders];
   const photoRay = new THREE.Raycaster(), pv = new THREE.Vector3(), pDir = new THREE.Vector3();
   let pCard = null, pImg = null, pCap = null, pClose = null, pOpen = false, pTimer = null;
+  let currentPhotoKey = 'photo';
   let autoCardTimer = null;
   const stopAutoCard = () => { clearTimeout(autoCardTimer); autoCardTimer = null; };
   const startAutoCard = fn => { stopAutoCard(); autoCardTimer = setTimeout(fn, 6000); };
   const photoHit = ndcPos => {
     photoRay.setFromCamera(ndcPos, camera);
     const h = photoRay.intersectObjects(photoThings, false)[0];
-    return !!h && photoParts.has(h.object);
+    if (!h) return null;
+    if (photo && photo.pick.includes(h.object)) return 'photo';
+    if (speakingPhoto && speakingPhoto.pick.includes(h.object)) return 'speaking';
+    return null;
   };
   const labelPhoto = () => {
     if (!pCard) return;
-    pCard.setAttribute('aria-label', t(curLang, 'model.photo.alt'));
-    pImg.alt = t(curLang, 'model.photo.alt');
-    pCap.textContent = t(curLang, 'model.photo.caption');
-    pClose.setAttribute('aria-label', t(curLang, 'model.photo.close'));
+    const isSpeaking = currentPhotoKey === 'speaking';
+    const altKey = isSpeaking ? 'model.speakingPhoto.alt' : 'model.photo.alt';
+    const capKey = isSpeaking ? 'model.speakingPhoto.caption' : 'model.photo.caption';
+    const closeKey = isSpeaking ? 'model.speakingPhoto.close' : 'model.photo.close';
+    pCard.setAttribute('aria-label', t(curLang, altKey));
+    pImg.alt = t(curLang, altKey);
+    pCap.textContent = t(curLang, capKey);
+    pClose.setAttribute('aria-label', t(curLang, closeKey));
   };
   const closePhoto = (restoreFocus = false) => {
     if (!pCard || !pOpen) return;
@@ -200,19 +210,23 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     else pTimer = setTimeout(() => { if (!pOpen) pCard.hidden = true; }, 280);
     if (had || restoreFocus) canvas.focus({ preventScroll: true });
   };
-  const openPhoto = () => {
+  const openPhoto = (photoKey = 'photo') => {
+    currentPhotoKey = photoKey;
     closePop(false);
     if (!pCard) {
       pCard = document.createElement('div'); pCard.className = 'photo-card'; pCard.setAttribute('role', 'region'); pCard.hidden = true;
-      pImg = document.createElement('img'); pImg.src = `${import.meta.env.BASE_URL}slots/about-wall-1.webp`; pImg.decoding = 'async';
+      pImg = document.createElement('img'); pImg.decoding = 'async';
       pImg.addEventListener('click', () => closePhoto(true));
       pCap = document.createElement('p'); pCap.className = 'photo-caption';
       pClose = document.createElement('button'); pClose.type = 'button'; pClose.className = 'card-x'; pClose.textContent = '×';
       pClose.addEventListener('click', () => closePhoto(true));
       pCard.addEventListener('pointerenter', stopAutoCard);
       pCard.addEventListener('pointerleave', () => { if (pOpen) startAutoCard(() => closePhoto(false)); });
-      pCard.append(pClose, pImg, pCap); stage.append(pCard); labelPhoto();
+      pCard.append(pClose, pImg, pCap); stage.append(pCard);
     }
+    const slotFile = photoKey === 'speaking' ? 'slots/writing-shelf-1.webp' : 'slots/about-wall-1.webp';
+    pImg.src = `${import.meta.env.BASE_URL}${slotFile}`;
+    labelPhoto();
     clearTimeout(pTimer); pOpen = true; pCard.hidden = false; pCard.inert = false; pCard.removeAttribute('aria-hidden');
     stage.classList.add('card-open');
     updatePhoto();
@@ -221,11 +235,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     pClose.focus({ preventScroll: true });
     startAutoCard(() => closePhoto(false));
   };
-  const togglePhoto = () => (pOpen ? closePhoto(true) : openPhoto());
+  const togglePhoto = (photoKey = 'photo') => ((pOpen && currentPhotoKey === photoKey) ? closePhoto(true) : openPhoto(photoKey));
   function updatePhoto() {
     if (!pCard || pCard.hidden) return;
-    if (openId !== 'about') { closePhoto(false); return; }
-    photo.anchor.getWorldPosition(pv);
+    const isSpeaking = currentPhotoKey === 'speaking';
+    const targetRoom = isSpeaking ? 'writing' : 'about';
+    const targetObj = isSpeaking ? speakingPhoto : photo;
+    if (openId !== targetRoom || !targetObj) { closePhoto(false); return; }
+    targetObj.anchor.getWorldPosition(pv);
     pDir.copy(pv).sub(camera.position).normalize(); photoRay.set(camera.position, pDir);
     const hit = photoRay.intersectObjects(photoThings, false)[0];
     const gone = !hit || !photoParts.has(hit.object);
@@ -390,13 +407,18 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const hoverV = new THREE.Vector3();
   const hoverObject = n => {
     if (openId === 'about') {
-      if (photoHit(n)) return { key: 'photo', anchor: photo.anchor };
+      const ph = photoHit(n);
+      if (ph === 'photo' && photo) return { key: 'photo', anchor: photo.anchor };
       const tr = trophyHit(n);
       if (tr?.project) return { key: tr.project, anchor: tr.anchor };
       const st = storyHit(n);
       if (st) return { key: 'story', anchor: st };
     }
-    if (openId === 'projects' || openId === 'ai') {
+    if (openId === 'writing') {
+      const ph = photoHit(n);
+      if (ph === 'speaking' && speakingPhoto) return { key: 'speaking', anchor: speakingPhoto.anchor };
+    }
+    if (openId === 'projects' || openId === 'ai' || openId === 'writing') {
       const pr = projectHit(n);
       if (pr) return { key: pr.userData.project, anchor: pr.userData.anchor };
     }
@@ -465,11 +487,13 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     pts.delete(e.pointerId);
     if (drag && pts.size === 0) {
       if (!cancelled && !drag.moved && e.target === canvas && drag.btn === 0) {
-        const proj = (openId === 'projects' || openId === 'ai') ? projectHit(ndc(e)) : null;
+        const proj = (openId === 'projects' || openId === 'ai' || openId === 'writing') ? projectHit(ndc(e)) : null;
         const trophy = openId === 'about' ? trophyHit(ndc(e)) : null;
         const stAnchor = openId === 'about' ? storyHit(ndc(e)) : null;
+        const pHit = photoHit(ndc(e));
         if (egg.hit(ndc(e))) egg.play();
-        else if (openId === 'about' && photoHit(ndc(e))) togglePhoto();
+        else if (openId === 'about' && pHit === 'photo') togglePhoto('photo');
+        else if (openId === 'writing' && pHit === 'speaking') togglePhoto('speaking');
         else if (trophy?.project) togglePop(trophy.project);
         else if (stAnchor) togglePop('story');
         else if (proj) togglePop(proj.userData.project);
@@ -578,7 +602,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   return {
     open(id, { keepView = false } = {}) {
       openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
-      if (id !== 'about') closePhoto(false);
+      if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
+      if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
       if (popKey && !popAllowed(id, popKey)) closePop(false);
       if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
       setGoal();

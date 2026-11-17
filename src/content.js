@@ -100,6 +100,7 @@ export const content = {
       rooms: { projects: 'Projects', about: 'About Me', ai: 'AI & Digital Health', writing: 'Writing & Speaking' },
       egg: { note: 'You found it! The fax device that keeps healthcare working in Germany. Send me a fax — or find me on LinkedIn.', cta: 'LinkedIn', label: 'Note from the cellar', close: 'Close' },
       photo: { alt: 'Gilles Penning running in Porto.', caption: 'Passionate marathon runner', close: 'Close' },
+      speakingPhoto: { alt: 'Gilles Penning speaking on stage in Marburg on AI, data, and the pharmacy of the future.', caption: 'Keynote · Marburg, 2026: AI, Data and the Future of Pharmacy', close: 'Close' },
       projectCards: {
         wimmelbild: {
           title: 'Wimmelbild',
@@ -159,7 +160,8 @@ export const content = {
       slots: {
         'ai-wall-1': 'Consultation',
         'ai-wall-2': 'Progress',
-        'writing-table-1': 'Writing',
+        'writing-table-1': 'MedTech Signal',
+        'writing-shelf-1': 'Speaking',
         'about-wall-1': 'About',
       },
       spots: {
@@ -170,7 +172,7 @@ export const content = {
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
         bluesky: 'Bluesky',
-        speaking: 'Speaking topics',
+        speaking: 'Keynote Marburg',
         linkedin: 'LinkedIn',
         story: 'My story',
         photo: 'Marathon',
@@ -265,6 +267,7 @@ export const content = {
       rooms: { projects: 'Projekte', about: 'Über mich', ai: 'KI & Digital Health', writing: 'Schreiben & Vorträge' },
       egg: { note: 'Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält. Schick mir ein Fax — oder schreib mir auf LinkedIn.', cta: 'LinkedIn', label: 'Notiz aus dem Keller', close: 'Schließen' },
       photo: { alt: 'Gilles Penning beim Lauf in Porto.', caption: 'Begeisterter Marathonläufer', close: 'Schließen' },
+      speakingPhoto: { alt: 'Gilles Penning bei seinem Vortrag in Marburg zu KI, Daten und der Apotheke der Zukunft.', caption: 'Keynote · Marburg, 2026: KI, Daten und die Apotheke der Zukunft', close: 'Schließen' },
       projectCards: {
         rack: {
           title: 'Digitale Workflows & OP-Integration',
@@ -324,7 +327,8 @@ export const content = {
       slots: {
         'ai-wall-1': 'Sprechstunde',
         'ai-wall-2': 'Verlauf',
-        'writing-table-1': 'Schreiben',
+        'writing-table-1': 'MedTech Signal',
+        'writing-shelf-1': 'Vortrag',
         'about-wall-1': 'Über mich',
       },
       spots: {
@@ -335,7 +339,7 @@ export const content = {
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
         bluesky: 'Bluesky',
-        speaking: 'Vortragsthemen',
+        speaking: 'Vortrag Marburg',
         linkedin: 'LinkedIn',
         story: 'Meine Geschichte',
         photo: 'Marathon',

@@ -31,7 +31,7 @@ The limits on the number of steps are in `AGENTS.md`. Do not add in-between valu
 ## Page layout
 Desktop is one screen (`100svh`) with the 3D stage (`#scene`, `z-index: 0`) running full-bleed behind translucent frosted header, left intro card, and bottom footer strip (Wimmelbild, social logo links in `#social`, and the 3 horizontal "Latest Substacks:" links). Active navigation items use clean typography/color without underline bars. Room cards (`#panel`) sit compactly at bottom-left, and pop-up project/story/photo cards anchor to the left of the 3D room with top-right `×` close buttons and directly clickable image/text bodies (no separate CTA buttons). Phone: header, intro, model, room bar, room content (dock), strip. See D-014, D-015, D-031 and D-032 in `docs/decisions.md`.
 
-On phones (up to 800 px), the live model extends behind the intro in a taller canvas, with extra space above and below the model. The overview is positioned lower within that canvas so it sits more centrally in the exposed area; individual room framing is unchanged. The intro uses the same 78% paper / 22% transparency and 8 px background blur as desktop; links remain usable and the exposed model area supports touch. Room controls and content remain below the model. Without WebGL or JavaScript, keep the static fallback and text in normal flow. See D-041 and D-042.
+On phones (up to 800 px), the live model extends behind the intro in a taller canvas, with extra space above and below the model. The overview is positioned lower within that canvas so it sits more centrally in the exposed area; individual room framing is unchanged. The intro uses 88% paper and 8 px background blur so its copy remains legible; links remain usable and the exposed model area supports touch. Room controls and content remain below the model. Without WebGL or JavaScript, keep the static fallback and text in normal flow. See D-041, D-042 and D-046.
 
 The default overview camera looks from about 31° above and 13° to the left, with a wider framing that keeps the entire model visible. The intro remains visible during exploration. On mobile, opening a room places its model below the intro, clear of the text; on desktop the intro remains alongside the model. See D-043 and its correction D-045.
 
@@ -42,6 +42,8 @@ Intro surfaces use 88% paper, and overlay cards and 3D labels use roughly 86–8
 The four mobile room controls use translucent paper with backdrop blur like the Reset view control. They form two columns from 481–800 px and one column on narrower phones. The selected room uses a translucent deep-blue fill. See D-047.
 
 The intro links lead with the AI in Medicine Monitor, then the AI Medicine Wimmel Book, with MedTech Signal as a quieter reading link beneath. Desktop presents the two projects side by side; mobile stacks all three at up to 800 px. The Wimmel Book description invites playful exploration in both languages. See D-048.
+
+On the desktop 3D view, the header and footer strip use 58% cream and a 4 px blur so the model remains visible through both. Text-heavy intro and preview cards retain their stronger paper opacity. See D-049.
 
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long

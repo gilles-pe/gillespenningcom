@@ -154,8 +154,8 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 @media (min-width: 801px) {
   html.js body { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
   html.js main { min-height: 0; display: grid; }
-  html.js .top { position: relative; z-index: 3; padding: var(--s3) var(--s5); background: color-mix(in srgb, var(--cream) 78%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
-  html.js .strip { position: relative; z-index: 3; background: color-mix(in srgb, var(--cream) 80%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  html.js .top { position: relative; z-index: 3; padding: var(--s3) var(--s5); background: color-mix(in srgb, var(--cream) 58%, transparent); backdrop-filter: blur(var(--s1)); -webkit-backdrop-filter: blur(var(--s1)); border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+  html.js .strip { position: relative; z-index: 3; background: color-mix(in srgb, var(--cream) 58%, transparent); backdrop-filter: blur(var(--s1)); -webkit-backdrop-filter: blur(var(--s1)); }
   html.js .hero { position: static; min-height: 0; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(280px, 34%) 1fr; padding: var(--s4) var(--s5) var(--s3); align-items: start; pointer-events: none; }
   html.js .intro { position: relative; z-index: 2; gap: var(--s3); pointer-events: auto; padding: var(--s4); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); }
   html.js .stage { position: absolute; inset: 0; height: 100svh; min-height: 0; z-index: auto; pointer-events: auto; }

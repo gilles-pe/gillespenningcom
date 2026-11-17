@@ -101,6 +101,51 @@ export const content = {
       egg: { note: 'You found it! The fax device that keeps healthcare working in Germany. Send me a fax — or find me on LinkedIn.', cta: 'LinkedIn', label: 'Note from the cellar', close: 'Close' },
       photo: { alt: 'Gilles Penning running in Porto.', caption: 'Passionate marathon runner', close: 'Close' },
       speakingPhoto: { alt: 'Gilles Penning speaking on stage in Marburg on AI, data, and the pharmacy of the future.', caption: 'Keynote · Marburg, 2026: AI, Data and the Future of Pharmacy', close: 'Close' },
+      album: {
+        title: 'Photo Album',
+        subtitle: 'Personal snapshots & perspectives',
+        close: 'Close',
+        prev: 'Previous photo',
+        next: 'Next photo',
+        hint: 'Click to turn page · Arrow keys ‹ ›',
+        photos: [
+          {
+            src: 'album/photo-1.webp',
+            title: 'River Elbe & Container Giant',
+            desc: 'Overlooking the Elbe river towards Airbus Finkenwerder as a massive container ship navigates upstream · Hamburg',
+          },
+          {
+            src: 'album/photo-2.webp',
+            title: 'Rainbow over Speicherstadt',
+            desc: 'Full arc rainbow spanning the historic warehouse district, waterways and church spires of St. Katharinen and St. Nikolai · Hamburg',
+          },
+          {
+            src: 'album/photo-3.webp',
+            title: 'Harbour Reflections',
+            desc: 'Sunset puddle reflection with crane silhouette and a photographer at the quay · Hamburg',
+          },
+          {
+            src: 'album/photo-4.webp',
+            title: 'Köhlbrandbrücke',
+            desc: 'Runners crossing the high cable-stayed bridge in bright morning light · Hamburg Marathon',
+          },
+          {
+            src: 'album/photo-5.webp',
+            title: 'Ponte Dom Luís I',
+            desc: 'Golden evening light over the double-deck metal arch bridge crossing the Douro river · Porto',
+          },
+          {
+            src: 'album/photo-6.webp',
+            title: 'Ever Acme Arriving in Port',
+            desc: 'Green and red hull of the mega-ship guided by harbor tugboats into the container terminal · Hamburg',
+          },
+          {
+            src: 'album/photo-7.webp',
+            title: 'Quiet Sunset',
+            desc: 'Silhouetted tree, bench and hiking signpost against a blazing golden horizon · Evening tranquility',
+          },
+        ],
+      },
       projectCards: {
         wimmelbild: {
           title: 'Wimmelbild',
@@ -175,6 +220,7 @@ export const content = {
         speaking: 'Keynote Marburg',
         linkedin: 'LinkedIn',
         story: 'My story',
+        album: 'Photo album',
         photo: 'Marathon',
         rack: 'Digital workflows',
         enterprise: 'USS Enterprise NCC-1701-E',
@@ -268,6 +314,51 @@ export const content = {
       egg: { note: 'Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält. Schick mir ein Fax — oder schreib mir auf LinkedIn.', cta: 'LinkedIn', label: 'Notiz aus dem Keller', close: 'Schließen' },
       photo: { alt: 'Gilles Penning beim Lauf in Porto.', caption: 'Begeisterter Marathonläufer', close: 'Schließen' },
       speakingPhoto: { alt: 'Gilles Penning bei seinem Vortrag in Marburg zu KI, Daten und der Apotheke der Zukunft.', caption: 'Keynote · Marburg, 2026: KI, Daten und die Apotheke der Zukunft', close: 'Schließen' },
+      album: {
+        title: 'Fotoalbum',
+        subtitle: 'Persönliche Momentaufnahmen & Perspektiven',
+        close: 'Schließen',
+        prev: 'Vorheriges Foto',
+        next: 'Nächstes Foto',
+        hint: 'Klicken zum Blättern · Pfeiltasten ‹ ›',
+        photos: [
+          {
+            src: 'album/photo-1.webp',
+            title: 'Elbe & Containerriese',
+            desc: 'Blick über den Elbstrom Richtung Airbus Finkenwerder beim Vorbeiziehen eines Frachters · Hamburg',
+          },
+          {
+            src: 'album/photo-2.webp',
+            title: 'Regenbogen über der Speicherstadt',
+            desc: 'Vollständiger Doppelbogen über den historischen Fleeten und Kirchturmspitzen von St. Katharinen und St. Nikolai · Hamburg',
+          },
+          {
+            src: 'album/photo-3.webp',
+            title: 'Spiegelung am Hafen',
+            desc: 'Abendsonne in einer Pfütze an der Kaikante mit Kransilhouette und Fotograf · Hamburg',
+          },
+          {
+            src: 'album/photo-4.webp',
+            title: 'Köhlbrandbrücke',
+            desc: 'Das Läuferfeld überquert die markante Schrägseilbrücke bei strahlendem Sonnenschein · Hamburg Marathon',
+          },
+          {
+            src: 'album/photo-5.webp',
+            title: 'Ponte Dom Luís I',
+            desc: 'Abendstimmung über der Douro-Brücke und den Dächern von Ribeira · Porto',
+          },
+          {
+            src: 'album/photo-6.webp',
+            title: 'Ever Acme im Hamburger Hafen',
+            desc: 'Einfahrt des Mega-Containerschiffs mit Begleitschleppern am Containerterminal · Hamburg',
+          },
+          {
+            src: 'album/photo-7.webp',
+            title: 'Abendstille',
+            desc: 'Baumsilhouette, Rastbank und Wegweiser vor leuchtendem Abendrot am Horizont',
+          },
+        ],
+      },
       projectCards: {
         rack: {
           title: 'Digitale Workflows & OP-Integration',
@@ -342,6 +433,7 @@ export const content = {
         speaking: 'Vortrag Marburg',
         linkedin: 'LinkedIn',
         story: 'Meine Geschichte',
+        album: 'Fotoalbum',
         photo: 'Marathon',
         rack: 'Digitale Workflows',
         enterprise: 'USS Enterprise NCC-1701-E',

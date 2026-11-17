@@ -502,7 +502,7 @@ export function buildScene() {
   const brassHot = new THREE.MeshStandardMaterial({ color: 0xffd27a, emissive: 0xd9a03c, emissiveIntensity: 0.9, metalness: 0.5, roughness: 0.3 });
   const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
-  const projectPicks = [], trophyPicks = [], storyPicks = [];
+  const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [];
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
     g.position.set(r.cx, 0, r.cz); scene.add(g);
@@ -549,13 +549,14 @@ export function buildScene() {
     if (extra?.projectPicks) projectPicks.push(...extra.projectPicks);
     if (extra?.trophyPicks) trophyPicks.push(...extra.trophyPicks);
     if (extra?.storyPicks) storyPicks.push(...extra.storyPicks);
+    if (extra?.albumPicks) albumPicks.push(...extra.albumPicks);
   }
   // Outline of the whole model, for the camera: base corners plus the top of every room.
   const outline = [];
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -644,6 +645,57 @@ function openLaptop(parent, x, y, z, rotY = 0) {
   const picks = [base, kb, back, disp];
   picks.forEach(m => { m.userData.story = true; m.userData.anchor = anchor; });
   return picks;
+}
+
+function deskPhotoAlbum(parent, x, y, z, rotY = -0.22) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
+  const w = 0.22, h = 0.034, d = 0.28;
+  const coverMat = mat(0x1a2e3b, { roughness: 0.6 });
+  const pageMat = mat(0xf4efe4, { roughness: 0.8 });
+  const gold = mat(C.brass, { metalness: 0.6, roughness: 0.35 });
+
+  // Lower cover & page block
+  box(g, w + 0.008, 0.004, d + 0.008, 0, 0.002, 0, coverMat);
+  box(g, w - 0.008, h - 0.008, d - 0.012, 0.004, h / 2, 0, pageMat);
+  box(g, 0.006, h, d + 0.008, -w / 2 - 0.001, h / 2, 0, coverMat);
+  [[-w / 2 + 0.01, -d / 2 + 0.01], [w / 2 - 0.01, -d / 2 + 0.01], [-w / 2 + 0.01, d / 2 - 0.01], [w / 2 - 0.01, d / 2 - 0.01]].forEach(([cx, cz]) => {
+    box(g, 0.02, 0.006, 0.02, cx, h + 0.001, cz, gold);
+  });
+
+  // Top cover with embossed canvas texture
+  const c = canvas(512, 640), k = c.getContext('2d'), t = tex(c);
+  whenFont(() => {
+    k.fillStyle = '#1a2e3b'; k.fillRect(0, 0, 512, 640);
+    k.strokeStyle = '#d4af37'; k.lineWidth = 6;
+    k.strokeRect(36, 36, 440, 568);
+    k.strokeStyle = '#a9792b'; k.lineWidth = 2;
+    k.strokeRect(48, 48, 416, 544);
+    // Center camera/photo emblem
+    k.strokeStyle = '#d4af37'; k.lineWidth = 4;
+    k.strokeRect(176, 180, 160, 120);
+    k.fillStyle = '#223d4f'; k.fillRect(182, 186, 148, 108);
+    k.fillStyle = '#d4af37';
+    k.beginPath(); k.arc(280, 218, 14, 0, Math.PI * 2); k.fill();
+    k.beginPath(); k.moveTo(186, 288); k.lineTo(236, 232); k.lineTo(276, 272); k.lineTo(296, 252); k.lineTo(326, 288); k.closePath(); k.fill();
+    // Text: "Fotoalbum" / "Photo Album"
+    k.fillStyle = '#f7f6f2'; k.textAlign = 'center'; k.textBaseline = 'middle';
+    k.font = `600 46px ${FONT}`;
+    k.fillText(modelText().spots.album ?? 'Photo Album', 256, 360, 380);
+    k.fillStyle = '#d4af37';
+    k.fillRect(176, 400, 160, 4);
+    k.font = '500 22px system-ui, sans-serif';
+    k.fillStyle = '#a9b8c6';
+    k.fillText('GILLES PENNING', 256, 435, 300);
+    t.needsUpdate = true;
+  });
+  const topCoverMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.52, metalness: 0.1 });
+  const topCover = new THREE.Mesh(new THREE.BoxGeometry(w + 0.008, 0.004, d + 0.008), [coverMat, coverMat, topCoverMat, coverMat, coverMat, coverMat]);
+  topCover.position.set(0, h - 0.002, 0); topCover.castShadow = true; g.add(topCover);
+
+  const anchor = new THREE.Object3D(); anchor.position.set(0, h + 0.08, 0); g.add(anchor);
+  const picks = [topCover];
+  picks.forEach(m => { m.userData.album = true; m.userData.anchor = anchor; });
+  return { picks, anchor };
 }
 
 function coffeeMug(parent, x, y, z) {
@@ -982,10 +1034,9 @@ function furnish(id, g, r) {
     const [dx, dz] = L.desk;
     box(g, 1.3, 0.07, 0.7, dx, 0.62, dz, w);
     [[-0.58, -0.28], [0.58, -0.28], [-0.58, 0.28], [0.58, 0.28]].forEach(([x, z]) => box(g, 0.07, 0.62, 0.07, dx + x, 0, dz + z, w));
-    // Open laptop ("My Story"), book and coffee mug on the desk (lamp moved onto the shelf)
+    // Open laptop ("My Story"), photo album and coffee mug on the desk (lamp moved onto the shelf)
     const storyPicks = openLaptop(g, dx - 0.24, 0.69, dz + 0.03, 0.14);
-    const deskBook = box(g, 0.21, 0.032, 0.28, dx + 0.18, 0.69, dz + 0.07, mat(C.book[2]));
-    deskBook.rotation.y = -0.22;
+    const album = deskPhotoAlbum(g, dx + 0.18, 0.69, dz + 0.07, -0.22);
     coffeeMug(g, dx + 0.39, 0.69, dz - 0.12);
     // Ergonomic office chair behind the desk
     officeChair(g, dx, dz - 0.72, 0, 1);
@@ -1006,7 +1057,7 @@ function furnish(id, g, r) {
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
     plant(g, RW / 2 - 0.4, RD / 2 - 0.4, 1.0);
-    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks };
+    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks };
   }
   if (id === 'ai') {
     const projectPicks = [];
@@ -1064,6 +1115,7 @@ export const HOTSPOTS = {
   about: [
     ['photo', null, LAY.about.pic[0], LAY.about.pic[1], -ROOMS.about.d / 2 + 0.1, 'photo'],
     ['story', null, LAY.about.desk[0] - 0.24, 0.85, LAY.about.desk[1] + 0.03, 'story'],
+    ['album', null, LAY.about.desk[0] + 0.18, 0.74, LAY.about.desk[1] + 0.07, 'album'],
     ['enterprise', null, LAY.about.shelf[0] + 0.36, 1.35, LAY.about.shelf[1] + 0.02, 'enterprise'],
     ['signal', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'signal'],
     ['bluesky', LINKS.bluesky, LAY.about.shelf[0] + 0.25, 0.9, LAY.about.shelf[1] + 0.05, 'bluesky'],

@@ -77,6 +77,16 @@ not per room; only their position follows the room (the wall pictures of the AI 
 | `writing-shelf-1` | Writing & Speaking | framed photo of Gilles speaking standing on the bookshelf (clickable) | 3:4 portrait | 768 x 1024 px |
 | `about-wall-1` | About Me | framed running photo on back wall (clickable) | 3:4 portrait | 900 x 1200 px |
 
+### Interactive Photo Album (About Me desk, D-039)
+Images live in `public/album/photo-<1..7>.webp` (max width 1024 px, 80% WebP quality, ~50–144 KB):
+- `photo-1.webp`: River Elbe & container giant (Hamburg)
+- `photo-2.webp`: Rainbow over historic Speicherstadt (Hamburg)
+- `photo-3.webp`: Harbor reflections in puddle at Dockland (Hamburg)
+- `photo-4.webp`: Köhlbrandbrücke with runners (Hamburg Marathon)
+- `photo-5.webp`: Ponte Dom Luís I at golden sunset (Porto)
+- `photo-6.webp`: Ever Acme container mega-ship arriving in port (Hamburg)
+- `photo-7.webp`: Quiet sunset with tree, bench, and hiking signpost
+
 Rules:
 - Pictures are drawn unlit (not tone-mapped), so they show the brightness of the file (D-022).
 - Format is WebP. Wrong aspect ratios are cropped to fit (centre crop), not stretched.

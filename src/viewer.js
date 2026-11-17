@@ -12,7 +12,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -30,13 +30,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   for (const [id, list] of Object.entries(HOTSPOTS)) for (const [key, href, x, y, z, project] of list) {
     const el = document.createElement(href ? 'a' : project ? 'button' : 'span');
     if (el.tagName === 'BUTTON') el.type = 'button';
-    el.className = 'spot' + (id === 'about' ? ' quiet-spot' : '') + (href ? '' : ' soon'); el.tabIndex = -1;
+    const isQuiet = id === 'about' && key !== 'album';
+    el.className = 'spot' + (isQuiet ? ' quiet-spot' : '') + (href ? '' : ' soon'); el.tabIndex = -1;
     el.dataset.room = id;
     if (href) el.href = href;
     const pos = new THREE.Vector3(x, y, z).add(rooms[id].group.position);
     const sp = { key, el, project };
     if (project === 'photo') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('photo'); });
     else if (project === 'speaking') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('speaking'); });
+    else if (project === 'album') el.addEventListener('click', e => { e.preventDefault(); toggleAlbum(); });
     else if (project) el.addEventListener('click', e => { e.preventDefault(); togglePop(project); });
     spotsEl.append(el);
     spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos });
@@ -213,6 +215,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const openPhoto = (photoKey = 'photo') => {
     currentPhotoKey = photoKey;
     closePop(false);
+    closeAlbum(false);
     if (!pCard) {
       pCard = document.createElement('div'); pCard.className = 'photo-card'; pCard.setAttribute('role', 'region'); pCard.hidden = true;
       pImg = document.createElement('img'); pImg.decoding = 'async';
@@ -336,6 +339,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function openPop(key) {
     closePhoto(false);
+    closeAlbum(false);
     if (!popEl) {
       popEl = document.createElement('div'); popEl.className = 'pop-card'; popEl.setAttribute('role', 'region'); popEl.hidden = true;
       popClose = document.createElement('button'); popClose.type = 'button'; popClose.className = 'card-x'; popClose.textContent = '×';
@@ -389,6 +393,215 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return h && storyParts.has(h.object) ? h.object.userData.anchor : null;
   };
 
+  // Interactive Photo Album in About Me (D-039)
+  const albumParts = new Set(albumPicks ?? []), albumThings = [...(albumPicks ?? []), ...occluders];
+  const albumRay = new THREE.Raycaster();
+  const albumHit = ndcPos => {
+    albumRay.setFromCamera(ndcPos, camera);
+    const h = albumRay.intersectObjects(albumThings, false)[0];
+    return h && albumParts.has(h.object) ? h.object.userData : null;
+  };
+  let albumOpen = false, albumIndex = 0;
+  let albumModal = null, albumBackdrop = null, albumBook = null;
+  let albumPhotoEl = null, albumTitleEl = null, albumDescEl = null, albumCounterEl = null;
+  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumThumbsContainer = null;
+  let albumTimer = null;
+
+  const getAlbumPhotos = () => t(curLang, 'model.album.photos') || [];
+
+  function buildAlbumModal() {
+    if (albumModal) return;
+    albumModal = document.createElement('div');
+    albumModal.className = 'album-modal';
+    albumModal.setAttribute('role', 'dialog');
+    albumModal.setAttribute('aria-modal', 'true');
+    albumModal.hidden = true;
+    albumModal.inert = true;
+
+    albumBackdrop = document.createElement('div');
+    albumBackdrop.className = 'album-backdrop';
+    albumBackdrop.addEventListener('click', () => closeAlbum(true));
+
+    albumBook = document.createElement('div');
+    albumBook.className = 'album-book';
+
+    albumCloseBtn = document.createElement('button');
+    albumCloseBtn.type = 'button';
+    albumCloseBtn.className = 'card-x album-close';
+    albumCloseBtn.textContent = '×';
+    albumCloseBtn.addEventListener('click', () => closeAlbum(true));
+
+    const spread = document.createElement('div');
+    spread.className = 'album-spread';
+
+    // Left page: photo mount & photo
+    const pageLeft = document.createElement('div');
+    pageLeft.className = 'album-page album-page-left';
+
+    const photoMount = document.createElement('div');
+    photoMount.className = 'album-photo-mount';
+    photoMount.setAttribute('role', 'button');
+    photoMount.tabIndex = 0;
+    photoMount.addEventListener('click', () => {
+      const photos = getAlbumPhotos();
+      if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+    });
+    photoMount.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const photos = getAlbumPhotos();
+        if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+      }
+    });
+
+    albumPhotoEl = document.createElement('img');
+    albumPhotoEl.className = 'album-photo';
+    albumPhotoEl.decoding = 'async';
+    photoMount.append(albumPhotoEl);
+
+    const clickHint = document.createElement('span');
+    clickHint.className = 'album-click-hint';
+    clickHint.textContent = '›';
+    photoMount.append(clickHint);
+
+    pageLeft.append(photoMount);
+
+    // Center spine
+    const spine = document.createElement('div');
+    spine.className = 'album-spine';
+
+    // Right page: text, thumbnails, controls
+    const pageRight = document.createElement('div');
+    pageRight.className = 'album-page album-page-right';
+
+    const header = document.createElement('div');
+    header.className = 'album-header';
+
+    const tag = document.createElement('span');
+    tag.className = 'album-tag';
+    tag.textContent = t(curLang, 'model.album.title');
+
+    albumCounterEl = document.createElement('span');
+    albumCounterEl.className = 'album-counter';
+
+    header.append(tag, albumCounterEl);
+
+    albumTitleEl = document.createElement('h3');
+    albumTitleEl.className = 'album-title';
+
+    albumDescEl = document.createElement('p');
+    albumDescEl.className = 'album-desc';
+
+    albumThumbsContainer = document.createElement('div');
+    albumThumbsContainer.className = 'album-thumbs';
+
+    const nav = document.createElement('div');
+    nav.className = 'album-nav';
+
+    albumPrevBtn = document.createElement('button');
+    albumPrevBtn.type = 'button';
+    albumPrevBtn.className = 'album-btn album-btn-prev';
+    albumPrevBtn.addEventListener('click', () => {
+      const photos = getAlbumPhotos();
+      if (photos.length) setAlbumIndex((albumIndex - 1 + photos.length) % photos.length);
+    });
+
+    albumNextBtn = document.createElement('button');
+    albumNextBtn.type = 'button';
+    albumNextBtn.className = 'album-btn album-btn-next';
+    albumNextBtn.addEventListener('click', () => {
+      const photos = getAlbumPhotos();
+      if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+    });
+
+    nav.append(albumPrevBtn, albumNextBtn);
+
+    const hintEl = document.createElement('p');
+    hintEl.className = 'album-hint';
+    hintEl.textContent = t(curLang, 'model.album.hint');
+
+    pageRight.append(header, albumTitleEl, albumDescEl, albumThumbsContainer, nav, hintEl);
+
+    spread.append(pageLeft, spine, pageRight);
+    albumBook.append(albumCloseBtn, spread);
+    albumModal.append(albumBackdrop, albumBook);
+    stage.append(albumModal);
+  }
+
+  function updateAlbumView() {
+    if (!albumModal || !albumOpen) return;
+    const photos = getAlbumPhotos();
+    if (!photos.length) return;
+    if (albumIndex < 0) albumIndex = 0;
+    if (albumIndex >= photos.length) albumIndex = photos.length - 1;
+
+    const current = photos[albumIndex];
+    albumPhotoEl.src = `${import.meta.env.BASE_URL}${current.src}`;
+    albumPhotoEl.alt = current.title;
+    albumTitleEl.textContent = current.title;
+    albumDescEl.textContent = current.desc;
+    albumCounterEl.textContent = `${albumIndex + 1} / ${photos.length}`;
+
+    albumCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
+    albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
+    albumNextBtn.textContent = `${t(curLang, 'model.album.next')} ›`;
+    albumModal.setAttribute('aria-label', `${t(curLang, 'model.album.title')} - ${current.title}`);
+
+    albumThumbsContainer.innerHTML = '';
+    photos.forEach((p, idx) => {
+      const thumbBtn = document.createElement('button');
+      thumbBtn.type = 'button';
+      thumbBtn.className = 'album-thumb' + (idx === albumIndex ? ' active' : '');
+      thumbBtn.setAttribute('aria-label', `${idx + 1}: ${p.title}`);
+      const thumbImg = document.createElement('img');
+      thumbImg.src = `${import.meta.env.BASE_URL}${p.src}`;
+      thumbImg.alt = '';
+      thumbImg.decoding = 'async';
+      thumbBtn.append(thumbImg);
+      thumbBtn.addEventListener('click', () => setAlbumIndex(idx));
+      albumThumbsContainer.append(thumbBtn);
+    });
+  }
+
+  function setAlbumIndex(idx) {
+    albumIndex = idx;
+    updateAlbumView();
+  }
+
+  function openAlbum() {
+    closePhoto(false);
+    closePop(false);
+    buildAlbumModal();
+    clearTimeout(albumTimer);
+    albumOpen = true;
+    albumModal.hidden = false;
+    albumModal.inert = false;
+    albumModal.removeAttribute('aria-hidden');
+    stage.classList.add('album-open');
+    updateAlbumView();
+    void albumModal.offsetWidth;
+    albumModal.classList.add('on');
+    albumCloseBtn.focus({ preventScroll: true });
+  }
+
+  function closeAlbum(restoreFocus = false) {
+    if (!albumModal || !albumOpen) return;
+    albumOpen = false;
+    albumModal.classList.remove('on');
+    albumModal.inert = true;
+    stage.classList.remove('album-open');
+    clearTimeout(albumTimer);
+    const had = albumModal.contains(document.activeElement);
+    if (reduced) albumModal.hidden = true;
+    else albumTimer = setTimeout(() => { if (!albumOpen) albumModal.hidden = true; }, 260);
+    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+  }
+
+  function toggleAlbum() {
+    if (albumOpen) closeAlbum(true);
+    else openAlbum();
+  }
+
   // Pointer: drag turns the model freely, right/middle/Shift/Space-drag pans, two fingers (or wheel) zoom.
   // (or plays the hidden cellar machine). Touch rule: a one-finger drag that starts mostly vertical is left to the page scroll;
   // one that starts mostly horizontal locks as an orbit (azimuth and elevation); two fingers always orbit and pinch.
@@ -409,6 +622,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (openId === 'about') {
       const ph = photoHit(n);
       if (ph === 'photo' && photo) return { key: 'photo', anchor: photo.anchor };
+      const alb = albumHit(n);
+      if (alb) return { key: 'album', anchor: alb.anchor };
       const tr = trophyHit(n);
       if (tr?.project) return { key: tr.project, anchor: tr.anchor };
       const st = storyHit(n);
@@ -438,6 +653,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     hoverTip.hidden = false;
   }
   addEventListener('keydown', e => {
+    if (albumOpen) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeAlbum(true);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const photos = getAlbumPhotos();
+        if (photos.length) setAlbumIndex((albumIndex - 1 + photos.length) % photos.length);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const photos = getAlbumPhotos();
+        if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+      }
+      return;
+    }
     if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
       spaceDown = true;
       if (e.target === canvas) e.preventDefault();
@@ -490,8 +720,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         const proj = (openId === 'projects' || openId === 'ai' || openId === 'writing') ? projectHit(ndc(e)) : null;
         const trophy = openId === 'about' ? trophyHit(ndc(e)) : null;
         const stAnchor = openId === 'about' ? storyHit(ndc(e)) : null;
+        const albHit = openId === 'about' ? albumHit(ndc(e)) : null;
         const pHit = photoHit(ndc(e));
         if (egg.hit(ndc(e))) egg.play();
+        else if (albHit) toggleAlbum();
         else if (openId === 'about' && pHit === 'photo') togglePhoto('photo');
         else if (openId === 'writing' && pHit === 'speaking') togglePhoto('speaking');
         else if (trophy?.project) togglePop(trophy.project);
@@ -579,6 +811,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     egg.update(now, stageW, stageH);
     updatePhoto();
     updatePop();
+    if (openId !== 'about' && albumOpen) closeAlbum(false);
 
     for (const r of Object.values(rooms)) {
       const isOpen = r.id === openId, isHot = r.id === hoverId && !openId;
@@ -604,6 +837,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
       if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
       if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
+      if (id !== 'about') closeAlbum(false);
       if (popKey && !popAllowed(id, popKey)) closePop(false);
       if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
       setGoal();
@@ -613,12 +847,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     getPanMode: () => panMode,
     reset: resetView,
     closeNote() {
-      const had = egg.isOpen || pOpen || Boolean(popKey);
-      egg.close(true); closePhoto(true); closePop(true);
+      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen;
+      egg.close(true); closePhoto(true); closePop(true); closeAlbum(true);
       return had;
     },
     isCustom: () => custom,
-    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); updateHoverTip(); },
+    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); if (albumModal && albumOpen) updateAlbumView(); updateHoverTip(); },
     ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; } } } : {}),
   };
 }

@@ -211,6 +211,8 @@ until a later entry replaces it.
   - **Horizontal Links Layout:** Converted the 3 stacked rectangular buttons in `.hero-actions` into clean text hyperlinks (`.hero-link`) with dedicated captions (`.hero-desc`) placed directly underneath each link.
   - **Space-Saving 3-Column Arrangement:** Replaced the vertical stack with a 3-column horizontal grid (`grid-template-columns: repeat(3, minmax(0, 1fr))`, wrapping to 1 column on mobile screens <= 600px). This saves over 110px of vertical space, eliminates clipping behind the footer strip, and keeps the entire desktop layout compact on one screen per D-014.
 
+- **D-041 (2026-11-17) Mobile translucent intro and breathing room (owner decision).** On mobile, extend the interactive 3D canvas behind the intro, using the desktop intro's 78% paper background and 8 px backdrop blur. Give the model more vertical space above and below, with an exposed touch area and the existing room controls beneath it. Preserve the normal-flow static/no-JavaScript fallback. Record the mobile design in `DESIGN.md`.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

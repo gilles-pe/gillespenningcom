@@ -218,6 +218,14 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .brand, .top nav a { min-height: var(--h3); }
   .hero { grid-template-columns: 1fr; padding: 0 var(--s3) var(--s3); gap: var(--s3); }
   .intro { gap: var(--s2); max-width: none; }
+  /* The live model extends behind the introductory copy; its lower area remains
+     clear for touch interaction. Keep the static/no-JS fallback in normal flow. */
+  html.js .hero:has(.stage:not(.static)) { align-items: start; }
+  html.js .hero:has(.stage:not(.static)) .intro { grid-area: 1 / 1; position: relative; z-index: 2; padding: var(--s3); background: color-mix(in srgb, var(--paper) 78%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); pointer-events: none; }
+  html.js .hero:has(.stage:not(.static)) .intro a { pointer-events: auto; }
+  html.js .stage:not(.static) { grid-area: 1 / 1; }
+  html.js .stage:not(.static) #scene { height: calc(100svh + var(--s7) * 2); }
+  html.js .stage:not(.static) .labels, html.js .stage:not(.static) .spots { height: calc(100svh + var(--s7) * 2); }
   h1, html:lang(de) h1 { font-size: var(--t4); line-height: 1.1; }
   .intro p { font-size: var(--t2); }
   .intro hr { display: none; }
@@ -285,6 +293,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .pop-text { font-size: var(--t1); line-height: 1.35; color: var(--ink); }
 @media (max-width: 800px) {
   .photo-card, .pop-card, .egg { left: 50%; top: calc(min(84vw, 44svh) / 2); width: min(calc(var(--s7) * 3), calc(100% - var(--s4))); max-height: calc(min(84vw, 44svh) - var(--s2)); overflow-y: auto; overscroll-behavior: contain; }
+  html.js .stage:not(.static) .photo-card, html.js .stage:not(.static) .pop-card, html.js .stage:not(.static) .egg { position: fixed; top: 50%; max-height: calc(100svh - var(--s5)); }
   .photo-card { transform: translate(-50%, -50%) scale(0.86); }
   .pop-card { transform: translate(-50%, -50%) scale(0.92); }
   .egg { transform: translate(-50%, -50%); }

@@ -207,6 +207,9 @@ until a later entry replaces it.
     - *Right Page:* Features an elegant header with album badge and page counter (`1 / 7`), serif photo title, descriptive caption, a 7-photo thumbnail strip for direct jumping, previous/next navigation buttons (`‹ Vorheriges`, `Nächstes ›`), and keyboard hint (`Klicken zum Blättern · Pfeiltasten ‹ ›`).
     - *7 Processed Photos (`public/album/photo-1.webp` .. `photo-7.webp`):* 1. Elbe & COSCO container ship in Hamburg; 2. Speicherstadt rainbow over canals; 3. Dockland sunset puddle reflection; 4. Köhlbrandbrücke marathon runners; 5. Ponte Dom Luís I at sunset in Porto; 6. Ever Acme mega-ship arriving in port; 7. Quiet evening sunset with bench and trail signpost. Images are compressed with sharp (max width 1024px, 80% WebP quality, ~50-144 KB each) for optimal screen fidelity and fast load times.
     - *Keyboard & Accessibility:* Supports `ArrowLeft` / `ArrowRight` page turning, `Escape` to close, full keyboard navigation with focus trapping, backdrop dismiss, and strict token adherence passing `npm run check`.
+- **D-040 (2026-11-17) Hero Action Links in Horizontal Triad with Descriptions Underneath (owner decision 2026-11-17):**
+  - **Horizontal Links Layout:** Converted the 3 stacked rectangular buttons in `.hero-actions` into clean text hyperlinks (`.hero-link`) with dedicated captions (`.hero-desc`) placed directly underneath each link.
+  - **Space-Saving 3-Column Arrangement:** Replaced the vertical stack with a 3-column horizontal grid (`grid-template-columns: repeat(3, minmax(0, 1fr))`, wrapping to 1 column on mobile screens <= 600px). This saves over 110px of vertical space, eliminates clipping behind the footer strip, and keeps the entire desktop layout compact on one screen per D-014.
 
 ## Open questions
 

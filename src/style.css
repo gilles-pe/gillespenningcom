@@ -25,12 +25,17 @@ h1, h2, h3 { overflow-wrap: break-word; font-family: var(--serif); }
 
 /* ---- Hero ---- */
 .hero { display: grid; grid-template-columns: minmax(280px, 30%) 1fr; gap: var(--s4); padding: 0 var(--s5) var(--s5); align-items: center; }
-.intro { display: grid; gap: var(--s4); max-width: 480px; }
+.intro { display: grid; gap: var(--s4); max-width: 520px; }
 h1 { font-size: var(--t5); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: var(--petrol); text-wrap: balance; font-family: var(--serif); }
 .intro hr { width: var(--s6); margin: 0; border: 0; border-top: 2px solid var(--brass); }
-.hero-actions { display: grid; gap: var(--s3); }
-.hero-action { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); }
+.hero-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
+.hero-action { display: flex; flex-direction: column; gap: var(--s1); }
+.hero-link { font-size: var(--t2); font-weight: 600; color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); line-height: 1.25; }
+.hero-link:hover { color: var(--brass-ink); text-decoration-color: var(--brass); }
 .hero-desc { font-size: var(--t1); color: var(--muted); line-height: 1.35; }
+@media (max-width: 600px) {
+  .hero-actions { grid-template-columns: 1fr; gap: var(--s2); }
+}
 
 .btn, .pill { display: inline-flex; align-items: center; gap: var(--s3); height: var(--h2); padding: 0 var(--s3); font-size: var(--t2); font-family: inherit; text-decoration: none; border: 1px solid var(--petrol); border-radius: var(--r1); color: var(--petrol); background: transparent; cursor: pointer; }
 .btn.primary { background: var(--petrol); color: var(--paper); }

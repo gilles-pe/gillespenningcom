@@ -41,6 +41,8 @@ Intro surfaces use 88% paper, and overlay cards and 3D labels use roughly 86–8
 
 The four mobile room controls use translucent paper with backdrop blur like the Reset view control. They form two columns from 481–800 px and one column on narrower phones. The selected room uses a translucent deep-blue fill. See D-047.
 
+The intro links lead with the AI in Medicine Monitor, then the AI Medicine Wimmel Book, with MedTech Signal as a quieter reading link beneath. Desktop presents the two projects side by side; mobile stacks all three at up to 800 px. The Wimmel Book description invites playful exploration in both languages. See D-048.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,

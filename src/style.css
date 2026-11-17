@@ -28,13 +28,16 @@ h1, h2, h3 { overflow-wrap: break-word; font-family: var(--serif); }
 .intro { display: grid; gap: var(--s4); max-width: 520px; }
 h1 { font-size: var(--t5); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: var(--petrol); text-wrap: balance; font-family: var(--serif); }
 .intro hr { width: var(--s6); margin: 0; border: 0; border-top: 2px solid var(--brass); }
-.hero-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
+.hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); }
 .hero-action { display: flex; flex-direction: column; gap: var(--s1); }
+.hero-action:last-child { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: var(--s1) var(--s2); }
+.hero-action:last-child .hero-link { font-weight: 400; }
 .hero-link { font-size: var(--t2); font-weight: 600; color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); line-height: 1.25; }
 .hero-link:hover { color: var(--brass-ink); text-decoration-color: var(--brass); }
 .hero-desc { font-size: var(--t1); color: var(--muted); line-height: 1.35; }
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .hero-actions { grid-template-columns: 1fr; gap: var(--s2); }
+  .hero-action:last-child { grid-column: auto; flex-direction: column; gap: var(--s1); }
 }
 
 .btn, .pill { display: inline-flex; align-items: center; gap: var(--s3); height: var(--h2); padding: 0 var(--s3); font-size: var(--t2); font-family: inherit; text-decoration: none; border: 1px solid var(--petrol); border-radius: var(--r1); color: var(--petrol); background: transparent; cursor: pointer; }

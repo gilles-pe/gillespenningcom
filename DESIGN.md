@@ -33,6 +33,10 @@ Desktop is one screen (`100svh`) with the 3D stage (`#scene`, `z-index: 0`) runn
 
 On phones (up to 800 px), the live model extends behind the intro in a taller canvas, with extra space above and below the model. The overview is positioned lower within that canvas so it sits more centrally in the exposed area; individual room framing is unchanged. The intro uses the same 78% paper / 22% transparency and 8 px background blur as desktop; links remain usable and the exposed model area supports touch. Room controls and content remain below the model. Without WebGL or JavaScript, keep the static fallback and text in normal flow. See D-041 and D-042.
 
+The default overview camera looks from about 31° above and 13° to the left, with a wider framing that keeps the entire model visible. On desktop and mobile, opening a room or manually moving the view hides the introductory text surface so it cannot cover wall labels or interactive objects. Returning to the unmodified overview restores the introduction. See D-043.
+
+On narrow phones, the canvas is one viewport height plus one large spacing step. The mobile overview aim is lowered within it, giving the model more space beneath the intro and bringing its base closer to the room controls. See D-044.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,

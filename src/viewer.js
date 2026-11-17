@@ -54,7 +54,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   labelSpots();
 
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
-  const EL = 0.74, TAU = Math.PI * 2;                     // default elevation in radians
+  const EL = 0.54, AZ = -0.22, TAU = Math.PI * 2;         // overview: lower, slightly from the left
   // view = what is drawn (damped), goal = where it is heading. el is free all the way round (upside down included).
   const view = { az: 0, el: EL, dist: 30, t: new THREE.Vector3(0, 0.2, 0.3) };
   const goal = { az: 0, el: EL, dist: 30, t: view.t.clone() };
@@ -119,14 +119,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const left = mob ? -0.94 : -0.45, right = mob ? 0.96 : 0.90;
       home.dist = fitView(roomPts[openId], home.t, home.az, left, right, Math.max(0.55, 0.92 - topPad), Math.max(0.5, 0.92 - bar)) * 0.68;
     } else {
-      home.t.copy(center); home.az = 0;
+      home.t.copy(center); home.az = AZ;
       const bar = mob ? 0 : 2 * 90 / stageH;
       const left = mob ? -0.96 : -0.58, right = mob ? 0.96 : 0.88;
-      home.dist = fitView(outline, home.t, 0, left, right, Math.max(0.55, 0.94 - topPad), Math.max(0.5, 0.94 - bar)) * 0.78;
+      home.dist = fitView(outline, home.t, home.az, left, right, Math.max(0.55, 0.94 - topPad), Math.max(0.5, 0.94 - bar)) * 0.92;
       // On the taller mobile canvas, lower the overview so it is centred in
       // the open area beneath the translucent introduction. Room views keep
       // their own framing; reset returns to this same overview position.
-      if (mob) home.t.addScaledVector(upv, home.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * 0.32);
+      if (mob) home.t.addScaledVector(upv, home.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * 0.46);
     }
     if (!custom) { panOffset.set(0, 0, 0); goal.az = near(view.az, home.az); goal.el = near(view.el, EL); goal.dist = home.dist; zoom = 1; }
     else goal.dist = Math.max(DMIN, home.dist * zoom);

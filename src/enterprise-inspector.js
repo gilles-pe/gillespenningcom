@@ -1,3 +1,4 @@
+import { labelShipAction } from './enterprise-copy.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createEnterprise, disposeEnterprise } from './enterprise.js';
@@ -9,10 +10,10 @@ export function showEnterprise(era, copy, reduced, launch = false) {
   const viewport=document.createElement('div');viewport.className='ship-viewport';
   const hint=document.createElement('p');hint.textContent=copy.hint;
   const footer=document.createElement('div');footer.className='ship-actions';
-  const warp=document.createElement('button');warp.type='button';warp.textContent=copy.warp;
-  const reset=document.createElement('button');reset.type='button';reset.textContent=copy.reset;
+  const warp=document.createElement('button');warp.type='button';labelShipAction(warp,copy.warp,'warp');
+  const reset=document.createElement('button');reset.type='button';labelShipAction(reset,copy.reset,'reset');
   const status=document.createElement('p');status.className='ship-status';status.setAttribute('role','status');status.textContent=copy.ready;
-  footer.append(warp,reset);dialog.append(close,title,viewport,hint,footer,status);document.body.append(dialog);
+  footer.append(reset,warp);footer.prepend(hint);dialog.append(close,title,viewport,footer,status);document.body.append(dialog);
   const previous=document.activeElement, previousOverflow=document.body.style.overflow;
   let renderer;
   try {renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});} catch { dialog.remove();return false; }

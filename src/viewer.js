@@ -1,4 +1,4 @@
-import { enterpriseCopy } from './enterprise-copy.js';
+import { enterpriseCopy, labelShipAction } from './enterprise-copy.js';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { t } from './i18n.js';
@@ -306,8 +306,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const isShip = popKey === 'enterprise' || popKey === 'enterpriseD';
     const shipCopy = enterpriseCopy[curLang];
     shipActions.hidden = !isShip;
-    shipActions.children[0].textContent = shipCopy.inspect;
-    shipActions.children[1].textContent = shipCopy.warp;
+    labelShipAction(shipActions.children[0], shipCopy.inspect, 'inspect');
+    labelShipAction(shipActions.children[1], shipCopy.warp, 'warp');
     if (popKey === 'story') {
       const title = t(curLang, 'model.spots.story');
       popEl.setAttribute('aria-label', title);
@@ -323,7 +323,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!data) return;
     popEl.setAttribute('aria-label', data.title);
     popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
-    popTitle.textContent = data.title;
+    popTitle.textContent = isShip ? (popKey === 'enterpriseD' ? 'NCC-1701-D' : 'NCC-1701') : data.title;
     popText.textContent = isShip ? shipCopy[popKey === 'enterpriseD' ? 'tng' : 'tos'] : data.text;
     popTimeline.replaceChildren();
     popTimeline.hidden = !Array.isArray(data.timeline);
@@ -363,10 +363,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     miniature.updateWorldMatrix(true, true);
     const bounds = new THREE.Box3().setFromObject(miniature), target = bounds.getCenter(new THREE.Vector3());
     const radius = bounds.getSize(new THREE.Vector3()).length() / 2;
-    const rect = stage.getBoundingClientRect(), card = popEl.getBoundingClientRect();
-    const left = phone() ? 16 : Math.max(stageW * .36, card.right - rect.left + 24);
+    popEl.style.top = phone() ? `${Math.max(0, stageH - popEl.offsetHeight - 8)}px` : '';
+    const rect = canvas.getBoundingClientRect(), card = popEl.getBoundingClientRect();
+    const left = phone() ? 16 : stageW * .36;
     const right = stageW - 16, top = phone() ? 16 : 88;
-    const bottom = phone() ? Math.max(top + 80, card.top - rect.top - 16) : stageH - BAR - 16;
+    const bottom = Math.max(top + 80, card.top - rect.top - 16);
     const width = Math.max(100, right - left), height = Math.max(80, bottom - top);
     const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
     const dist = Math.max(DMIN, radius * 1.25 / Math.sin(Math.atan(Math.min(tv * height / stageH, tv * camera.aspect * width / stageW))));
@@ -383,7 +384,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function restoreShipView() {
     if (!shipFocus) return;
     const saved = shipFocus; shipFocus = null;
-    stage.classList.remove('ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
+    stage.classList.remove('ship-focused'); popEl.style.top = ''; custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
     goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.target);
     checkAway();
   }
@@ -435,6 +436,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     stopAutoCard();
     popKey = key;
     popEl.classList.toggle('rack-card', key === 'rack');
+    popEl.classList.toggle('ship-card', ['enterprise', 'enterpriseD'].includes(key));
     fillPop();
     popEl.hidden = false;
     popEl.inert = false;

@@ -234,6 +234,8 @@ until a later entry replaces it.
 
 - **D-060 (2026-11-18) First-tap model camera (owner correction).** On selecting a miniature, move the main room camera in front of the cabinet and frame the selected model for immediate inspection. Keep the card beside the model on desktop and beneath it within the mobile canvas. Closing restores the prior camera pose; reset returns to room framing. Recompute framing on resize and skip the camera travel for reduced motion. Warp remains an explicit second action.
 
+- **D-061 (2026-11-18) More elegant ship controls (owner feedback).** Replace the bulky ship preview and boxed Warp controls with a compact bottom caption, registry heading, short class/series line and restrained text actions with line icons. Use the same visual language in the inspector. Keep first-click camera positioning, explicit Warp activation, keyboard access and touch target sizes. Model provenance is unchanged: original procedural interim models; the intended Sketchfab files are not yet acquired.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

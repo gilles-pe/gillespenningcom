@@ -191,6 +191,12 @@ until a later entry replaces it.
   - **Color Palette:** Fully aligned design tokens (`src/tokens.css`, `DESIGN.md`) with `ai.gillespenning.com`: `--paper: #f7f6f2` (soft warm neutral background), `--surface: #ffffff` (cards and elevated panels), `--line: #dcd9d0` (subtle hairlines and borders), `--ink: #18181b` (primary body text), `--muted: #4b5563` (secondary captions/metadata), `--teal: #1e3a8a` (signature deep blue accent for headings, active navigation, buttons, and focus outlines), `--teal-surface: #eff6ff` (light tint for badges and highlights), and `--brass-ink: #172554` (high-contrast deep blue text for small sizes, 7:1+).
   - **Two-Font Typography System:** Adopted the AI Monitor font pair: `--serif: 'Source Serif 4', Georgia, serif` for brand name, headings (`h1`, `h2`, `h3`), and 3D architectural wall lettering, and `--sans: 'Source Sans 3', system-ui, -apple-system, sans-serif` for body text, navigation links, buttons, tooltips, cards, and footer strip. Fonts are self-hosted locally via `@fontsource/source-serif-4` and `@fontsource/source-sans-3` with zero external requests per `AGENTS.md`.
   - **Hero & Intro Structure:** Added collapsible `<details class="about-scope">` with summary label (`"About this site"` / `"Über diese Seite"`) around the second intro paragraph, preserving full two-column breathing room and clean focus on the primary CTAs (`AI in Medicine Monitor` and `Wimmelbild`) alongside crisp accent lines.
+- **D-037 (2026-11-17) Hero Intro Expansion & Triad Action Buttons with Explanatory Lines (owner decision 2026-11-17):**
+  - **Hero Text Expansion:** Removed collapsible `<details class="about-scope">`. Expanded the intro paragraph directly beneath the headline to include the owner's 25-year MedTech perspective: *"I enjoy 25 years in MedTech, alongside great people and projects. Here I share the projects I build, the ideas I pick up from the people I meet, and a few thoughts on what we need to sustain and improve healthcare in times of technological and demographic changes."* (and German equivalent).
+  - **Unified Action Triad with Sublines:** Formatted all three key destinations as equal `.btn` actions with dedicated sublines explaining their purpose:
+    1. **AI Medicine Wimmel Book** (`https://wimmelbild.gillespenning.com/en/`) — *Fun time to explore AI impact*
+    2. **AI in Medicine Monitor** (`https://ai.gillespenning.com/`) — *Serious way to track progress*
+    3. **Read MedTech Signal** (`https://medtechsignal.substack.com/`) — *My thoughts and writing on this*
 
 ## Open questions
 

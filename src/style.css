@@ -28,14 +28,9 @@ h1, h2, h3 { overflow-wrap: break-word; font-family: var(--serif); }
 .intro { display: grid; gap: var(--s4); max-width: 480px; }
 h1 { font-size: var(--t5); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: var(--petrol); text-wrap: balance; font-family: var(--serif); }
 .intro hr { width: var(--s6); margin: 0; border: 0; border-top: 2px solid var(--brass); }
-.about-scope { font-size: var(--t2); color: var(--muted); border-left: 2px solid var(--line); padding-left: var(--s3); }
-.about-scope summary { cursor: pointer; font-weight: 600; color: var(--petrol); user-select: none; }
-.about-scope summary:hover { color: var(--brass-ink); }
-.about-scope p { margin-top: var(--s2); line-height: 1.4; color: var(--muted); }
-.actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--s2); }
-.more { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); }
-.more a { display: inline-flex; align-items: center; min-height: var(--h2); font-size: var(--t2); color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); }
-.more a:hover { text-decoration-color: var(--brass); }
+.hero-actions { display: grid; gap: var(--s3); }
+.hero-action { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); }
+.hero-desc { font-size: var(--t1); color: var(--muted); line-height: 1.35; }
 
 .btn, .pill { display: inline-flex; align-items: center; gap: var(--s3); height: var(--h2); padding: 0 var(--s3); font-size: var(--t2); font-family: inherit; text-decoration: none; border: 1px solid var(--petrol); border-radius: var(--r1); color: var(--petrol); background: transparent; cursor: pointer; }
 .btn.primary { background: var(--petrol); color: var(--paper); }

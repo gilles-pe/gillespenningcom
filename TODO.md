@@ -27,3 +27,8 @@
 - [ ] Implement TWO distinct, optional warp animations, using our own Three.js effects (not copied TV footage): (1) TOS NCC-1701 - period-appropriate simple accelerating departure, subtle engine lights and classic starfield, no TNG stretch/flash; (2) TNG NCC-1701-D - blue nacelle charge, slit-scan-like elongation, flash, rapid exit and star streaks.
 - [ ] Share animation lifecycle and controls (activate on click, accessible reduced-motion fallback, Escape/reset to desk), but keep separate TOS and TNG visual presets. Test draw calls, GPU memory, first-load size, and FPS on desktop and phone.
 - [ ] Optional Easter egg: both desk models react to a discreet “Engage” interaction; no auto-playing warp or large effects on initial page load.
+
+## Work handoff
+- [x] Add implementation specification and both model source links: [docs/enterprise-models.md](docs/enterprise-models.md).
+- [ ] Obtain both downloadable, license-cleared GLBs; source references are not the actual binary models.
+- [ ] Owner: switch repository visibility to Private in GitHub settings while keeping GitHub Pages active (requires suitable GitHub plan).

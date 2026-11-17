@@ -124,6 +124,74 @@ until a later entry replaces it.
   as "Legal & privacy" / "Impressum & Datenschutz" (14 px, ink colour) and in the no-JavaScript source. Replaces the "legal pages not
   written" part of D-020 and open question 8 (the owner supplied the content; a lawyer has not reviewed it).
 
+## 2026-11-17
+
+- **D-029 Operating room, practice desk, About Me shelf & microphone (owner decision 2026-11-17).**
+  - **AI & Digital Health:** Combines an operating room zone on the left (operating table with sterile drape, 10 mm rigid
+    endoscope with camera head and trailing cable, articulated 7-lens surgical light, rolling 3-drawer cart, and an endoscopic
+    equipment tower for rigid endoscopy with CO₂ cylinder, insufflator, cold light source, camera control unit and a large
+    rolling monitor displaying `ai-wall-1` / Wimmelbild) with a practice corner on the right (two-door cabinet bookshelf
+    along the back wall and angled wooden desk with a desktop monitor displaying `ai-wall-2` / AI in Medicine Monitor instead
+    of a flower). The corridor boundary of the AI room is a three-panel frosted glass partition whose front panel slides open.
+  - **Doorways:** Corridor kerbs in Projects, About Me and Writing & Speaking leave an opening at each sliding door so the
+    brass corridor path enters every room through its door onto the room floor.
+  - **About Me:** Uses the two-door cabinet bookshelf with slightly imperfect standing and stacked books; the brass lamp
+    moves onto the shelf alongside upright/leaning books and a miniature USS Enterprise NCC-1701-E on a display stand. The
+    desk holds an open laptop, a book and a coffee mug. `public/slots/about-wall-1.webp` shows the owner's Porto running
+    photo (bib 8490, 3:4 portrait, warm-graded) and opens a compact animated photo card when clicked inside About Me.
+  - **Writing & Speaking:** Uses the two-door cabinet bookshelf and a detailed studio/podcast table microphone with weighted
+    base, stem, U-yoke, brass collar and mesh capsule on the round lounge table.
+- **D-030 Internal OR glass wall, IT rack, running shoes, panning, compact cards & AI-cliché cleanup (owner decision 2026-11-17).**
+  - **AI & Digital Health:** An internal glass partition wall with an open doorway separates the OR zone from the Vorraum;
+    the rear bookshelf in the Vorraum is replaced by a 19-inch IT server rack with stacked blades and status LEDs.
+  - **About Me:** A pair of miniature running shoes stands on the floor under `about-wall-1`. The running photo card has no
+    caption text and closes via a small top-right `×` button.
+  - **Camera & Mouse Panning:** Removes `setViewOffset` so the model never slides out of the viewport; clamps the camera
+    target within the model bounds; adds right-click / middle-click / Shift+drag panning (plus two-finger touch pan and
+    Shift+Arrow keys).
+  - **Compact Project & Room Cards:** Clicking a project board, monitor or project hotspot opens a compact pop-up card
+    (preview image, 1–2 lines, link if live, top-right `×`). The desktop room card (`#panel`) sits compactly at bottom-left
+    with a top-right `×`, and `Projects` shows a one-line prompt inside the 3D view while `#source` keeps the fallback list.
+  - **Anti-AI-Cliché Cleanup:** Removes the `.kicker` line under `<h1>`, replaces paired filled/outlined and full-width hero/contact
+    buttons with a single primary CTA and underlined text links, removes title `–` dashes, and trims rule-of-three prose lists.
+- **D-031 Full-screen translucent layout, ceiling dual-wing OP light, About Me trophies & Praxisfaden (owner decision 2026-11-17).**
+  - **Full-bleed 3D stage behind translucent UI:** On desktop (`>= 801px`), `#stage` fills `100svh` behind translucent frosted
+    header, intro card, footer strip, cards and hotspot labels (`color-mix` + `backdrop-filter`) so panning/zooming never clips
+    the 3D model at column edges. Right/Middle/Shift/Space-drag and horizontal trackpad swipes pan smoothly; `DMIN = 0.7`,
+    `ZMIN = 0.06` enable close zoom onto the Enterprise-E (rotated into side profile) and other details without extra mode buttons.
+  - **AI & Digital Health:** Rear-most internal glass segment removed so `"AI & Digital Health"` back lettering is uninterrupted;
+    floor-standing OP light replaced by a ceiling-suspended dual-wing surgical light; IT rack tucked into the back-right corner.
+    Opening `AI & Digital Health` zooms cleanly into the room with no `#panel` overlay.
+  - **About Me:** Running shoes removed; career copy updated (MedTech since 2001, digital workflows from telemedicine to AI
+    since 2004, healthcare leadership since 2005, OR system integration / minimally invasive surgery / patient monitoring from 2008,
+    AI & analytics today). Bookshelf adds a brass globe and 3 clickable brass-rimmed trophies (Substack, Bluesky, LinkedIn);
+    open laptop shows `"My Story"` / `"Meine Geschichte"` and opens a compact translucent card on click; floating `.spot` tags
+    in `About Me` are removed.
+  - **Projects, Footer & Cellar:** `DocEase` renamed to `Praxisfaden` (tool for MFAs in outpatient medicine); `Elbstrand` carries
+    `projects-board-4.webp` (`1200 x 900`) and `"Just chill and relax."`. Footer shows the 3 newest Substack posts horizontally
+    (`Latest Substacks:`). `"Explore speaking topics"`, the `#speaking` card, and `nr@gillespenning.com` are removed from the home
+    page (`nr@gillespenning.com` stays only in `legal.html`). Cellar fax machine note updated with a LinkedIn link.
+- **D-032 Left-aligned clickable cards, clean nav states & OP cart placement (owner decision 2026-11-17).**
+  - **OR Rolling Drawer Cart:** Placed flush against the left outer wall of the operating room (`[-2.22, 0.06, 0.48]`, facing into the room).
+  - **No Nav/Button Underlines:** Removed `border-bottom` underlines on top header nav links and room bar active/hover buttons (using color/weight/tint instead) and hover underlines on hotspot labels.
+  - **Direct Card Click & Left Placement:** Removed separate `"Open ..."` CTA links from pop-up cards; clicking a card's image or text opens its target link directly (when live) while `×` closes the card. Pop-up and photo cards anchor to the left side of the 3D area (clear of `.intro` and `#panel`) with `.stage` keeping `z-index: auto` and `#scene` at `z-index: 0` so cards and canvas interactions stay reliably clickable above the 3D view.
+- **D-033 (2026-11-17) Fixed Card Position, Photo Caption & Social Media Pop-up Cards:**
+  - **Consistent Fixed Card Spot:** Stopped moving `.photo-card` and `.pop-card` dynamically per 3D anchor (`clampCardPos` removed). Every pop-up card now opens in one fixed, predictable position (`left: calc(34% + var(--s4)); top: 50%` on desktop, centered inside the 3D viewport on mobile).
+  - **Runner Photo Caption:** Added `"Begeisterter Marathonläufer"` (DE) / `"Passionate marathon runner"` (EN) beneath the running photo inside `.photo-card`.
+  - **Social Media Pop-up Cards:** Clicking the Substack, Bluesky, or LinkedIn trophy plaques in `About Me` or the social hotspots (`signal`, `linkedin`, `bluesky`) in `Writing & Speaking` now opens a compact translucent `.pop-card` with a canvas emblem preview, short description, direct card link to the profile, and top-right `×`.
+  - **Hero Wimmel Book CTA:** Added an `Open AI Medicine Wimmel Book` / `Zum AI Medicine Wimmel Book` button (`https://wimmelbild.gillespenning.com/en/`) alongside `Open the AI in Medicine Monitor` inside `.intro .actions`, with `flex-wrap: wrap` so the two buttons sit side-by-side when space allows and wrap cleanly when narrow.
+- **D-034 (2026-11-17) Impeccable Init & Hook Configuration (`PRODUCT.md`, `.impeccable/config.json`):**
+  - **Product Positioning Priority:** Created `PRODUCT.md` via `/impeccable init` establishing flagship project promotion (`AI in Medicine Monitor` and `Wimmelbild`) and clinical AI / MedTech expert positioning as the primary focus alongside speaker bookings and career reference.
+  - **Workflow & Hook Policy:** Configured `.impeccable/config.json` with `"buildPath": "code"` (code-first against `DESIGN.md` and `src/tokens.css`) and ran `impeccable hooks off` so the automatic edit hook remains disabled per `AGENTS.md` without repeating doctor warnings.
+- **D-035 (2026-11-17) Top-Right Borderless Auto-Fading Cards, Closer 3D View, Free Panning, Furniture Upgrade & Hover Tooltips:**
+  - **Stacking Context & Top-Right Cards:** Changed desktop `.stage` to `position: absolute` inside `body { position: relative; }` with `.hero { position: static; }` and raised overlay UI (`z-index: 6`), so `.panel`, `.photo-card`, `.pop-card`, and `.egg` always render cleanly above `.intro` at top-right beside `.intro`. Cards use bright, borderless frosted paper (`64%` opacity, `border: 0`, borderless emblems) and auto-dismiss after 6 seconds when not hovered.
+  - **Navigation & Camera:** Moved `All rooms` (`.back`), `"Move"` / `"Verschieben"` pan toggle (`.pan-toggle`), and `.reset` to the right column; clicking any room in `.top nav` or `.bar` on desktop zooms deeply (`* 0.68`) and centers more evenly; default overview zooms closer (`* 0.78`) and more centrally. Widened pan clamp bounds (`-14..14` / `-6..8`), enabled global `Space` + left-drag, right/middle-drag, `Shift`/`Ctrl`/`Alt` + drag, and one-click `"Verschieben"` left-drag mode.
+  - **3D Seating & Interactive Objects:** Added ergonomic 5-star office swivel chairs (`officeChair`) at both desks (`AI & Digital Health`, `About Me`) and plush club chairs (`podcastArmchair`) in `Writing & Speaking`. Moved LinkedIn and Bluesky off `HOTSPOTS.writing`, made the `AI & Digital Health` server rack (`rack`: telemedicine/OR integration since 2004, workflows, data & tools) and `USS Enterprise NCC-1701-E` (`enterprise`) clickable, and added desktop-only `.hover-tip` tooltips over interactive 3D props while preserving visible `.spots` on mobile.
+- **D-036 (2026-11-17) Harmonization with AI in Medicine Monitor Visual System, Typography & Structure (owner decision 2026-11-17):**
+  - **Color Palette:** Fully aligned design tokens (`src/tokens.css`, `DESIGN.md`) with `ai.gillespenning.com`: `--paper: #f7f6f2` (soft warm neutral background), `--surface: #ffffff` (cards and elevated panels), `--line: #dcd9d0` (subtle hairlines and borders), `--ink: #18181b` (primary body text), `--muted: #4b5563` (secondary captions/metadata), `--teal: #1e3a8a` (signature deep blue accent for headings, active navigation, buttons, and focus outlines), `--teal-surface: #eff6ff` (light tint for badges and highlights), and `--brass-ink: #172554` (high-contrast deep blue text for small sizes, 7:1+).
+  - **Two-Font Typography System:** Adopted the AI Monitor font pair: `--serif: 'Source Serif 4', Georgia, serif` for brand name, headings (`h1`, `h2`, `h3`), and 3D architectural wall lettering, and `--sans: 'Source Sans 3', system-ui, -apple-system, sans-serif` for body text, navigation links, buttons, tooltips, cards, and footer strip. Fonts are self-hosted locally via `@fontsource/source-serif-4` and `@fontsource/source-sans-3` with zero external requests per `AGENTS.md`.
+  - **Hero & Intro Structure:** Added collapsible `<details class="about-scope">` with summary label (`"About this site"` / `"Über diese Seite"`) around the second intro paragraph, preserving full two-column breathing room and clean focus on the primary CTAs (`AI in Medicine Monitor` and `Wimmelbild`) alongside crisp accent lines.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

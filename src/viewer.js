@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { t } from './i18n.js';
 import { createEgg } from './egg.js';
+import { PATHS } from './icons.js';
 
 export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway }) {
   let renderer;
@@ -11,7 +12,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, projectPicks, trophyPicks, storyPicks } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -24,22 +25,27 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   const phone = () => matchMedia('(max-width: 800px)').matches;
 
-  // Hotspots are real links, placed over the objects they belong to.
+  // Hotspots are real links (or buttons for soon/project cards), placed over the objects they belong to.
   const spots = [];
-  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [key, href, x, y, z] of list) {
-    const el = document.createElement(href ? 'a' : 'span');
-    el.className = 'spot' + (href ? '' : ' soon'); el.tabIndex = -1;
+  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [key, href, x, y, z, project] of list) {
+    const el = document.createElement(href ? 'a' : project ? 'button' : 'span');
+    if (el.tagName === 'BUTTON') el.type = 'button';
+    el.className = 'spot' + (id === 'about' ? ' quiet-spot' : '') + (href ? '' : ' soon'); el.tabIndex = -1;
+    el.dataset.room = id;
     if (href) el.href = href;
-    const sp = { key, el };
+    const pos = new THREE.Vector3(x, y, z).add(rooms[id].group.position);
+    const sp = { key, el, project };
+    if (project === 'photo') el.addEventListener('click', e => { e.preventDefault(); togglePhoto(); });
+    else if (project) el.addEventListener('click', e => { e.preventDefault(); togglePop(project); });
     spotsEl.append(el);
-    spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos: new THREE.Vector3(x, y, z).add(rooms[id].group.position) });
+    spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos });
   }
 
   let curLang = lang;
   function labelSpots() {
     for (const s of spots) {
       s.el.textContent = t(curLang, `model.spots.${s.sp.key}`);
-      if (!s.el.href) s.el.title = t(curLang, 'ui.soon');
+      if (!s.el.href && !s.sp.project) s.el.title = t(curLang, 'ui.soon');
     }
   }
   labelSpots();
@@ -47,27 +53,34 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
   const EL = 0.74, TAU = Math.PI * 2;                     // default elevation in radians
   // view = what is drawn (damped), goal = where it is heading. el is free all the way round (upside down included).
-  const view = { az: 0, el: EL, dist: 30, shift: 0, t: new THREE.Vector3(0, 0.2, 0.3) };
-  const goal = { az: 0, el: EL, dist: 30, shift: 0, t: view.t.clone() };
-  const home = { az: 0, el: EL, dist: 30, shift: 0, t: view.t.clone() };   // the default pose for the current state
+  const view = { az: 0, el: EL, dist: 30, t: new THREE.Vector3(0, 0.2, 0.3) };
+  const goal = { az: 0, el: EL, dist: 30, t: view.t.clone() };
+  const home = { az: 0, el: EL, dist: 30, t: view.t.clone() };   // the default pose for the current state
+  const panOffset = new THREE.Vector3();
   const panelEl = stage.querySelector('#panel');
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
-  let custom = false, zoom = 1, away = false;               // custom: the user turned or zoomed away from the default
-  const ZMIN = 0.2, ZMAX = 1.8, DMIN = 3;
+  let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
+  const ZMIN = 0.06, ZMAX = 1.8, DMIN = 0.7;
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
+  const clampTarget = v => {
+    v.x = THREE.MathUtils.clamp(v.x, -14, 14);
+    v.y = THREE.MathUtils.clamp(v.y, -6, 8);
+    v.z = THREE.MathUtils.clamp(v.z, -14, 14);
+    return v;
+  };
 
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); stageW = w; stageH = h;
     setGoal();
   }
-  // Camera distance at which all points fit into [-halfW, halfW] x [-below, above] (NDC), seen from azimuth az.
-  // Moves target t so the points are centred in that window. Every size constraint is linear in dist, so no search is needed.
+  // Camera distance at which all points fit into [leftNdc, rightNdc] x [-below, above] (NDC), seen from azimuth az.
   const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), upv = new THREE.Vector3(), dv = new THREE.Vector3();
-  function fitView(pts, t, az, halfW, above, below) {
+  function fitView(pts, t, az, leftNdc, rightNdc, above, below) {
     fwd.set(-Math.cos(EL) * Math.sin(az), -Math.sin(EL), -Math.cos(EL) * Math.cos(az));
     rgt.set(Math.cos(az), 0, -Math.sin(az)); upv.crossVectors(rgt, fwd);
     const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2), th = tv * camera.aspect;
+    const halfW = (rightNdc - leftNdc) / 2, cxNdc = (leftNdc + rightNdc) / 2;
     let dist = 1;
     for (let it = 0; it < 4; it++) {
       dist = 1;
@@ -82,11 +95,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         const dp = dist + dv.dot(fwd), x = dv.dot(rgt) / (dp * th), y = dv.dot(upv) / (dp * tv);
         x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
       }
-      t.addScaledVector(rgt, (x0 + x1) / 2 * dist * th).addScaledVector(upv, ((y0 + y1) / 2 - (above - below) / 2) * dist * tv);
+      t.addScaledVector(rgt, ((x0 + x1) / 2 - cxNdc) * dist * th).addScaledVector(upv, ((y0 + y1) / 2 - (above - below) / 2) * dist * tv);
     }
     return dist;
   }
-  const BAR = 64;                                          // the room bar floats over the bottom of the stage on desktop
+  const BAR = 104;                                         // bottom clearance on desktop (footer strip + room bar)
   const roomPts = {};
   for (const r of Object.values(rooms)) {
     roomPts[r.id] = [];
@@ -94,38 +107,38 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       roomPts[r.id].push(new THREE.Vector3(r.cx + sx * r.w / 2, y, r.cz + sz * r.d / 2));
   }
   function setGoal() {
+    const mob = phone();
+    const topPad = mob ? 0 : 2 * 74 / stageH;
     if (openId) {
       const r = rooms[openId];
-      // Desktop: the text panel stands at the left of the stage, so the room is framed in the space to its right.
-      const pw = phone() ? 0 : (panelEl.offsetWidth || 312) + 2 * 16;
-      const free = Math.max(0.4, (stageW - pw) / stageW);
-      home.shift = pw / 2;
-      home.t.copy(r.center); home.t.y += 0.3; home.az = -r.x * 0.32;
-      // Zoom to the room's own size: it fills the free part of the stage (right of the panel on desktop).
-      const bar = phone() ? 0 : 2 * BAR / stageH;
-      home.dist = fitView(roomPts[openId], home.t, home.az, 0.93 * free, 0.93, Math.max(0.5, 0.93 - bar));
+      home.t.copy(r.center); home.t.y += openId === 'ai' ? 0.12 : 0.22; home.az = -r.x * 0.32;
+      const bar = mob ? 0 : 2 * BAR / stageH;
+      const left = mob ? -0.94 : -0.45, right = mob ? 0.96 : 0.90;
+      home.dist = fitView(roomPts[openId], home.t, home.az, left, right, Math.max(0.55, 0.92 - topPad), Math.max(0.5, 0.92 - bar)) * 0.68;
     } else {
-      home.t.copy(center); home.az = 0; home.shift = 0;
-      const bar = phone() ? 0 : 2 * 24 / stageH;           // the bar may cover the front edge of the base a little
-      home.dist = fitView(outline, home.t, 0, 0.95, 0.95, Math.max(0.5, 0.95 - bar));
+      home.t.copy(center); home.az = 0;
+      const bar = mob ? 0 : 2 * 90 / stageH;
+      const left = mob ? -0.96 : -0.58, right = mob ? 0.96 : 0.88;
+      home.dist = fitView(outline, home.t, 0, left, right, Math.max(0.55, 0.94 - topPad), Math.max(0.5, 0.94 - bar)) * 0.78;
     }
-    goal.shift = home.shift;
-    if (!custom) { goal.az = near(view.az, home.az); goal.el = near(view.el, EL); goal.dist = home.dist; zoom = 1; }
+    if (!custom) { panOffset.set(0, 0, 0); goal.az = near(view.az, home.az); goal.el = near(view.el, EL); goal.dist = home.dist; zoom = 1; }
     else goal.dist = Math.max(DMIN, home.dist * zoom);
     aim(); checkAway();
   }
   // Zoomed in on the underside, the orbit centre drifts to the middle of the recess, so the close view stays on it.
   function aim() {
     const w = custom ? THREE.MathUtils.clamp((0.6 - zoom) / 0.3, 0, 1) * THREE.MathUtils.clamp(-Math.sin(goal.el) * 3, 0, 1) : 0;
-    goal.t.copy(home.t).lerp(cellar.center, w);
+    goal.t.copy(home.t).add(panOffset).lerp(cellar.center, w);
+    clampTarget(goal.t);
   }
   function checkAway() {
-    const a = custom && (Math.abs(near(goal.az, home.az) - goal.az) > 0.03 || Math.abs(near(goal.el, EL) - goal.el) > 0.03 || Math.abs(zoom - 1) > 0.03);
+    const panned = panOffset.lengthSq() > 0.002;
+    const a = custom && (panned || Math.abs(near(goal.az, home.az) - goal.az) > 0.03 || Math.abs(near(goal.el, EL) - goal.el) > 0.03 || Math.abs(zoom - 1) > 0.03);
     if (a !== away) { away = a; onAway?.(a); }
   }
   function resetView() {
-    custom = false; zoom = 1; egg.close(); setGoal();
-    if (reduced) { view.az = goal.az; view.el = goal.el; }
+    custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); closePop(false); setGoal();
+    if (reduced) { view.az = goal.az; view.el = goal.el; view.t.copy(goal.t); }
   }
   // Turning: signs are for a drag; when the model is upside down (cos el < 0) the horizontal sense is mirrored.
   function wrap() {
@@ -137,6 +150,20 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (instant) { view.az -= dAz * s; view.el += dEl; }
     custom = true; wrap(); aim(); checkAway();
   }
+  const panRgt = new THREE.Vector3(), panUp = new THREE.Vector3(), panNext = new THREE.Vector3();
+  function panBy(dxPx, dyPx, instant) {
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const scale = (instant ? view.dist : goal.dist) * (2 * tv) / Math.max(stageH, 1);
+    panRgt.set(1, 0, 0).applyQuaternion(camera.quaternion);
+    panUp.set(0, 1, 0).applyQuaternion(camera.quaternion);
+    panOffset.addScaledVector(panRgt, -dxPx * scale).addScaledVector(panUp, dyPx * scale);
+    panNext.copy(home.t).add(panOffset);
+    clampTarget(panNext);
+    panOffset.copy(panNext).sub(home.t);
+    custom = true; aim();
+    if (instant) view.t.copy(goal.t);
+    checkAway();
+  }
   function zoomBy(f, instant) {
     zoom = THREE.MathUtils.clamp(zoom * f, ZMIN, ZMAX); custom = true;
     goal.dist = Math.max(DMIN, home.dist * zoom);
@@ -144,10 +171,208 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     aim(); checkAway();
   }
   const egg = createEgg({ cellar, camera, stage, canvas, reduced, lang });
-  new ResizeObserver(resize).observe(stage); resize();
-  Object.assign(view, { az: goal.az, el: goal.el, dist: goal.dist, shift: goal.shift }); view.t.copy(goal.t);
+  const photoParts = new Set(photo.pick), photoThings = [...photo.pick, ...occluders];
+  const photoRay = new THREE.Raycaster(), pv = new THREE.Vector3(), pDir = new THREE.Vector3();
+  let pCard = null, pImg = null, pCap = null, pClose = null, pOpen = false, pTimer = null;
+  let autoCardTimer = null;
+  const stopAutoCard = () => { clearTimeout(autoCardTimer); autoCardTimer = null; };
+  const startAutoCard = fn => { stopAutoCard(); autoCardTimer = setTimeout(fn, 6000); };
+  const photoHit = ndcPos => {
+    photoRay.setFromCamera(ndcPos, camera);
+    const h = photoRay.intersectObjects(photoThings, false)[0];
+    return !!h && photoParts.has(h.object);
+  };
+  const labelPhoto = () => {
+    if (!pCard) return;
+    pCard.setAttribute('aria-label', t(curLang, 'model.photo.alt'));
+    pImg.alt = t(curLang, 'model.photo.alt');
+    pCap.textContent = t(curLang, 'model.photo.caption');
+    pClose.setAttribute('aria-label', t(curLang, 'model.photo.close'));
+  };
+  const closePhoto = (restoreFocus = false) => {
+    if (!pCard || !pOpen) return;
+    pOpen = false; pCard.classList.remove('on'); pCard.inert = true;
+    stopAutoCard();
+    stage.classList.toggle('card-open', Boolean(popKey));
+    clearTimeout(pTimer);
+    const had = pCard.contains(document.activeElement);
+    if (reduced) pCard.hidden = true;
+    else pTimer = setTimeout(() => { if (!pOpen) pCard.hidden = true; }, 280);
+    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+  };
+  const openPhoto = () => {
+    closePop(false);
+    if (!pCard) {
+      pCard = document.createElement('div'); pCard.className = 'photo-card'; pCard.setAttribute('role', 'region'); pCard.hidden = true;
+      pImg = document.createElement('img'); pImg.src = `${import.meta.env.BASE_URL}slots/about-wall-1.webp`; pImg.decoding = 'async';
+      pImg.addEventListener('click', () => closePhoto(true));
+      pCap = document.createElement('p'); pCap.className = 'photo-caption';
+      pClose = document.createElement('button'); pClose.type = 'button'; pClose.className = 'card-x'; pClose.textContent = '×';
+      pClose.addEventListener('click', () => closePhoto(true));
+      pCard.addEventListener('pointerenter', stopAutoCard);
+      pCard.addEventListener('pointerleave', () => { if (pOpen) startAutoCard(() => closePhoto(false)); });
+      pCard.append(pClose, pImg, pCap); stage.append(pCard); labelPhoto();
+    }
+    clearTimeout(pTimer); pOpen = true; pCard.hidden = false; pCard.inert = false; pCard.removeAttribute('aria-hidden');
+    stage.classList.add('card-open');
+    updatePhoto();
+    void pCard.offsetWidth;
+    pCard.classList.add('on');
+    pClose.focus({ preventScroll: true });
+    startAutoCard(() => closePhoto(false));
+  };
+  const togglePhoto = () => (pOpen ? closePhoto(true) : openPhoto());
+  function updatePhoto() {
+    if (!pCard || pCard.hidden) return;
+    if (openId !== 'about') { closePhoto(false); return; }
+    photo.anchor.getWorldPosition(pv);
+    pDir.copy(pv).sub(camera.position).normalize(); photoRay.set(camera.position, pDir);
+    const hit = photoRay.intersectObjects(photoThings, false)[0];
+    const gone = !hit || !photoParts.has(hit.object);
+    pCard.classList.toggle('away', gone);
+    pCard.inert = gone;
+    pCard.setAttribute('aria-hidden', String(gone));
+  }
 
-  // Pointer: drag turns the model freely, two fingers (or the wheel) zoom. A click without drag opens the room under the pointer
+  // Compact project, social & story card at a fixed position (clicking image or text opens the link; top-right X closes).
+  const projParts = new Set(projectPicks), projThings = [...projectPicks, ...occluders];
+  const projRay = new THREE.Raycaster();
+  const SOCIAL_CARDS = new Set(['signal', 'bluesky', 'linkedin']);
+  const ABOUT_CARDS = new Set(['story', 'enterprise', ...SOCIAL_CARDS]);
+  const popAllowed = (roomId, key) =>
+    roomId === 'projects' || roomId === 'ai'
+    || (roomId === 'writing' && SOCIAL_CARDS.has(key))
+    || (roomId === 'about' && ABOUT_CARDS.has(key));
+  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popClose = null;
+  let popKey = null, popTimer = null;
+  const projectHit = ndcPos => {
+    projRay.setFromCamera(ndcPos, camera);
+    const h = projRay.intersectObjects(projThings, false)[0];
+    return h && projParts.has(h.object) ? h.object : null;
+  };
+  function drawCardFallback(title) {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 300;
+    const k = c.getContext('2d');
+    k.fillStyle = '#f7f0e2'; k.fillRect(0, 0, 400, 300);
+    k.fillStyle = '#b9c7a6';
+    k.beginPath(); k.moveTo(0, 300); k.bezierCurveTo(108, 170, 232, 258, 400, 189); k.lineTo(400, 300); k.fill();
+    k.fillStyle = '#12383a'; k.textAlign = 'center'; k.textBaseline = 'middle';
+    k.font = '600 42px Georgia, serif'; k.fillText(title, 200, 110, 360);
+    return c.toDataURL();
+  }
+  function drawSocialEmblem(iconKey) {
+    const c = document.createElement('canvas'); c.width = 400; c.height = 300;
+    const k = c.getContext('2d');
+    k.fillStyle = '#faf6ee'; k.fillRect(0, 0, 400, 300);
+    k.fillStyle = '#efe6d4';
+    k.beginPath(); k.arc(200, 145, 82, 0, Math.PI * 2); k.fill();
+    k.save(); k.translate(134, 79); k.scale(5.5, 5.5);
+    k.fillStyle = '#0f3d42'; k.fill(new Path2D(PATHS[iconKey]));
+    k.restore();
+    return c.toDataURL();
+  }
+  function fillPop() {
+    if (!popEl || !popKey) return;
+    if (popKey === 'story') {
+      const title = t(curLang, 'model.spots.story');
+      popEl.setAttribute('aria-label', title);
+      popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
+      popImg.hidden = true; popImg.removeAttribute('src');
+      popTitle.textContent = title;
+      popText.textContent = `${t(curLang, 'rooms.about.p1')} ${t(curLang, 'rooms.about.p2')}`;
+      popBody.href = 'https://www.linkedin.com/in/gillespenning/';
+      return;
+    }
+    const data = t(curLang, `model.projectCards.${popKey}`);
+    if (!data) return;
+    popEl.setAttribute('aria-label', data.title);
+    popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
+    popTitle.textContent = data.title;
+    popText.textContent = data.text;
+    if (data.icon && PATHS[data.icon]) {
+      popImg.hidden = false;
+      popImg.alt = data.title;
+      popImg.onerror = null;
+      popImg.src = drawSocialEmblem(data.icon);
+    } else if (data.img) {
+      popImg.hidden = false;
+      popImg.alt = data.title;
+      popImg.onerror = () => { popImg.onerror = null; popImg.src = drawCardFallback(data.title); };
+      popImg.src = `${import.meta.env.BASE_URL}${data.img}`;
+    } else {
+      popImg.hidden = true;
+      popImg.removeAttribute('src');
+    }
+    if (data.href) popBody.href = data.href;
+    else popBody.removeAttribute('href');
+  }
+  function closePop(restoreFocus = false) {
+    if (!popEl || !popKey) return;
+    popKey = null; popEl.classList.remove('on'); popEl.inert = true;
+    stopAutoCard();
+    stage.classList.toggle('card-open', Boolean(pOpen));
+    clearTimeout(popTimer);
+    const had = popEl.contains(document.activeElement);
+    if (reduced) popEl.hidden = true;
+    else popTimer = setTimeout(() => { if (!popKey) popEl.hidden = true; }, 260);
+    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+  }
+  function openPop(key) {
+    closePhoto(false);
+    if (!popEl) {
+      popEl = document.createElement('div'); popEl.className = 'pop-card'; popEl.setAttribute('role', 'region'); popEl.hidden = true;
+      popClose = document.createElement('button'); popClose.type = 'button'; popClose.className = 'card-x'; popClose.textContent = '×';
+      popClose.addEventListener('click', () => closePop(true));
+      popBody = document.createElement('a'); popBody.className = 'pop-body'; popBody.rel = 'noopener';
+      popImg = document.createElement('img'); popImg.className = 'pop-img'; popImg.decoding = 'async';
+      popTitle = document.createElement('h3'); popTitle.className = 'pop-title';
+      popText = document.createElement('p'); popText.className = 'pop-text';
+      popEl.addEventListener('pointerenter', stopAutoCard);
+      popEl.addEventListener('pointerleave', () => { if (popKey) startAutoCard(() => closePop(false)); });
+      popBody.append(popImg, popTitle, popText);
+      popEl.append(popClose, popBody);
+      stage.append(popEl);
+    }
+    clearTimeout(popTimer);
+    popKey = key;
+    fillPop();
+    popEl.hidden = false;
+    popEl.inert = false;
+    stage.classList.add('card-open');
+    updatePop();
+    void popEl.offsetWidth;
+    popEl.classList.add('on');
+    popClose.focus({ preventScroll: true });
+    startAutoCard(() => closePop(false));
+  }
+  function togglePop(key) {
+    if (popKey === key) closePop(true);
+    else openPop(key);
+  }
+  function updatePop() {
+    if (!popEl || popEl.hidden || !popKey) return;
+    if (!popAllowed(openId, popKey)) closePop(false);
+  }
+  new ResizeObserver(resize).observe(stage); resize();
+  Object.assign(view, { az: goal.az, el: goal.el, dist: goal.dist }); view.t.copy(goal.t);
+
+  // Social trophies and laptop ("My Story") inside About Me
+  const trophyParts = new Set(trophyPicks), trophyThings = [...trophyPicks, ...occluders];
+  const trophyRay = new THREE.Raycaster();
+  const trophyHit = ndcPos => {
+    trophyRay.setFromCamera(ndcPos, camera);
+    const h = trophyRay.intersectObjects(trophyThings, false)[0];
+    return h && trophyParts.has(h.object) ? h.object.userData : null;
+  };
+  const storyParts = new Set(storyPicks), storyThings = [...storyPicks, ...occluders];
+  const storyRay = new THREE.Raycaster();
+  const storyHit = ndcPos => {
+    storyRay.setFromCamera(ndcPos, camera);
+    const h = storyRay.intersectObjects(storyThings, false)[0];
+    return h && storyParts.has(h.object) ? h.object.userData.anchor : null;
+  };
+
+  // Pointer: drag turns the model freely, right/middle/Shift/Space-drag pans, two fingers (or wheel) zoom.
   // (or plays the hidden cellar machine). Touch rule: a one-finger drag that starts mostly vertical is left to the page scroll;
   // one that starts mostly horizontal locks as an orbit (azimuth and elevation); two fingers always orbit and pinch.
   const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
@@ -160,65 +385,120 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return h?.object.userData.room ?? null;
   };
   const K = 0.0055, pts = new Map();
-  let drag = null;
+  let drag = null, spaceDown = false, panMode = false, hoverTarget = null;
+  const hoverTip = document.createElement('div'); hoverTip.className = 'hover-tip'; hoverTip.hidden = true; stage.append(hoverTip);
+  const hoverV = new THREE.Vector3();
+  const hoverObject = n => {
+    if (openId === 'about') {
+      if (photoHit(n)) return { key: 'photo', anchor: photo.anchor };
+      const tr = trophyHit(n);
+      if (tr?.project) return { key: tr.project, anchor: tr.anchor };
+      const st = storyHit(n);
+      if (st) return { key: 'story', anchor: st };
+    }
+    if (openId === 'projects' || openId === 'ai') {
+      const pr = projectHit(n);
+      if (pr) return { key: pr.userData.project, anchor: pr.userData.anchor };
+    }
+    return null;
+  };
+  function updateHoverTip() {
+    if (!hoverTarget || drag || !openId) { hoverTip.hidden = true; return; }
+    const label = t(curLang, `model.spots.${hoverTarget.key}`) || t(curLang, `model.projectCards.${hoverTarget.key}.title`);
+    if (!label || typeof label !== 'string') { hoverTip.hidden = true; return; }
+    hoverTarget.anchor.getWorldPosition(hoverV);
+    hoverV.project(camera);
+    const tx = (hoverV.x * 0.5 + 0.5) * stageW;
+    const ty = (-hoverV.y * 0.5 + 0.5) * stageH;
+    hoverTip.textContent = label;
+    hoverTip.style.left = `${Math.min(Math.max(tx, 64), stageW - 64)}px`;
+    hoverTip.style.top = `${Math.max(88, ty - 14)}px`;
+    hoverTip.hidden = false;
+  }
+  addEventListener('keydown', e => {
+    if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+      spaceDown = true;
+      if (e.target === canvas) e.preventDefault();
+    }
+  });
+  addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
   const pinchState = () => { const [a, b] = [...pts.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
   canvas.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType === 'mouse' && ![0, 1, 2].includes(e.button)) return;
+    hoverTip.hidden = true;
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     try { canvas.setPointerCapture(e.pointerId); } catch { /* ignore */ }
-    if (pts.size === 1) drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, mode: e.pointerType === 'touch' ? 'pending' : 'orbit' };
-    else if (pts.size === 2 && drag) { drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState(); }
-    canvas.style.cursor = 'grabbing';
+    if (pts.size === 1) {
+      const pan = e.pointerType === 'mouse' && (e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey || spaceDown || panMode);
+      drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: e.pointerType === 'touch' ? 'pending' : pan ? 'pan' : 'orbit' };
+    } else if (pts.size === 2 && drag) { drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState(); }
+    canvas.style.cursor = drag?.mode === 'pan' ? 'move' : 'grabbing';
   });
   addEventListener('pointermove', e => {
     if (drag && pts.has(e.pointerId)) {
-      const prev = pts.get(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (drag.mode === 'pinch') {
         if (pts.size < 2) return;
         const n = pinchState();
-        zoomBy(drag.p.d / n.d, true); orbit((n.x - drag.p.x) * K, (n.y - drag.p.y) * K, true);
+        zoomBy(drag.p.d / n.d, true); panBy(n.x - drag.p.x, n.y - drag.p.y, true);
         drag.p = n; return;
       }
-      const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
       if (!drag.moved && Math.abs(e.clientX - drag.sx) <= 5 && Math.abs(e.clientY - drag.sy) <= 5) return;
       drag.moved = true;
       if (drag.mode === 'pending') drag.mode = Math.abs(e.clientX - drag.sx) >= Math.abs(e.clientY - drag.sy) ? 'orbit' : 'scroll';
       if (drag.mode === 'orbit') { orbit((e.clientX - drag.x) * K, (e.clientY - drag.y) * K, true); drag.x = e.clientX; drag.y = e.clientY; }
-      void dx; void dy;
+      else if (drag.mode === 'pan') { panBy(e.clientX - drag.x, e.clientY - drag.y, true); drag.x = e.clientX; drag.y = e.clientY; }
     } else if (e.target === canvas && !drag) {
-      const over = egg.hit(ndc(e));
-      hoverId = !openId && !over ? pick(e) : null; canvas.style.cursor = hoverId || over ? 'pointer' : 'grab';
+      const n = ndc(e);
+      hoverTarget = e.pointerType === 'mouse' ? hoverObject(n) : null;
+      const overObj = egg.hit(n) || !!hoverTarget;
+      hoverId = !openId && !overObj ? pick(e) : null;
+      canvas.style.cursor = panMode ? 'move' : hoverId || overObj ? 'pointer' : 'grab';
+      updateHoverTip();
+    } else if (!drag) {
+      hoverTarget = null; hoverTip.hidden = true;
     }
   });
   const endPointer = (e, cancelled) => {
     if (!pts.has(e.pointerId)) return;
     pts.delete(e.pointerId);
     if (drag && pts.size === 0) {
-      if (!cancelled && !drag.moved && e.target === canvas) {
-        if (egg.hit(ndc(e))) egg.play(); else onPick(pick(e));
+      if (!cancelled && !drag.moved && e.target === canvas && drag.btn === 0) {
+        const proj = (openId === 'projects' || openId === 'ai') ? projectHit(ndc(e)) : null;
+        const trophy = openId === 'about' ? trophyHit(ndc(e)) : null;
+        const stAnchor = openId === 'about' ? storyHit(ndc(e)) : null;
+        if (egg.hit(ndc(e))) egg.play();
+        else if (openId === 'about' && photoHit(ndc(e))) togglePhoto();
+        else if (trophy?.project) togglePop(trophy.project);
+        else if (stAnchor) togglePop('story');
+        else if (proj) togglePop(proj.userData.project);
+        else onPick(pick(e));
       }
-      drag = null; canvas.style.cursor = 'grab';
+      drag = null; canvas.style.cursor = panMode ? 'move' : 'grab';
     } else if (drag && drag.mode === 'pinch' && pts.size === 1) { drag.mode = 'orbit'; const [r] = [...pts.values()]; drag.x = r.x; drag.y = r.y; }
   };
   addEventListener('pointerup', e => endPointer(e, false));
   addEventListener('pointercancel', e => endPointer(e, true));   // the browser took over (vertical page scroll)
-  canvas.addEventListener('pointerleave', () => { hoverId = null; });
+  canvas.addEventListener('pointerleave', () => { hoverId = null; hoverTarget = null; hoverTip.hidden = true; });
   // Touch: once a gesture is an orbit or a pinch, keep the page from scrolling under it.
   canvas.addEventListener('touchmove', e => { if (e.cancelable && (e.touches.length > 1 || drag?.mode === 'orbit' || drag?.mode === 'pinch')) e.preventDefault(); }, { passive: false });
-  // Wheel zoom, only over the canvas, without ctrl/cmd (those are the browser's own zoom), and only when the page itself does not scroll.
+  // Wheel zoom (and horizontal trackpad swipe pan), only over the canvas, without ctrl/cmd.
   canvas.addEventListener('wheel', e => {
-    if (e.ctrlKey || e.metaKey || document.documentElement.scrollHeight > innerHeight + 1) return;
-    e.preventDefault(); zoomBy(Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), false);
+    if (e.ctrlKey || e.metaKey || document.documentElement.scrollHeight > innerHeight + 4) return;
+    e.preventDefault();
+    if (Math.abs(e.deltaX) > 2 && Math.abs(e.deltaX) >= Math.abs(e.deltaY)) panBy(-e.deltaX * 0.8, 0, false);
+    else zoomBy(Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), false);
   }, { passive: false });
-  // Keyboard, when the canvas has focus.
+  // Keyboard, when the canvas has focus. Shift + Arrow keys pan; Arrow keys orbit.
   canvas.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
-    const S = 0.14; let used = true;
+    const S = 0.14, P = 48; let used = true;
     switch (e.key) {
-      case 'ArrowLeft': orbit(-S, 0); break;
-      case 'ArrowRight': orbit(S, 0); break;
-      case 'ArrowUp': orbit(0, -S); break;
-      case 'ArrowDown': orbit(0, S); break;
+      case 'ArrowLeft': if (e.shiftKey) panBy(P, 0); else orbit(-S, 0); break;
+      case 'ArrowRight': if (e.shiftKey) panBy(-P, 0); else orbit(S, 0); break;
+      case 'ArrowUp': if (e.shiftKey) panBy(0, P); else orbit(0, -S); break;
+      case 'ArrowDown': if (e.shiftKey) panBy(0, -P); else orbit(0, S); break;
       case '+': case '=': zoomBy(0.85); break;
       case '-': case '_': zoomBy(1 / 0.85); break;
       case 'Home': case '0': resetView(); break;
@@ -238,7 +518,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const live = [];
     for (const s of spots) {
       const on = s.id === openId && rooms[s.id].open > 0.7, low = Math.sin(view.el) < 0.12;   // seen from below or edge-on: fade out
-      if (on !== s.on || low !== s.low) { s.on = on; s.low = low; s.el.classList.toggle('on', on); s.el.classList.toggle('away', low); if (s.el.href) s.el.tabIndex = on && !low ? 0 : -1; }
+      if (on !== s.on || low !== s.low) { s.on = on; s.low = low; s.el.classList.toggle('on', on); s.el.classList.toggle('away', low); if (s.el.href || s.el.tagName === 'BUTTON') s.el.tabIndex = on && !low ? 0 : -1; }
       if (rooms[s.id].open < 0.05) continue;
       v3.copy(s.pos).project(camera);
       s.w = s.el.offsetWidth; s.h = s.el.offsetHeight;
@@ -257,7 +537,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (!hit) break;
         b = hit.b + GAP + s.h;
       }
-      b = Math.min(b, stageH - 80);   // keep clear of the room bar
+      b = Math.min(Math.max(b, phone() ? s.h + 8 : 88 + s.h), phone() ? stageH - 12 : stageH - 124);   // keep clear of header, room bar & footer strip
       placed.push({ l, b, w: s.w, h: s.h });
       s.el.style.left = `${l + s.w / 2}px`; s.el.style.top = `${b}px`;
     }
@@ -267,14 +547,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!visible || document.hidden) { last = now; return; }
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const k = reduced ? 1 : 1 - Math.exp(-dt * 2.6);
-    view.shift += (goal.shift - view.shift) * k;
-    if (Math.abs(view.shift) > 0.5 || camera.view?.enabled) { camera.setViewOffset(stageW, stageH, -view.shift, 0, stageW, stageH); if (Math.abs(view.shift) <= 0.5) camera.clearViewOffset(); }
-    view.az += (goal.az - view.az) * k; view.el += (goal.el - view.el) * k; view.dist += (goal.dist - view.dist) * k; view.t.lerp(goal.t, k);
+    view.az += (goal.az - view.az) * k; view.el += (goal.el - view.el) * k; view.dist += (goal.dist - view.dist) * k; view.t.lerp(goal.t, k); clampTarget(view.t);
     const ce = Math.cos(view.el), se = Math.sin(view.el), sa = Math.sin(view.az), ca = Math.cos(view.az);
     camera.position.set(view.t.x + view.dist * ce * sa, view.t.y + view.dist * se, view.t.z + view.dist * ce * ca);
     camera.up.set(-se * sa, ce, -se * ca);                    // tangent of the elevation arc: no flip or jump at the poles
     camera.lookAt(view.t);
     egg.update(now, stageW, stageH);
+    updatePhoto();
+    updatePop();
 
     for (const r of Object.values(rooms)) {
       const isOpen = r.id === openId, isHot = r.id === hoverId && !openId;
@@ -290,20 +570,30 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       labels[r.id].style.top = `${(-v3.y * 0.5 + 0.5) * 100}%`;
     }
     placeSpots();
+    updateHoverTip();
     renderer.render(scene, camera);
   }
   requestAnimationFrame(frame);
 
   return {
     open(id, { keepView = false } = {}) {
-      openId = id; hoverId = null;
-      if (!keepView) { custom = false; zoom = 1; egg.close(); }
+      openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
+      if (id !== 'about') closePhoto(false);
+      if (popKey && !popAllowed(id, popKey)) closePop(false);
+      if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
       setGoal();
     },
     hover(id) { hoverId = id; },
+    setPanMode(on) { panMode = Boolean(on); if (!drag) canvas.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
+    getPanMode: () => panMode,
     reset: resetView,
-    closeNote() { egg.close(true); },
-    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); },
+    closeNote() {
+      const had = egg.isOpen || pOpen || Boolean(popKey);
+      egg.close(true); closePhoto(true); closePop(true);
+      return had;
+    },
+    isCustom: () => custom,
+    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); updateHoverTip(); },
     ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; } } } : {}),
   };
 }

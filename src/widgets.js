@@ -49,15 +49,25 @@ export function renderNews(lang, root = document) {
   });
 }
 
-// Footer strip: one line, "Latest:" and the newest title linking to its original source.
+// Footer strip: "Latest Substacks:" followed by the three newest Substack items.
 export function renderLatest(lang) {
-  const el = document.getElementById('latest'), first = getNews()[0];
+  const el = document.getElementById('latest');
   if (!el) return;
-  if (!first) { el.hidden = true; return; }
-  const key = sig(getNews(), lang, 1);
+  const all = getNews();
+  const subs = all.filter(i => i.sources.some(s => s.platform === 'substack'));
+  const list = (subs.length ? subs : all).slice(0, 3);
+  if (!list.length) { el.hidden = true; return; }
+  const key = sig(list, lang, 3);
   if (el.dataset.sig === key) { el.hidden = false; return; }
   el.dataset.sig = key;
-  const label = document.createElement('span'); label.className = 'latest-label'; label.textContent = `${t(lang, 'news.latest')}:`;
-  const a = ext(document.createElement('a'), newsLink(first)); a.textContent = pick(first.title, lang);
-  el.replaceChildren(label, a); el.hidden = false;
+  const label = document.createElement('span'); label.className = 'latest-label'; label.textContent = `${t(lang, 'news.latestSubstacks')}:`;
+  const links = document.createElement('span'); links.className = 'latest-links';
+  list.forEach((it, idx) => {
+    if (idx > 0) links.append(' · ');
+    const sub = it.sources.find(s => s.platform === 'substack');
+    const a = ext(document.createElement('a'), sub ? sub.url : newsLink(it));
+    a.textContent = pick(it.title, lang);
+    links.append(a);
+  });
+  el.replaceChildren(label, links); el.hidden = false;
 }

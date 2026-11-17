@@ -1,4 +1,7 @@
-import '@fontsource-variable/newsreader';
+import '@fontsource/source-serif-4/400.css';
+import '@fontsource/source-serif-4/600.css';
+import '@fontsource/source-sans-3/400.css';
+import '@fontsource/source-sans-3/600.css';
 import './style.css';
 import { t, initialLang, rememberLang, applyStatic, LANGS } from './i18n.js';
 import { renderSocial, renderNews, renderLatest } from './widgets.js';
@@ -12,9 +15,11 @@ const back = document.getElementById('back');
 const bar = document.getElementById('bar');
 const dock = document.getElementById('dock');
 const spotsEl = document.getElementById('spots');
-const resetBtn = document.createElement('button');   // appears only after the model was turned or zoomed away from the default
+const resetBtn = document.createElement('button');   // appears only after the model was turned, panned or zoomed away from the default
 resetBtn.type = 'button'; resetBtn.className = 'reset'; resetBtn.hidden = true;
-stage.append(resetBtn);
+const panBtn = document.createElement('button');
+panBtn.type = 'button'; panBtn.className = 'pan-toggle'; panBtn.setAttribute('aria-pressed', 'false');
+stage.append(panBtn, resetBtn);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => matchMedia('(max-width: 800px)').matches;
 const ORDER = ['projects', 'about', 'ai', 'writing'];
@@ -48,18 +53,20 @@ let mode = 'loading';    // 'loading' | '3d' | 'static'
 let pending = null;
 
 const clean = n => { n.removeAttribute?.('id'); n.querySelectorAll?.('[id]').forEach(e => e.removeAttribute('id')); return n; };
-function roomNodes(id) {
-  const nodes = [...document.getElementById(id).children].map(n => clean(n.cloneNode(true)));
-  if (id === 'writing') {
-    const sp = document.getElementById('speaking');
-    const part = document.createElement('section');
-    const h = document.createElement('h3');
-    h.textContent = sp.querySelector('h2').textContent; h.tabIndex = -1;
-    part.className = 'speaking-part'; part.setAttribute('aria-label', h.textContent);
-    part.append(h, clean(sp.querySelector('.speaking-body').cloneNode(true)));
-    nodes.push(part);
+function roomNodes(id, { compact = false } = {}) {
+  if (compact && id === 'projects') {
+    const h = document.createElement('h2'); h.textContent = t(lang, 'rooms.projects.h');
+    const p = document.createElement('p'); p.textContent = t(lang, 'rooms.projects.cardHint');
+    return [h, p];
   }
-  return nodes;
+  return [...document.getElementById(id).children].map(n => clean(n.cloneNode(true)));
+}
+function panelCloseBtn() {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'card-x'; b.textContent = '×';
+  b.setAttribute('aria-label', t(lang, 'ui.close'));
+  b.addEventListener('click', () => { panel.hidden = true; canvas.focus({ preventScroll: true }); });
+  return b;
 }
 function showSpeaking() {
   const host = mobile() ? dock : panel, part = host.querySelector('.speaking-part');
@@ -72,24 +79,42 @@ function openRoom(id, auto = false, { speaking = false } = {}) {
   if (mode === 'loading') { pending = { id, speaking }; return; }
   const wasCurrent = current === id;
   current = id;
-  document.querySelectorAll('.top nav a').forEach(a => a.classList.toggle('active', a.dataset.room === id));
+  document.querySelectorAll('.top nav a').forEach(a => {
+    const on = a.dataset.room === id;
+    a.classList.toggle('active', on);
+    if (on) a.setAttribute('aria-current', 'location');
+    else a.removeAttribute('aria-current');
+  });
   document.querySelectorAll('.rooms article').forEach(a => {
     a.classList.toggle('current', a.dataset.room === id);
     a.style.order = a.dataset.room === id ? -1 : '';
   });
   bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.room === id));
-  if (!api) { if (!auto) document.getElementById(speaking ? 'speaking' : id).scrollIntoView(); return; }
+  if (!api) {
+    if (!auto) document.getElementById(speaking && document.getElementById('speaking') ? 'speaking' : id)?.scrollIntoView();
+    return;
+  }
   stage.classList.add('open'); back.hidden = false;
-  panel.replaceChildren(...roomNodes(id));
-  // The card scrolls inside: make it a named, keyboard-focusable region so the keyboard can scroll it in every browser.
-  panel.tabIndex = 0; panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', name(id));
-  panel.hidden = false; panel.scrollTop = 0;   // reset after un-hiding: a hidden element keeps its old scroll position
-  // Phone: the room's content sits in the dock under the model; the room bar stays visible.
-  const all = document.createElement('button');
-  all.type = 'button'; all.className = 'allrooms'; all.textContent = t(lang, 'ui.allRooms');
-  all.addEventListener('click', () => { closeRoom(); bar.querySelector('button')?.focus({ preventScroll: true }); });
-  dock.replaceChildren(all, ...roomNodes(id));
-  dock.hidden = false;
+  if (id === 'ai') {
+    panel.replaceChildren();
+    panel.hidden = true;
+  } else {
+    panel.replaceChildren(panelCloseBtn(), ...roomNodes(id, { compact: true }));
+    // The card scrolls inside: make it a named, keyboard-focusable region so the keyboard can scroll it in every browser.
+    panel.tabIndex = 0; panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', name(id));
+    panel.hidden = false; panel.scrollTop = 0;   // reset after un-hiding: a hidden element keeps its old scroll position
+  }
+  // Phone: the room's content sits in the dock under the model; skip off-screen live-region mutations on desktop.
+  if (mobile()) {
+    const all = document.createElement('button');
+    all.type = 'button'; all.className = 'allrooms'; all.textContent = t(lang, 'ui.allRooms');
+    all.addEventListener('click', () => { closeRoom(); bar.querySelector('button')?.focus({ preventScroll: true }); });
+    dock.replaceChildren(all, ...roomNodes(id));
+    dock.hidden = false;
+  } else {
+    dock.hidden = true;
+    dock.replaceChildren();
+  }
   if (mobile() && !auto) stage.scrollIntoView({ block: 'start' });
   api.open(id, { keepView: auto && wasCurrent });
   if (speaking) showSpeaking();
@@ -97,33 +122,41 @@ function openRoom(id, auto = false, { speaking = false } = {}) {
 function closeRoom() {
   current = null;
   stage.classList.remove('open'); panel.hidden = true; back.hidden = true; dock.hidden = true;
+  dock.replaceChildren();
   bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', false));
-  document.querySelectorAll('.top nav a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.top nav a').forEach(a => { a.classList.remove('active'); a.removeAttribute('aria-current'); });
   api?.open(null);
 }
-// First tap opens, second tap on the same room closes. Tapping another room switches.
-const toggleRoom = id => (current === id ? closeRoom() : openRoom(id));
+// Desktop: clicking a room zooms/re-centers into that room (All rooms button on the right exits). Mobile: second tap toggles out.
+const toggleRoom = id => (current === id && mobile() ? closeRoom() : openRoom(id));
 // A tap on the canvas: id is the room under the pointer, or null.
 function tapCanvas(id) {
   if (!current) { if (id) openRoom(id); return; }
-  if (id === current) closeRoom();
+  if (id === current) { if (mobile() && !api?.isCustom?.()) closeRoom(); }
   else if (id) openRoom(id);
-  else if (mobile()) closeRoom();
+  else if (mobile() && !api?.isCustom?.()) closeRoom();
 }
 back.addEventListener('click', closeRoom);
+panBtn.addEventListener('click', () => {
+  if (!api) return;
+  const on = api.setPanMode(!api.getPanMode());
+  panBtn.setAttribute('aria-pressed', String(on));
+  canvas.focus({ preventScroll: true });
+});
 resetBtn.addEventListener('click', () => { api?.reset(); canvas.focus({ preventScroll: true }); });
+matchMedia('(max-width: 800px)').addEventListener('change', () => { if (current) openRoom(current, true); });
 addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
-  api?.reset(); api?.closeNote();
-  if (current) closeRoom();
+  if (api?.closeNote?.()) return;
+  if (current) { closeRoom(); return; }
+  if (api?.isCustom?.()) api.reset();
 });
-// Links to the room texts (#projects, #speaking ...) open the room in the model; without 3D they scroll to the section.
+// Links to the room texts (#projects, #about ...) open the room in the model; without 3D they scroll to the section.
 document.addEventListener('click', e => {
   const a = e.target.closest?.('a[href^="#"]');
   if (!a || mode === 'static' || (a.getAttribute('href').length < 2)) return;
   const h = a.getAttribute('href').slice(1);
-  if (h === 'speaking') { e.preventDefault(); openRoom('writing', false, { speaking: true }); }
-  else if (ORDER.includes(h)) { e.preventDefault(); openRoom(h); }
+  if (ORDER.includes(h)) { e.preventDefault(); openRoom(h); }
 });
 
 // Language switch: static text, room names, 3D lettering, and the open room's panel and dock.
@@ -136,6 +169,7 @@ function setLang(next, { save = true } = {}) {
   lang = next;
   applyStatic(lang);
   resetBtn.textContent = t(lang, 'ui.resetView');
+  panBtn.textContent = t(lang, 'ui.panMode');
   renderAll();
   langBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
   for (const id of ORDER) { labels[id].textContent = name(id); bar.querySelector(`[data-room="${id}"]`).textContent = name(id); }
@@ -153,12 +187,6 @@ function useStatic() {
   if (pending) { const p = pending; pending = null; openRoom(p.id, false, p); }
 }
 
-// Any interaction cancels the one-off automatic tour.
-let autoTimer = null;
-const cancelAuto = () => { clearTimeout(autoTimer); autoTimer = null; };
-['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(t => addEventListener(t, cancelAuto, { passive: true, capture: true }));
-stage.addEventListener('pointermove', cancelAuto, { passive: true });
-
 // Text and links are usable before the 3D code arrives.
 import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
@@ -169,5 +197,4 @@ import('./viewer.js').then(({ startViewer }) => {
   if (import.meta.env.DEV) window.__gp = api.debug;
   mode = '3d';
   if (pending) { const p = pending; pending = null; openRoom(p.id, false, p); }
-  if (!reduced && !mobile()) autoTimer = setTimeout(() => { if (!current) openRoom('ai', true); }, 4000);
 }).catch(useStatic);

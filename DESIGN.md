@@ -2,37 +2,49 @@
 
 The visual system of gillespenning.com. Values live once, in `src/tokens.css`.
 
-## Palette (from `src/tokens.css`)
+## Palette (from `src/tokens.css`, aligned with AI in Medicine Monitor, D-036)
 | Token | Value | Use |
 |---|---|---|
-| `--cream` | #f6eee3 | page background |
-| `--paper` | #fbf6ee | panels, buttons |
-| `--petrol` | #12383a | headings, primary buttons, room names in the model |
-| `--ink` | #2a2f2c | body text |
-| `--line` | #d9cbb6 | hairlines |
-| `--brass` | #a9792b | single accent: brass line, hover and focus marks, large text only (3.35:1) |
-| `--brass-ink` | #8a6016 | the same accent as darker text colour for small text (4.85:1 on cream), used by the kicker line |
+| `--paper` / `--cream` | #f7f6f2 | page background (soft warm neutral) |
+| `--surface` | #ffffff | elevated panels, cards and buttons |
+| `--line` | #dcd9d0 | hairlines and subtle borders |
+| `--ink` | #18181b | primary body text |
+| `--muted` | #4b5563 | secondary captions, metadata and subtitles |
+| `--teal` / `--petrol` | #1e3a8a | signature deep blue accent (headings, primary buttons, room names, active states) |
+| `--teal-surface` | #eff6ff | soft blue tint for badges and highlights |
+| `--brass` | #1e3a8a | accent mark and interactive highlight (alias to deep blue) |
+| `--brass-ink` | #172554 | high-contrast deep blue for small text and hover (7:1+ on paper) |
 
 The 3D model adds pale limestone-cream walls, pale oak, soft sage (Projects wall), pale green satin glass and a muted
 grey-green base (decision D-016: light and airy, soft shadows). Those are material colours in the `C` table in
 `src/scene.js` and the light rig in `src/viewer.js`, not page tokens.
 
-## Fonts
-- `--font`: Newsreader Variable, fallback Georgia, serif. Used for everything, including the lettering on the model walls.
+## Fonts (D-036)
+- `--serif`: Source Serif 4 (fallback Georgia, serif). Used for brand, headings, and lettering on the model walls.
+- `--sans`: Source Sans 3 (fallback system-ui, sans-serif). Used for body text, UI navigation, buttons, cards, tooltips, and footer links.
+- Self-hosted locally via `@fontsource/source-serif-4` and `@fontsource/source-sans-3` (zero external network requests, 100% GDPR compliant).
 
 ## Sizes
 All sizes (spacing, radii, control heights, font sizes) come from the tokens in `src/tokens.css`.
 The limits on the number of steps are in `AGENTS.md`. Do not add in-between values.
 
 ## Page layout
-Desktop is one screen (`100svh`): header, intro left and model right, a slim strip at the bottom (Wimmelbild, the social logo links in `#social`, and one "Latest:" news line). Room content opens in the card (`#panel`) inside the model area. Phone: header,
-intro, model, room bar, room content (dock), strip. See D-014 and D-015 in `docs/decisions.md`.
+Desktop is one screen (`100svh`) with the 3D stage (`#scene`, `z-index: 0`) running full-bleed behind translucent frosted header, left intro card, and bottom footer strip (Wimmelbild, social logo links in `#social`, and the 3 horizontal "Latest Substacks:" links). Active navigation items use clean typography/color without underline bars. Room cards (`#panel`) sit compactly at bottom-left, and pop-up project/story/photo cards anchor to the left of the 3D room with top-right `×` close buttons and directly clickable image/text bodies (no separate CTA buttons). Phone: header, intro, model, room bar, room content (dock), strip. See D-014, D-015, D-031 and D-032 in `docs/decisions.md`.
 
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,
 Writing & Speaking (lounge) front right. A corridor leads from the entrance at the front edge and jogs sideways
-between the front and back row; the brass line follows it with bends to each room's glass door.
+between the front and back row; the brass line follows it with bends through each room's doorway onto the room floor.
+AI & Digital Health carries a three-panel frosted glass partition along the corridor (front panel slides open),
+combining an operating room zone (operating table with 10 mm rigid endoscope and camera head, ceiling-suspended
+dual-wing surgical light, rolling drawer cart, and an endoscopic equipment tower with a large rolling monitor)
+separated in its front/middle stretch by an internal glass partition wall with doorway from a consultation Vorraum
+(19-inch IT server rack tucked into the back-right corner and angled desk with monitor). About Me features a two-door
+cabinet bookshelf with slightly imperfect books, a brass globe, three clickable brass-rimmed social trophies (Substack,
+Bluesky, LinkedIn), the brass table lamp and a side-profile miniature USS Enterprise NCC-1701-E on top, an open
+"My Story" laptop, book and coffee mug on the desk, and an interactive running photo on the back wall. Writing &
+Speaking carries the cabinet bookshelf and a detailed table condenser microphone.
 Sizes, wall heights and positions live once in the `ROOMS` table in `src/scene.js`. Floor, walls, door, lettering,
 picture slots, furniture, hotspots and the camera framing are derived from it, so a room can be resized there.
 
@@ -44,7 +56,7 @@ model is turned over. The sheet in its slot carries the sentence from `model.egg
 (`src/viewer.js`); the camera orbit centre drifts to the recess when zoomed in on the underside. The legal page `legal.html` is described in D-028.
 
 ## Social links and news
-Social marks (Substack, Bluesky, LinkedIn) are inline SVG from `src/icons.js`: 20 px glyph (`--t3`) in a 40 px (48 px phone) target, petrol, brass on hover and focus.
+Social marks (Substack, Bluesky, LinkedIn) are inline SVG from `src/icons.js`: 28 px glyph (`--t4`) in a 40 px (48 px phone) target, petrol, brass on hover and focus.
 News comes from `src/news.js` (snapshot plus live feed) and is rendered by `src/widgets.js`.
 
 ## Image slots
@@ -55,14 +67,14 @@ not per room; only their position follows the room (the wall pictures of the AI 
 
 | Slot | Room | Surface | Aspect | Minimum size |
 |---|---|---|---|---|
-| `ai-wall-1` | AI & Digital Health | picture on back wall, left | 2:1 landscape | 1200 x 600 px |
-| `ai-wall-2` | AI & Digital Health | picture on back wall, right | 2:1 landscape | 1200 x 600 px |
+| `ai-wall-1` | AI & Digital Health | large rolling monitor on endoscopic cart (Wimmelbild) | 2:1 landscape | 1200 x 600 px |
+| `ai-wall-2` | AI & Digital Health | desktop monitor on practice desk (AI Monitor) | 2:1 landscape | 1200 x 600 px |
 | `projects-board-1` | Projects | board on plinth 1 (Wimmelbild) | 4:3 landscape | 1200 x 900 px |
 | `projects-board-2` | Projects | board on plinth 2 (AI Monitor) | 4:3 landscape | 1200 x 900 px |
-| `projects-board-3` | Projects | board on plinth 3 (DocEase) | 4:3 landscape | 1200 x 900 px |
+| `projects-board-3` | Projects | board on plinth 3 (Praxisfaden) | 4:3 landscape | 1200 x 900 px |
 | `projects-board-4` | Projects | board on plinth 4 (Elbstrand) | 4:3 landscape | 1200 x 900 px |
 | `writing-table-1` | Writing & Speaking | book or paper on the round table | 4:3 landscape | 1200 x 900 px |
-| `about-wall-1` | About Me | framed picture on back wall | 3:4 portrait | 900 x 1200 px |
+| `about-wall-1` | About Me | framed running photo on back wall (clickable) | 3:4 portrait | 900 x 1200 px |
 
 Rules:
 - Pictures are drawn unlit (not tone-mapped), so they show the brightness of the file (D-022).

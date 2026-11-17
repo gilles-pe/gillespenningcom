@@ -2,6 +2,7 @@
 // It is not in the HTML, not in the tab order and never announced. The note exists in the DOM only after the machine was clicked.
 import * as THREE from 'three';
 import { t } from './i18n.js';
+import { LINKS } from './content.js';
 
 const FEED_MS = 1200, SHAKE_MS = 600;
 const ease = u => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
@@ -9,7 +10,7 @@ const ease = u => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
 export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
   const parts = new Set(cellar.pick), things = [...cellar.pick, ...cellar.occluders];
   const ray = new THREE.Raycaster(), v = new THREE.Vector3(), dir = new THREE.Vector3();
-  let opened = false, curLang = lang, note = null, text = null, closeBtn = null, anim = null, away = false;
+  let opened = false, curLang = lang, note = null, text = null, link = null, closeBtn = null, anim = null, away = false;
 
   // True when the machine is the first thing a ray meets, so it is only found from the side it can be seen from.
   const hit = r => { const h = r.intersectObjects(things, false)[0]; return !!h && parts.has(h.object); };
@@ -18,15 +19,19 @@ export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
     note = document.createElement('div');
     note.className = 'egg'; note.setAttribute('role', 'region');
     text = document.createElement('p');
+    const row = document.createElement('div'); row.className = 'egg-actions';
+    link = document.createElement('a'); link.className = 'egg-link'; link.href = LINKS.linkedin; link.rel = 'noopener';
     closeBtn = document.createElement('button');
     closeBtn.type = 'button'; closeBtn.className = 'egg-close';
     closeBtn.addEventListener('click', () => close(true));
-    note.append(text, closeBtn); stage.append(note); label();
+    row.append(link, closeBtn);
+    note.append(text, row); stage.append(note); label();
   }
   function label() {
     if (!note) return;
     note.setAttribute('aria-label', t(curLang, 'model.egg.label'));
     text.textContent = t(curLang, 'model.egg.note');
+    link.textContent = t(curLang, 'model.egg.cta');
     closeBtn.textContent = t(curLang, 'model.egg.close');
   }
   function show() {
@@ -71,12 +76,7 @@ export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
       // Hidden again when the machine is turned out of sight (seen from above, from the side).
       dir.copy(target).sub(camera.position).normalize(); ray.set(camera.position, dir);
       const gone = !hit(ray) || Math.abs(v.x) > 1 || Math.abs(v.y) > 1 || v.z > 1;
-      if (gone !== away) { away = gone; note.classList.toggle('away', gone); }
-      const nw = note.offsetWidth, nh = note.offsetHeight, gap = Math.min(Math.max(w * 0.14, 56), 150);
-      let l = px + gap; if (l + nw > w - 4) l = px - gap - nw;
-      l = Math.min(Math.max(l, 4), Math.max(4, w - nw - 4));
-      const tp = Math.min(Math.max(py - nh / 2, 4), Math.max(4, h - nh - 4));
-      note.style.left = `${l}px`; note.style.top = `${tp}px`;
+      if (gone !== away) { away = gone; note.classList.toggle('away', gone); note.inert = gone; }
     },
   };
 }

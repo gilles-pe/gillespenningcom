@@ -4,12 +4,22 @@
   --r0: 0; --r1: 6px; --r-full: 999px;
   --h1: 32px; --h2: 40px; --h3: 48px;
   --t1: 14px; --t2: 16px; --t3: 20px; --t4: 28px; --t5: 40px; --t6: 64px;
-  --font: 'Newsreader Variable', Georgia, serif;
-  --cream: #f6eee3;
-  --paper: #fbf6ee;
-  --petrol: #12383a;
-  --ink: #2a2f2c;
-  --line: #d9cbb6;
-  --brass: #a9792b;
-  --brass-ink: #8a6016;   /* brass for small text on cream or paper: 4.85:1 (--brass is 3.35:1, graphics and large text only) */
+
+  /* Typography: AI in Medicine Monitor 2-font system (D-036) */
+  --serif: 'Source Serif 4', Georgia, serif;
+  --sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+  --font: var(--sans);
+
+  /* Colors: AI in Medicine Monitor palette (D-036) */
+  --paper: #f7f6f2;        /* page neutral background */
+  --surface: #ffffff;      /* elevated cards and surfaces */
+  --cream: #f7f6f2;        /* alias for backwards compatibility with paper */
+  --ink: #18181b;          /* primary deep neutral text */
+  --muted: #4b5563;        /* secondary neutral text */
+  --line: #dcd9d0;         /* subtle hairline border and divider */
+  --teal: #1e3a8a;         /* AI Monitor signature deep blue accent */
+  --petrol: #1e3a8a;       /* alias pointing to deep blue accent */
+  --teal-surface: #eff6ff; /* light accent tint for highlights & badges */
+  --brass: #1e3a8a;        /* alias: active/hover accent */
+  --brass-ink: #172554;    /* dark accent for high contrast on paper (7:1+) */
 }

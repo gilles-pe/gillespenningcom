@@ -44,7 +44,7 @@ lines.forEach((line, i) => {
       for (const v of used) if (!/^--t\d$/.test(v)) fail(i, prop, val, `${v} is not a font-size token`);
     } else if (prop === 'font') {
       if (px.length) fail(i, prop, val, 'raw px in shorthand, use var(--t*)');
-      for (const v of used) if (v !== '--font' && !/^--t\d$/.test(v)) fail(i, prop, val, `${v} is not a font-size token`);
+      for (const v of used) if (!['--font', '--serif', '--sans'].includes(v) && !/^--t\d$/.test(v)) fail(i, prop, val, `${v} is not a font-size token`);
     } else if (prop === 'border-radius') {
       if (px.length) fail(i, prop, val, 'raw px, use var(--r*)');
       for (const v of used) if (!/^--r/.test(v)) fail(i, prop, val, `${v} is not a radius token`);

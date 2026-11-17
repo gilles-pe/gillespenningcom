@@ -212,6 +212,7 @@ until a later entry replaces it.
   - **Space-Saving 3-Column Arrangement:** Replaced the vertical stack with a 3-column horizontal grid (`grid-template-columns: repeat(3, minmax(0, 1fr))`, wrapping to 1 column on mobile screens <= 600px). This saves over 110px of vertical space, eliminates clipping behind the footer strip, and keeps the entire desktop layout compact on one screen per D-014.
 
 - **D-041 (2026-11-17) Mobile translucent intro and breathing room (owner decision).** On mobile, extend the interactive 3D canvas behind the intro, using the desktop intro's 78% paper background and 8 px backdrop blur. Give the model more vertical space above and below, with an exposed touch area and the existing room controls beneath it. Preserve the normal-flow static/no-JavaScript fallback. Record the mobile design in `DESIGN.md`.
+- **D-042 (2026-11-17) Mobile overview framing (owner feedback).** Lower the initial overview within the tall mobile canvas to centre the model better in the exposed space. Keep desktop and individual room views unchanged; reset returns to the adjusted overview.
 
 ## Open questions
 

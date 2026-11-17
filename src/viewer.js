@@ -123,6 +123,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const bar = mob ? 0 : 2 * 90 / stageH;
       const left = mob ? -0.96 : -0.58, right = mob ? 0.96 : 0.88;
       home.dist = fitView(outline, home.t, 0, left, right, Math.max(0.55, 0.94 - topPad), Math.max(0.5, 0.94 - bar)) * 0.78;
+      // On the taller mobile canvas, lower the overview so it is centred in
+      // the open area beneath the translucent introduction. Room views keep
+      // their own framing; reset returns to this same overview position.
+      if (mob) home.t.addScaledVector(upv, home.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * 0.32);
     }
     if (!custom) { panOffset.set(0, 0, 0); goal.az = near(view.az, home.az); goal.el = near(view.el, EL); goal.dist = home.dist; zoom = 1; }
     else goal.dist = Math.max(DMIN, home.dist * zoom);

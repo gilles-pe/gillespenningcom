@@ -93,7 +93,7 @@ html:not(.js):not(.static) .hero { grid-template-columns: 1fr; }
 .stage.static .bar { display: none; }
 
 .spots { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
-.spot { position: absolute; transform: translate(-50%, -100%); display: inline-flex; align-items: center; height: var(--h1); padding: 0 var(--s2); font-family: inherit; font-size: var(--t1); font-weight: 400; color: var(--petrol); background: color-mix(in srgb, var(--paper) 64%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); text-decoration: none; white-space: nowrap; opacity: 0; pointer-events: none; cursor: pointer; transition: opacity .4s; }
+.spot { position: absolute; transform: translate(-50%, -100%); display: inline-flex; align-items: center; height: var(--h1); padding: 0 var(--s2); font-family: inherit; font-size: var(--t1); font-weight: 400; color: var(--petrol); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); text-decoration: none; white-space: nowrap; opacity: 0; pointer-events: none; cursor: pointer; transition: opacity .4s; }
 .spot.soon { background: color-mix(in srgb, var(--cream) 64%, transparent); color: var(--ink); border: 0; }
 .spot.on { opacity: 1; pointer-events: auto; }
 .spot.on.away { opacity: 0; pointer-events: none; }
@@ -103,7 +103,7 @@ html:not(.js):not(.static) .hero { grid-template-columns: 1fr; }
   .stage:not(.static) .spot:not([data-room="writing"]):not(:focus-visible) { opacity: 0; pointer-events: none; }
 }
 a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84%, transparent); color: var(--brass-ink); text-decoration: none; }
-.hover-tip { position: absolute; z-index: 6; pointer-events: none; transform: translate(-50%, -100%); height: var(--h1); padding: 0 var(--s2); display: inline-flex; align-items: center; font-size: var(--t1); font-weight: 600; color: var(--petrol); background: color-mix(in srgb, var(--paper) 64%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); white-space: nowrap; }
+.hover-tip { position: absolute; z-index: 6; pointer-events: none; transform: translate(-50%, -100%); height: var(--h1); padding: 0 var(--s2); display: inline-flex; align-items: center; font-size: var(--t1); font-weight: 600; color: var(--petrol); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); white-space: nowrap; }
 .bar { position: absolute; z-index: 6; pointer-events: auto; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - var(--s4)); flex-wrap: wrap; justify-content: center; bottom: var(--s3); display: flex; gap: var(--s1); padding: var(--s1); background: color-mix(in srgb, var(--paper) 74%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid color-mix(in srgb, var(--line) 85%, transparent); border-radius: var(--r1); }
 .bar button { height: var(--h2); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: transparent; border: 0; border-radius: var(--r1); cursor: pointer; white-space: nowrap; }
 .bar button:hover { background: color-mix(in srgb, var(--cream) 70%, transparent); }
@@ -116,7 +116,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .reset { right: var(--s3); }
 
 /* ---- Room card (top-right light translucent card on desktop, dock on phone) ---- */
-.panel { position: absolute; z-index: 6; pointer-events: auto; left: var(--s3); top: var(--s3); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s4))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2) var(--s3); display: grid; gap: var(--s1); align-content: start; background: color-mix(in srgb, var(--paper) 64%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); font-size: var(--t1); line-height: 1.38; transition: opacity .2s ease; }
+.panel { position: absolute; z-index: 6; pointer-events: auto; left: var(--s3); top: var(--s3); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s4))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2) var(--s3); display: grid; gap: var(--s1); align-content: start; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); font-size: var(--t1); line-height: 1.38; transition: opacity .2s ease; }
 .panel h2 { font-size: var(--t3); line-height: 1.15; color: var(--petrol); padding-right: var(--s5); }
 .card-x { position: absolute; z-index: 1; top: var(--s1); right: var(--s1); width: var(--h1); height: var(--h1); padding: 0; display: grid; place-items: center; font: 400 var(--t3)/1 var(--font); color: var(--petrol); background: color-mix(in srgb, var(--paper) 55%, transparent); border: 0; border-radius: var(--r1); cursor: pointer; }
 .card-x:hover { color: var(--brass-ink); }
@@ -154,7 +154,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   html.js .top { position: relative; z-index: 3; padding: var(--s3) var(--s5); background: color-mix(in srgb, var(--cream) 78%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
   html.js .strip { position: relative; z-index: 3; background: color-mix(in srgb, var(--cream) 80%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   html.js .hero { position: static; min-height: 0; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(280px, 34%) 1fr; padding: var(--s4) var(--s5) var(--s3); align-items: start; pointer-events: none; }
-  html.js .intro { position: relative; z-index: 2; gap: var(--s3); pointer-events: auto; padding: var(--s4); background: color-mix(in srgb, var(--paper) 78%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); }
+  html.js .intro { position: relative; z-index: 2; gap: var(--s3); pointer-events: auto; padding: var(--s4); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); }
   html.js .stage { position: absolute; inset: 0; height: 100svh; min-height: 0; z-index: auto; pointer-events: auto; }
   html.js #scene { position: absolute; inset: 0; height: 100%; z-index: 0; }
   html.js .top nav { flex-wrap: nowrap; }
@@ -221,7 +221,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   /* The live model extends behind the introductory copy; its lower area remains
      clear for touch interaction. Keep the static/no-JS fallback in normal flow. */
   html.js .hero:has(.stage:not(.static)) { align-items: start; }
-  html.js .hero:has(.stage:not(.static)) .intro { grid-area: 1 / 1; position: relative; z-index: 2; padding: var(--s3); background: color-mix(in srgb, var(--paper) 78%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); pointer-events: none; }
+  html.js .hero:has(.stage:not(.static)) .intro { grid-area: 1 / 1; position: relative; z-index: 2; padding: var(--s3); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid color-mix(in srgb, var(--line) 75%, transparent); border-radius: var(--r1); pointer-events: none; }
   html.js .hero:has(.stage:not(.static)) .intro a { pointer-events: auto; }
   html.js .stage:not(.static) { grid-area: 1 / 1; }
   html.js .stage:not(.static) #scene { height: calc(100svh + var(--s7)); }
@@ -246,8 +246,8 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .panel, .back, .pan-toggle { display: none; }
   .spots { inset: 0 0 auto 0; height: min(84vw, 44svh); }
   .bar { position: static; width: auto; max-width: none; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); background: transparent; border: 0; border-radius: 0; padding: var(--s2) var(--s3) 0; }
-  .bar button { min-width: 0; white-space: normal; line-height: 1.1; height: var(--h3); padding: 0 var(--s2); font-size: var(--t2); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); }
-  .bar button[aria-pressed=true] { background: var(--petrol); border-color: var(--petrol); color: var(--paper); }
+  .bar button { min-width: 0; white-space: normal; line-height: 1.1; height: var(--h3); padding: 0 var(--s2); font-size: var(--t2); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--r1); }
+  .bar button[aria-pressed=true] { background: color-mix(in srgb, var(--petrol) 88%, transparent); border-color: var(--petrol); color: var(--paper); }
   .dock { display: grid; gap: var(--s3); padding: var(--s3) var(--s3) 0; font-size: var(--t2); }
   .dock[hidden] { display: none; }
   .dock .allrooms { height: var(--h3); padding: 0 var(--s3); font: var(--t2) var(--font); color: var(--petrol); background: transparent; border: 1px solid var(--petrol); border-radius: var(--r1); cursor: pointer; text-align: left; }
@@ -269,10 +269,11 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .rooms article.current h2 { color: var(--brass); }
 }
 @media (max-width: 360px) { .top { flex-wrap: wrap; } }
+@media (max-width: 480px) { .bar { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .egg, .photo-card, .pop-card, .album-modal, .album-book, .album-photo-mount, .album-thumb, .album-btn { transition: none; } }
 
 /* ---- Note near the fax machine (see src/egg.js). Exists only after the machine was clicked. ---- */
-.egg { position: absolute; z-index: 6; pointer-events: auto; left: max(calc(var(--s7) * 3 + var(--s3)), calc(34% + var(--s4))); top: calc(var(--s6) + var(--s3)); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s3))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s3); display: grid; gap: var(--s2); justify-items: start; background: color-mix(in srgb, var(--paper) 64%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); font-size: var(--t2); transition: opacity .3s, visibility .3s; }
+.egg { position: absolute; z-index: 6; pointer-events: auto; left: max(calc(var(--s7) * 3 + var(--s3)), calc(34% + var(--s4))); top: calc(var(--s6) + var(--s3)); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s3))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s3); display: grid; gap: var(--s2); justify-items: start; background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); font-size: var(--t2); transition: opacity .3s, visibility .3s; }
 .egg p { font-size: var(--t2); line-height: 1.3; color: var(--petrol); }
 .egg-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
 .egg-link { display: inline-flex; align-items: center; min-height: var(--h1); font-size: var(--t2); font-weight: 600; color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); }
@@ -282,14 +283,14 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .egg.away { opacity: 0; visibility: hidden; }
 
 /* ---- Animated photo card and compact project/social card at a fixed top-right stage position ---- */
-.photo-card { position: absolute; z-index: 6; pointer-events: none; left: max(calc(var(--s7) * 3 + var(--s3)), calc(34% + var(--s4))); top: calc(var(--s6) + var(--s3)); width: min(calc(var(--s7) * 2), calc(100% - var(--s4))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2); background: color-mix(in srgb, var(--paper) 64%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); opacity: 0; transform: scale(0.86); transition: opacity .26s ease, transform .34s cubic-bezier(0.22, 1, 0.36, 1); }
+.photo-card { position: absolute; z-index: 6; pointer-events: none; left: max(calc(var(--s7) * 3 + var(--s3)), calc(34% + var(--s4))); top: calc(var(--s6) + var(--s3)); width: min(calc(var(--s7) * 2), calc(100% - var(--s4))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); opacity: 0; transform: scale(0.86); transition: opacity .26s ease, transform .34s cubic-bezier(0.22, 1, 0.36, 1); }
 .photo-card.on { opacity: 1; pointer-events: auto; transform: scale(1); }
 .photo-card.away { opacity: 0; pointer-events: none; }
 .photo-card img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--r1); cursor: pointer; }
 .photo-caption { margin-top: var(--s2); font-size: var(--t1); line-height: 1.3; color: var(--petrol); text-align: center; }
 .photo-card .card-x, .pop-card .card-x { top: var(--s2); right: var(--s2); }
 
-.pop-card { position: absolute; z-index: 6; pointer-events: none; left: max(calc(var(--s7) * 3 + var(--s3)), calc(34% + var(--s4))); top: calc(var(--s6) + var(--s3)); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s4))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2); background: color-mix(in srgb, var(--paper) 64%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); opacity: 0; transform: scale(0.92); transition: opacity .22s ease, transform .28s cubic-bezier(0.22, 1, 0.36, 1); }
+.pop-card { position: absolute; z-index: 6; pointer-events: none; left: max(calc(var(--s7) * 3 + var(--s3)), calc(34% + var(--s4))); top: calc(var(--s6) + var(--s3)); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s4))); max-height: calc(100% - var(--s7) - var(--s6)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); opacity: 0; transform: scale(0.92); transition: opacity .22s ease, transform .28s cubic-bezier(0.22, 1, 0.36, 1); }
 .pop-card.on { opacity: 1; pointer-events: auto; transform: scale(1); }
 .pop-body { display: grid; gap: var(--s2); text-decoration: none; color: inherit; cursor: pointer; }
 .pop-body:not([href]) { cursor: default; }

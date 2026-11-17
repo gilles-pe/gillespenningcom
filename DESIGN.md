@@ -37,6 +37,10 @@ The default overview camera looks from about 31° above and 13° to the left, wi
 
 On narrow phones, the canvas is one viewport height plus one large spacing step. The mobile overview aim is lowered within it, giving the model more space beneath the intro and bringing its base closer to the room controls. See D-044.
 
+Intro surfaces use 88% paper, and overlay cards and 3D labels use roughly 86–88% paper for legible copy over the model. Tapping a project or social object in the 3D scene opens its preview card; external navigation remains on that card. See D-046.
+
+The four mobile room controls use translucent paper with backdrop blur like the Reset view control. They form two columns from 481–800 px and one column on narrower phones. The selected room uses a translucent deep-blue fill. See D-047.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,

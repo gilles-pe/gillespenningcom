@@ -28,12 +28,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // Hotspots are real links (or buttons for soon/project cards), placed over the objects they belong to.
   const spots = [];
   for (const [id, list] of Object.entries(HOTSPOTS)) for (const [key, href, x, y, z, project] of list) {
-    const el = document.createElement(href ? 'a' : project ? 'button' : 'span');
+    // 3D project/social hotspots always open their preview card first. Keep
+    // external navigation on the card, never on the object hit target.
+    const el = document.createElement(project ? 'button' : href ? 'a' : 'span');
     if (el.tagName === 'BUTTON') el.type = 'button';
     const isQuiet = id === 'about' && key !== 'album';
     el.className = 'spot' + (isQuiet ? ' quiet-spot' : '') + (href ? '' : ' soon'); el.tabIndex = -1;
     el.dataset.room = id;
-    if (href) el.href = href;
+    if (href && !project) el.href = href;
     const pos = new THREE.Vector3(x, y, z).add(rooms[id].group.position);
     const sp = { key, el, project };
     if (project === 'photo') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('photo'); });

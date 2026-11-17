@@ -1015,38 +1015,76 @@ export function tailoredArmchair(parent, x, z, rotY = 0) {
   soft(0.265, 0.15, 0.065, 0.037, 0.02, 0.46, -0.098, pillow, -0.09);
 }
 
-// 19-inch medical/hospital IT server rack along the back wall of the AI Vorraum.
+// The five drawers of the IT rack double as a career timeline, oldest at the base.
+// Large years and small subject labels become legible when the visitor zooms in;
+// the preview card carries the same language-specific data at normal reading size.
 function itRack(g, x, z, projectPicks = []) {
   const r = new THREE.Group(); r.position.set(x, 0.06, z); g.add(r);
-  const dark = mat(0x262c2b, { roughness: 0.6 }), blade = mat(0x1b201f, { roughness: 0.5 });
-  const trim = mat(0x3a4240, { roughness: 0.5 }), steel = mat(0xadb3b5, { roughness: 0.35, metalness: 0.6 });
-  const W = 0.74, H = 1.16, D = 0.44;
+  const dark = mat(0x27302e, { roughness: 0.7 });
+  const blade = mat(0x202826, { roughness: 0.55 });
+  const steel = mat(0x8c9993, { roughness: 0.4, metalness: 0.48 });
+  const brass = mat(0xa58b5b, { roughness: 0.48, metalness: 0.42 });
+  const W = 0.78, H = 1.22, D = 0.44;
   const backP = box(r, W, H, 0.03, 0, 0, -D / 2 + 0.015, dark);         // back
+  const picks = [backP];
   for (const sx of [-1, 1]) {
-    box(r, 0.03, H, D, sx * (W / 2 - 0.015), 0, 0, dark);               // sides
-    box(r, 0.025, H - 0.08, 0.02, sx * (W / 2 - 0.055), 0.04, D / 2 - 0.04, steel); // rails
+    picks.push(box(r, 0.03, H, D, sx * (W / 2 - 0.015), 0, 0, dark));
+    picks.push(box(r, 0.025, H - 0.08, 0.024, sx * (W / 2 - 0.045), 0.04, D / 2 - 0.014, steel));
   }
-  box(r, W, 0.04, D, 0, 0, 0, dark);                                    // base
-  const topP = box(r, W, 0.04, D, 0, H - 0.04, 0, dark);                // top
-  // Stacked 1U/2U blades with status LEDs
-  const leds = [0x58c96a, 0x62b8d8, 0xd9a03c, 0x58c96a, 0x62b8d8, 0x58c96a];
-  for (let i = 0; i < 6; i++) {
-    const by = 0.09 + i * 0.165, bh = i % 2 === 0 ? 0.11 : 0.08;
-    const bl = box(r, W - 0.13, bh, D - 0.08, 0, by, 0, i % 2 ? trim : blade);
-    projectPicks.push(tagProject(bl, 'rack', r, new THREE.Vector3(0, H * 0.65, 0)));
-    const led = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.012, 0.01),
-      new THREE.MeshStandardMaterial({ color: leds[i], emissive: leds[i], emissiveIntensity: 1.0 }));
-    led.position.set(0.20, by + bh * 0.5, D / 2 - 0.032); r.add(led);
+  picks.push(box(r, W, 0.04, D, 0, 0, 0, dark));
+  picks.push(box(r, W, 0.04, D, 0, H - 0.04, 0, dark));
+
+  function drawFace(c, index) {
+    const k = c.getContext('2d'), entry = modelText().projectCards.rack.timeline[index];
+    const year = entry.year, label = entry.label;
+    k.fillStyle = '#303a37'; k.fillRect(0, 0, c.width, c.height);
+    k.fillStyle = '#a58b5b'; k.fillRect(0, 0, 12, c.height);
+    k.strokeStyle = '#74837c'; k.lineWidth = 3;
+    k.strokeRect(18, 17, c.width - 36, c.height - 34);
+    k.fillStyle = '#f1e8d7'; k.textBaseline = 'middle'; k.textAlign = 'left';
+    k.font = `600 112px ${FONT}`; k.fillText(year, 56, 132, 234);
+    k.fillStyle = '#a58b5b'; k.fillRect(302, 55, 3, 146);
+    k.fillStyle = '#f0eee5';
+    const lines = label.includes(' & ') && label.length > 24 ? label.split(' & ').map((part, i) => i ? `& ${part}` : part) : [label];
+    let fs = lines.length === 1 ? 62 : 57;
+    k.font = `600 ${fs}px ${FONT}`;
+    const widest = Math.max(...lines.map(line => k.measureText(line).width));
+    if (widest > 520) { fs *= 520 / widest; k.font = `600 ${fs}px ${FONT}`; }
+    lines.forEach((line, i) => k.fillText(line, 334, lines.length === 1 ? 132 : 100 + i * 74, 520));
+
+    // One modest line drawing per era; no blinking dashboard or neon decoration.
+    k.strokeStyle = '#b9b7a0'; k.fillStyle = '#b9b7a0'; k.lineWidth = 8;
+    k.lineCap = 'round'; k.lineJoin = 'round';
+    const dot = (cx, cy, radius = 9) => { k.beginPath(); k.arc(cx, cy, radius, 0, Math.PI * 2); k.fill(); };
+    k.beginPath();
+    if (index === 0) { k.moveTo(882, 128); k.lineTo(940, 128); k.stroke(); dot(874, 128); dot(948, 128); }
+    if (index === 1) { k.strokeRect(875, 90, 72, 56); k.moveTo(910, 147); k.lineTo(910, 165); k.stroke(); }
+    if (index === 2) { k.moveTo(885, 92); k.lineTo(928, 128); k.lineTo(885, 164); k.stroke(); dot(885, 92); dot(928, 128); dot(885, 164); }
+    if (index === 3) { k.moveTo(866, 130); k.lineTo(887, 130); k.lineTo(900, 103); k.lineTo(918, 158); k.lineTo(932, 130); k.lineTo(953, 130); k.stroke(); }
+    if (index === 4) { for (const xx of [880, 910, 940]) for (const yy of [98, 128, 158]) dot(xx, yy, 6); }
   }
-  // Subtle tinted front glass door frame
-  const glass = new THREE.Mesh(new THREE.BoxGeometry(W - 0.08, H - 0.08, 0.012),
-    new THREE.MeshStandardMaterial({ color: 0x2c3635, transparent: true, opacity: 0.25, roughness: 0.2, depthWrite: false }));
-  glass.position.set(0, H / 2, D / 2 - 0.012); r.add(glass);
-  projectPicks.push(
-    tagProject(backP, 'rack', r, new THREE.Vector3(0, H * 0.65, 0)),
-    tagProject(topP, 'rack', r, new THREE.Vector3(0, H * 0.65, 0)),
-    tagProject(glass, 'rack', r, new THREE.Vector3(0, H * 0.65, 0)),
-  );
+
+  const leds = [0x8eaa8e, 0x9aafa5, 0xc2aa72, 0x8eaa8e, 0xc2aa72];
+  for (let i = 0; i < 5; i++) {
+    const by = 0.105 + i * 0.207, bh = 0.174;
+    const bl = box(r, W - 0.09, bh, D - 0.06, 0, by, 0, blade);
+    picks.push(bl);
+    // A real faceplate stands slightly proud of each drawer, with a fine lip and a status light.
+    box(r, W - 0.105, 0.008, 0.015, 0, by + bh - 0.008, D / 2 - 0.015, steel);
+    const c = canvas(1024, 256), t = tex(c);
+    whenFont(() => { drawFace(c, i); t.needsUpdate = true; });
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.17, 0.14),
+      new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+    label.position.set(-0.012, by + bh / 2, D / 2 + 0.006);
+    r.add(label); picks.push(label);
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.009, 8, 6),
+      new THREE.MeshStandardMaterial({ color: leds[i], emissive: leds[i], emissiveIntensity: 0.3 }));
+    led.position.set(W / 2 - 0.057, by + bh / 2, D / 2 + 0.015); r.add(led);
+  }
+  // Thin hardware frame keeps the five stages visible, without a glass sheet over the words.
+  for (const sx of [-1, 1]) box(r, 0.012, H - 0.09, 0.012, sx * (W / 2 - 0.079), 0.045, D / 2 + 0.015, brass);
+  const anchor = new THREE.Object3D(); anchor.position.set(0, H * 0.63, D / 2); r.add(anchor);
+  picks.forEach(m => { m.userData.project = 'rack'; m.userData.anchor = anchor; projectPicks.push(m); });
 }
 
 function tagProject(mesh, id, anchorParent, pos) {

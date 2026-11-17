@@ -102,7 +102,8 @@ not per room; only their position follows the room (the wall pictures of the AI 
 ### Interactive Photo Album (About Me desk, D-039)
 Images live in `public/album/photo-<1..7>.webp` (max width 1024 px, 80% WebP quality, ~50–144 KB):
 - D-054: The closed desk album is larger and reads as a physical book: cloth/leather grain, ribbed spine, visible page edges, bookmark, restrained corner details and a mounted real photo on its cover. The entire object opens the album when clicked in About Me.
-- D-055 supersedes the open-book layout of D-054: two landscape photos share a page, each with its caption; portrait photos receive a page of their own. Group consecutive landscape images in pairs, flushing a partial pair before any portrait. On desktop show two pages as a spread; on phones show one page in a viewport-sized dialog. Keep images uncropped and make each photo clickable to open a larger view. Previous/next buttons, horizontal swipes and arrow keys turn one page on phones or one spread on desktop without wrapping. A restrained page-turn motion respects reduced-motion settings. Escape closes the large photo first, then the album.
+- D-055 supersedes the open-book layout of D-054: two landscape photos share a page, each with its caption; portrait photos receive a page of their own. Group consecutive landscape images in pairs, flushing a partial pair before any portrait. Keep images uncropped and make each photo clickable to open a larger view. Escape closes the large photo first, then the album.
+- D-057: Keep two facing pages and a visible spine at all viewport widths, including phones. The mobile book is centred and height-limited to retain the silhouette of an open book. Previous/next buttons, horizontal swipes and arrow keys turn a whole spread without wrapping; the subtle motion respects reduced-motion settings. Small photos remain directly enlargable.
 - The current seven photos are all landscape, so they occupy four pages (2 + 2 + 2 + 1); a future portrait requires `orientation: 'portrait'` in its language metadata.
 - `photo-1.webp`: River Elbe & container giant (Hamburg)
 - `photo-2.webp`: Rainbow over historic Speicherstadt (Hamburg)
@@ -111,6 +112,9 @@ Images live in `public/album/photo-<1..7>.webp` (max width 1024 px, 80% WebP qua
 - `photo-5.webp`: Ponte Dom Luís I at golden sunset (Porto)
 - `photo-6.webp`: Ever Acme container mega-ship arriving in port (Hamburg)
 - `photo-7.webp`: Quiet sunset with tree, bench, and hiking signpost
+
+### Server rack timeline (AI & Digital Health, D-056)
+Five distinct physical modules climb from bottom to top: Telemedicine 2004, Digital OR 2008, System Integration 2018, Longitudinal Data & Wearables 2023, AI & Startup 2024. Printed years and restrained cues make the chronology visible at close range. The whole rack opens a bilingual preview card with the five legible labels and no external destination. The preview remains open until dismissed so a visitor can read it. The room overview relies on shape and rhythm; tiny lettering is not expected to be readable there.
 
 Rules:
 - Pictures are drawn unlit (not tone-mapped), so they show the brightness of the file (D-022).

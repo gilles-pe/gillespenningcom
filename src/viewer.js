@@ -270,7 +270,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     roomId === 'projects' || roomId === 'ai'
     || (roomId === 'writing' && SOCIAL_CARDS.has(key))
     || (roomId === 'about' && ABOUT_CARDS.has(key));
-  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popClose = null;
+  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popTimeline = null, popClose = null;
   let popKey = null, popTimer = null;
   const projectHit = ndcPos => {
     projRay.setFromCamera(ndcPos, camera);
@@ -307,6 +307,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popImg.hidden = true; popImg.removeAttribute('src');
       popTitle.textContent = title;
       popText.textContent = `${t(curLang, 'rooms.about.p1')} ${t(curLang, 'rooms.about.p2')}`;
+      popTimeline.hidden = true;
       popBody.href = 'https://www.linkedin.com/in/gillespenning/';
       return;
     }
@@ -316,7 +317,18 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
     popTitle.textContent = data.title;
     popText.textContent = data.text;
-    if (data.icon && PATHS[data.icon]) {
+    popTimeline.replaceChildren();
+    popTimeline.hidden = !Array.isArray(data.timeline);
+    for (const entry of data.timeline || []) {
+      const row = document.createElement('li');
+      const year = document.createElement('span'); year.className = 'pop-timeline-year'; year.textContent = entry.year;
+      const label = document.createElement('span'); label.textContent = entry.label;
+      row.append(year, label); popTimeline.append(row);
+    }
+    if (data.timeline) {
+      popImg.hidden = true;
+      popImg.removeAttribute('src');
+    } else if (data.icon && PATHS[data.icon]) {
       popImg.hidden = false;
       popImg.alt = data.title;
       popImg.onerror = null;
@@ -355,14 +367,17 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popImg = document.createElement('img'); popImg.className = 'pop-img'; popImg.decoding = 'async';
       popTitle = document.createElement('h3'); popTitle.className = 'pop-title';
       popText = document.createElement('p'); popText.className = 'pop-text';
+      popTimeline = document.createElement('ol'); popTimeline.className = 'pop-timeline'; popTimeline.hidden = true;
       popEl.addEventListener('pointerenter', stopAutoCard);
-      popEl.addEventListener('pointerleave', () => { if (popKey) startAutoCard(() => closePop(false)); });
-      popBody.append(popImg, popTitle, popText);
+      popEl.addEventListener('pointerleave', () => { if (popKey && popKey !== 'rack') startAutoCard(() => closePop(false)); });
+      popBody.append(popImg, popTitle, popText, popTimeline);
       popEl.append(popClose, popBody);
       stage.append(popEl);
     }
     clearTimeout(popTimer);
+    stopAutoCard();
     popKey = key;
+    popEl.classList.toggle('rack-card', key === 'rack');
     fillPop();
     popEl.hidden = false;
     popEl.inert = false;
@@ -371,7 +386,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     void popEl.offsetWidth;
     popEl.classList.add('on');
     popClose.focus({ preventScroll: true });
-    startAutoCard(() => closePop(false));
+    if (key !== 'rack') startAutoCard(() => closePop(false));
   }
   function togglePop(key) {
     if (popKey === key) closePop(true);
@@ -460,15 +475,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       touchStart = null;
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.3) {
         e.preventDefault();
-        setAlbumIndex(albumIndex + (dx < 0 ? 1 : -1) * (phone() ? 1 : 2));
+        setAlbumIndex(albumIndex + (dx < 0 ? 2 : -2));
       }
     }, { passive: false });
 
     const footer = document.createElement('div'); footer.className = 'album-footer';
     albumPrevBtn = document.createElement('button'); albumPrevBtn.type = 'button';
-    albumPrevBtn.className = 'album-btn'; albumPrevBtn.addEventListener('click', () => setAlbumIndex(albumIndex - (phone() ? 1 : 2)));
+    albumPrevBtn.className = 'album-btn'; albumPrevBtn.addEventListener('click', () => setAlbumIndex(albumIndex - 2));
     albumNextBtn = document.createElement('button'); albumNextBtn.type = 'button';
-    albumNextBtn.className = 'album-btn'; albumNextBtn.addEventListener('click', () => setAlbumIndex(albumIndex + (phone() ? 1 : 2)));
+    albumNextBtn.className = 'album-btn'; albumNextBtn.addEventListener('click', () => setAlbumIndex(albumIndex + 2));
     const nav = document.createElement('div'); nav.className = 'album-nav'; nav.append(albumPrevBtn, albumNextBtn);
     albumHintEl = document.createElement('p'); albumHintEl.className = 'album-hint';
     footer.append(nav, albumHintEl);
@@ -514,9 +529,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   function renderAlbumPage(element, page, pageNumber, totalPages) {
     element.replaceChildren();
-    if (!page.length) return;
     element.classList.toggle('album-page-portrait', page.length === 1 && page[0].orientation === 'portrait');
     element.classList.toggle('album-page-single', page.length === 1);
+    if (!page.length) return;
     for (const photo of page) {
       const button = document.createElement('button'); button.type = 'button';
       button.className = 'album-photo-card';
@@ -536,15 +551,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   function updateAlbumView() {
     if (!albumModal || !albumOpen) return;
-    const photos = getAlbumPhotos(), pages = albumPages(photos), single = phone();
+    const photos = getAlbumPhotos(), pages = albumPages(photos);
     if (!pages.length) return;
-    albumIndex = Math.max(0, Math.min(albumIndex, pages.length - 1));
-    if (!single) albumIndex = Math.floor(albumIndex / 2) * 2;
-    const left = pages[albumIndex], right = single ? [] : (pages[albumIndex + 1] || []);
+    albumIndex = Math.floor(Math.max(0, Math.min(albumIndex, pages.length - 1)) / 2) * 2;
+    const left = pages[albumIndex], right = pages[albumIndex + 1] || [];
     const pageCount = pages.length;
     renderAlbumPage(albumPageLeft, left, albumIndex + 1, pageCount);
-    albumPageRight.hidden = single;
-    if (!single) renderAlbumPage(albumPageRight, right, albumIndex + 2, pageCount);
+    albumPageRight.hidden = false;
+    renderAlbumPage(albumPageRight, right, albumIndex + 2, pageCount);
     const visible = [...left, ...right];
     albumCounterEl.textContent = `${visible[0].index + 1}–${visible.at(-1).index + 1} / ${photos.length}`;
     albumTagEl.textContent = t(curLang, 'model.album.title');
@@ -553,16 +567,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
     albumNextBtn.textContent = `${t(curLang, 'model.album.next')} ›`;
     albumPrevBtn.disabled = albumIndex === 0;
-    albumNextBtn.disabled = albumIndex + (single ? 1 : 2) >= pages.length;
+    albumNextBtn.disabled = albumIndex + 2 >= pages.length;
     albumModal.setAttribute('aria-label', `${t(curLang, 'model.album.title')} · ${albumCounterEl.textContent}`);
   }
 
   function setAlbumIndex(idx) {
     const pages = albumPages(getAlbumPhotos());
     if (!pages.length) return;
-    const next = phone()
-      ? Math.max(0, Math.min(idx, pages.length - 1))
-      : Math.max(0, Math.min(Math.floor(idx / 2) * 2, pages.length - 1));
+    const next = Math.floor(Math.max(0, Math.min(idx, pages.length - 1)) / 2) * 2;
     if (next === albumIndex) return;
     const direction = next > albumIndex ? 'turn-forward' : 'turn-back';
     albumIndex = next;
@@ -600,10 +612,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (albumOpen) closeAlbum(true);
     else openAlbum();
   }
-
-  matchMedia('(max-width: 800px)').addEventListener('change', () => {
-    if (albumOpen) updateAlbumView();
-  });
 
   // Pointer: drag turns the model freely, right/middle/Shift/Space-drag pans, two fingers (or wheel) zoom.
   // (or plays the hidden cellar machine). Touch rule: a one-finger drag that starts mostly vertical is left to the page scroll;
@@ -665,10 +673,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (e.key === 'Tab') { e.preventDefault(); albumLightboxClose.focus(); }
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setAlbumIndex(albumIndex - (phone() ? 1 : 2));
+        setAlbumIndex(albumIndex - 2);
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setAlbumIndex(albumIndex + (phone() ? 1 : 2));
+        setAlbumIndex(albumIndex + 2);
       } else if (e.key === 'Tab') {
         const focusable = [...albumBook.querySelectorAll('button:not(:disabled), [tabindex="0"]')].filter(el => !el.closest('[hidden]'));
         const first = focusable[0], last = focusable.at(-1);

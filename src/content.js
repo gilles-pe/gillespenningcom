@@ -105,9 +105,9 @@ export const content = {
         title: 'Photo Album',
         subtitle: 'Personal snapshots & perspectives',
         close: 'Close',
-        prev: 'Previous page',
-        next: 'Next page',
-        hint: 'Turn pages with the buttons or swipe · Tap a photo to enlarge',
+        prev: 'Previous',
+        next: 'Next',
+        hint: 'Turn the spread with the buttons or swipe · Tap a photo to enlarge',
         openImage: 'Open photo',
         closeImage: 'Close photo',
         photos: [
@@ -174,9 +174,16 @@ export const content = {
           href: LINKS.elbstrand,
         },
         rack: {
-          title: 'Digital Workflows & OR Integration',
+          title: 'From Telemedicine to AI',
           icon: 'rack',
-          text: 'Telemedicine since 2004, integrated OR, digital workflows and image guidance: throughout my career I have worked to give physicians the best possible digital solutions, data and tools.',
+          text: 'Five stages of my work in digital medicine, from telemedicine to AI and startup.',
+          timeline: [
+            { year: '2004', label: 'Telemedicine' },
+            { year: '2008', label: 'Digital OR' },
+            { year: '2018', label: 'System Integration' },
+            { year: '2023', label: 'Longitudinal Data & Wearables' },
+            { year: '2024', label: 'AI & Startup' },
+          ],
           href: null,
         },
         enterprise: {
@@ -320,9 +327,9 @@ export const content = {
         title: 'Fotoalbum',
         subtitle: 'Persönliche Momentaufnahmen & Perspektiven',
         close: 'Schließen',
-        prev: 'Vorherige Seite',
-        next: 'Nächste Seite',
-        hint: 'Mit den Tasten oder per Wischgeste blättern · Foto antippen zum Vergrößern',
+        prev: 'Zurück',
+        next: 'Weiter',
+        hint: 'Doppelseite per Taste oder Wischgeste umblättern · Foto antippen zum Vergrößern',
         openImage: 'Foto öffnen',
         closeImage: 'Foto schließen',
         photos: [
@@ -365,9 +372,16 @@ export const content = {
       },
       projectCards: {
         rack: {
-          title: 'Digitale Workflows & OP-Integration',
+          title: 'Von Telemedizin zu KI',
           icon: 'rack',
-          text: 'Telemedizin seit 2004, integrierter OP, digitale Workflows und Bildführung: In meiner ganzen Karriere ging es mir darum, Ärztinnen und Ärzten die bestmöglichen digitalen Lösungen, Daten und Tools an die Hand zu geben.',
+          text: 'Fünf Stationen meiner Arbeit in der digitalen Medizin, von der Telemedizin bis zu KI und Startup.',
+          timeline: [
+            { year: '2004', label: 'Telemedizin' },
+            { year: '2008', label: 'Digitaler OP' },
+            { year: '2018', label: 'Systemintegration' },
+            { year: '2023', label: 'Longitudinale Daten & Wearables' },
+            { year: '2024', label: 'KI & Startup' },
+          ],
           href: null,
         },
         enterprise: {

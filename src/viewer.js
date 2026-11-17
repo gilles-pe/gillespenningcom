@@ -408,10 +408,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return h && albumParts.has(h.object) ? h.object.userData : null;
   };
   let albumOpen = false, albumIndex = 0;
-  let albumModal = null, albumBackdrop = null, albumBook = null;
+  let albumModal = null, albumBackdrop = null, albumBook = null, albumSpread = null;
   let albumPhotoEl = null, albumTitleEl = null, albumDescEl = null, albumCounterEl = null;
-  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumThumbsContainer = null;
-  let albumTimer = null;
+  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumThumbsContainer = null, albumTagEl = null, albumHintEl = null;
+  let albumTimer = null, albumReturnFocus = null;
 
   const getAlbumPhotos = () => t(curLang, 'model.album.photos') || [];
 
@@ -439,6 +439,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
     const spread = document.createElement('div');
     spread.className = 'album-spread';
+    albumSpread = spread;
 
     // Left page: photo mount & photo
     const pageLeft = document.createElement('div');
@@ -449,14 +450,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     photoMount.setAttribute('role', 'button');
     photoMount.tabIndex = 0;
     photoMount.addEventListener('click', () => {
-      const photos = getAlbumPhotos();
-      if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+      setAlbumIndex(albumIndex + 1);
     });
     photoMount.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        const photos = getAlbumPhotos();
-        if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+        setAlbumIndex(albumIndex + 1);
       }
     });
 
@@ -469,6 +468,20 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     clickHint.className = 'album-click-hint';
     clickHint.textContent = '›';
     photoMount.append(clickHint);
+    let touchStart = null;
+    pageLeft.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+    pageLeft.addEventListener('touchend', e => {
+      if (!touchStart || !e.changedTouches.length) return;
+      const dx = e.changedTouches[0].clientX - touchStart.x;
+      const dy = e.changedTouches[0].clientY - touchStart.y;
+      touchStart = null;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+        e.preventDefault();
+        setAlbumIndex(albumIndex + (dx < 0 ? 1 : -1));
+      }
+    }, { passive: false });
 
     pageLeft.append(photoMount);
 
@@ -483,14 +496,13 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const header = document.createElement('div');
     header.className = 'album-header';
 
-    const tag = document.createElement('span');
-    tag.className = 'album-tag';
-    tag.textContent = t(curLang, 'model.album.title');
+    albumTagEl = document.createElement('span');
+    albumTagEl.className = 'album-tag';
 
     albumCounterEl = document.createElement('span');
     albumCounterEl.className = 'album-counter';
 
-    header.append(tag, albumCounterEl);
+    header.append(albumTagEl, albumCounterEl);
 
     albumTitleEl = document.createElement('h3');
     albumTitleEl.className = 'album-title';
@@ -508,25 +520,22 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     albumPrevBtn.type = 'button';
     albumPrevBtn.className = 'album-btn album-btn-prev';
     albumPrevBtn.addEventListener('click', () => {
-      const photos = getAlbumPhotos();
-      if (photos.length) setAlbumIndex((albumIndex - 1 + photos.length) % photos.length);
+      setAlbumIndex(albumIndex - 1);
     });
 
     albumNextBtn = document.createElement('button');
     albumNextBtn.type = 'button';
     albumNextBtn.className = 'album-btn album-btn-next';
     albumNextBtn.addEventListener('click', () => {
-      const photos = getAlbumPhotos();
-      if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+      setAlbumIndex(albumIndex + 1);
     });
 
     nav.append(albumPrevBtn, albumNextBtn);
 
-    const hintEl = document.createElement('p');
-    hintEl.className = 'album-hint';
-    hintEl.textContent = t(curLang, 'model.album.hint');
+    albumHintEl = document.createElement('p');
+    albumHintEl.className = 'album-hint';
 
-    pageRight.append(header, albumTitleEl, albumDescEl, albumThumbsContainer, nav, hintEl);
+    pageRight.append(header, albumTitleEl, albumDescEl, albumThumbsContainer, nav, albumHintEl);
 
     spread.append(pageLeft, spine, pageRight);
     albumBook.append(albumCloseBtn, spread);
@@ -544,13 +553,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const current = photos[albumIndex];
     albumPhotoEl.src = `${import.meta.env.BASE_URL}${current.src}`;
     albumPhotoEl.alt = current.title;
+    albumPhotoEl.loading = 'eager';
     albumTitleEl.textContent = current.title;
     albumDescEl.textContent = current.desc;
     albumCounterEl.textContent = `${albumIndex + 1} / ${photos.length}`;
+    albumTagEl.textContent = t(curLang, 'model.album.title');
+    albumHintEl.textContent = t(curLang, 'model.album.hint');
 
     albumCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
     albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
     albumNextBtn.textContent = `${t(curLang, 'model.album.next')} ›`;
+    albumPrevBtn.disabled = albumIndex === 0;
+    albumNextBtn.disabled = albumIndex === photos.length - 1;
+    albumPhotoEl.parentElement.setAttribute('aria-label', albumNextBtn.disabled ? current.title : t(curLang, 'model.album.next'));
+    albumPhotoEl.parentElement.tabIndex = albumNextBtn.disabled ? -1 : 0;
+    albumPhotoEl.parentElement.toggleAttribute('data-last', albumNextBtn.disabled);
     albumModal.setAttribute('aria-label', `${t(curLang, 'model.album.title')} - ${current.title}`);
 
     albumThumbsContainer.innerHTML = '';
@@ -570,13 +587,22 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
 
   function setAlbumIndex(idx) {
-    albumIndex = idx;
+    const next = Math.max(0, Math.min(idx, getAlbumPhotos().length - 1));
+    if (next === albumIndex) return;
+    const direction = next > albumIndex ? 'turn-forward' : 'turn-back';
+    albumIndex = next;
     updateAlbumView();
+    if (!reduced && albumSpread) {
+      albumSpread.classList.remove('turn-forward', 'turn-back');
+      void albumSpread.offsetWidth;
+      albumSpread.classList.add(direction);
+    }
   }
 
   function openAlbum() {
     closePhoto(false);
     closePop(false);
+    albumReturnFocus = document.activeElement;
     buildAlbumModal();
     clearTimeout(albumTimer);
     albumOpen = true;
@@ -600,7 +626,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const had = albumModal.contains(document.activeElement);
     if (reduced) albumModal.hidden = true;
     else albumTimer = setTimeout(() => { if (!albumOpen) albumModal.hidden = true; }, 260);
-    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+    if (had || restoreFocus) (albumReturnFocus?.isConnected ? albumReturnFocus : canvas).focus({ preventScroll: true });
   }
 
   function toggleAlbum() {
@@ -665,12 +691,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         closeAlbum(true);
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        const photos = getAlbumPhotos();
-        if (photos.length) setAlbumIndex((albumIndex - 1 + photos.length) % photos.length);
+        setAlbumIndex(albumIndex - 1);
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        const photos = getAlbumPhotos();
-        if (photos.length) setAlbumIndex((albumIndex + 1) % photos.length);
+        setAlbumIndex(albumIndex + 1);
+      } else if (e.key === 'Tab') {
+        const focusable = [...albumBook.querySelectorAll('button:not(:disabled), [tabindex="0"]')];
+        const first = focusable[0], last = focusable.at(-1);
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
       }
       return;
     }

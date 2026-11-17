@@ -105,9 +105,9 @@ export const content = {
         title: 'Photo Album',
         subtitle: 'Personal snapshots & perspectives',
         close: 'Close',
-        prev: 'Previous photo',
-        next: 'Next photo',
-        hint: 'Click to turn page · Arrow keys ‹ ›',
+        prev: 'Previous page',
+        next: 'Next page',
+        hint: 'Tap or swipe the photo · Arrow keys ‹ ›',
         photos: [
           {
             src: 'album/photo-1.webp',
@@ -318,9 +318,9 @@ export const content = {
         title: 'Fotoalbum',
         subtitle: 'Persönliche Momentaufnahmen & Perspektiven',
         close: 'Schließen',
-        prev: 'Vorheriges Foto',
-        next: 'Nächstes Foto',
-        hint: 'Klicken zum Blättern · Pfeiltasten ‹ ›',
+        prev: 'Vorherige Seite',
+        next: 'Nächste Seite',
+        hint: 'Foto antippen oder wischen · Pfeiltasten ‹ ›',
         photos: [
           {
             src: 'album/photo-1.webp',

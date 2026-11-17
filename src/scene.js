@@ -708,51 +708,57 @@ function openLaptop(parent, x, y, z, rotY = 0) {
 
 function deskPhotoAlbum(parent, x, y, z, rotY = -0.22) {
   const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
-  const w = 0.22, h = 0.034, d = 0.28;
-  const coverMat = mat(0x1a2e3b, { roughness: 0.6 });
+  const w = 0.30, h = 0.042, d = 0.36;
+  const coverMat = mat(0x203d3b, { roughness: 0.82 });
   const pageMat = mat(0xf4efe4, { roughness: 0.8 });
-  const gold = mat(C.brass, { metalness: 0.6, roughness: 0.35 });
+  const gold = mat(0xb99a60, { metalness: 0.45, roughness: 0.52 });
 
-  // Lower cover & page block
-  box(g, w + 0.008, 0.004, d + 0.008, 0, 0.002, 0, coverMat);
-  box(g, w - 0.008, h - 0.008, d - 0.012, 0.004, h / 2, 0, pageMat);
-  box(g, 0.006, h, d + 0.008, -w / 2 - 0.001, h / 2, 0, coverMat);
-  [[-w / 2 + 0.01, -d / 2 + 0.01], [w / 2 - 0.01, -d / 2 + 0.01], [-w / 2 + 0.01, d / 2 - 0.01], [w / 2 - 0.01, d / 2 - 0.01]].forEach(([cx, cz]) => {
-    box(g, 0.02, 0.006, 0.02, cx, h + 0.001, cz, gold);
-  });
+  const lower = box(g, w + 0.008, 0.005, d + 0.008, 0, 0, 0, coverMat);
+  const pages = box(g, w - 0.014, h - 0.011, d - 0.018, 0.004, 0.005, 0, pageMat);
+  const spine = box(g, 0.016, h + 0.008, d + 0.012, -w / 2 - 0.002, 0, 0, coverMat);
+  for (const sz of [-0.12, -0.085, 0.085, 0.12])
+    box(g, 0.018, 0.002, 0.006, -w / 2 - 0.003, h - 0.002, sz, gold);
+  for (const py of [0.011, 0.018, 0.025])
+    box(g, w - 0.018, 0.001, 0.002, 0.004, py, d / 2 - 0.006, mat(0xd9d0c0));
+  const ribbon = box(g, 0.017, 0.002, 0.055, 0.078, 0.006, d / 2 + 0.012, mat(0x789084));
 
-  // Top cover with embossed canvas texture
   const c = canvas(512, 640), k = c.getContext('2d'), t = tex(c);
-  whenFont(() => {
-    k.fillStyle = '#1a2e3b'; k.fillRect(0, 0, 512, 640);
-    k.strokeStyle = '#d4af37'; k.lineWidth = 6;
-    k.strokeRect(36, 36, 440, 568);
-    k.strokeStyle = '#a9792b'; k.lineWidth = 2;
-    k.strokeRect(48, 48, 416, 544);
-    // Center camera/photo emblem
-    k.strokeStyle = '#d4af37'; k.lineWidth = 4;
-    k.strokeRect(176, 180, 160, 120);
-    k.fillStyle = '#223d4f'; k.fillRect(182, 186, 148, 108);
-    k.fillStyle = '#d4af37';
-    k.beginPath(); k.arc(280, 218, 14, 0, Math.PI * 2); k.fill();
-    k.beginPath(); k.moveTo(186, 288); k.lineTo(236, 232); k.lineTo(276, 272); k.lineTo(296, 252); k.lineTo(326, 288); k.closePath(); k.fill();
-    // Text: "Fotoalbum" / "Photo Album"
-    k.fillStyle = '#f7f6f2'; k.textAlign = 'center'; k.textBaseline = 'middle';
-    k.font = `600 46px ${FONT}`;
-    k.fillText(modelText().spots.album ?? 'Photo Album', 256, 360, 380);
-    k.fillStyle = '#d4af37';
-    k.fillRect(176, 400, 160, 4);
-    k.font = '500 22px system-ui, sans-serif';
-    k.fillStyle = '#a9b8c6';
-    k.fillText('GILLES PENNING', 256, 435, 300);
+  const coverPhoto = new Image();
+  const drawCover = () => {
+    k.fillStyle = '#203d3b'; k.fillRect(0, 0, 512, 640);
+    const random = rng(406);
+    for (let i = 0; i < 2600; i++) {
+      k.fillStyle = `rgba(238,228,200,${random() * 0.055})`;
+      k.fillRect(random() * 512, random() * 640, 2, 2);
+    }
+    k.strokeStyle = '#b99a60'; k.lineWidth = 5; k.strokeRect(30, 30, 452, 580);
+    k.lineWidth = 2; k.strokeRect(42, 42, 428, 556);
+    k.fillStyle = '#efe7d7'; k.textAlign = 'center'; k.textBaseline = 'middle';
+    k.font = `600 45px ${FONT}`;
+    k.fillText(modelText().spots.album ?? 'Photo Album', 256, 105, 390);
+    k.fillStyle = '#efe7d7'; k.fillRect(82, 183, 348, 274);
+    if (coverPhoto.naturalWidth) {
+      const scale = Math.min(328 / coverPhoto.naturalWidth, 254 / coverPhoto.naturalHeight);
+      const pw = coverPhoto.naturalWidth * scale, ph = coverPhoto.naturalHeight * scale;
+      k.drawImage(coverPhoto, 92 + (328 - pw) / 2, 193 + (254 - ph) / 2, pw, ph);
+    }
+    else { k.fillStyle = '#8fa59a'; k.fillRect(92, 193, 328, 254); }
+    k.fillStyle = '#b99a60'; k.fillRect(166, 503, 180, 3);
+    k.font = '500 24px system-ui, sans-serif';
+    k.fillText('GILLES PENNING', 256, 545, 340);
     t.needsUpdate = true;
-  });
-  const topCoverMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.52, metalness: 0.1 });
-  const topCover = new THREE.Mesh(new THREE.BoxGeometry(w + 0.008, 0.004, d + 0.008), [coverMat, coverMat, topCoverMat, coverMat, coverMat, coverMat]);
-  topCover.position.set(0, h - 0.002, 0); topCover.castShadow = true; g.add(topCover);
+  };
+  whenFont(drawCover);
+  coverPhoto.onload = drawCover;
+  coverPhoto.src = `${import.meta.env.BASE_URL}album/photo-1.webp`;
+  const topMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 });
+  const cover = new THREE.Mesh(new THREE.BoxGeometry(w + 0.008, 0.005, d + 0.008), [coverMat, coverMat, topMat, coverMat, coverMat, coverMat]);
+  cover.position.set(0, h + 0.002, 0); cover.castShadow = true; g.add(cover);
+  for (const cx of [-w / 2 + 0.012, w / 2 - 0.012]) for (const cz of [-d / 2 + 0.012, d / 2 - 0.012])
+    box(g, 0.017, 0.002, 0.017, cx, h + 0.005, cz, gold);
 
   const anchor = new THREE.Object3D(); anchor.position.set(0, h + 0.08, 0); g.add(anchor);
-  const picks = [topCover];
+  const picks = [lower, pages, spine, ribbon, cover];
   picks.forEach(m => { m.userData.album = true; m.userData.anchor = anchor; });
   return { picks, anchor };
 }

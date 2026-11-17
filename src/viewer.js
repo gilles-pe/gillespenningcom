@@ -3,6 +3,7 @@ import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { t } from './i18n.js';
 import { createEgg } from './egg.js';
 import { PATHS } from './icons.js';
+import { albumPages } from './album-pages.js';
 
 export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway }) {
   let renderer;
@@ -408,11 +409,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return h && albumParts.has(h.object) ? h.object.userData : null;
   };
   let albumOpen = false, albumIndex = 0;
-  let albumModal = null, albumBackdrop = null, albumBook = null, albumSpread = null;
-  let albumPhotoEl = null, albumTitleEl = null, albumDescEl = null, albumCounterEl = null;
-  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumThumbsContainer = null, albumTagEl = null, albumHintEl = null;
-  let albumTimer = null, albumReturnFocus = null;
-
+  let albumModal = null, albumBook = null, albumSpread = null, albumLightbox = null;
+  let albumPageLeft = null, albumPageRight = null, albumCounterEl = null, albumTagEl = null, albumHintEl = null;
+  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumLightboxClose = null;
+  let albumLightboxImage = null, albumLightboxCaption = null;
+  let albumTimer = null, albumReturnFocus = null, albumPhotoFocus = null;
   const getAlbumPhotos = () => t(curLang, 'model.album.photos') || [];
 
   function buildAlbumModal() {
@@ -424,175 +425,149 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     albumModal.hidden = true;
     albumModal.inert = true;
 
-    albumBackdrop = document.createElement('div');
-    albumBackdrop.className = 'album-backdrop';
-    albumBackdrop.addEventListener('click', () => closeAlbum(true));
-
+    const backdrop = document.createElement('div');
+    backdrop.className = 'album-backdrop';
+    backdrop.addEventListener('click', () => closeAlbum(true));
     albumBook = document.createElement('div');
     albumBook.className = 'album-book';
-
     albumCloseBtn = document.createElement('button');
     albumCloseBtn.type = 'button';
     albumCloseBtn.className = 'card-x album-close';
     albumCloseBtn.textContent = '×';
     albumCloseBtn.addEventListener('click', () => closeAlbum(true));
 
-    const spread = document.createElement('div');
-    spread.className = 'album-spread';
-    albumSpread = spread;
+    const header = document.createElement('div');
+    header.className = 'album-header';
+    albumTagEl = document.createElement('span'); albumTagEl.className = 'album-tag';
+    albumCounterEl = document.createElement('span'); albumCounterEl.className = 'album-counter';
+    header.append(albumTagEl, albumCounterEl);
 
-    // Left page: photo mount & photo
-    const pageLeft = document.createElement('div');
-    pageLeft.className = 'album-page album-page-left';
+    albumSpread = document.createElement('div');
+    albumSpread.className = 'album-spread';
+    albumPageLeft = document.createElement('div'); albumPageLeft.className = 'album-page album-page-left';
+    const spine = document.createElement('div'); spine.className = 'album-spine';
+    albumPageRight = document.createElement('div'); albumPageRight.className = 'album-page album-page-right';
+    albumSpread.append(albumPageLeft, spine, albumPageRight);
 
-    const photoMount = document.createElement('div');
-    photoMount.className = 'album-photo-mount';
-    photoMount.setAttribute('role', 'button');
-    photoMount.tabIndex = 0;
-    photoMount.addEventListener('click', () => {
-      setAlbumIndex(albumIndex + 1);
-    });
-    photoMount.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        setAlbumIndex(albumIndex + 1);
-      }
-    });
-
-    albumPhotoEl = document.createElement('img');
-    albumPhotoEl.className = 'album-photo';
-    albumPhotoEl.decoding = 'async';
-    photoMount.append(albumPhotoEl);
-
-    const clickHint = document.createElement('span');
-    clickHint.className = 'album-click-hint';
-    clickHint.textContent = '›';
-    photoMount.append(clickHint);
     let touchStart = null;
-    pageLeft.addEventListener('touchstart', e => {
+    albumSpread.addEventListener('touchstart', e => {
       if (e.touches.length === 1) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }, { passive: true });
-    pageLeft.addEventListener('touchend', e => {
+    albumSpread.addEventListener('touchend', e => {
       if (!touchStart || !e.changedTouches.length) return;
       const dx = e.changedTouches[0].clientX - touchStart.x;
       const dy = e.changedTouches[0].clientY - touchStart.y;
       touchStart = null;
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.3) {
         e.preventDefault();
-        setAlbumIndex(albumIndex + (dx < 0 ? 1 : -1));
+        setAlbumIndex(albumIndex + (dx < 0 ? 1 : -1) * (phone() ? 1 : 2));
       }
     }, { passive: false });
 
-    pageLeft.append(photoMount);
+    const footer = document.createElement('div'); footer.className = 'album-footer';
+    albumPrevBtn = document.createElement('button'); albumPrevBtn.type = 'button';
+    albumPrevBtn.className = 'album-btn'; albumPrevBtn.addEventListener('click', () => setAlbumIndex(albumIndex - (phone() ? 1 : 2)));
+    albumNextBtn = document.createElement('button'); albumNextBtn.type = 'button';
+    albumNextBtn.className = 'album-btn'; albumNextBtn.addEventListener('click', () => setAlbumIndex(albumIndex + (phone() ? 1 : 2)));
+    const nav = document.createElement('div'); nav.className = 'album-nav'; nav.append(albumPrevBtn, albumNextBtn);
+    albumHintEl = document.createElement('p'); albumHintEl.className = 'album-hint';
+    footer.append(nav, albumHintEl);
+    albumBook.append(albumCloseBtn, header, albumSpread, footer);
 
-    // Center spine
-    const spine = document.createElement('div');
-    spine.className = 'album-spine';
-
-    // Right page: text, thumbnails, controls
-    const pageRight = document.createElement('div');
-    pageRight.className = 'album-page album-page-right';
-
-    const header = document.createElement('div');
-    header.className = 'album-header';
-
-    albumTagEl = document.createElement('span');
-    albumTagEl.className = 'album-tag';
-
-    albumCounterEl = document.createElement('span');
-    albumCounterEl.className = 'album-counter';
-
-    header.append(albumTagEl, albumCounterEl);
-
-    albumTitleEl = document.createElement('h3');
-    albumTitleEl.className = 'album-title';
-
-    albumDescEl = document.createElement('p');
-    albumDescEl.className = 'album-desc';
-
-    albumThumbsContainer = document.createElement('div');
-    albumThumbsContainer.className = 'album-thumbs';
-
-    const nav = document.createElement('div');
-    nav.className = 'album-nav';
-
-    albumPrevBtn = document.createElement('button');
-    albumPrevBtn.type = 'button';
-    albumPrevBtn.className = 'album-btn album-btn-prev';
-    albumPrevBtn.addEventListener('click', () => {
-      setAlbumIndex(albumIndex - 1);
-    });
-
-    albumNextBtn = document.createElement('button');
-    albumNextBtn.type = 'button';
-    albumNextBtn.className = 'album-btn album-btn-next';
-    albumNextBtn.addEventListener('click', () => {
-      setAlbumIndex(albumIndex + 1);
-    });
-
-    nav.append(albumPrevBtn, albumNextBtn);
-
-    albumHintEl = document.createElement('p');
-    albumHintEl.className = 'album-hint';
-
-    pageRight.append(header, albumTitleEl, albumDescEl, albumThumbsContainer, nav, albumHintEl);
-
-    spread.append(pageLeft, spine, pageRight);
-    albumBook.append(albumCloseBtn, spread);
-    albumModal.append(albumBackdrop, albumBook);
+    albumLightbox = document.createElement('div');
+    albumLightbox.className = 'album-lightbox';
+    albumLightbox.setAttribute('role', 'dialog');
+    albumLightbox.setAttribute('aria-modal', 'true');
+    albumLightbox.hidden = true;
+    const lightboxBackdrop = document.createElement('div'); lightboxBackdrop.className = 'album-lightbox-backdrop';
+    lightboxBackdrop.addEventListener('click', closeAlbumPhoto);
+    const lightboxFigure = document.createElement('figure'); lightboxFigure.className = 'album-lightbox-figure';
+    albumLightboxImage = document.createElement('img'); albumLightboxImage.className = 'album-lightbox-image';
+    albumLightboxCaption = document.createElement('figcaption'); albumLightboxCaption.className = 'album-lightbox-caption';
+    albumLightboxClose = document.createElement('button'); albumLightboxClose.type = 'button';
+    albumLightboxClose.className = 'card-x album-lightbox-close'; albumLightboxClose.textContent = '×';
+    albumLightboxClose.addEventListener('click', closeAlbumPhoto);
+    lightboxFigure.append(albumLightboxImage, albumLightboxCaption);
+    albumLightbox.append(lightboxBackdrop, lightboxFigure, albumLightboxClose);
+    albumModal.append(backdrop, albumBook, albumLightbox);
     stage.append(albumModal);
+  }
+
+  function openAlbumPhoto(photo, button) {
+    albumPhotoFocus = button;
+    albumLightboxImage.src = `${import.meta.env.BASE_URL}${photo.src}`;
+    albumLightboxImage.alt = photo.title;
+    albumLightboxCaption.textContent = `${photo.title} · ${photo.desc}`;
+    albumLightbox.setAttribute('aria-label', `${t(curLang, 'model.album.openImage')}: ${photo.title}`);
+    albumLightboxClose.setAttribute('aria-label', t(curLang, 'model.album.closeImage'));
+    albumBook.inert = true;
+    albumLightbox.hidden = false;
+    albumLightboxClose.focus({ preventScroll: true });
+  }
+
+  function closeAlbumPhoto() {
+    if (!albumLightbox || albumLightbox.hidden) return;
+    albumLightbox.hidden = true;
+    albumBook.inert = false;
+    (albumPhotoFocus?.isConnected && !albumPhotoFocus.closest('[hidden]') ? albumPhotoFocus : albumCloseBtn).focus({ preventScroll: true });
+  }
+
+  function renderAlbumPage(element, page, pageNumber, totalPages) {
+    element.replaceChildren();
+    if (!page.length) return;
+    element.classList.toggle('album-page-portrait', page.length === 1 && page[0].orientation === 'portrait');
+    element.classList.toggle('album-page-single', page.length === 1);
+    for (const photo of page) {
+      const button = document.createElement('button'); button.type = 'button';
+      button.className = 'album-photo-card';
+      button.setAttribute('aria-label', `${t(curLang, 'model.album.openImage')}: ${photo.title}`);
+      const image = document.createElement('img'); image.src = `${import.meta.env.BASE_URL}${photo.src}`;
+      image.alt = photo.title; image.decoding = 'async';
+      const caption = document.createElement('span'); caption.className = 'album-photo-caption';
+      caption.textContent = photo.title;
+      button.append(image, caption);
+      button.addEventListener('click', () => openAlbumPhoto(photo, button));
+      element.append(button);
+    }
+    const number = document.createElement('span'); number.className = 'album-page-number';
+    number.textContent = `${pageNumber} / ${totalPages}`;
+    element.append(number);
   }
 
   function updateAlbumView() {
     if (!albumModal || !albumOpen) return;
-    const photos = getAlbumPhotos();
-    if (!photos.length) return;
-    if (albumIndex < 0) albumIndex = 0;
-    if (albumIndex >= photos.length) albumIndex = photos.length - 1;
-
-    const current = photos[albumIndex];
-    albumPhotoEl.src = `${import.meta.env.BASE_URL}${current.src}`;
-    albumPhotoEl.alt = current.title;
-    albumPhotoEl.loading = 'eager';
-    albumTitleEl.textContent = current.title;
-    albumDescEl.textContent = current.desc;
-    albumCounterEl.textContent = `${albumIndex + 1} / ${photos.length}`;
+    const photos = getAlbumPhotos(), pages = albumPages(photos), single = phone();
+    if (!pages.length) return;
+    albumIndex = Math.max(0, Math.min(albumIndex, pages.length - 1));
+    if (!single) albumIndex = Math.floor(albumIndex / 2) * 2;
+    const left = pages[albumIndex], right = single ? [] : (pages[albumIndex + 1] || []);
+    const pageCount = pages.length;
+    renderAlbumPage(albumPageLeft, left, albumIndex + 1, pageCount);
+    albumPageRight.hidden = single;
+    if (!single) renderAlbumPage(albumPageRight, right, albumIndex + 2, pageCount);
+    const visible = [...left, ...right];
+    albumCounterEl.textContent = `${visible[0].index + 1}–${visible.at(-1).index + 1} / ${photos.length}`;
     albumTagEl.textContent = t(curLang, 'model.album.title');
     albumHintEl.textContent = t(curLang, 'model.album.hint');
-
     albumCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
     albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
     albumNextBtn.textContent = `${t(curLang, 'model.album.next')} ›`;
     albumPrevBtn.disabled = albumIndex === 0;
-    albumNextBtn.disabled = albumIndex === photos.length - 1;
-    albumPhotoEl.parentElement.setAttribute('aria-label', albumNextBtn.disabled ? current.title : t(curLang, 'model.album.next'));
-    albumPhotoEl.parentElement.tabIndex = albumNextBtn.disabled ? -1 : 0;
-    albumPhotoEl.parentElement.toggleAttribute('data-last', albumNextBtn.disabled);
-    albumModal.setAttribute('aria-label', `${t(curLang, 'model.album.title')} - ${current.title}`);
-
-    albumThumbsContainer.innerHTML = '';
-    photos.forEach((p, idx) => {
-      const thumbBtn = document.createElement('button');
-      thumbBtn.type = 'button';
-      thumbBtn.className = 'album-thumb' + (idx === albumIndex ? ' active' : '');
-      thumbBtn.setAttribute('aria-label', `${idx + 1}: ${p.title}`);
-      const thumbImg = document.createElement('img');
-      thumbImg.src = `${import.meta.env.BASE_URL}${p.src}`;
-      thumbImg.alt = '';
-      thumbImg.decoding = 'async';
-      thumbBtn.append(thumbImg);
-      thumbBtn.addEventListener('click', () => setAlbumIndex(idx));
-      albumThumbsContainer.append(thumbBtn);
-    });
+    albumNextBtn.disabled = albumIndex + (single ? 1 : 2) >= pages.length;
+    albumModal.setAttribute('aria-label', `${t(curLang, 'model.album.title')} · ${albumCounterEl.textContent}`);
   }
 
   function setAlbumIndex(idx) {
-    const next = Math.max(0, Math.min(idx, getAlbumPhotos().length - 1));
+    const pages = albumPages(getAlbumPhotos());
+    if (!pages.length) return;
+    const next = phone()
+      ? Math.max(0, Math.min(idx, pages.length - 1))
+      : Math.max(0, Math.min(Math.floor(idx / 2) * 2, pages.length - 1));
     if (next === albumIndex) return;
     const direction = next > albumIndex ? 'turn-forward' : 'turn-back';
     albumIndex = next;
     updateAlbumView();
-    if (!reduced && albumSpread) {
+    if (!reduced) {
       albumSpread.classList.remove('turn-forward', 'turn-back');
       void albumSpread.offsetWidth;
       albumSpread.classList.add(direction);
@@ -600,29 +575,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
 
   function openAlbum() {
-    closePhoto(false);
-    closePop(false);
+    closePhoto(false); closePop(false);
     albumReturnFocus = document.activeElement;
-    buildAlbumModal();
-    clearTimeout(albumTimer);
-    albumOpen = true;
-    albumModal.hidden = false;
-    albumModal.inert = false;
-    albumModal.removeAttribute('aria-hidden');
+    buildAlbumModal(); clearTimeout(albumTimer);
+    albumOpen = true; albumModal.hidden = false; albumModal.inert = false;
     stage.classList.add('album-open');
     updateAlbumView();
-    void albumModal.offsetWidth;
-    albumModal.classList.add('on');
+    void albumModal.offsetWidth; albumModal.classList.add('on');
     albumCloseBtn.focus({ preventScroll: true });
   }
 
   function closeAlbum(restoreFocus = false) {
     if (!albumModal || !albumOpen) return;
-    albumOpen = false;
-    albumModal.classList.remove('on');
-    albumModal.inert = true;
-    stage.classList.remove('album-open');
-    clearTimeout(albumTimer);
+    if (!albumLightbox.hidden) { albumLightbox.hidden = true; albumBook.inert = false; }
+    albumOpen = false; albumModal.classList.remove('on'); albumModal.inert = true;
+    stage.classList.remove('album-open'); clearTimeout(albumTimer);
     const had = albumModal.contains(document.activeElement);
     if (reduced) albumModal.hidden = true;
     else albumTimer = setTimeout(() => { if (!albumOpen) albumModal.hidden = true; }, 260);
@@ -633,6 +600,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (albumOpen) closeAlbum(true);
     else openAlbum();
   }
+
+  matchMedia('(max-width: 800px)').addEventListener('change', () => {
+    if (albumOpen) updateAlbumView();
+  });
 
   // Pointer: drag turns the model freely, right/middle/Shift/Space-drag pans, two fingers (or wheel) zoom.
   // (or plays the hidden cellar machine). Touch rule: a one-finger drag that starts mostly vertical is left to the page scroll;
@@ -688,15 +659,18 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (albumOpen) {
       if (e.key === 'Escape') {
         e.preventDefault();
-        closeAlbum(true);
+        if (albumLightbox && !albumLightbox.hidden) closeAlbumPhoto();
+        else closeAlbum(true);
+      } else if (albumLightbox && !albumLightbox.hidden) {
+        if (e.key === 'Tab') { e.preventDefault(); albumLightboxClose.focus(); }
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setAlbumIndex(albumIndex - 1);
+        setAlbumIndex(albumIndex - (phone() ? 1 : 2));
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setAlbumIndex(albumIndex + 1);
+        setAlbumIndex(albumIndex + (phone() ? 1 : 2));
       } else if (e.key === 'Tab') {
-        const focusable = [...albumBook.querySelectorAll('button:not(:disabled), [tabindex="0"]')];
+        const focusable = [...albumBook.querySelectorAll('button:not(:disabled), [tabindex="0"]')].filter(el => !el.closest('[hidden]'));
         const first = focusable[0], last = focusable.at(-1);
         if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }

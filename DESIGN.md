@@ -102,7 +102,8 @@ not per room; only their position follows the room (the wall pictures of the AI 
 ### Interactive Photo Album (About Me desk, D-039)
 Images live in `public/album/photo-<1..7>.webp` (max width 1024 px, 80% WebP quality, ~50–144 KB):
 - D-054: The closed desk album is larger and reads as a physical book: cloth/leather grain, ribbed spine, visible page edges, bookmark, restrained corner details and a mounted real photo on its cover. The entire object opens the album when clicked in About Me.
-- The open album keeps one full, uncropped image per spread because the set mixes 4:3 frames and wide panoramas. The opposite page carries title and note; thumbnails provide direct access. On phones it fills the viewport and stacks image above text. Page controls stop at either end, and photo tap, horizontal swipe and arrow keys turn pages. Escape and the close button dismiss it.
+- D-055 supersedes the open-book layout of D-054: two landscape photos share a page, each with its caption; portrait photos receive a page of their own. Group consecutive landscape images in pairs, flushing a partial pair before any portrait. On desktop show two pages as a spread; on phones show one page in a viewport-sized dialog. Keep images uncropped and make each photo clickable to open a larger view. Previous/next buttons, horizontal swipes and arrow keys turn one page on phones or one spread on desktop without wrapping. A restrained page-turn motion respects reduced-motion settings. Escape closes the large photo first, then the album.
+- The current seven photos are all landscape, so they occupy four pages (2 + 2 + 2 + 1); a future portrait requires `orientation: 'portrait'` in its language metadata.
 - `photo-1.webp`: River Elbe & container giant (Hamburg)
 - `photo-2.webp`: Rainbow over historic Speicherstadt (Hamburg)
 - `photo-3.webp`: Harbor reflections in puddle at Dockland (Hamburg)

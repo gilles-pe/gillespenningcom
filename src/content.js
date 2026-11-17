@@ -107,7 +107,9 @@ export const content = {
         close: 'Close',
         prev: 'Previous page',
         next: 'Next page',
-        hint: 'Tap or swipe the photo · Arrow keys ‹ ›',
+        hint: 'Turn pages with the buttons or swipe · Tap a photo to enlarge',
+        openImage: 'Open photo',
+        closeImage: 'Close photo',
         photos: [
           {
             src: 'album/photo-1.webp',
@@ -320,7 +322,9 @@ export const content = {
         close: 'Schließen',
         prev: 'Vorherige Seite',
         next: 'Nächste Seite',
-        hint: 'Foto antippen oder wischen · Pfeiltasten ‹ ›',
+        hint: 'Mit den Tasten oder per Wischgeste blättern · Foto antippen zum Vergrößern',
+        openImage: 'Foto öffnen',
+        closeImage: 'Foto schließen',
         photos: [
           {
             src: 'album/photo-1.webp',

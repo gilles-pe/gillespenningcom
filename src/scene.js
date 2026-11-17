@@ -787,33 +787,113 @@ function officeChair(parent, x, z, rotY = 0, s = 1) {
   box(back, 0.24, 0.12, 0.065, 0, 0.58, 0.025, fabric);
 }
 
-function podcastArmchair(parent, x, z, rotY = 0) {
-  const a = new THREE.Group(); a.position.set(x, 0.02, z); a.rotation.y = rotY; parent.add(a);
-  const uph = mat(0xebe0cc, { roughness: 0.85 });
-  const cushion = mat(0xe3d4b9, { roughness: 0.88 });
-  const accent = mat(0x5b7673, { roughness: 0.85 });
-  const legM = wood(C.woodDark);
-  // Tapered wooden legs
-  for (const [lx, lz] of [[-0.26, -0.24], [0.26, -0.24], [-0.26, 0.24], [0.26, 0.24]]) {
-    cyl(a, 0.022, 0.014, 0.13, lx, 0, lz, legM, 10);
+export function podcastArmchair(parent, x, z, rotY = 0) {
+  const chair = new THREE.Group(); chair.position.set(x, 0.02, z); chair.rotation.y = rotY; parent.add(chair);
+  // Fine, deterministic leather grain; all detail is local and loads with the scene.
+  const grain = canvas(128, 128), ctx = grain.getContext('2d'), random = rng(2817);
+  ctx.fillStyle = '#b9b9b9'; ctx.fillRect(0, 0, 128, 128);
+  for (let i = 0; i < 3600; i++) {
+    const shade = 150 + Math.floor(random() * 54);
+    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+    ctx.fillRect(random() * 128, random() * 128, 1.5, 1.5);
   }
-  // Plush seat chassis + deep seat cushion
-  box(a, 0.66, 0.16, 0.62, 0, 0.13, 0, uph);
-  box(a, 0.48, 0.11, 0.56, 0, 0.29, 0.03, cushion);
-  // Wide rounded club armrests
-  for (const sx of [-1, 1]) {
-    box(a, 0.12, 0.30, 0.60, sx * 0.29, 0.28, -0.01, uph);
-    const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.60, 14), uph);
-    roll.rotation.x = Math.PI / 2; roll.position.set(sx * 0.29, 0.58, -0.01); roll.castShadow = true; a.add(roll);
+  const texture = tex(grain, { wrap: true, repeat: [2, 2] });
+  const outer = mat(0xb7a184, { roughness: 0.76, bumpMap: texture, bumpScale: 0.005, side: THREE.DoubleSide });
+  const inner = mat(0xd0bea2, { roughness: 0.81, bumpMap: texture, bumpScale: 0.005, side: THREE.DoubleSide });
+  const seat = mat(0xe4d7be, { roughness: 0.85, bumpMap: texture, bumpScale: 0.006 });
+  const piping = mat(0x9f8b70, { roughness: 0.83 });
+  const frame = wood(C.woodDark);
+
+  // The back and both arms are one continuous upholstered tub. Its inner and
+  // outer skins share a curved top profile: high at the back, low at the arms.
+  const count = 48, rows = 8, start = -2.12, span = 4.24;
+  const topAt = t => 0.615 + 0.31 * Math.pow(Math.max(0, Math.cos(t)), 1.7);
+  const point = (t, v, radius) => {
+    const r = radius + 0.018 * v;
+    return [r * Math.sin(t), 0.285 + (topAt(t) - 0.285) * v, 0.12 - r * Math.cos(t)];
+  };
+  function skin(radius, material, reverse) {
+    const positions = [], uvs = [], indices = [];
+    for (let i = 0; i <= count; i++) {
+      const u = i / count, t = start + span * u;
+      for (let j = 0; j <= rows; j++) {
+        const v = j / rows;
+        positions.push(...point(t, v, radius)); uvs.push(u * 2, v);
+      }
+    }
+    for (let i = 0; i < count; i++) for (let j = 0; j < rows; j++) {
+      const a = i * (rows + 1) + j, b = a + rows + 1;
+      indices.push(...(reverse ? [a, a + 1, b, b, a + 1, b + 1] : [a, b, a + 1, b, b + 1, a + 1]));
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    geo.setIndex(indices); geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.castShadow = mesh.receiveShadow = true; chair.add(mesh);
   }
-  // Reclined wing/club backrest + lumbar pillow
-  const bk = new THREE.Group(); bk.position.set(0, 0.28, -0.24); bk.rotation.x = -0.18; a.add(bk);
-  box(bk, 0.64, 0.48, 0.13, 0, 0, 0, uph);
-  box(bk, 0.34, 0.18, 0.07, 0, 0.12, 0.10, accent);
+  skin(0.41, outer, true);
+  skin(0.34, inner, false);
+  const capPositions = [], capUvs = [], capIndices = [];
+  for (let i = 0; i <= count; i++) {
+    const u = i / count, t = start + span * u;
+    capPositions.push(...point(t, 1, 0.41), ...point(t, 1, 0.34));
+    capUvs.push(u * 2, 0, u * 2, 1);
+  }
+  for (let i = 0; i < count; i++) {
+    const a = i * 2;
+    capIndices.push(a, a + 1, a + 2, a + 2, a + 1, a + 3);
+  }
+  const capGeo = new THREE.BufferGeometry();
+  capGeo.setAttribute('position', new THREE.Float32BufferAttribute(capPositions, 3));
+  capGeo.setAttribute('uv', new THREE.Float32BufferAttribute(capUvs, 2));
+  capGeo.setIndex(capIndices); capGeo.computeVertexNormals();
+  const cap = new THREE.Mesh(capGeo, outer); cap.castShadow = true; chair.add(cap);
+  // Close the exposed front ends of the arms rather than leaving hollow skins.
+  for (const t of [start, start + span]) {
+    const vertices = [point(t, 0, 0.41), point(t, 1, 0.41), point(t, 1, 0.34), point(t, 0, 0.34)];
+    const endGeo = new THREE.BufferGeometry();
+    endGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices.flat(), 3));
+    endGeo.setIndex([0, 1, 2, 0, 2, 3]); endGeo.computeVertexNormals();
+    const end = new THREE.Mesh(endGeo, outer); end.castShadow = true; chair.add(end);
+  }
+
+  // A narrow sewn edge follows the silhouette. Two short inner seams suggest
+  // shaped upholstery without a busy tufted pattern at overview scale.
+  function stitchedLine(points, radius, material) {
+    const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)));
+    const line = new THREE.Mesh(new THREE.TubeGeometry(curve, points.length * 3, radius, 5, false), material);
+    line.castShadow = true; chair.add(line);
+  }
+  const topSeam = [];
+  for (let i = 0; i <= 32; i++) {
+    const t = start + span * i / 32, p = point(t, 1, 0.36);
+    topSeam.push([p[0], p[1] + 0.003, p[2]]);
+  }
+  stitchedLine(topSeam, 0.0045, piping);
+  for (const t of [-0.56, 0.56]) {
+    stitchedLine([0.18, 0.35, 0.55, 0.75, 0.92].map(v => {
+      const p = point(t, v, 0.339);
+      return [p[0], p[1], p[2] + 0.003];
+    }), 0.0025, piping);
+  }
+
+  // Loose seat cushion above a visible walnut underframe.
+  const base = new THREE.Mesh(new RoundedBoxGeometry(0.63, 0.08, 0.59, 3, 0.025), frame);
+  base.position.set(0, 0.245, 0.035); base.castShadow = true; chair.add(base);
+  const cushion = new THREE.Mesh(new RoundedBoxGeometry(0.585, 0.14, 0.60, 4, 0.065), seat);
+  cushion.position.set(0, 0.355, 0.065); cushion.castShadow = cushion.receiveShadow = true; chair.add(cushion);
+  const frontSeam = new THREE.Mesh(new RoundedBoxGeometry(0.51, 0.008, 0.012, 2, 0.003), piping);
+  frontSeam.position.set(0, 0.335, 0.367); chair.add(frontSeam);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.03, 0.215, 10), frame);
+    leg.position.set(sx * 0.24, 0.112, sz * 0.215 + 0.035);
+    leg.rotation.z = sx * 0.14; leg.rotation.x = sz * 0.11;
+    leg.castShadow = true; chair.add(leg);
+  }
 }
 
-// A single, more tailored lounge chair on the left. The right chair retains the
-// simpler form so the two options can be compared in the actual room.
+// The tailored left chair contrasts with the sculptural tub chair on the right.
 export function tailoredArmchair(parent, x, z, rotY = 0) {
   const chair = new THREE.Group();
   chair.position.set(x, 0.02, z); chair.rotation.y = rotY; parent.add(chair);

@@ -47,6 +47,10 @@ On the desktop 3D view, the header and footer strip use 58% cream and a 4 px blu
 
 The left chair in Writing & Speaking is a tailored upholstered lounge chair: rounded back and arms, separate seat and back cushions, subtle woven surface, restrained seams, splayed oak legs, and one sage cushion. Its low, warm palette suits the architectural model. Keep the right chair unchanged for an in-room comparison. See D-050.
 
+The right chair now contrasts through a continuous curved tub shell that forms the back and both arms. Tonal leather, a loose cushion, fine seams and exposed oak legs give it more sculptural detail while keeping the small room calm. See D-051, superseding the right-chair comparison in D-050.
+
+The mobile overview aims lower on the tall canvas, clearing more of the intro and reducing the blank gap before the room controls. Opening a room retains its existing close framing. See D-052.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,

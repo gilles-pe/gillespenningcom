@@ -232,6 +232,8 @@ until a later entry replaces it.
 
 - **D-059 (2026-11-17) Two Enterprise miniatures and deliberate inspection (owner approval).** Replace the E miniature with separate classic NCC-1701 and NCC-1701-D models on small wood/brass display stands. First tap opens a persistent card; View model opens a rotatable/zoomable close-up, Warp starts a distinct TOS or TNG departure with a fixed camera and return to stand. No automatic warp. Escape, reset, keyboard arrows, native modal focus and reduced-motion fallback are provided. Sketchfab source downloads returned HTTP 401, so the shipped geometry is original procedural Three.js geometry, not the referenced source assets. Keep asset acquisition explicitly open. Build/token and CPU geometry checks pass; browser/mobile GPU verification is pending because local preview is not reachable from the available cloud browser.
 
+- **D-060 (2026-11-18) First-tap model camera (owner correction).** On selecting a miniature, move the main room camera in front of the cabinet and frame the selected model for immediate inspection. Keep the card beside the model on desktop and beneath it within the mobile canvas. Closing restores the prior camera pose; reset returns to room framing. Recompute framing on resize and skip the camera travel for reduced motion. Warp remains an explicit second action.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

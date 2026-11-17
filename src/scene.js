@@ -611,7 +611,7 @@ function enterpriseModel(parent, x, y, z, rotY = -0.5, era = 'tos') {
   g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
   const anchor = new THREE.Object3D(); anchor.position.set(0, 1.8, 0); g.add(anchor);
   const picks = [];
-  g.traverse(o => { if (o.isMesh) { o.userData.project = era === 'tng' ? 'enterpriseD' : 'enterprise'; o.userData.anchor = anchor; picks.push(o); } });
+  g.traverse(o => { if (o.isMesh) { o.userData.project = era === 'tng' ? 'enterpriseD' : 'enterprise'; o.userData.anchor = anchor; o.userData.miniature = g; picks.push(o); } });
   return picks;
 }
 

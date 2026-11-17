@@ -410,3 +410,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .ship-actions button:disabled { opacity: .55; cursor: wait; }
 .ship-status { margin-top: var(--s3); }
 @media (max-width: 800px) { .ship-dialog { padding: var(--s3); } .ship-dialog h2 { font-size: var(--t3); } .ship-viewport { height: 40dvh; } }
+.stage.ship-focused .pop-card { transition: none; }
+@media (max-width: 800px) {
+  html.js .stage.ship-focused:not(.static) .pop-card { position: absolute; top: min(70vw, 39svh); bottom: auto; left: var(--s2); width: calc(100% - var(--s3)); max-height: min(55vw, 31svh); transform: none; }
+}

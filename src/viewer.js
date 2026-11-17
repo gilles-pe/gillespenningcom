@@ -66,6 +66,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const panOffset = new THREE.Vector3();
   const panelEl = stage.querySelector('#panel');
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
+  let shipFocus = null;
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
   const ZMIN = 0.06, ZMAX = 1.8, DMIN = 0.7;
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
@@ -80,6 +81,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const w = canvas.clientWidth, h = canvas.clientHeight;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); stageW = w; stageH = h;
     setGoal();
+    if (shipFocus) focusShip(shipFocus.key, false);
   }
   // Camera distance at which all points fit into [leftNdc, rightNdc] x [-below, above] (NDC), seen from azimuth az.
   const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), upv = new THREE.Vector3(), dv = new THREE.Vector3();
@@ -148,7 +150,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (a !== away) { away = a; onAway?.(a); }
   }
   function resetView() {
-    custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); closePop(false); setGoal();
+    closePop(false); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
     if (reduced) { view.az = goal.az; view.el = goal.el; view.t.copy(goal.t); }
   }
   // Turning: signs are for a drag; when the model is upside down (cos el < 0) the horizontal sense is mirrored.
@@ -351,8 +353,43 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (data.href) popBody.href = data.href;
     else popBody.removeAttribute('href');
   }
+  // Inspect the physical miniature in the room before offering the separate viewer.
+  // Preserve the incoming room view so closing the card returns to that framing.
+  function focusShip(key, save = true) {
+    const miniature = trophyPicks.find(o => o.userData.project === key)?.userData.miniature;
+    if (!miniature) return;
+    if (save && !shipFocus) shipFocus = { key, custom, zoom, pan: panOffset.clone(), az: goal.az, el: goal.el, dist: goal.dist, target: goal.t.clone() };
+    if (shipFocus) shipFocus.key = key;
+    miniature.updateWorldMatrix(true, true);
+    const bounds = new THREE.Box3().setFromObject(miniature), target = bounds.getCenter(new THREE.Vector3());
+    const radius = bounds.getSize(new THREE.Vector3()).length() / 2;
+    const rect = stage.getBoundingClientRect(), card = popEl.getBoundingClientRect();
+    const left = phone() ? 16 : Math.max(stageW * .36, card.right - rect.left + 24);
+    const right = stageW - 16, top = phone() ? 16 : 88;
+    const bottom = phone() ? Math.max(top + 80, card.top - rect.top - 16) : stageH - BAR - 16;
+    const width = Math.max(100, right - left), height = Math.max(80, bottom - top);
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const dist = Math.max(DMIN, radius * 1.25 / Math.sin(Math.atan(Math.min(tv * height / stageH, tv * camera.aspect * width / stageW))));
+    const az = -.28, el = .32;
+    const rightVector = new THREE.Vector3(Math.cos(az), 0, -Math.sin(az));
+    const upVector = new THREE.Vector3(-Math.sin(el)*Math.sin(az), Math.cos(el), -Math.sin(el)*Math.cos(az));
+    const nx = (left + right) / stageW - 1, ny = 1 - (top + bottom) / stageH;
+    target.addScaledVector(rightVector, -nx * dist * tv * camera.aspect).addScaledVector(upVector, -ny * dist * tv);
+    panOffset.copy(target).sub(home.t); custom = true; zoom = dist / home.dist;
+    goal.az = near(view.az, az); goal.el = near(view.el, el); goal.dist = dist; goal.t.copy(target);
+    if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = dist; view.t.copy(target); }
+    checkAway();
+  }
+  function restoreShipView() {
+    if (!shipFocus) return;
+    const saved = shipFocus; shipFocus = null;
+    stage.classList.remove('ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
+    goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.target);
+    checkAway();
+  }
   function closePop(restoreFocus = false) {
     if (!popEl || !popKey) return;
+    restoreShipView();
     popKey = null; popEl.classList.remove('on'); popEl.inert = true;
     stopAutoCard();
     stage.classList.toggle('card-open', Boolean(pOpen));
@@ -365,6 +402,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function openPop(key) {
     closePhoto(false);
     closeAlbum(false);
+    if (!['enterprise', 'enterpriseD'].includes(key)) restoreShipView();
     if (!popEl) {
       popEl = document.createElement('div'); popEl.className = 'pop-card'; popEl.setAttribute('role', 'region'); popEl.hidden = true;
       popClose = document.createElement('button'); popClose.type = 'button'; popClose.className = 'card-x'; popClose.textContent = '×';
@@ -404,6 +442,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     updatePop();
     void popEl.offsetWidth;
     popEl.classList.add('on');
+    if (['enterprise', 'enterpriseD'].includes(key)) { stage.classList.add('ship-focused'); focusShip(key); }
     popClose.focus({ preventScroll: true });
     if (!['rack', 'enterprise', 'enterpriseD'].includes(key)) startAutoCard(() => closePop(false));
   }
@@ -870,6 +909,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   return {
     open(id, { keepView = false } = {}) {
+      if (shipFocus) closePop(false);
       openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
       if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
       if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);

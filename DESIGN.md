@@ -53,6 +53,8 @@ The mobile overview aims lower on the tall canvas, clearing more of the intro an
 
 The two rear shelves have different silhouettes and roles (D-053). About Me keeps a light two-door cabinet with brass handles, a sage inset, a quiet book cluster and a clear bay for the three clickable social plaques. The lamp and a detailed Enterprise miniature share the top with space between them. Writing & Speaking uses a thin, open oak display shelf with a subdued back panel, sparse books and a larger standing talk photo; its photo remains clickable. At overview distance, the key objects must read before any fine grain or lettering does.
 
+D-058 refines these furnishings. The About Me desk now has a softly eased oak top, tapered legs, slim drawers and restrained brass pulls; its laptop, album and mug stay at their original clickable coordinates. Its upholstered, rounded office chair has a visible swivel base and shared design language with the AI room chair. The front Writing & Speaking shelf is more lived-in: varied upright and stacked books on both open levels, a slim drawer base and a small antique globe on the top right, clear of the clickable speaking photo. The books have subtle spine marks and slight variation without making a uniform wall of color. This supersedes the intentionally sparse book arrangement of D-053.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,
@@ -62,11 +64,11 @@ AI & Digital Health carries a three-panel frosted glass partition along the corr
 combining an operating room zone (operating table with 10 mm rigid endoscope and camera head, ceiling-suspended
 dual-wing surgical light, rolling drawer cart, and an endoscopic equipment tower with a large rolling monitor)
 separated in its front/middle stretch by an internal glass partition wall with doorway from a consultation Vorraum
-(19-inch IT server rack tucked into the back-right corner and angled desk with monitor). About Me features a two-door
-cabinet bookshelf with slightly imperfect books, a brass globe, three clickable brass-rimmed social trophies (Substack,
+(19-inch IT server rack tucked into the back-right corner and angled desk with monitor). About Me features a refined oak
+desk and upholstered swivel chair, plus a two-door cabinet bookshelf with slightly imperfect books, a brass globe, three clickable brass-rimmed social trophies (Substack,
 Bluesky, LinkedIn), the brass table lamp and a side-profile miniature USS Enterprise NCC-1701-E on top, an open
 "My Story" laptop, book and coffee mug on the desk, and an interactive running photo on the back wall. Writing &
-Speaking carries the cabinet bookshelf and a detailed table condenser microphone.
+Speaking carries the open oak display shelf with books, a small globe and the standing talk photo, plus a detailed table condenser microphone.
 Sizes, wall heights and positions live once in the `ROOMS` table in `src/scene.js`. Floor, walls, door, lettering,
 picture slots, furniture, hotspots and the camera framing are derived from it, so a room can be resized there.
 

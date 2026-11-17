@@ -819,36 +819,61 @@ function internalGlassWall(g, r) {
   g.add(leaf);
 }
 
+let officeWeave;
 function officeChair(parent, x, z, rotY = 0, s = 1) {
   const c = new THREE.Group(); c.position.set(x, 0.02, z); c.rotation.y = rotY; c.scale.setScalar(s); parent.add(c);
-  const metal = mat(0x3a4240, { roughness: 0.4, metalness: 0.55 });
-  const fabric = mat(0x1b3b3d, { roughness: 0.78 });
-  const shell = mat(0x28302f, { roughness: 0.6 });
-  const brass = mat(C.brass, { roughness: 0.35, metalness: 0.55 });
-  // 5-star swivel base + gas lift
-  cyl(c, 0.035, 0.042, 0.05, 0, 0.05, 0, metal, 12);
-  cyl(c, 0.022, 0.026, 0.34, 0, 0.07, 0, metal, 12);
+  if (!officeWeave) {
+    const grain = canvas(128, 128), k = grain.getContext('2d'), random = rng(2781);
+    k.fillStyle = '#b8b8b8'; k.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 2600; i++) {
+      const v = 145 + Math.floor(random() * 60);
+      k.fillStyle = `rgb(${v},${v},${v})`;
+      k.fillRect(random() * 128, random() * 128, 1.1, 1.1);
+    }
+    officeWeave = tex(grain, { wrap: true, repeat: [2, 2] });
+  }
+  const metal = mat(0x414946, { roughness: 0.48, metalness: 0.48 });
+  const shell = mat(0x29413e, { roughness: 0.75 });
+  const fabric = mat(0x41645d, { roughness: 0.92, bumpMap: officeWeave, bumpScale: 0.004 });
+  const cushion = mat(0x55756c, { roughness: 0.94, bumpMap: officeWeave, bumpScale: 0.004 });
+  const seam = mat(0x78938a, { roughness: 0.9 });
+  const brass = mat(0xa98c59, { roughness: 0.48, metalness: 0.52 });
+  const soft = (group, w, h, d, r, px, py, pz, material) => {
+    const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, r), material);
+    m.position.set(px, py, pz); m.castShadow = m.receiveShadow = true; group.add(m); return m;
+  };
+  // Satin-finished five-spoke base, low double casters and an adjustable lift.
+  cyl(c, 0.038, 0.045, 0.055, 0, 0.055, 0, metal, 16);
+  cyl(c, 0.021, 0.024, 0.30, 0, 0.10, 0, metal, 16);
+  cyl(c, 0.055, 0.055, 0.022, 0, 0.36, 0, brass, 20);
   for (let i = 0; i < 5; i++) {
-    const a = (i / 5) * Math.PI * 2;
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.022, 0.24), metal);
-    arm.position.set(Math.sin(a) * 0.12, 0.048, Math.cos(a) * 0.12);
-    arm.rotation.y = a; c.add(arm);
-    caster(c, Math.sin(a) * 0.22, 0.024, Math.cos(a) * 0.22);
+    const a = i * Math.PI * 2 / 5, sx = Math.sin(a), sz = Math.cos(a);
+    const spoke = soft(c, 0.043, 0.026, 0.24, 0.012, sx * 0.12, 0.069, sz * 0.12, metal);
+    spoke.rotation.y = a;
+    const foot = new THREE.Group(); foot.position.set(sx * 0.235, 0.029, sz * 0.235); foot.rotation.y = a; c.add(foot);
+    for (const side of [-1, 1]) {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.023, 0.023, 0.015, 10), shell);
+      wheel.rotation.z = Math.PI / 2; wheel.position.x = side * 0.014; wheel.castShadow = true; foot.add(wheel);
+    }
   }
-  // Seat cushion + shell
-  box(c, 0.46, 0.03, 0.44, 0, 0.39, 0.01, shell);
-  box(c, 0.45, 0.06, 0.43, 0, 0.42, 0.01, fabric);
-  // T-armrests
+  // A shallow upholstered bowl and separate softly rounded seat cushion.
+  soft(c, 0.53, 0.075, 0.50, 0.032, 0, 0.425, 0.015, shell);
+  soft(c, 0.49, 0.076, 0.46, 0.036, 0, 0.480, 0.035, cushion);
+  soft(c, 0.43, 0.008, 0.018, 0.003, 0, 0.446, 0.258, seam);
+  // Tilted padded back: shell, narrow upholstered border, inset cushion and lumbar support.
+  const back = new THREE.Group(); back.position.set(0, 0.45, -0.245); back.rotation.x = -0.12; c.add(back);
+  soft(back, 0.49, 0.62, 0.095, 0.045, 0, 0.32, -0.035, shell);
+  soft(back, 0.445, 0.565, 0.042, 0.025, 0, 0.325, 0.030, seam);
+  soft(back, 0.425, 0.545, 0.065, 0.038, 0, 0.33, 0.055, fabric);
+  soft(back, 0.29, 0.13, 0.04, 0.018, 0, 0.22, 0.096, cushion);
+  soft(back, 0.27, 0.105, 0.085, 0.035, 0, 0.675, 0.042, fabric);
+  // Slim cantilever supports and gently padded arms, with a modest metal reveal.
   for (const sx of [-1, 1]) {
-    box(c, 0.032, 0.17, 0.032, sx * 0.25, 0.41, 0.01, metal);
-    box(c, 0.055, 0.026, 0.24, sx * 0.25, 0.58, 0.02, shell);
+    const post = soft(c, 0.025, 0.19, 0.028, 0.007, sx * 0.285, 0.54, -0.095, metal);
+    post.rotation.z = sx * 0.09;
+    soft(c, 0.064, 0.047, 0.31, 0.019, sx * 0.29, 0.655, 0.03, shell);
+    soft(c, 0.058, 0.021, 0.285, 0.009, sx * 0.29, 0.683, 0.03, fabric);
   }
-  // Curved high backrest, lumbar support, brass spine accent & headrest
-  const back = new THREE.Group(); back.position.set(0, 0.43, -0.20); back.rotation.x = -0.10; c.add(back);
-  box(back, 0.06, 0.20, 0.03, 0, -0.02, -0.02, brass);
-  box(back, 0.40, 0.48, 0.035, 0, 0.08, -0.015, shell);
-  box(back, 0.39, 0.46, 0.055, 0, 0.09, 0.015, fabric);
-  box(back, 0.24, 0.12, 0.065, 0, 0.58, 0.025, fabric);
 }
 
 export function podcastArmchair(parent, x, z, rotY = 0) {
@@ -1274,14 +1299,36 @@ function furnish(id, g, r) {
   }
   if (id === 'about') {
     const [dx, dz] = L.desk;
-    box(g, 1.3, 0.07, 0.7, dx, 0.62, dz, w);
-    [[-0.58, -0.28], [0.58, -0.28], [-0.58, 0.28], [0.58, 0.28]].forEach(([x, z]) => box(g, 0.07, 0.62, 0.07, dx + x, 0, dz + z, w));
+    // A compact joiner's desk: softly eased oak top, tapered legs and two slim
+    // drawers. Keep its top at the original height so the album and laptop retain
+    // their exact interaction positions.
+    const deskTop = new THREE.Mesh(new RoundedBoxGeometry(1.32, 0.075, 0.72, 4, 0.018), w);
+    deskTop.position.set(dx, 0.6525, dz); deskTop.castShadow = deskTop.receiveShadow = true; g.add(deskTop);
+    const darkOak = wood(C.woodDark), warmMetal = mat(0xb39a6c, { roughness: 0.48, metalness: 0.45 });
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.024, 0.039, 0.59, 8), w);
+      leg.position.set(dx + sx * 0.56, 0.315, dz + sz * 0.275);
+      leg.rotation.z = sx * 0.035; leg.rotation.x = sz * 0.025;
+      leg.castShadow = leg.receiveShadow = true; g.add(leg);
+      cyl(g, 0.030, 0.032, 0.026, dx + sx * 0.57, 0.014, dz + sz * 0.282, warmMetal, 8);
+    }
+    for (const sz of [-1, 1]) box(g, 1.08, 0.095, 0.026, dx, 0.515, dz + sz * 0.276, darkOak);
+    for (const sx of [-1, 1]) box(g, 0.025, 0.095, 0.53, dx + sx * 0.555, 0.515, dz, darkOak);
+    for (const sx of [-1, 1]) {
+      box(g, 0.42, 0.082, 0.012, dx + sx * 0.255, 0.521, dz + 0.300, w);
+      box(g, 0.085, 0.009, 0.013, dx + sx * 0.255, 0.560, dz + 0.315, warmMetal);
+    }
+    // An understated cable grommet sits behind the objects rather than adding
+    // decorative clutter to the clickable album and laptop.
+    cyl(g, 0.026, 0.026, 0.003, dx + 0.51, 0.690, dz - 0.245, darkOak, 20);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.028, 0.003, 6, 20), warmMetal);
+    ring.rotation.x = -Math.PI / 2; ring.position.set(dx + 0.51, 0.693, dz - 0.245); g.add(ring);
     // Open laptop ("My Story"), photo album and coffee mug on the desk (lamp moved onto the shelf)
     const storyPicks = openLaptop(g, dx - 0.24, 0.69, dz + 0.03, 0.14);
     const album = deskPhotoAlbum(g, dx + 0.18, 0.69, dz + 0.07, -0.22);
     coffeeMug(g, dx + 0.39, 0.69, dz - 0.12);
     // Ergonomic office chair behind the desk
-    officeChair(g, dx, dz - 0.72, 0, 1);
+    officeChair(g, dx, dz - 0.72, 0.12, 1);
     // Cabinet bookshelf with imperfect books and Substack / Bluesky / LinkedIn trophies
     const shelfH = 1.18, trophyPicks = [];
     const sh = cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], shelfH, 0, { imperfect: true, skipUpperRight: true });

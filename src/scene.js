@@ -66,7 +66,7 @@ export const SLOTS = [
   { name: 'projects-board-3', room: 'projects', size: [0.72, 0.54], text: 'Praxisfaden',  tint: '#b9c7a6' },
   { name: 'projects-board-4', room: 'projects', size: [0.72, 0.54], text: 'Elbstrand',    tint: '#b9c7a6' },
   { name: 'writing-table-1',  room: 'writing',  size: [0.44, 0.33], text: 'MedTech Signal', tint: '#d9c7a8' },
-  { name: 'writing-shelf-1',  room: 'writing',  size: [0.30, 0.40], text: 'Speaking',     tint: '#d9c7a8' },
+  { name: 'writing-shelf-1',  room: 'writing',  size: [0.36, 0.48], text: 'Speaking',     tint: '#d9c7a8' },
   { name: 'about-wall-1',     room: 'about',    size: [0.54, 0.72], text: 'About',        tint: '#b9c7a6' },
 ];
 const SLOT = Object.fromEntries(SLOTS.map(s => [s.name, s]));
@@ -301,13 +301,20 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
   const doorW = (w - 2 * sideT - 0.03) / 2;
   const doorH = cabH - 0.075;
   for (const sx of [-1, 1]) {
-    box(g, doorW, doorH, 0.022, sx * (doorW / 2 + 0.008), 0.04, depth / 2 - 0.018, wood(C.woodDark));
+    box(g, doorW, doorH, 0.022, sx * (doorW / 2 + 0.008), 0.04, depth / 2 - 0.018, skipUpperRight ? wood() : wood(C.woodDark));
+    if (skipUpperRight) box(g, 0.012, 0.065, 0.012, sx * 0.044, cabH * 0.47, depth / 2 - 0.002, mat(C.brass, { metalness: 0.55 }));
   }
   // Open shelves above the cabinet
   const innerW = w - 2 * sideT;
   const openH = h - cabH - topT;
   const midY = cabH + openH * 0.5;
   box(g, innerW, 0.028, depth - backT, 0, midY, backT / 2, wood());
+  if (skipUpperRight) {
+    // One dark inset and an off-centre partition distinguish this personal
+    // cabinet from the open writing shelf and frame the social plaques.
+    box(g, innerW - 0.02, openH - 0.015, 0.008, 0, cabH, -depth / 2 + backT, mat(0x8fa59a));
+    box(g, 0.025, openH * 0.48, depth - backT, -0.18, midY + 0.014, backT / 2, wood());
+  }
   const palette = [0xebe3d3, 0x8fa395, 0xd8cbb4, 0x5c7672, 0xcbb693];
   for (const [si, sy] of [[0, cabH], [1, midY + 0.028]]) {
     const availH = (si === 0 ? midY - cabH : h - topT - (midY + 0.028));
@@ -319,8 +326,8 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
       const bh = Math.min(availH * 0.84, 0.21 + rand() * 0.06);
       const bd = 0.16 + rand() * 0.03;
       const bk = box(g, bw, bh, bd, bx, sy, 0.05 + (rand() - 0.5) * 0.018, mat(palette[(i + si * 2) % palette.length]));
-      if (imperfect && i === nStand - 1) { bk.rotation.z = -0.14; bk.position.x += 0.022; }
-      else if (imperfect && rand() > 0.55) { bk.rotation.z = (rand() - 0.5) * 0.06; }
+      if (imperfect && i === nStand - 1 && !skipUpperRight) { bk.rotation.z = -0.14; bk.position.x += 0.022; }
+      else if (imperfect && !skipUpperRight && rand() > 0.55) { bk.rotation.z = (rand() - 0.5) * 0.06; }
       bx += bw + 0.012;
     }
     // Right cluster: horizontal stacked books (skipped when trophies occupy upper-right)
@@ -335,6 +342,27 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
     globe.position.set(gx, gy + 0.095, 0.05); globe.castShadow = true; g.add(globe);
   }
   g.userData.upperY = midY + 0.028;
+  return g;
+}
+
+// A lighter editorial shelf for Writing & Speaking; the standing talk photo
+// remains the hero object on top instead of being lost among tiny props.
+function writingDisplayShelf(parent, x, z, w) {
+  const g = new THREE.Group(); g.position.set(x, 0.06, z); parent.add(g);
+  const oak = wood(), dark = mat(0x82988d, { roughness: 0.9 });
+  const depth = 0.32, height = 1.0, side = 0.026;
+  for (const sx of [-1, 1]) box(g, side, height, depth, sx * (w / 2 - side / 2), 0, 0, oak);
+  for (const y of [0, 0.34, 0.68, height - 0.025]) box(g, w, 0.025, depth, 0, y, 0, oak);
+  // Recessed sage back makes a few pale objects readable at room scale.
+  box(g, w - 2 * side, 0.67, 0.012, 0, 0.34, -depth / 2 + 0.006, dark);
+  // The upper bay is intentionally open around the photo.
+  const palette = [0xebe3d3, 0xc9d0bd, 0x5c7672, 0xd8cbb4];
+  for (let i = 0; i < 4; i++) box(g, 0.047, 0.23 - (i % 2) * 0.025, 0.18,
+    -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, mat(palette[i]));
+  for (let i = 0; i < 3; i++) box(g, 0.17 - i * 0.015, 0.028, 0.19,
+    w / 2 - 0.21, 0.365 + i * 0.032, 0.02, mat(palette[(i + 1) % palette.length]));
+  // One concealed base shelf, not another pair of prominent cupboard doors.
+  box(g, w - 2 * side, 0.18, 0.26, 0, 0.04, -0.02, wood(C.woodDark));
   return g;
 }
 
@@ -579,46 +607,76 @@ function layout(id) {
 // ---- Detailed props & room assemblies -----------------------------------------------
 function enterpriseModel(parent, x, y, z, rotY = -0.5) {
   const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
-  const hull = mat(0xeae5db, { roughness: 0.48 }), accent = mat(0x525a58, { roughness: 0.5 });
-  const bussard = new THREE.MeshStandardMaterial({ color: 0xb84638, emissive: 0x8a2c1e, emissiveIntensity: 0.35, roughness: 0.4 });
-  const warp = new THREE.MeshStandardMaterial({ color: 0x62a8c8, emissive: 0x4b8ca8, emissiveIntensity: 0.6, roughness: 0.35 });
-  const defl = new THREE.MeshStandardMaterial({ color: 0xc9923b, emissive: 0xa6701e, emissiveIntensity: 0.4, roughness: 0.4 });
+  const hull = mat(0xdce1de, { metalness: 0.28, roughness: 0.48 });
+  const panel = mat(0xb8c4c2, { metalness: 0.22, roughness: 0.54 });
+  const dark = mat(0x425963, { metalness: 0.3, roughness: 0.48 });
+  const red = mat(0xc15b47, { emissive: 0x722819, emissiveIntensity: 0.35, roughness: 0.36 });
+  const blue = mat(0x61adcc, { emissive: 0x397d9c, emissiveIntensity: 0.55, roughness: 0.36 });
+  const gold = mat(0xc59c56, { emissive: 0x704319, emissiveIntensity: 0.2, metalness: 0.45 });
   const brass = mat(C.brass, { metalness: 0.55, roughness: 0.35 });
-  // Stand
-  cyl(g, 0.048, 0.056, 0.014, 0, 0, 0, wood(C.woodDark));
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.009, 0.095, 10), brass);
-  stem.position.set(0, 0.056, 0.01); stem.rotation.x = 0.2; g.add(stem);
-  // Ship group (pitched slightly nose-up towards -z)
-  const ship = new THREE.Group(); ship.position.set(0, 0.115, 0); ship.rotation.x = -0.14; g.add(ship);
-  // Sovereign-class elongated oval saucer
-  const saucer = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.015, 28), hull);
-  saucer.scale.set(1, 1, 1.42); saucer.position.set(0, 0.012, -0.055); saucer.castShadow = true; ship.add(saucer);
-  const dorsal = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.068, 0.012, 20), hull);
-  dorsal.scale.set(1, 1, 1.45); dorsal.position.set(0, 0.024, -0.045); ship.add(dorsal);
-  cyl(ship, 0.018, 0.025, 0.01, 0, 0.028, -0.055, hull, 16);
-  // Engineering / secondary hull + navigational deflector
-  const eng = new THREE.Mesh(new THREE.BoxGeometry(0.044, 0.032, 0.21), hull);
-  eng.position.set(0, -0.008, 0.045); eng.castShadow = true; ship.add(eng);
-  const neck = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.024, 0.075), accent);
-  neck.position.set(0, 0.004, -0.01); ship.add(neck);
-  const dish = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.012, 14), defl);
-  dish.rotation.x = Math.PI / 2; dish.position.set(0, -0.009, -0.062); ship.add(dish);
-  // Twin swept-back pylons and warp nacelles
-  const picks = [saucer, dorsal, eng, dish];
+
+  // Museum-style display stand and discreet nameplate.
+  const base = new THREE.Mesh(new RoundedBoxGeometry(0.24, 0.018, 0.12, 2, 0.008), wood(C.woodDark));
+  base.position.y = 0.009; base.castShadow = true; g.add(base);
+  cyl(g, 0.008, 0.009, 0.105, 0, 0.018, 0.025, brass, 12);
+  const plaque = box(g, 0.13, 0.004, 0.025, 0, 0.018, 0.045, brass);
+  const ship = new THREE.Group(); ship.position.set(0, 0.143, 0); ship.rotation.x = -0.10; g.add(ship);
+
+  // The long, bevelled oval saucer is the defining Sovereign-class silhouette.
+  const profile = [[0, -0.011], [0.083, -0.011], [0.102, -0.006], [0.113, 0.001], [0.104, 0.008], [0.075, 0.017], [0, 0.019]];
+  const saucer = new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r, h]) => new THREE.Vector2(r, h)), 40), hull);
+  saucer.scale.z = 1.48; saucer.position.set(0, 0.008, -0.078); saucer.castShadow = true; ship.add(saucer);
+  const inlay = new THREE.Mesh(new THREE.CylinderGeometry(0.073, 0.078, 0.003, 32), panel);
+  inlay.scale.z = 1.48; inlay.position.set(0, 0.029, -0.078); ship.add(inlay);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.106, 0.0028, 5, 48), dark);
+  rim.rotation.x = Math.PI / 2; rim.scale.y = 1.48; rim.position.set(0, 0.008, -0.078); ship.add(rim);
+  const bridge = new THREE.Mesh(new THREE.SphereGeometry(0.016, 16, 10), hull);
+  bridge.scale.set(1, 0.35, 1.45); bridge.position.set(0, 0.036, -0.089); ship.add(bridge);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.007, 12, 8), dark);
+  dome.scale.y = 0.4; dome.position.set(0, 0.042, -0.089); ship.add(dome);
+
+  // Tapered engineering hull under the saucer, with a forward glowing deflector.
+  const eng = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 14), hull);
+  eng.scale.set(0.049, 0.033, 0.145); eng.position.set(0, -0.019, 0.081); eng.castShadow = true; ship.add(eng);
+  const spine = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.018, 0.095), panel);
+  spine.position.set(0, 0.009, 0.033); ship.add(spine);
+  const deflector = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.009, 18), gold);
+  deflector.rotation.x = Math.PI / 2; deflector.position.set(0, -0.02, -0.052); ship.add(deflector);
+  const deflectorRim = new THREE.Mesh(new THREE.TorusGeometry(0.019, 0.002, 5, 20), dark);
+  deflectorRim.position.set(0, -0.02, -0.058); ship.add(deflectorRim);
+
   for (const sx of [-1, 1]) {
-    const pylon = new THREE.Mesh(new THREE.BoxGeometry(0.088, 0.009, 0.034), hull);
-    pylon.position.set(sx * 0.048, 0.018, 0.092);
-    pylon.rotation.z = sx * 0.56; pylon.rotation.y = -sx * 0.28; ship.add(pylon);
-    const nac = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.018, 0.21), hull);
-    nac.position.set(sx * 0.086, 0.046, 0.135); nac.castShadow = true; ship.add(nac);
-    const grille = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.007, 0.155), warp);
-    grille.position.set(sx * 0.086, 0.048, 0.142); ship.add(grille);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.01, 10, 8), bussard);
-    cap.position.set(sx * 0.086, 0.046, 0.03); ship.add(cap);
-    picks.push(pylon, nac);
+    // Swept pylons leave a clear gap between hull and each long nacelle.
+    const shape = new THREE.Shape();
+    shape.moveTo(sx * 0.028, 0.07); shape.lineTo(sx * 0.19, 0.15);
+    shape.lineTo(sx * 0.19, 0.178); shape.lineTo(sx * 0.035, 0.11); shape.closePath();
+    const pylon = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 0.009, bevelEnabled: false }), panel);
+    pylon.rotation.x = Math.PI / 2; pylon.position.y = 0.011; pylon.castShadow = true; ship.add(pylon);
+    const nacelle = new THREE.Mesh(new THREE.CapsuleGeometry(0.019, 0.20, 5, 10), hull);
+    nacelle.rotation.x = Math.PI / 2; nacelle.position.set(sx * 0.19, 0.042, 0.15); nacelle.castShadow = true; ship.add(nacelle);
+    const grille = new THREE.Mesh(new THREE.BoxGeometry(0.019, 0.004, 0.165), blue);
+    grille.position.set(sx * 0.19, 0.062, 0.16); ship.add(grille);
+    const bussard = new THREE.Mesh(new THREE.SphereGeometry(0.015, 12, 8), red);
+    bussard.position.set(sx * 0.19, 0.042, 0.027); ship.add(bussard);
+    const tail = new THREE.Mesh(new THREE.SphereGeometry(0.011, 10, 8), blue);
+    tail.position.set(sx * 0.19, 0.042, 0.273); ship.add(tail);
+    for (let i = 0; i < 5; i++) {
+      const window = new THREE.Mesh(new THREE.BoxGeometry(0.007, 0.0025, 0.003), dark);
+      window.position.set(sx * (0.045 + i * 0.010), 0.026, -0.14 + i * 0.012); ship.add(window);
+    }
   }
-  const anchor = new THREE.Object3D(); anchor.position.set(0, 0.22, 0); g.add(anchor);
-  for (const m of picks) { m.userData.project = 'enterprise'; m.userData.anchor = anchor; }
+
+  const registryCanvas = canvas(512, 128), k = registryCanvas.getContext('2d');
+  k.fillStyle = '#dce1de'; k.fillRect(0, 0, 512, 128);
+  k.fillStyle = '#34474d'; k.textAlign = 'center'; k.textBaseline = 'middle';
+  k.font = '600 47px sans-serif'; k.fillText('NCC-1701-E', 256, 66);
+  const registry = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.023), new THREE.MeshBasicMaterial({ map: tex(registryCanvas), toneMapped: false }));
+  registry.rotation.x = -Math.PI / 2; registry.position.set(0, 0.033, -0.171); ship.add(registry);
+
+  const anchor = new THREE.Object3D(); anchor.position.set(0, 0.27, 0); g.add(anchor);
+  const picks = [];
+  ship.traverse(o => { if (o.isMesh) { o.userData.project = 'enterprise'; o.userData.anchor = anchor; picks.push(o); } });
+  for (const o of [base, plaque]) { o.userData.project = 'enterprise'; o.userData.anchor = anchor; picks.push(o); }
   return picks;
 }
 
@@ -1223,7 +1281,7 @@ function furnish(id, g, r) {
     podcastArmchair(g, tx + 1.0, tz - 0.15, -0.6);
     cyl(g, 0.02, 0.02, 1.25, L.lamp[0], 0, L.lamp[1], mat(C.brass, { metalness: 0.5 }));
     cyl(g, 0.12, 0.22, 0.2, L.lamp[0], 1.2, L.lamp[1], new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.9 }));
-    cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], 1.0, 0, { imperfect: true });
+    writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
     const speakingPic = standingPicture(g, 'writing-shelf-1', L.shelf[0] - 0.22, 1.06, L.shelf[1] + 0.02, 0.12);
     plant(g, -RW / 2 + 0.4, RD / 2 - 0.5, 1.1);
     return { projectPicks, speakingPic };

@@ -51,6 +51,8 @@ The right chair now contrasts through a continuous curved tub shell that forms t
 
 The mobile overview aims lower on the tall canvas, clearing more of the intro and reducing the blank gap before the room controls. Opening a room retains its existing close framing. See D-052.
 
+The two rear shelves have different silhouettes and roles (D-053). About Me keeps a light two-door cabinet with brass handles, a sage inset, a quiet book cluster and a clear bay for the three clickable social plaques. The lamp and a detailed Enterprise miniature share the top with space between them. Writing & Speaking uses a thin, open oak display shelf with a subdued back panel, sparse books and a larger standing talk photo; its photo remains clickable. At overview distance, the key objects must read before any fine grain or lettering does.
+
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long
 and narrow) is back left, About Me (study, smallest) back right, AI & Digital Health (largest) front left,

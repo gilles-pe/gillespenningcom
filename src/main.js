@@ -60,7 +60,7 @@ function roomNodes(id) {
   close.setAttribute('aria-label', t(lang, 'ui.close'));
   close.addEventListener('click', () => {
     panel.hidden = true;
-    canvas.focus({ preventScroll: true });
+    stage.focus({ preventScroll: true });
   });
   return [close, ...nodes];
 }
@@ -102,7 +102,7 @@ function closeRoom() {
   bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', false));
   document.querySelectorAll('.top nav a').forEach(a => { a.classList.remove('active'); a.removeAttribute('aria-current'); });
   api?.open(null);
-  if (restoreFocus) canvas.focus({ preventScroll: true });
+  if (restoreFocus) stage.focus({ preventScroll: true });
 }
 // Desktop: clicking a room zooms/re-centers into that room (All rooms button on the right exits). Mobile: second tap toggles out.
 const toggleRoom = id => (current === id && mobile() ? closeRoom() : openRoom(id));
@@ -118,9 +118,9 @@ panBtn.addEventListener('click', () => {
   if (!api) return;
   const on = api.setPanMode(!api.getPanMode());
   panBtn.setAttribute('aria-pressed', String(on));
-  canvas.focus({ preventScroll: true });
+  stage.focus({ preventScroll: true });
 });
-resetBtn.addEventListener('click', () => { api?.reset(); canvas.focus({ preventScroll: true }); });
+resetBtn.addEventListener('click', () => { api?.reset(); stage.focus({ preventScroll: true }); });
 addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (api?.closeNote?.()) return;
@@ -165,11 +165,12 @@ function useStatic() {
 // Text and links are usable before the 3D code arrives.
 import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
-    onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) canvas.focus({ preventScroll: true }); } });
+    onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
   if (!api) return useStatic();
   viewControls.hidden = false;
   // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
-  canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0; canvas.setAttribute('role', 'application');
+  stage.tabIndex = 0; stage.setAttribute('role', 'application');
+  stage.closest('.hero').classList.add('hero--rendered');
   if (import.meta.env.DEV) window.__gp = api.debug;
   mode = '3d';
   if (pending) { const id = pending; pending = null; openRoom(id); }

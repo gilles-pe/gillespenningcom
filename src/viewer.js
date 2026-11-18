@@ -9,7 +9,6 @@ import { albumPages } from './album-pages.js';
 export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
@@ -56,7 +55,13 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   labelSpots();
 
+  // Keep picking and framing in the clear stage. Expand only the render camera
+  // so pixels continue under the surrounding surfaces at the same scale.
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
+  const renderCamera = camera.clone();
+  const hero = stage.closest('.hero');
+  const column = stage.parentElement;
+  const panel = hero.querySelector('.panel');
   const EL = 0.54, AZ = -0.22, TAU = Math.PI * 2;         // overview: lower, slightly from the left
   // view = what is drawn (damped), goal = where it is heading. el is free all the way round (upside down included).
   const view = { az: 0, el: EL, dist: 30, t: new THREE.Vector3(0, 0.2, 0.3) };
@@ -76,11 +81,29 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   };
 
   function resize() {
-    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const frame = stage.getBoundingClientRect(), region = hero.getBoundingClientRect();
+    const w = frame.width, h = frame.height;
     if (!w || !h) return;
-    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); stageW = w; stageH = h;
-    setGoal();
-    if (shipFocus) focusShip(shipFocus.key, false);
+
+    const details = panel.hidden ? null : panel.getBoundingClientRect();
+    const below = column.getBoundingClientRect().bottom;
+    const left = region.left - frame.left;
+    const top = Math.max(region.top - frame.top, -104);
+    const bottom = Math.min(region.bottom, Math.max(below, details ? details.top + 104 : below) + 40);
+    const width = Math.ceil(region.width), height = Math.ceil(bottom - frame.top - top);
+    Object.assign(canvas.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
+
+    // Limit the extra raster area on high density and large screens.
+    const density = Math.min(devicePixelRatio, 2, Math.sqrt(3_000_000 / (width * height)));
+    if (renderer.getPixelRatio() !== density) renderer.setPixelRatio(density);
+    renderer.setSize(width, height, false);
+    renderCamera.setViewOffset(w, h, left, top, width, height);
+
+    if (stageW !== w || stageH !== h) {
+      stageW = w; stageH = h; camera.aspect = w / h; camera.updateProjectionMatrix();
+      setGoal();
+      if (shipFocus) focusShip(shipFocus.key, false);
+    }
   }
   // Camera distance at which all points fit into [leftNdc, rightNdc] x [-below, above] (NDC), seen from azimuth az.
   const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), upv = new THREE.Vector3(), dv = new THREE.Vector3();
@@ -118,7 +141,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const room = rooms[openId];
       home.t.copy(room.center);
       home.az = -room.x * 0.32;
-      home.dist = fitView(roomPts[openId], home.t, home.az, -0.96, 0.96, 0.94, 0.94);
+      home.dist = fitView(roomPts[openId], home.t, home.az, -0.94, 0.94, 0.83, 0.90);
     } else {
       home.t.copy(center);
       home.az = AZ;
@@ -173,7 +196,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (instant) view.dist = goal.dist;
     aim(); checkAway();
   }
-  const egg = createEgg({ cellar, camera, stage, canvas, reduced, lang });
+  const egg = createEgg({ cellar, camera, stage, reduced, lang });
   const allPhotoPicks = [...(photo?.pick ?? []), ...(speakingPhoto?.pick ?? [])];
   const photoParts = new Set(allPhotoPicks), photoThings = [...allPhotoPicks, ...occluders];
   const photoRay = new THREE.Raycaster(), pv = new THREE.Vector3(), pDir = new THREE.Vector3();
@@ -209,7 +232,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const had = pCard.contains(document.activeElement);
     if (reduced) pCard.hidden = true;
     else pTimer = setTimeout(() => { if (!pOpen) pCard.hidden = true; }, 280);
-    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+    if (had || restoreFocus) stage.focus({ preventScroll: true });
   };
   const openPhoto = (photoKey = 'photo') => {
     currentPhotoKey = photoKey;
@@ -351,7 +374,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     miniature.updateWorldMatrix(true, true);
     const bounds = new THREE.Box3().setFromObject(miniature), target = bounds.getCenter(new THREE.Vector3());
     const radius = bounds.getSize(new THREE.Vector3()).length() / 2;
-    const rect = canvas.getBoundingClientRect(), card = popEl.getBoundingClientRect();
+    const rect = stage.getBoundingClientRect(), card = popEl.getBoundingClientRect();
     const left = 16;
     const right = stageW - 16, top = 16;
     const bottom = Math.max(top + 80, card.top - rect.top - 16);
@@ -384,7 +407,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const had = popEl.contains(document.activeElement);
     if (reduced) popEl.hidden = true;
     else popTimer = setTimeout(() => { if (!popKey) popEl.hidden = true; }, 260);
-    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+    if (had || restoreFocus) stage.focus({ preventScroll: true });
   }
   function openPop(key) {
     closePhoto(false);
@@ -441,7 +464,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!popEl || popEl.hidden || !popKey) return;
     if (!popAllowed(openId, popKey)) closePop(false);
   }
-  new ResizeObserver(resize).observe(canvas); resize();
+  const observer = new ResizeObserver(resize);
+  for (const layout of [hero, stage, column, panel]) observer.observe(layout);
+  resize();
   Object.assign(view, { az: goal.az, el: goal.el, dist: goal.dist }); view.t.copy(goal.t);
 
   // Social trophies and laptop ("My Story") inside About Me
@@ -649,7 +674,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const had = albumModal.contains(document.activeElement);
     if (reduced) albumModal.hidden = true;
     else albumTimer = setTimeout(() => { if (!albumOpen) albumModal.hidden = true; }, 260);
-    if (had || restoreFocus) (albumReturnFocus?.isConnected ? albumReturnFocus : canvas).focus({ preventScroll: true });
+    if (had || restoreFocus) (albumReturnFocus?.isConnected ? albumReturnFocus : stage).focus({ preventScroll: true });
   }
 
   function toggleAlbum() {
@@ -662,7 +687,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // one that starts mostly horizontal locks as an orbit (azimuth and elevation); two fingers always orbit and pinch.
   const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
   const hits = Object.values(rooms).map(r => r.hit);
-  const ndc = e => { const b = canvas.getBoundingClientRect(); return ptr.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1); };
+  const ndc = e => { const b = stage.getBoundingClientRect(); return ptr.set(((e.clientX - b.left) / b.width) * 2 - 1, -((e.clientY - b.top) / b.height) * 2 + 1); };
   const pick = e => {
     ray.setFromCamera(ndc(e), camera);
     // The base and corridor floor hide rooms from below: the first thing the ray meets must be a room.
@@ -731,22 +756,23 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
       spaceDown = true;
-      if (e.target === canvas) e.preventDefault();
+      if (e.target === stage) e.preventDefault();
     }
   });
   addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
   const pinchState = () => { const [a, b] = [...pts.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-  canvas.addEventListener('pointerdown', e => {
+  stage.addEventListener('contextmenu', e => { if (e.target === stage) e.preventDefault(); });
+  stage.addEventListener('pointerdown', e => {
+    if (e.target !== stage) return;
     if (e.pointerType === 'mouse' && ![0, 1, 2].includes(e.button)) return;
     hoverTip.hidden = true;
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    try { canvas.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    try { stage.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     if (pts.size === 1) {
       const pan = panMode || (e.pointerType === 'mouse' && (e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey || spaceDown));
       drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: pan ? 'pan' : e.pointerType === 'touch' ? 'pending' : 'orbit' };
     } else if (pts.size === 2 && drag) { drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState(); }
-    canvas.style.cursor = drag?.mode === 'pan' ? 'move' : 'grabbing';
+    stage.style.cursor = drag?.mode === 'pan' ? 'move' : 'grabbing';
   });
   addEventListener('pointermove', e => {
     if (drag && pts.has(e.pointerId)) {
@@ -762,12 +788,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       if (drag.mode === 'pending') drag.mode = Math.abs(e.clientX - drag.sx) >= Math.abs(e.clientY - drag.sy) ? 'orbit' : 'scroll';
       if (drag.mode === 'orbit') { orbit((e.clientX - drag.x) * K, (e.clientY - drag.y) * K, true); drag.x = e.clientX; drag.y = e.clientY; }
       else if (drag.mode === 'pan') { panBy(e.clientX - drag.x, e.clientY - drag.y, true); drag.x = e.clientX; drag.y = e.clientY; }
-    } else if (e.target === canvas && !drag) {
+    } else if (e.target === stage && !drag) {
       const n = ndc(e);
       hoverTarget = e.pointerType === 'mouse' ? hoverObject(n) : null;
       const overObj = egg.hit(n) || !!hoverTarget;
       hoverId = !openId && !overObj ? pick(e) : null;
-      canvas.style.cursor = panMode ? 'move' : hoverId || overObj ? 'pointer' : 'grab';
+      stage.style.cursor = panMode ? 'move' : hoverId || overObj ? 'pointer' : 'grab';
       updateHoverTip();
     } else if (!drag) {
       hoverTarget = null; hoverTip.hidden = true;
@@ -777,7 +803,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!pts.has(e.pointerId)) return;
     pts.delete(e.pointerId);
     if (drag && pts.size === 0) {
-      if (!cancelled && !drag.moved && e.target === canvas && drag.btn === 0) {
+      if (!cancelled && !drag.moved && e.target === stage && drag.btn === 0) {
         const proj = (openId === 'projects' || openId === 'ai' || openId === 'writing') ? projectHit(ndc(e)) : null;
         const trophy = openId === 'about' ? trophyHit(ndc(e)) : null;
         const stAnchor = openId === 'about' ? storyHit(ndc(e)) : null;
@@ -792,23 +818,28 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         else if (proj) togglePop(proj.userData.project);
         else onPick(pick(e));
       }
-      drag = null; canvas.style.cursor = panMode ? 'move' : 'grab';
+      drag = null; stage.style.cursor = panMode ? 'move' : 'grab';
     } else if (drag && drag.mode === 'pinch' && pts.size === 1) { drag.mode = 'orbit'; const [r] = [...pts.values()]; drag.x = r.x; drag.y = r.y; }
   };
   addEventListener('pointerup', e => endPointer(e, false));
   addEventListener('pointercancel', e => endPointer(e, true));   // the browser took over (vertical page scroll)
-  canvas.addEventListener('pointerleave', () => { hoverId = null; hoverTarget = null; hoverTip.hidden = true; });
-  // Touch: once a gesture is an orbit or a pinch, keep the page from scrolling under it.
-  canvas.addEventListener('touchmove', e => { if (e.cancelable && (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch')) e.preventDefault(); }, { passive: false });
-  // Wheel zoom (and horizontal trackpad swipe pan), only over the canvas, without ctrl/cmd.
-  canvas.addEventListener('wheel', e => {
+  stage.addEventListener('pointerleave', () => { hoverId = null; hoverTarget = null; hoverTip.hidden = true; });
+  // Once a touch gesture moves the scene, keep the page from scrolling under it.
+  stage.addEventListener('touchmove', e => {
+    if (e.target !== stage || !e.cancelable) return;
+    if (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch') e.preventDefault();
+  }, { passive: false });
+  // Wheel zoom and horizontal trackpad panning in the interactive stage.
+  stage.addEventListener('wheel', e => {
+    if (e.target !== stage) return;
     if (e.ctrlKey || e.metaKey || document.documentElement.scrollHeight > innerHeight + 4) return;
     e.preventDefault();
     if (Math.abs(e.deltaX) > 2 && Math.abs(e.deltaX) >= Math.abs(e.deltaY)) panBy(-e.deltaX * 0.8, 0, false);
     else zoomBy(Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), false);
   }, { passive: false });
-  // Keyboard, when the canvas has focus. Shift + Arrow keys pan; Arrow keys orbit.
-  canvas.addEventListener('keydown', e => {
+  // Shift + Arrow keys pan; Arrow keys orbit when the stage has focus.
+  stage.addEventListener('keydown', e => {
+    if (e.target !== stage) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const S = 0.14, P = 48; let used = true;
     switch (e.key) {
@@ -866,6 +897,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     camera.position.set(view.t.x + view.dist * ce * sa, view.t.y + view.dist * se, view.t.z + view.dist * ce * ca);
     camera.up.set(-se * sa, ce, -se * ca);                    // tangent of the elevation arc: no flip or jump at the poles
     camera.lookAt(view.t);
+    camera.updateMatrixWorld();
     egg.update(now, stageW, stageH);
     updatePhoto();
     updatePop();
@@ -886,7 +918,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     placeSpots();
     updateHoverTip();
-    renderer.render(scene, camera);
+    renderCamera.position.copy(camera.position);
+    renderCamera.quaternion.copy(camera.quaternion);
+    renderer.render(scene, renderCamera);
   }
   requestAnimationFrame(frame);
 
@@ -902,7 +936,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       setGoal();
     },
     hover(id) { hoverId = id; },
-    setPanMode(on) { panMode = Boolean(on); canvas.classList.toggle('panning', panMode); if (!drag) canvas.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
+    setPanMode(on) { panMode = Boolean(on); stage.classList.toggle('panning', panMode); if (!drag) stage.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
     getPanMode: () => panMode,
     reset: resetView,
     closeNote() {

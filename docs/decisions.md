@@ -222,6 +222,8 @@ until a later entry replaces it.
 
 - **D-067 (2026-11-18) Separate page text from the 3D canvas.** Replace the overlapping intro and room-card layout with a responsive grid. Show room details alongside the model on wide screens and below it on smaller screens. Fit and centre the camera within its own canvas and keep controls outside it. Use one room details region across layouts. In Writing & Speaking show a short introduction, contact, social links, and one recent post plus the archive.
 
+- **D-068 (2026-11-18) Required scene continuity and transparency.** Keep the D-067 grid while allowing the 3D view to continue under the translucent introduction, room details and controls. This applies to desktop and mobile. Use 86% paper opacity for those backgrounds and full opacity for text. Text regions must remain separate. Frame room names and interactive objects within the clear view with extra headroom. See the required rule in DESIGN.md.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

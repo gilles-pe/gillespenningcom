@@ -156,3 +156,9 @@ Keep the slender post and the tapered, warm shade in Writing & Speaking. A low b
 
 ### Separate introduction, scene and room details (D-067, 2026-11-18)
 The main page uses a normal-flow grid. At 1280 px and wider, the introduction sits left, the canvas in the middle and the selected room’s details on the right. Between 801 and 1279 px the details move below the canvas in its column. On phones, stack all three areas. Keep navigation and view controls below the canvas, and fit the model to the available canvas width. The Writing & Speaking room details show a contact link, one row of named social targets, and the newest post with an archive link.
+
+### Required scene transparency (D-068, 2026-11-18)
+
+The 3D view must continue behind adjacent text and control surfaces on desktop and mobile. Render one continuous scene, with a soft fade at its outer edges. The introduction, room details and scene controls must use the shared translucent paper surface at 86% opacity. Apply opacity to the background only. Text and controls remain fully legible.
+
+Keep separate layout areas for introduction, controls and room details. Text regions must never overlap each other. Fit room titles and interactive objects into the clear part of the stage with visible headroom. Only that clear stage accepts scene gestures. On narrow screens the same surface and interaction rules apply to the stacked layout.

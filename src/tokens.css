@@ -12,6 +12,7 @@
 
   /* Colors: AI in Medicine Monitor palette (D-036) */
   --paper: #f7f6f2;        /* page neutral background */
+  --scene-surface: color-mix(in srgb, var(--paper) 86%, transparent); /* D-068 */
   --surface: #ffffff;      /* elevated cards and surfaces */
   --cream: #f7f6f2;        /* alias for backwards compatibility with paper */
   --ink: #18181b;          /* primary deep neutral text */

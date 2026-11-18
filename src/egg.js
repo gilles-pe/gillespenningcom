@@ -7,7 +7,7 @@ import { LINKS } from './content.js';
 const FEED_MS = 1200, SHAKE_MS = 600;
 const ease = u => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
 
-export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
+export function createEgg({ cellar, camera, stage, reduced, lang }) {
   const parts = new Set(cellar.pick), things = [...cellar.pick, ...cellar.occluders];
   const ray = new THREE.Raycaster(), v = new THREE.Vector3(), dir = new THREE.Vector3();
   let opened = false, curLang = lang, note = null, text = null, link = null, closeBtn = null, anim = null, away = false;
@@ -46,7 +46,7 @@ export function createEgg({ cellar, camera, stage, canvas, reduced, lang }) {
     opened = false;
     const had = note.contains(document.activeElement);
     note.hidden = true; note.classList.add('closed');
-    if (had || restoreFocus) canvas.focus({ preventScroll: true });
+    if (had || restoreFocus) stage.focus({ preventScroll: true });
   }
 
   return {

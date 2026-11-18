@@ -236,6 +236,8 @@ until a later entry replaces it.
 
 - **D-061 (2026-11-18) More elegant ship controls (owner feedback).** Replace the bulky ship preview and boxed Warp controls with a compact bottom caption, registry heading, short class/series line and restrained text actions with line icons. Use the same visual language in the inspector. Keep first-click camera positioning, explicit Warp activation, keyboard access and touch target sizes. Model provenance is unchanged: original procedural interim models; the intended Sketchfab files are not yet acquired.
 
+- **D-062 (2026-11-18) Laptop and endoscopy equipment.** Refine three props at their existing stations. Give the laptop raised keys and a trackpad, distinguish the three endoscopy tower modules by their front panels, and show the rigid scope diagonally with its optical tip, coupling, camera head and curved cable. Keep the laptop story target and the Wimmelbild monitor target.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

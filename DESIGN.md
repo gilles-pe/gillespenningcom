@@ -140,3 +140,6 @@ Selecting either Enterprise moves the room camera to a close, slightly elevated 
 
 ### Quiet ship caption and actions (D-061, 2026-11-18)
 Enterprise selection uses a compact bottom caption with the registry, a single class/series line, and two text actions: Explore/Ansehen and Warp. The Warp action has a small outlined circular arrow, not a filled CTA. The same text/icon language appears in the inspector; idle status copy is omitted. Keep touch targets at 48 px, visible focus rings, high text contrast and reduced-motion behavior. Frame the model above the measured caption, leaving the desktop intro unobstructed. On phones, anchor the caption to the actual canvas height rather than the surrounding dock. These changes refine D-059 and D-060; the models remain original procedural interim geometry pending source-file downloads.
+
+### Laptop and endoscopy props (D-062, 2026-11-18)
+The About Me laptop uses five rows of raised keys, a wider space bar and an outlined trackpad. The endoscopy tower uses visibly separate modules with distinct front panels for the camera controller, light source and CO₂ insufflator. Set the rigid scope diagonally on the green drape. Give it a slim steel shaft, a dark lens, a ridged coupling, a side light port and a rounded camera head. Route the camera cable over the edge of the table.

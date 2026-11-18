@@ -618,7 +618,7 @@ function enterpriseModel(parent, x, y, z, rotY = -0.5, era = 'tos') {
 function openLaptop(parent, x, y, z, rotY = 0) {
   const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
   const body = mat(0xd8d7d0, { roughness: 0.45, metalness: 0.2 });
-  const keys = mat(0x3a403e, { roughness: 0.7 });
+  const keycap = mat(0x343a39, { roughness: 0.7 });
   const c = canvas(512, 312), k = c.getContext('2d'), t = tex(c);
   whenFont(() => {
     k.fillStyle = '#fbf6ee'; k.fillRect(0, 0, 512, 312);
@@ -630,13 +630,39 @@ function openLaptop(parent, x, y, z, rotY = 0) {
   });
   const screen = new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
   const base = box(g, 0.36, 0.014, 0.25, 0, 0, 0, body);
-  const kb = box(g, 0.30, 0.003, 0.12, 0, 0.013, -0.03, keys);
+  const kb = box(g, 0.302, 0.002, 0.122, 0, 0.014, -0.037, mat(0x747a76));
+  // Five rows with staggered modifiers and a separate space bar. All caps share one draw call.
+  const rows = [
+    Array(15).fill(1),
+    [...Array(13).fill(1), 2],
+    [1.4, ...Array(12).fill(1), 1.6],
+    [1.8, ...Array(11).fill(1), 2.2],
+    [1.25, 1.25, 1.25, 6.25, 1.25, 1.25, 1.25, 1.25],
+  ];
+  const keycaps = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), keycap,
+    rows.reduce((count, row) => count + row.length, 0));
+  const key = new THREE.Object3D(), pitch = 0.0196;
+  let index = 0;
+  rows.forEach((row, rowIndex) => {
+    let left = -15 * pitch / 2;
+    for (const units of row) {
+      const width = units * pitch;
+      key.position.set(left + width / 2, 0.0175, -0.083 + rowIndex * 0.023);
+      key.scale.set(width - 0.003, 0.003, rowIndex === 0 ? 0.014 : 0.018);
+      key.updateMatrix();
+      keycaps.setMatrixAt(index++, key.matrix);
+      left += width;
+    }
+  });
+  g.add(keycaps);
+  const trackpadEdge = box(g, 0.126, 0.001, 0.069, 0, 0.014, 0.064, mat(0x9fa6a1));
+  const trackpad = box(g, 0.120, 0.001, 0.063, 0, 0.015, 0.064, body);
   const lid = new THREE.Group(); lid.position.set(0, 0.014, -0.12); lid.rotation.x = -0.25; g.add(lid);
   const back = box(lid, 0.36, 0.23, 0.012, 0, 0, 0, body);
   const disp = new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.195), screen);
   disp.position.set(0, 0.118, 0.007); lid.add(disp);
   const anchor = new THREE.Object3D(); anchor.position.set(0, 0.14, 0); lid.add(anchor);
-  const picks = [base, kb, back, disp];
+  const picks = [base, kb, keycaps, trackpadEdge, trackpad, back, disp];
   picks.forEach(m => { m.userData.story = true; m.userData.anchor = anchor; });
   return picks;
 }
@@ -1088,23 +1114,43 @@ function operatingRoom(g, L, projectPicks) {
   box(headSec, 0.46, 0.075, 0.50, -0.23, 0, 0, cream);                   // slightly elevated head/back section
   box(op, 0.48, 0.075, 0.48, 0.52, 0.495, 0, cream);                     // leg section
   // Sterile drape & 10 mm rigid endoscope + camera head lying on the middle cushion
-  const scopeSet = new THREE.Group(); scopeSet.position.set(0.02, 0.576, 0.02); scopeSet.rotation.y = 0.18; op.add(scopeSet);
-  box(scopeSet, 0.46, 0.008, 0.32, 0, 0, 0, drape);
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0085, 0.34, 12), steel);
-  shaft.rotation.z = Math.PI / 2; shaft.position.set(0.06, 0.02, 0); shaft.castShadow = true; scopeSet.add(shaft);
-  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.012, 0.032, 12), steel);
-  collar.rotation.z = Math.PI / 2; collar.position.set(-0.11, 0.02, 0); scopeSet.add(collar);
-  const lightPost = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.036, 10), steel);
-  lightPost.rotation.x = Math.PI / 2; lightPost.position.set(-0.105, 0.02, 0.022); scopeSet.add(lightPost);
-  // Ergonomic camera head coupled to the eyepiece
-  box(scopeSet, 0.092, 0.032, 0.042, -0.172, 0.008, 0, dark);
-  box(scopeSet, 0.018, 0.008, 0.018, -0.162, 0.040, 0, mat(C.brass));
-  // Flexible camera cable trailing toward the endoscopic cart
+  box(op, 0.51, 0.006, 0.35, 0.006, 0.575, 0.012, drape);
+  const scope = new THREE.Group();
+  scope.position.set(0.016, 0.581, 0.02);
+  scope.rotation.y = 0.38;
+  op.add(scope);
+  const scopeAxis = 0.027;
+  const polishedSteel = mat(0xe1e6e5, { roughness: 0.28, metalness: 0.45 });
+  const lensGlass = mat(0x1b383a, { roughness: 0.19, metalness: 0.18 });
+  const barrel = (x, length, frontRadius, rearRadius, material) => {
+    const part = cyl(scope, frontRadius, rearRadius, length, x, scopeAxis - length / 2, 0, material, 16);
+    part.rotation.z = -Math.PI / 2;
+    return part;
+  };
+  barrel(0.053, 0.316, 0.006, 0.006, polishedSteel);
+  barrel(0.211, 0.006, 0.006, 0.006, steel);
+  barrel(0.214, 0.002, 0.0045, 0.0045, lensGlass);
+  barrel(-0.116, 0.030, 0.014, 0.018, polishedSteel);
+  barrel(-0.140, 0.022, 0.019, 0.019, dark);
+  for (const x of [-0.148, -0.143, -0.138, -0.133])
+    barrel(x, 0.002, 0.020, 0.020, steel);
+  const lightPost = cyl(scope, 0.008, 0.009, 0.023, -0.116, scopeAxis - 0.023 / 2, 0.021, polishedSteel, 12);
+  lightPost.rotation.x = Math.PI / 2;
+  const lightPort = cyl(scope, 0.005, 0.005, 0.002, -0.116, scopeAxis - 0.001, 0.033, lensGlass, 12);
+  lightPort.rotation.x = Math.PI / 2;
+  const cameraHead = new THREE.Mesh(new RoundedBoxGeometry(0.084, 0.048, 0.054, 2, 0.013), dark);
+  cameraHead.position.set(-0.191, scopeAxis, 0);
+  cameraHead.castShadow = cameraHead.receiveShadow = true;
+  scope.add(cameraHead);
+  box(scope, 0.017, 0.004, 0.014, -0.190, 0.049, 0, mat(0x7b9c8c));
+  barrel(-0.241, 0.022, 0.009, 0.006, dark);
+  // The cable starts at the strain relief, lies on the cushion and turns down over its edge.
   const cablePts = [
-    new THREE.Vector3(-0.22, 0.02, 0), new THREE.Vector3(-0.34, 0.015, -0.06),
-    new THREE.Vector3(-0.46, -0.14, -0.20), new THREE.Vector3(-0.72, -0.48, -0.62),
-  ];
-  op.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cablePts.map(p => p.clone().add(scopeSet.position))), 16, 0.006, 6), dark));
+    [-0.252, scopeAxis, 0], [-0.286, 0.016, 0.014], [-0.299, 0.007, 0.065],
+    [-0.281, 0.007, 0.110], [-0.255, 0.007, 0.150], [-0.240, -0.005, 0.176],
+    [-0.236, -0.058, 0.186], [-0.268, -0.167, 0.172],
+  ].map(point => new THREE.Vector3(...point));
+  scope.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cablePts), 24, 0.0045, 6), dark));
 
   // 2. Ceiling-suspended dual-wing Surgical Light (Decken-OP-Leuchte mit zwei Flügeln, no floor stand)
   const hubX = L.table[0] - 0.05, hubZ = L.table[1] - 0.12, hubY = 1.48;
@@ -1160,21 +1206,46 @@ function operatingRoom(g, L, projectPicks) {
   for (const sy of [0.24, 0.47, 0.70]) box(ec, 0.62, 0.025, 0.46, 0, sy, 0, putty);
   // CO2 cylinder strapped behind the cart
   cyl(ec, 0.055, 0.055, 0.44, -0.22, 0.065, -0.26, mat(0x7d8884), 14);
-  // Insufflator (bottom shelf)
-  box(ec, 0.52, 0.13, 0.38, 0, 0.07, 0.02, putty);
-  box(ec, 0.48, 0.08, 0.015, 0, 0.095, 0.215, dark);
-  // Cold Light Source (middle shelf) with glowing fiber-optic light port
-  box(ec, 0.52, 0.13, 0.38, 0, 0.27, 0.02, putty);
-  box(ec, 0.48, 0.08, 0.015, 0, 0.295, 0.215, dark);
-  const port = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.02, 12),
-    new THREE.MeshStandardMaterial({ color: 0xe6f8ff, emissive: 0x9be0ff, emissiveIntensity: 1.1 }));
-  port.rotation.x = Math.PI / 2; port.position.set(-0.14, 0.335, 0.225); ec.add(port);
-  // Camera Control Unit (upper shelf)
-  box(ec, 0.52, 0.13, 0.38, 0, 0.50, 0.02, putty);
-  box(ec, 0.48, 0.08, 0.015, 0, 0.525, 0.215, dark);
-  const led = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.012, 0.01),
-    new THREE.MeshStandardMaterial({ color: 0x9de8a6, emissive: 0x58c96a, emissiveIntensity: 0.9 }));
-  led.position.set(0.16, 0.57, 0.224); ec.add(led);
+  // Distinct front panels sit back from the shelf lips, with an air gap above each unit.
+  const display = mat(0x152928, { roughness: 0.35 });
+  const indicator = mat(0xa7cfb7, { emissive: 0x79a98d, emissiveIntensity: 0.32 });
+  const inactive = mat(0x475753);
+  const portFace = (x, y, z, radius, depth, material) => {
+    const part = cyl(ec, radius, radius, depth, x, y - depth / 2, z, material, 16);
+    part.rotation.x = Math.PI / 2;
+  };
+  const chassis = (y, h, face) => {
+    box(ec, 0.54, h, 0.39, 0, y, 0.028, putty);
+    box(ec, 0.508, h - 0.018, 0.014, 0, y + 0.009, 0.225, face);
+  };
+  const readout = (x, y, width) => {
+    box(ec, width, 0.046, 0.008, x, y, 0.234, display);
+    box(ec, width * 0.53, 0.007, 0.003, x, y + 0.025, 0.240, indicator);
+    box(ec, width * 0.33, 0.004, 0.003, x - width * 0.10, y + 0.013, 0.240, inactive);
+  };
+
+  // Insufflator: paired display windows and a raised control knob.
+  chassis(0.065, 0.137, dark);
+  readout(-0.139, 0.110, 0.114);
+  readout(0.003, 0.110, 0.114);
+  portFace(0.158, 0.134, 0.240, 0.038, 0.012, steel);
+  portFace(0.158, 0.134, 0.251, 0.029, 0.016, inactive);
+  box(ec, 0.006, 0.011, 0.003, 0.158, 0.144, 0.261, indicator);
+  // Light source: brushed fascia, recessed fiber port and vent slots.
+  chassis(0.265, 0.144, steel);
+  portFace(-0.151, 0.337, 0.238, 0.038, 0.013, dark);
+  portFace(-0.151, 0.337, 0.246, 0.030, 0.008, putty);
+  portFace(-0.151, 0.337, 0.251, 0.018, 0.004, display);
+  for (const y of [0.315, 0.327, 0.339, 0.351])
+    box(ec, 0.115, 0.005, 0.003, 0.086, y, 0.234, inactive);
+  // Camera control: a wide display, input ring and a small status light.
+  chassis(0.495, 0.134, dark);
+  portFace(-0.177, 0.562, 0.238, 0.024, 0.011, steel);
+  portFace(-0.177, 0.562, 0.246, 0.014, 0.006, display);
+  readout(-0.017, 0.540, 0.162);
+  for (const x of [0.105, 0.136, 0.167])
+    box(ec, 0.018, 0.018, 0.006, x, 0.549, 0.237, inactive);
+  box(ec, 0.013, 0.008, 0.004, 0.211, 0.557, 0.237, indicator);
   // Large rolling medical monitor (1.04 x 0.52, 2:1 aspect -> ai-wall-1 / Wimmelbild)
   const [mw, mh] = SLOT['ai-wall-1'].size;
   box(ec, 0.055, 0.24, 0.05, 0, 0.725, -0.14, steel);

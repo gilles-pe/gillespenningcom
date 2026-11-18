@@ -24,6 +24,9 @@ grey-green base (decision D-016: light and airy, soft shadows). Those are materi
 - `--sans`: Source Sans 3 (fallback system-ui, sans-serif). Used for body text, UI navigation, buttons, cards, tooltips, and footer links.
 - Self-hosted locally via `@fontsource/source-serif-4` and `@fontsource/source-sans-3` (zero external network requests, 100% GDPR compliant).
 
+## Brand mark and favicon
+The approved favicon (2026-11-18) uses a white Source-Serif-style `GP` monogram in front of a dotted globe on deep royal blue. Preserve this artwork rather than recreating or recolouring it. `public/favicon.svg` is the scalable source; `favicon.ico`, `favicon-16.png`, `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png`, and `icon-1024.png` are matching raster exports. Both HTML pages reference the icon family with a versioned URL to refresh browser caches.
+
 ## Sizes
 All sizes (spacing, radii, control heights, font sizes) come from the tokens in `src/tokens.css`.
 The limits on the number of steps are in `AGENTS.md`. Do not add in-between values.

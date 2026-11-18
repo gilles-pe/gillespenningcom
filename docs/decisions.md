@@ -229,6 +229,8 @@ until a later entry replaces it.
   - **Voice & Content (`writing_style_substack.md` + `gilles-wortliste-substack-2026.md`):** Written in Gilles' direct, concrete, hyphen-separated style without AI clichés or P&L amounts. Includes the leadership foundation text, three anonymized business development cases under `Selected experience` / `Ausgewählte Erfahrungen` (80+ staff / 5 surgical lines / up to 28% growth; carve-out & integration / up to 16 countries / 20%+ annual growth; 65+ staff / commercial realignment / wearable patient monitoring), three anonymous quotes under `Feedback from colleagues` / `Feedback von Kollegen`, and today's focus (`What I focus on today` / `Woran ich heute arbeite`).
   - **Bilingual & Responsive:** Full EN/DE translation via `src/content.js`, three-column desktop grid collapsing to single-column cards and quiet typographic blockquotes on mobile.
 
+- **D-070 (2026-11-18) Approved favicon for gillespenning.com.** Replace the previous petrol-on-cream GP icon with the owner-selected white GP monogram and dotted globe on royal blue. Use the exact SVG artwork and matching ICO/PNG exports (16, 32, 180, 512 and 1024 px). Install in `public/`, reference from both `index.html` and `legal.html`, and use a URL version suffix so returning visitors receive the new icon. Keep the site's 3D design and other colours unchanged.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

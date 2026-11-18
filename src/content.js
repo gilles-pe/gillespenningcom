@@ -30,7 +30,7 @@ export const content = {
       langDe: 'Deutsch',
       resetView: 'Reset view',
       panMode: 'Move',
-      viewControls: '3D view',
+      viewControls: '3D view', previousView: 'Previous view',
       zoom: 'Zoom', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
     },
     nav: {
@@ -356,7 +356,7 @@ export const content = {
       langDe: 'Deutsch',
       resetView: 'Zurücksetzen',
       panMode: 'Verschieben',
-      viewControls: '3D-Ansicht',
+      viewControls: '3D-Ansicht', previousView: 'Vorherige Ansicht',
       zoom: 'Zoom', zoomIn: 'Vergrößern', zoomOut: 'Verkleinern',
     },
     nav: {

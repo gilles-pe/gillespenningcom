@@ -4,6 +4,7 @@ import { resolve, dirname } from 'node:path';
 import assert from 'node:assert/strict';
 import * as Three from 'three';
 const context2d = new Proxy({}, { get: (o,k) => k in o ? o[k] : k === 'measureText' ? text => ({width: String(text).length*24}) : k === 'createLinearGradient' || k === 'createRadialGradient' ? () => ({addColorStop(){}}) : () => {}, set:(o,k,v)=>(o[k]=v,true) });
+let clockOffset=0;
 let active, viewport={width:740,height:580};
 class Element {
   constructor(tag='div') { this.tagName=tag.toUpperCase();this.children=[];this.dataset={};this.style={};this.attrs={};this.listeners={};this.hidden=false;this.inert=false;this._classes=new Set();this.classList={add:(...a)=>a.forEach(x=>this._classes.add(x)),remove:(...a)=>a.forEach(x=>this._classes.delete(x)),contains:x=>this._classes.has(x),toggle:(x,on)=>{on ??= !this._classes.has(x);on?this._classes.add(x):this._classes.delete(x);return on;}}; }
@@ -25,7 +26,7 @@ const globalListeners={};let frame,resize;
 const document={createElement:tag=>new Element(tag),createElementNS:(_,tag)=>new Element(tag),get activeElement(){return active;},hidden:false,documentElement:{scrollHeight:1800}};
 class Renderer{constructor(){this.shadowMap={};}getPixelRatio(){return 1;}setPixelRatio(){}setSize(){}render(scene){scene.updateMatrixWorld(true);}}
 class TextureLoader {load(){return new Three.Texture();}}
-const globals={console,document,Image:class{},performance,devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
+const globals={console,document,Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
 const ctx=vm.createContext(globals);const cache=new Map();
 async function external(name){const ns=name==='three'?{...Three,WebGLRenderer:Renderer,TextureLoader}:await import(name);return new vm.SyntheticModule(Object.keys(ns),function(){for(const [key,val]of Object.entries(ns))this.setExport(key,val);},{context:ctx,identifier:name});}
 async function getModule(file){if(cache.has(file))return cache.get(file);const mod=new vm.SourceTextModule(readFileSync(file,'utf8'),{context:ctx,identifier:file,initializeImportMeta:meta=>{meta.env={BASE_URL:'/',DEV:true};}});cache.set(file,mod);return mod;}
@@ -89,3 +90,35 @@ let prevented=false;const before=api.debug.zoom;stage.fire('wheel',{deltaX:0,del
 prevented=false;stage.fire('wheel',{ctrlKey:true,preventDefault(){prevented=true;}});assert(!prevented);
 api.setZoom(1000);assert.equal(api.debug.zoom,1.8);api.setZoom(0);assert(api.debug.goal.dist>=.7);
 console.log(`viewer checks: framing at 3 sizes; return view; ship/language/reset; wheel on scrolling page; browser shortcut; slider limits (${zoomEvents} zoom updates)`);
+
+// Album entry must stop at the facing pages, including on a touch click-through.
+api.open('about'); api.debug.openAlbum(); draw();
+const album=stage.children.find(element=>element.classList.contains('album-modal'));
+const book=album.children.find(element=>element.classList.contains('album-book'));
+const spread=book.children.find(element=>element.classList.contains('album-spread'));
+const photoButton=spread.children[0].children.find(element=>element.classList.contains('album-photo-card'));
+const lightbox=album.children.find(element=>element.classList.contains('album-lightbox'));
+assert(!album.hidden); assert(lightbox.hidden);
+photoButton.fire('click'); assert(lightbox.hidden,'opening click leaked into photo');
+clockOffset+=400; photoButton.fire('click'); assert(!lightbox.hidden);
+assert(api.back()); assert(lightbox.hidden); assert(!album.hidden);
+assert(api.back()); assert(album.hidden);
+api.debug.openAlbum();draw();assert(lightbox.hidden,'re-entry retained the lightbox');api.back();api.back();
+while(api.back()){}
+api.open('about');draw();const roomPose=api.debug.goal.t.clone();
+api.debug.inspect('studyDesk');draw();
+api.setZoom(api.debug.zoom*.8);api.setZoom(api.debug.zoom*.8);
+assert(api.back());draw();assert(stage.classList.contains('object-focused')===false);
+assert(api.back());draw();assert(api.debug.goal.t.distanceTo(roomPose)<1e-8);
+assert(api.back());draw();assert(!api.isCustom());assert(!api.back());
+console.log('album entry/click-through, lightbox/book/back order and grouped view history: passed');
+
+const animated=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:false,lang:'en',onPick(){},onAway(){}});
+animated.open('about');animated.debug.openAlbum();assert(animated.debug.albumPending);
+let tick=performance.now()+clockOffset;
+for(let i=0;i<240&&animated.debug.albumPending;i++){tick+=16;frame(tick);}
+assert(!animated.debug.albumPending,'album never opened after the camera settled');
+animated.back();animated.debug.openAlbum();animated.open('writing');
+for(let i=0;i<180;i++){tick+=16;frame(tick);}
+assert(!animated.debug.albumPending,'room change failed to cancel album entry');
+console.log('animated album arrival and cancellation: passed');

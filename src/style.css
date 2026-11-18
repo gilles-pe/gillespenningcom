@@ -433,3 +433,8 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .leadership-cases { grid-template-columns: 1fr; gap: var(--s3); }
   .leadership-quotes { grid-template-columns: 1fr; gap: var(--s3); }
 }
+
+/* A quiet local route back through room, object and gesture views. */
+.scene-back { position: absolute; z-index: 7; top: var(--s2); right: var(--s2); min-height: var(--h3); padding: 0 var(--s3); border: 1px solid var(--line); border-radius: var(--r1); background: var(--scene-surface); backdrop-filter: blur(var(--s1)); color: var(--petrol); font: 600 var(--t1) var(--sans); cursor: pointer; }
+.scene-back:hover { border-color: var(--petrol); }
+.stage.has-view-history .photo-card { top: calc(var(--s2) * 2 + var(--h3)); }

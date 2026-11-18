@@ -13,6 +13,8 @@ const canvas = document.getElementById('scene');
 const labelsEl = document.getElementById('labels');
 const panel = document.getElementById('panel');
 const back = document.getElementById('back');
+const sceneBack = document.getElementById('scene-back');
+sceneBack.addEventListener('click', () => { api?.back(); stage.focus({ preventScroll: true }); });
 const bar = document.getElementById('bar');
 const spotsEl = document.getElementById('spots');
 const viewControls = document.getElementById('view-controls');
@@ -243,6 +245,8 @@ function useStatic() {
 import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
     onZoom: syncZoom,
+    onBackState: available => { sceneBack.hidden = !available; stage.classList.toggle('has-view-history', available); },
+    onViewBack: id => { if (id) openRoom(id, true); else closeRoom({ fromHistory: true }); writeRoomHash(id); },
     onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
   if (!api) return useStatic();
   viewControls.hidden = false;

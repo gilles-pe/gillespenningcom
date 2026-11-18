@@ -250,3 +250,5 @@ until a later entry replaces it.
 
 
 - **D-073 (2026-11-18) Additional photo album images (owner request):** Added nine supplied photos to the About Me album, with concise location labels where identifiable. Images are stored as WebP in `public/album/`; uncertain locations are left unspecified.
+
+- **D-074 (2026-11-18) Album entry sequence and local BACK navigation.** Clicking the album first frames the physical book, then opens its facing pages once the camera arrives. Clear any enlarged photo on entry and ignore the opening gesture's click-through; only a new photo click opens a large image. Cancel pending album entry on room changes, Reset or BACK. Add a translucent BACK control at the top-right of the stage once a previous view exists. Record room changes, object inspections and grouped manual zoom/orbit/pan gestures; restore them in reverse order without creating new navigation steps. Within the album, BACK closes the enlarged photo first, then the book, then returns through camera views. Keep the existing All rooms and Reset controls.

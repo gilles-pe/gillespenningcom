@@ -7,7 +7,7 @@ import { PATHS } from './icons.js';
 import { albumPages } from './album-pages.js';
 import { inspectionPose, clampZoom } from './inspection.js';
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom }) {
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -82,6 +82,40 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
   const DMIN = 0.7;
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
+  const viewHistory = [];
+  let restoringView = false, navigationGroup = null;
+  const snapshot = () => ({ room: openId, az: goal.az, el: goal.el, zoom, custom, pan: panOffset.clone(), point: goal.t.clone(), dist: goal.dist });
+  const samePose = (a, b) => a.room === b.room && Math.abs(a.az - b.az) < .001 && Math.abs(a.el - b.el) < .001 && Math.abs(a.dist - b.dist) < .001 && a.point.distanceToSquared(b.point) < .000001;
+  function notifyBack() { onBackState?.(viewHistory.length > 0); }
+  function rememberView(kind, continuous = false) {
+    if (restoringView) return;
+    const now = performance.now();
+    if (continuous && navigationGroup?.continuous && now - navigationGroup.time < 650) { navigationGroup.time = now; return; }
+    navigationGroup = { kind, continuous, time: now };
+    const pose = snapshot();
+    if (!viewHistory.length || !samePose(viewHistory.at(-1), pose)) viewHistory.push(pose);
+    if (viewHistory.length > 60) viewHistory.shift();
+    notifyBack();
+  }
+  function goBack() {
+    navigationGroup = null;
+    if (albumLightbox && !albumLightbox.hidden) { closeAlbumPhoto(); return true; }
+    if (albumOpen) { closeAlbum(true); return true; }
+    if (!viewHistory.length) return false;
+    const saved = viewHistory.pop();
+    restoringView = true;
+    try {
+      closeAlbum(false); closePhoto(false); closePop(false); restoreObjectView(); egg.close();
+      onViewBack?.(saved.room);
+      openId = saved.room; custom = false; setGoal();
+      custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
+      goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el);
+      goal.dist = Math.max(DMIN, home.dist * saved.zoom); goal.t.copy(home.t).add(saved.pan);
+      if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
+      checkAway();
+    } finally { restoringView = false; notifyBack(); }
+    return true;
+  }
   const clampTarget = v => {
     v.x = THREE.MathUtils.clamp(v.x, -14, 14);
     v.y = THREE.MathUtils.clamp(v.y, -6, 8);
@@ -177,7 +211,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (a !== away) { away = a; onAway?.(a); }
   }
   function resetView() {
-    closePop(false); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
+    rememberView('reset'); closeAlbum(false); closePop(false); restoreObjectView(); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
   }
   // Turning: signs are for a drag; when the model is upside down (cos el < 0) the horizontal sense is mirrored.
@@ -185,6 +219,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     for (const k of ['az', 'el']) while (Math.abs(goal[k]) > Math.PI) { const d = goal[k] > 0 ? -TAU : TAU; goal[k] += d; view[k] += d; }
   }
   function orbit(dAz, dEl, instant) {
+    rememberView('orbit', true);
     const s = Math.cos(instant ? view.el : goal.el) >= 0 ? 1 : -1;
     goal.az -= dAz * s; goal.el += dEl;
     if (instant) { view.az -= dAz * s; view.el += dEl; }
@@ -192,6 +227,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   const panRgt = new THREE.Vector3(), panUp = new THREE.Vector3(), panNext = new THREE.Vector3();
   function panBy(dxPx, dyPx, instant) {
+    rememberView('pan', true);
     const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
     const scale = (instant ? view.dist : goal.dist) * (2 * tv) / Math.max(stageH, 1);
     panRgt.set(1, 0, 0).applyQuaternion(camera.quaternion);
@@ -205,6 +241,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     checkAway();
   }
   function zoomBy(f, instant) {
+    rememberView('zoom', true);
     zoom = Math.max(DMIN / home.dist, clampZoom(zoom * f)); custom = true;
     goal.dist = Math.max(DMIN, home.dist * zoom);
     if (instant) view.dist = goal.dist;
@@ -405,7 +442,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const bounds = new THREE.Box3();
     for (const object of target.objects) { object.updateWorldMatrix(true, true); bounds.expandByObject(object); }
     const pose = inspectionPose({ min: bounds.min.toArray(), max: bounds.max.toArray(), az: target.az, el: target.el,
-      fov: camera.fov, width: stageW, height: stageH, captionHeight: popEl?.offsetHeight || 0 });
+      fov: camera.fov, width: stageW, height: stageH, captionHeight: target.album ? 0 : (popEl?.offsetHeight || 0) });
     panOffset.fromArray(pose.target).sub(home.t); custom = true; zoom = pose.distance / home.dist;
     goal.az = near(view.az, target.az); goal.el = near(view.el, target.el); goal.dist = pose.distance; goal.t.fromArray(pose.target);
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
@@ -416,7 +453,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const saved = objectFocus; objectFocus = null;
     stage.classList.remove('object-focused', 'ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
     goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.point);
-    checkAway();
+    if (!restoringView) while (viewHistory.length && samePose(viewHistory.at(-1), snapshot())) viewHistory.pop();
+    notifyBack(); checkAway();
   }
   function closePop(restoreFocus = false) {
     if (!popEl || !popKey) return;
@@ -430,6 +468,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (had || restoreFocus) stage.focus({ preventScroll: true });
   }
   function openPop(key) {
+    rememberView('object');
     closePhoto(false);
     closeAlbum(false);
     if (!inspectionFor(key)) restoreObjectView();
@@ -519,10 +558,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const h = albumRay.intersectObjects(albumThings, false)[0];
     return h && albumParts.has(h.object) ? h.object.userData : null;
   };
-  let albumOpen = false, albumIndex = 0;
+  let albumOpen = false, albumIndex = 0, albumPending = false, albumOpenedAt = 0;
   let albumModal = null, albumBook = null, albumSpread = null, albumLightbox = null;
   let albumPageLeft = null, albumPageRight = null, albumCounterEl = null, albumTagEl = null, albumHintEl = null;
-  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumLightboxClose = null;
+  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumLightboxClose = null, albumBackBtn = null;
   let albumLightboxImage = null, albumLightboxCaption = null;
   let albumTimer = null, albumReturnFocus = null, albumPhotoFocus = null;
   const getAlbumPhotos = () => t(curLang, 'model.album.photos') || [];
@@ -551,7 +590,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     header.className = 'album-header';
     albumTagEl = document.createElement('span'); albumTagEl.className = 'album-tag';
     albumCounterEl = document.createElement('span'); albumCounterEl.className = 'album-counter';
-    header.append(albumTagEl, albumCounterEl);
+    albumBackBtn = document.createElement('button'); albumBackBtn.type = 'button'; albumBackBtn.className = 'album-btn'; albumBackBtn.textContent = 'BACK';
+    albumBackBtn.addEventListener('click', goBack);
+    header.append(albumTagEl, albumCounterEl, albumBackBtn);
 
     albumSpread = document.createElement('div');
     albumSpread.className = 'album-spread';
@@ -605,6 +646,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
 
   function openAlbumPhoto(photo, button) {
+    // Ignore the synthetic click belonging to the pointer release that opened the book.
+    if (!albumOpen || performance.now() - albumOpenedAt < 350) return;
     albumPhotoFocus = button;
     albumLightboxImage.src = `${import.meta.env.BASE_URL}${photo.src}`;
     albumLightboxImage.alt = photo.title;
@@ -658,6 +701,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const visible = [...left, ...right];
     albumCounterEl.textContent = `${visible[0].index + 1}–${visible.at(-1).index + 1} / ${photos.length}`;
     albumTagEl.textContent = t(curLang, 'model.album.title');
+    albumBackBtn.setAttribute('aria-label', t(curLang, 'ui.previousView'));
     albumHintEl.textContent = t(curLang, 'model.album.hint');
     albumCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
     albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
@@ -683,9 +727,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
 
   function openAlbum() {
+    if (albumPending || albumOpen) return;
+    rememberView('album');
     closePhoto(false); closePop(false);
     albumReturnFocus = document.activeElement;
+    const target = { id: 'about:album', room: 'about', key: 'album', objects: albumPicks, az: -.22, el: .82, album: true };
+    stage.classList.add('object-focused'); focusObject(target);
+    albumPending = true;
+    if (reduced) showAlbum();
+  }
+  function showAlbum() {
+    albumPending = false;
     buildAlbumModal(); clearTimeout(albumTimer);
+    // Every entry starts as a book, never with a previously enlarged photograph.
+    albumLightbox.hidden = true; albumBook.inert = false; albumPhotoFocus = null;
+    albumOpenedAt = performance.now();
     albumOpen = true; albumModal.hidden = false; albumModal.inert = false;
     updateAlbumView();
     void albumModal.offsetWidth; albumModal.classList.add('on');
@@ -693,6 +749,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
 
   function closeAlbum(restoreFocus = false) {
+    albumPending = false;
     if (!albumModal || !albumOpen) return;
     if (!albumLightbox.hidden) { albumLightbox.hidden = true; albumBook.inert = false; }
     albumOpen = false; albumModal.classList.remove('on'); albumModal.inert = true;
@@ -704,7 +761,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
 
   function toggleAlbum() {
-    if (albumOpen) closeAlbum(true);
+    if (albumPending) { albumPending = false; goBack(); }
+    else if (albumOpen) closeAlbum(true);
     else openAlbum();
   }
 
@@ -848,7 +906,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
           else togglePop(object.key);
         } else onPick(pick(e));
       }
-      drag = null; stage.style.cursor = panMode ? 'move' : 'grab';
+      drag = null; navigationGroup = null; stage.style.cursor = panMode ? 'move' : 'grab';
     } else if (drag && drag.mode === 'pinch' && pts.size === 1) { drag.mode = 'orbit'; const [r] = [...pts.values()]; drag.x = r.x; drag.y = r.y; }
   };
   addEventListener('pointerup', e => endPointer(e, false));
@@ -923,6 +981,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));
     view.az += (goal.az - view.az) * k; view.el += (goal.el - view.el) * k; view.dist += (goal.dist - view.dist) * k; view.t.lerp(goal.t, k); clampTarget(view.t);
+    if (albumPending && Math.abs(view.dist - goal.dist) < .02 && view.t.distanceTo(goal.t) < .01 && Math.abs(view.el - goal.el) < .01 && Math.abs(view.az - goal.az) < .01) showAlbum();
     const ce = Math.cos(view.el), se = Math.sin(view.el), sa = Math.sin(view.az), ca = Math.cos(view.az);
     camera.position.set(view.t.x + view.dist * ce * sa, view.t.y + view.dist * se, view.t.z + view.dist * ce * ca);
     camera.up.set(-se * sa, ce, -se * ca);                    // tangent of the elevation arc: no flip or jump at the poles
@@ -956,7 +1015,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   return {
     open(id, { keepView = false } = {}) {
-      if (objectFocus && (id !== openId || !keepView)) closePop(false);
+      if (!keepView && (id !== openId || custom)) rememberView('room');
+      if (id !== openId) closeAlbum(false);
+      if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
       openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
       if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
       if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
@@ -969,15 +1030,16 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     hover(id) { hoverId = id; },
     setPanMode(on) { panMode = Boolean(on); stage.classList.toggle('panning', panMode); if (!drag) stage.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
     getPanMode: () => panMode,
+    back: goBack,
     reset: resetView,
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
-      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen;
+      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumPending;
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true);
       return had;
     },
     isCustom: () => custom,
     setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); if (objectFocus) focusObject(objectFocus.target, false); if (albumModal && albumOpen) updateAlbumView(); updateHoverTip(); },
-    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; }, inspectionTargets, inspect: key => openPop(key) } } : {}),
+    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; }, inspectionTargets, inspect: key => openPop(key), openAlbum, get albumPending() { return albumPending; }, get historyLength() { return viewHistory.length; } } } : {}),
   };
 }

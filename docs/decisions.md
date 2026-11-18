@@ -240,6 +240,8 @@ until a later entry replaces it.
 
 - **D-063 (2026-11-18) Practice desk, speaking photo and quieter controls.** Refine the practice desk with separate input devices and an aligned seating position. Move the framed speaking photo to the right shelf corner, away from the wall lettering. Replace the header contact button and language pills with quiet text controls. Group Move and Reset at the scene edge, with a below-canvas row on phones. Move also pans with a single touch when activated.
 
+- **D-064 (2026-11-18) Study lamp and distinct indoor plants.** Refine the lamp in the back-right room with pleated linen, brass trim, a petrol base and a soft warm diffuser. Give each existing plant a different form and vessel: narrow olive leaves over a terracotta pot, broad rubber-plant leaves over ivory ceramic, and arching fern fronds over a low sage bowl.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

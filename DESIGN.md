@@ -146,3 +146,6 @@ The About Me laptop uses five rows of raised keys, a wider space bar and an outl
 
 ### Practice desk and quieter scene controls (D-063, 2026-11-18)
 Give the practice desk a slim rounded oak top, tapered legs, a stand-alone keyboard, a mouse on a sage mat, a folder, a pen and a short monitor cable. Align the chair and input devices with the screen. Set the speaking frame in the right corner of the Writing & Speaking shelf, with its hotspot following the frame. Use a plain contact link and underlined language selection. Place Move and Reset together at the lower edge on desktop and in a row below the canvas on phones. Keep 48 px touch targets, show Reset only after the view changes, and tint only the active Move icon.
+
+### Study lamp and individual plants (D-064, 2026-11-18)
+The study cabinet holds a lamp with a pleated linen shade, a small warm diffuser, a brass stem and a petrol base. Its shade sits above the neighbouring ship models. The gallery has an airy olive tree in terracotta, the study a rubber plant with broad staggered leaves in ivory ceramic, and the lounge a low fern with arching fronds in a sage bowl. Use shaped geometry and varied greens with instanced leaves and stems. Keep planting in the front corners so the paths and clickable props have room.

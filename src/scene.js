@@ -14,7 +14,7 @@ const PETROL = '#12383a', CREAM = '#f6eee3';
 const C = {
   wall: 0xf1e7d4, wallGreen: 0xbfc9a8, floor: 0xe5cda5, corridor: 0xdcc39b, base: 0x72877f,
   wood: 0xd9bf93, woodDark: 0xbfa479, cream: 0xf5eee0, glass: 0xe3efe6, brass: 0xb8862f,
-  leaf: 0x6f8f4e, leaf2: 0x86a05f, pot: 0xe9dfcf, book: [0xe8dcc6, 0xcdb994, 0x9db0a0, 0xd9c7a8, 0x7f9488],
+  book: [0xe8dcc6, 0xcdb994, 0x9db0a0, 0xd9c7a8, 0x7f9488],
 };
 // Slightly different wall tone per room, so the four rooms do not read as copies.
 const WALL_TONE = { projects: C.wallGreen, about: 0xf2e8d6, ai: 0xf1e9d9, writing: 0xf4e9d6 };
@@ -245,35 +245,187 @@ function cyl(parent, rt, rb, h, x, y, z, m, seg = 24) {
   mesh.position.set(x, y + h / 2, z); mesh.castShadow = mesh.receiveShadow = true;
   parent.add(mesh); return mesh;
 }
-// Plant: a pot, thin stems and many small leaves (two instanced meshes per plant).
-const leafGeo = new THREE.SphereGeometry(1, 6, 4), stemGeo = new THREE.CylinderGeometry(1, 1, 1, 5);
-const leafMat = new THREE.MeshStandardMaterial({ color: C.leaf, roughness: 0.7 });
-const stemMat = new THREE.MeshStandardMaterial({ color: 0x6b7f45, roughness: 0.8 });
-function plant(parent, x, z, s = 1) {
-  cyl(parent, 0.16 * s, 0.12 * s, 0.28 * s, x, 0, z, mat(C.pot));
-  const r = rng(Math.round(x * 100 + z * 37) + 5), stems = 7, perStem = 7;
-  const leaves = new THREE.InstancedMesh(leafGeo, leafMat, stems * perStem);
-  const sticks = new THREE.InstancedMesh(stemGeo, stemMat, stems);
-  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), qr = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), px = new THREE.Vector3(1, 0, 0);
-  let li = 0;
-  for (let i = 0; i < stems; i++) {
-    const a = (i / stems) * Math.PI * 2 + r() * 0.6, lean = 0.18 + r() * 0.42, len = (0.5 + r() * 0.4) * s;
-    const dir = new THREE.Vector3(Math.cos(a) * Math.sin(lean), Math.cos(lean), Math.sin(a) * Math.sin(lean)).normalize();
-    const base = new THREE.Vector3(x, 0.27 * s, z);
-    q.setFromUnitVectors(up, dir);
-    m.compose(base.clone().addScaledVector(dir, len / 2), q, new THREE.Vector3(0.007 * s, len, 0.007 * s)); sticks.setMatrixAt(i, m);
-    for (let j = 0; j < perStem; j++) {
-      const t = 0.3 + (j / (perStem - 1)) * 0.7, side = j % 2 ? 1 : -1;
-      const ld = dir.clone().add(new THREE.Vector3(-dir.z, 0, dir.x).multiplyScalar(side * 0.9)).normalize();
-      qr.setFromUnitVectors(px, ld); qr.multiply(new THREE.Quaternion().setFromAxisAngle(px, r() * 0.8));
-      const sz = (0.085 - t * 0.025) * s;
-      m.compose(base.clone().addScaledVector(dir, len * t), qr, new THREE.Vector3(sz, 0.006 * s, sz * 0.42));
-      leaves.setMatrixAt(li++, m);
+// A folded blade catches light on the centre vein without requiring a texture.
+function leafBlade(outline) {
+  const vertices = [], indices = [];
+  for (const [y, width, curl] of outline) {
+    vertices.push(-width, y, curl, 0, y, curl + width * 0.24, width, y, curl);
+  }
+  for (let row = 0; row < outline.length - 1; row++) {
+    for (let side = 0; side < 2; side++) {
+      const i = row * 3 + side;
+      indices.push(i, i + 1, i + 3, i + 1, i + 4, i + 3);
     }
   }
-  leaves.castShadow = false; sticks.castShadow = false; leaves.frustumCulled = sticks.frustumCulled = false;
-  parent.add(sticks, leaves);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
 }
+
+const narrowBlade = leafBlade([[0, 0, 0], [0.25, 0.15, 0.025], [0.59, 0.15, 0.005], [0.83, 0.08, -0.025], [1, 0, -0.09]]);
+const broadBlade = leafBlade([[0, 0, 0], [0.22, 0.30, 0.07], [0.51, 0.47, 0.09], [0.76, 0.38, 0.03], [1, 0, -0.14]]);
+const frondBlade = leafBlade([[0, 0, 0], [0.24, 0.18, 0.025], [0.50, 0.20, 0.03], [0.78, 0.13, -0.01], [1, 0, -0.12]]);
+const stemGeometry = new THREE.CylinderGeometry(0.72, 1, 1, 6);
+const bladeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.58, side: THREE.DoubleSide });
+const plantSoil = mat(0x655242, { roughness: 1 });
+
+function pottedPlant(parent, name, x, z, pot, blade, palette, build) {
+  const group = new THREE.Group();
+  group.name = name;
+  group.position.set(x, 0.06, z);
+  parent.add(group);
+  const profile = pot.profile.map(([r, y]) => new THREE.Vector2(r, y));
+  const vessel = new THREE.Mesh(new THREE.LatheGeometry(profile, 32), mat(pot.color, { roughness: 0.66 }));
+  vessel.castShadow = vessel.receiveShadow = true;
+  group.add(vessel);
+  const soilY = profile.at(-1).y;
+  cyl(group, profile.at(-1).x, profile.at(-1).x, 0.012, 0, soilY - 0.012, 0, plantSoil, 24);
+
+  const stems = [], leaves = [];
+  const point = (x, y, z) => new THREE.Vector3(x, y + soilY, z);
+  const branch = (from, to, radius) => stems.push({ from, to, radius });
+  const leaf = (from, vector, length, roll, color) => leaves.push({ from, vector, length, roll, color });
+  build(point, branch, leaf);
+
+  const stalks = new THREE.InstancedMesh(stemGeometry, mat(pot.stem), stems.length);
+  const foliage = new THREE.InstancedMesh(blade, bladeMat, leaves.length);
+  const up = new THREE.Vector3(0, 1, 0), transform = new THREE.Matrix4(), rotation = new THREE.Quaternion();
+  const roll = new THREE.Quaternion();
+  stems.forEach(({ from, to, radius }, i) => {
+    const delta = to.clone().sub(from), length = delta.length();
+    rotation.setFromUnitVectors(up, delta.multiplyScalar(1 / length));
+    transform.compose(from.clone().lerp(to, 0.5), rotation, new THREE.Vector3(radius, length, radius));
+    stalks.setMatrixAt(i, transform);
+  });
+  leaves.forEach(({ from, vector, length, roll: twist, color }, i) => {
+    rotation.setFromUnitVectors(up, vector.normalize()).multiply(roll.setFromAxisAngle(up, twist));
+    transform.compose(from, rotation, new THREE.Vector3(length, length, length));
+    foliage.setMatrixAt(i, transform);
+    foliage.setColorAt(i, new THREE.Color(palette[color % palette.length]));
+  });
+  group.add(stalks, foliage);
+}
+
+function galleryOlive(parent, x, z) {
+  pottedPlant(parent, 'gallery-olive', x, z, {
+    color: 0xb97b5c, stem: 0x766341,
+    profile: [[0, 0], [0.135, 0], [0.163, 0.018], [0.184, 0.252], [0.194, 0.262], [0.194, 0.288], [0.174, 0.288], [0.168, 0.249]],
+  }, narrowBlade, [0x65794d, 0x849162, 0x99a67c], (point, branch, leaf) => {
+    const rand = rng(203);
+    const bend = point(0.035, 0.43, -0.025), top = point(0.045, 0.81, 0.015);
+    branch(point(0, 0, 0), bend, 0.019);
+    branch(bend, top, 0.012);
+    for (let i = 0; i < 8; i++) {
+      const angle = i * 2.40;
+      const start = bend.clone().lerp(top, i / 9);
+      const reach = 0.26 - i * 0.014;
+      const end = start.clone().add(new THREE.Vector3(Math.cos(angle) * reach, 0.25 + rand() * 0.12, Math.sin(angle) * reach));
+      branch(start, end, 0.0055);
+      for (let j = 0; j < 7; j++) {
+        const side = j % 2 ? 1 : -1;
+        const turn = angle + side * (0.75 + rand() * 0.35);
+        const origin = start.clone().lerp(end, 0.24 + j * 0.122);
+        leaf(origin, new THREE.Vector3(Math.cos(turn), 0.30 + rand() * 0.34, Math.sin(turn)),
+          0.125 - j * 0.008 + rand() * 0.024, 0.45 + rand() * 1.1, i + j);
+      }
+    }
+  });
+}
+
+function studyRubberPlant(parent, x, z) {
+  pottedPlant(parent, 'study-rubber-plant', x, z, {
+    color: 0xd7ccb8, stem: 0x635749,
+    profile: [[0, 0], [0.133, 0], [0.166, 0.015], [0.180, 0.079], [0.178, 0.238], [0.165, 0.271], [0.147, 0.271], [0.145, 0.246]],
+  }, broadBlade, [0x365b42, 0x4f704b, 0x667d51, 0x799064], (point, branch, leaf) => {
+    const rand = rng(774);
+    const base = point(0, 0, 0), tip = point(-0.035, 0.71, 0.005);
+    branch(base, tip, 0.014);
+    for (let i = 0; i < 11; i++) {
+      const t = 0.28 + i * 0.065, angle = i * 2.40;
+      const radial = new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle));
+      const join = base.clone().lerp(tip, t);
+      const origin = join.clone().addScaledVector(radial, 0.06);
+      origin.y += 0.022;
+      branch(join, origin, 0.0045);
+      const vector = radial.clone().setY(0.24 + t * 0.48);
+      leaf(origin, vector, 0.31 - t * 0.10 + rand() * 0.023, 0.9 + rand() * 0.70, i);
+    }
+    leaf(tip, new THREE.Vector3(-0.19, 1, 0.12), 0.143, 1.8, 3);
+  });
+}
+
+function loungeFern(parent, x, z) {
+  pottedPlant(parent, 'lounge-fern', x, z, {
+    color: 0x76857a, stem: 0x687b44,
+    profile: [[0, 0], [0.126, 0], [0.145, 0.015], [0.180, 0.062], [0.205, 0.176], [0.205, 0.195], [0.19, 0.202], [0.18, 0.173]],
+  }, frondBlade, [0x53794b, 0x729459, 0x8aa76a], (point, branch, leaf) => {
+    const rand = rng(519);
+    for (let i = 0; i < 9; i++) {
+      const angle = i * 2.40, reach = 0.20 + rand() * 0.23, height = 0.38 + rand() * 0.21;
+      const direction = new THREE.Vector3(Math.cos(angle), 0, Math.sin(angle));
+      const cross = new THREE.Vector3(-direction.z, 0, direction.x);
+      const position = t => point(direction.x * reach * t, height * t * (2.6 - 1.76 * t), direction.z * reach * t);
+      for (let j = 0; j < 6; j++) branch(position(j / 6), position((j + 1) / 6), 0.0055 - j * 0.0006);
+      for (let j = 0; j < 7; j++) {
+        const t = 0.25 + j * 0.102, length = 0.14 * (1 - t) + 0.028;
+        for (const side of [-1, 1]) {
+          const vector = cross.clone().multiplyScalar(side).addScaledVector(direction, 0.62).setY(0.24 - t * 0.54);
+          leaf(position(t + side * 0.015), vector, length, 0.85 + rand() * 0.82, j + i);
+        }
+      }
+      leaf(position(0.95), direction.clone().setY(-0.38), 0.066, 1.5, i);
+    }
+  });
+}
+
+function studyLamp(parent, x, y, z) {
+  const lamp = new THREE.Group();
+  lamp.name = 'study-lamp';
+  lamp.position.set(x, y, z);
+  parent.add(lamp);
+  const brass = mat(0xa98146, { metalness: 0.5, roughness: 0.34 });
+  const base = mat(0x3f5550, { roughness: 0.43 });
+  cyl(lamp, 0.079, 0.089, 0.018, 0, 0, 0, base, 28);
+  cyl(lamp, 0.066, 0.074, 0.008, 0, 0.018, 0, brass, 28);
+  cyl(lamp, 0.018, 0.032, 0.048, 0, 0.026, 0, brass, 20);
+  cyl(lamp, 0.011, 0.016, 0.16, 0, 0.074, 0, brass, 16);
+  cyl(lamp, 0.027, 0.022, 0.035, 0, 0.219, 0, brass, 20);
+  const glow = mat(0xffedcd, { emissive: 0xffd38a, emissiveIntensity: 0.68 });
+  const diffuser = new THREE.Mesh(new THREE.CircleGeometry(0.133, 32), glow);
+  diffuser.rotation.x = Math.PI / 2;
+  diffuser.position.y = 0.244;
+  lamp.add(diffuser);
+
+  const outline = [[0.149, 0.238], [0.149, 0.246], [0.136, 0.275], [0.116, 0.321], [0.093, 0.370], [0.087, 0.374]];
+  const geometry = new THREE.LatheGeometry(outline.map(([r, y]) => new THREE.Vector2(r, y)), 96);
+  const positions = geometry.attributes.position;
+  for (let i = 0; i < positions.count; i++) {
+    const px = positions.getX(i), pz = positions.getZ(i);
+    const pleat = 1 + Math.cos(Math.atan2(px, pz) * 24) * 0.028;
+    positions.setX(i, px * pleat);
+    positions.setZ(i, pz * pleat);
+  }
+  geometry.computeVertexNormals();
+  const linen = mat(0xf0dfc5, { roughness: 0.94, emissive: 0xffcf88, emissiveIntensity: 0.14, side: THREE.DoubleSide });
+  const shade = new THREE.Mesh(geometry, linen);
+  shade.castShadow = true;
+  lamp.add(shade);
+  for (const [radius, height] of [[0.149, 0.240], [0.087, 0.373]]) {
+    const trim = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.003, 6, 48), brass);
+    trim.rotation.x = Math.PI / 2;
+    trim.position.y = height;
+    lamp.add(trim);
+  }
+  for (const angle of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) {
+    const support = box(lamp, 0.087, 0.003, 0.003, 0.0435 * Math.cos(angle), 0.369, -0.0435 * Math.sin(angle), brass);
+    support.rotation.y = angle;
+    support.castShadow = false;
+  }
+  cyl(lamp, 0.010, 0.015, 0.012, 0, 0.374, 0, brass, 16);
+}
+
 // Two-door cabinet below + two open bookshelves above, with standing and stacked books.
 function bookStack(parent, x, y, z, count, imperfect, rand) {
   const palette = [0xebe3d3, 0xd8cbb4, 0xe4dac7, 0xc9d0bd, 0xcebda0];
@@ -1353,7 +1505,7 @@ function furnish(id, g, r) {
         tagProject(plinth, PROJECT_KEYS[i], g, b.position),
       );
     });
-    plant(g, -RW / 2 + 0.4, RD / 2 - 0.45, 1.1);
+    galleryOlive(g, -RW / 2 + 0.44, RD / 2 - 0.48);
     return { projectPicks };
   }
   if (id === 'about') {
@@ -1399,13 +1551,12 @@ function furnish(id, g, r) {
     for (let i = 0; i < 3; i++) box(sh, 0.048, 0.23, 0.16, -0.44 + i * 0.056, shelfH, 0.03, mat(topPal[i]));
     const lean = box(sh, 0.044, 0.22, 0.15, -0.22, shelfH, 0.03, mat(0xd8cbb4));
     lean.rotation.z = -0.25;
-    cyl(sh, 0.03, 0.08, 0.28, 0.02, shelfH, 0.01, mat(C.brass, { metalness: 0.5 }));
-    cyl(sh, 0.1, 0.17, 0.14, 0.02, shelfH + 0.26, 0.01, new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.8 }));
+    studyLamp(sh, 0.005, shelfH, -0.045);
     trophyPicks.push(...enterpriseModel(sh, 0.22, shelfH, 0.02, -1.12, 'tos'));
     trophyPicks.push(...enterpriseModel(sh, 0.49, shelfH, 0.02, -0.82, 'tng'));
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
-    plant(g, RW / 2 - 0.4, RD / 2 - 0.4, 1.0);
+    studyRubberPlant(g, RW / 2 - 0.43, RD / 2 - 0.44);
     return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks };
   }
   if (id === 'ai') {
@@ -1434,7 +1585,7 @@ function furnish(id, g, r) {
     cyl(g, 0.12, 0.22, 0.2, L.lamp[0], 1.2, L.lamp[1], new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.9 }));
     writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
     const speakingPic = standingPicture(g, 'writing-shelf-1', ...L.speaking, -0.12, 0.78);
-    plant(g, -RW / 2 + 0.4, RD / 2 - 0.5, 1.1);
+    loungeFern(g, -RW / 2 + 0.47, RD / 2 - 0.54);
     return { projectPicks, speakingPic };
   }
 }

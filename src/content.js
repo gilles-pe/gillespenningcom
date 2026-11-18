@@ -145,6 +145,9 @@ export const content = {
         hint: 'Turn the spread with the buttons or swipe · Tap a photo to enlarge',
         openImage: 'Open photo',
         closeImage: 'Close photo',
+        tapToOpen: 'Tap the book to open',
+        openBook: 'Open book',
+        instructionsLabel: 'Guide',
         photos: [
           {
             src: 'album/photo-1.webp',
@@ -473,6 +476,9 @@ export const content = {
         hint: 'Doppelseite per Taste oder Wischgeste umblättern · Foto antippen zum Vergrößern',
         openImage: 'Foto öffnen',
         closeImage: 'Foto schließen',
+        tapToOpen: 'Buch zum Öffnen antippen',
+        openBook: 'Buch öffnen',
+        instructionsLabel: 'Anleitung',
         photos: [
           {
             src: 'album/photo-1.webp',

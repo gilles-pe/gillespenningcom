@@ -245,7 +245,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 }
 @media (max-width: 360px) { .top { flex-wrap: wrap; } }
 @media (max-width: 480px) { .bar { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .egg, .photo-card, .pop-card, .album-modal, .album-book, .album-btn { transition: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .egg, .photo-card, .pop-card, .album-btn { transition: none; } }
 
 /* ---- Note near the fax machine (see src/egg.js). Exists only after the machine was clicked. ---- */
 .egg { position: absolute; z-index: 6; pointer-events: auto; right: var(--s2); top: var(--s2); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s3))); max-height: calc(100% - var(--s3)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s3); display: grid; gap: var(--s2); justify-items: start; background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); font-size: var(--t2); transition: opacity .3s, visibility .3s; }
@@ -282,86 +282,26 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .pop-timeline { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .pop-timeline li { display: grid; grid-template-columns: var(--s6) minmax(0,1fr); gap: var(--s2); align-items: baseline; padding: var(--s2) 0; border-top: 1px solid var(--line); font-size: var(--t1); line-height: 1.25; }
 .pop-timeline-year { color: var(--petrol); font-weight: 700; font-variant-numeric: tabular-nums; }
-/* ---- Photo album: two facing pages at every viewport width (D-056) ---- */
-.album-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--s4);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .26s ease;
-}
-.album-modal.on { opacity: 1; pointer-events: auto; }
-.album-backdrop { position: absolute; inset: 0; background: color-mix(in srgb, var(--ink) 65%, transparent); backdrop-filter: blur(8px); }
-.album-book {
-  position: relative;
-  z-index: 2;
-  width: min(calc(var(--s7) * 9), 100%);
-  height: min(calc(var(--s7) * 6), calc(100% - var(--s4)));
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r1);
-  box-shadow: 0 24px 64px rgba(0,0,0,.28), 0 4px 16px rgba(0,0,0,.12);
-  overflow: hidden;
-  transform: scale(.94);
-  transition: transform .32s cubic-bezier(.2,.9,.3,1);
-}
-.album-modal.on .album-book { transform: scale(1); }
-.album-header { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--s2); min-height: var(--h3); padding: var(--s2) var(--s6) var(--s2) var(--s4); border-bottom: 1px solid var(--line); }
-.album-tag { font-size: var(--t1); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--teal); }
-.album-counter, .album-page-number { font-size: var(--t1); color: var(--muted); font-variant-numeric: tabular-nums; }
-.album-spread { display: grid; grid-template-columns: minmax(0,1fr) 1px minmax(0,1fr); flex: 1 1 auto; min-height: 0; overflow: hidden; perspective: calc(var(--s7) * 10); }
-.album-spine { background: var(--line); box-shadow: 0 0 var(--s2) var(--line); z-index: 1; }
-.album-page { display: grid; grid-template-rows: repeat(2,minmax(0,1fr)) auto; gap: var(--s2); min-width: 0; min-height: 0; padding: var(--s3); }
-.album-page-single { grid-template-rows: minmax(0,1fr) auto; }
-.album-page-left { background: var(--paper); box-shadow: inset calc(var(--s2) * -1) 0 var(--s4) color-mix(in srgb,var(--line) 35%,transparent); }
-.album-page-right { background: color-mix(in srgb,var(--paper) 85%,var(--surface)); box-shadow: inset var(--s2) 0 var(--s4) color-mix(in srgb,var(--line) 35%,transparent); }
-.album-photo-card { display: grid; grid-template-rows: minmax(0,1fr) auto; gap: var(--s1); min-height: 0; min-width: 0; width: 100%; padding: var(--s2); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r1); box-shadow: 0 4px 16px rgba(0,0,0,.06); cursor: zoom-in; color: var(--ink); font: var(--t1)/1.25 var(--sans); transition: border-color .18s ease, box-shadow .18s ease; }
-.album-photo-card:hover { border-color: var(--teal); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
-.album-photo-card img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
-.album-photo-caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
-.album-page-portrait .album-photo-card img { object-fit: contain; }
-.album-page-number { justify-self: end; line-height: 1; }
-.album-footer { flex: none; display: grid; gap: var(--s1); padding: var(--s2) var(--s4) var(--s3); border-top: 1px solid var(--line); }
-.album-nav { display: flex; gap: var(--s2); }
-.album-btn { flex: 1; min-width: 0; min-height: var(--h2); padding: 0 var(--s2); font: 600 var(--t1) var(--sans); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer; }
+/* ---- 3D Photo Album HUD & photo lightbox (D-075) ---- */
+.album-hud { position: absolute; z-index: 6; left: var(--s2); right: var(--s2); bottom: var(--s2); max-width: calc(var(--s7) * 6); margin: 0 auto; padding: var(--s1) var(--s2); background: var(--scene-surface); backdrop-filter: blur(var(--s1)); -webkit-backdrop-filter: blur(var(--s1)); border: 1px solid var(--line); border-radius: var(--r1); pointer-events: auto; }
+.album-hud-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); min-height: var(--h3); }
+.album-hud-title { flex: 1 1 auto; min-width: 0; padding: 0 var(--s1); font: 600 var(--t1)/1.3 var(--sans); color: var(--ink); }
+.album-counter { font-size: var(--t1); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: center; padding: 0 var(--s1); }
+.album-btn { min-height: var(--h3); padding: 0 var(--s3); font: 600 var(--t1) var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r1); cursor: pointer; white-space: nowrap; }
 .album-btn:hover:not(:disabled) { background: var(--teal-surface); color: var(--teal); border-color: var(--teal); }
 .album-btn:disabled { opacity: .45; cursor: default; }
-.album-hint { margin: 0; font-size: var(--t1); line-height: 1.25; color: var(--muted); text-align: center; }
-.album-close { position: absolute; top: var(--s2); right: var(--s2); z-index: 5; }
-.album-spread.turn-forward .album-page { animation: album-next .28s ease-out; }
-.album-spread.turn-back .album-page { animation: album-prev .28s ease-out; }
-@keyframes album-next { from { opacity: .5; transform: rotateY(-8deg) translateX(var(--s2)); } to { opacity: 1; transform: rotateY(0) translateX(0); } }
-@keyframes album-prev { from { opacity: .5; transform: rotateY(8deg) translateX(calc(var(--s2) * -1)); } to { opacity: 1; transform: rotateY(0) translateX(0); } }
-.album-lightbox { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; padding: var(--s5); }
+.album-open-btn { background: var(--teal-surface); color: var(--teal); border-color: var(--teal); }
+.album-hud-close { position: static; flex: none; min-width: var(--h3); min-height: var(--h3); }
+.album-lightbox { position: fixed; inset: 0; z-index: 12; display: flex; align-items: center; justify-content: center; padding: var(--s4); }
 .album-lightbox-backdrop { position: absolute; inset: 0; background: color-mix(in srgb,var(--ink) 88%,transparent); backdrop-filter: blur(8px); }
 .album-lightbox-figure { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--s2); max-width: 100%; max-height: 100%; margin: 0; }
-.album-lightbox-image { display: block; max-width: 100%; max-height: calc(100dvh - var(--s7) * 2); object-fit: contain; }
+.album-lightbox-image { display: block; max-width: 100%; max-height: calc(100dvh - var(--s7) * 2); object-fit: contain; border-radius: var(--r1); }
 .album-lightbox-caption { max-width: calc(var(--s7) * 7); color: var(--surface); font-size: var(--t2); line-height: 1.3; text-align: center; }
-.album-lightbox-close { position: absolute; top: var(--s2); right: var(--s2); z-index: 2; background: var(--paper); }
-@media (max-width: 800px) {
-  .album-modal { position: fixed; padding: var(--s2); }
-  .album-book { width: 100%; height: min(calc(100dvh - var(--s2) * 2), calc(var(--s7) * 6)); }
-  .album-header { padding-left: var(--s3); }
-  .album-spread { grid-template-columns: minmax(0,1fr) 1px minmax(0,1fr); }
-  .album-page { gap: var(--s1); padding: var(--s2); }
-  .album-photo-card { padding: var(--s1); }
-  .album-photo-caption { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .album-footer { padding: var(--s2); }
-  .album-hint { font-size: var(--t1); }
-  .album-lightbox { position: fixed; padding: var(--s3); }
-  .album-lightbox-image { max-height: calc(100dvh - var(--s7) * 2); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .album-modal, .album-book { transition: none; }
-  .album-spread.turn-forward .album-page, .album-spread.turn-back .album-page { animation: none; }
+.album-lightbox-close { position: absolute; top: var(--s3); right: var(--s3); z-index: 2; background: var(--paper); }
+@media (max-width: 600px) {
+  .album-hud { padding: var(--s1); }
+  .album-hud-row { gap: var(--s1); }
+  .album-btn { padding: 0 var(--s2); }
 }
 .ship-dialog { width: min(calc(var(--s7) * 8), calc(100vw - var(--s4))); max-height: calc(100dvh - var(--s4)); overflow: auto; padding: var(--s4); border: 0; border-radius: var(--r1); background: var(--paper); color: var(--ink); }
 .ship-dialog::backdrop { background: color-mix(in srgb, var(--ink) 68%, transparent); }

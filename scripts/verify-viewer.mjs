@@ -93,19 +93,74 @@ prevented=false;stage.fire('wheel',{ctrlKey:true,preventDefault(){prevented=true
 api.setZoom(1000);assert.equal(api.debug.zoom,1.8);api.setZoom(0);assert(api.debug.goal.dist>=.7);
 console.log(`viewer checks: framing at 3 sizes; return view; ship/language/reset; wheel on scrolling page; browser shortcut; slider limits (${zoomEvents} zoom updates)`);
 
-// Album entry must stop at the facing pages, including on a touch click-through.
+// Album entry must frame closed book on 1st click, open 3D book onto Page 1 instructions on 2nd click,
+// flip forward/backward across photos, and step cleanly through BACK.
 api.open('about'); api.debug.openAlbum(); draw();
-const album=stage.children.find(element=>element.classList.contains('album-modal'));
-const book=album.children.find(element=>element.classList.contains('album-book'));
-const spread=book.children.find(element=>element.classList.contains('album-spread'));
-const photoButton=spread.children[0].children.find(element=>element.classList.contains('album-photo-card'));
-const lightbox=album.children.find(element=>element.classList.contains('album-lightbox'));
-assert(!album.hidden); assert(lightbox.hidden);
-photoButton.fire('click'); assert(lightbox.hidden,'opening click leaked into photo');
-clockOffset+=400; photoButton.fire('click'); assert(!lightbox.hidden);
-assert(api.back()); assert(lightbox.hidden); assert(!album.hidden);
-assert(api.back()); assert(album.hidden);
-api.debug.openAlbum();draw();assert(lightbox.hidden,'re-entry retained the lightbox');api.back();api.back();
+const hud=stage.children.find(element=>element.classList.contains('album-hud'));
+const promptRow=hud.children[0], navRow=hud.children[1];
+const nextBtn=navRow.children[2], prevBtn=navRow.children[0];
+assert(!hud.hidden, 'album prompt HUD missing after 1st click');
+assert(promptRow.hidden===false && navRow.hidden===true, '1st click must keep book closed');
+assert(api.debug.albumBook.isClosed(), '1st click must never open the book');
+assert.equal(api.debug.albumBook.getLoadedFaces().length, 0, 'inner page textures must not load before opening');
+
+// 2nd click once settled opens the 3D book onto Page 1 (Instructions)
+api.debug.openAlbumBook(); draw();
+assert(api.debug.albumOpen && api.debug.albumBook.getSpread()===1, '2nd click must open onto Page 1 instructions');
+assert(promptRow.hidden===true && navRow.hidden===false);
+assert(api.debug.albumBook.getState().isInstructions===true);
+assert.equal(prevBtn.disabled, true);
+assert.equal(nextBtn.disabled, false);
+const openFacesSpread1 = api.debug.albumBook.getLoadedFaces();
+assert(openFacesSpread1.includes('cover-in') && openFacesSpread1.includes('face-0'), 'instructions spread must allocate Page 1 & inner cover');
+assert(!openFacesSpread1.includes('face-9'), 'far pages must remain unloaded until needed');
+
+// Check open 3D book framing across Desktop, Portrait Phone, Landscape Phone, 5:4 Foldable, Tablet
+for (const [w, h, label] of [[1280,800,'desktop'], [390,844,'mobile-portrait'], [844,390,'mobile-landscape'], [884,717,'foldable-5:4'], [768,1024,'tablet']]) {
+  viewport = { width: w, height: h }; resize(); draw();
+  const corners = api.debug.albumBook.getOpenCorners();
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const c of corners) {
+    const p = new Three.Vector3(...c).project(api.debug.camera);
+    minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+    minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+  }
+  assert(minX >= -1 && maxX <= 1, `open book clipped horizontally on ${label}`);
+  assert(maxY <= 1 && minY >= -0.95, `open book clipped vertically on ${label}`);
+  const spanW = (maxX - minX) / 2, spanH = (maxY - minY) / 2;
+  assert(Math.max(spanW, spanH) >= 0.45, `open book rendered too small on ${label} (${spanW.toFixed(2)}x${spanH.toFixed(2)})`);
+}
+viewport = { width: 740, height: 580 }; resize(); draw();
+
+// Turning forward reveals photos in order & disposes far textures; language switch updates live HUD
+nextBtn.fire('click'); draw();
+assert.equal(api.debug.albumBook.getSpread(), 2);
+assert.equal(api.debug.albumBook.getState().isInstructions, false);
+assert.equal(prevBtn.disabled, false);
+assert(api.debug.albumBook.getState().label.startsWith('1–4'));
+api.debug.albumBook.setSpread(6, true); draw();
+assert(!api.debug.albumBook.getLoadedFaces().includes('face-0'), 'distant page 1 texture must be disposed when flipping away');
+api.setLanguage('de'); draw();
+assert.equal(prevBtn.textContent, '‹ Zurück');
+api.setLanguage('en'); draw();
+api.debug.albumBook.setSpread(1, true); draw();
+
+// Drag-to-flip curves turning page smoothly mid-turn (Y elevation arches upward > 0.14m above desk)
+api.debug.albumBook.startDrag();
+api.debug.albumBook.moveDrag(-90, 740);
+api.debug.albumBook.update(0.016);
+const pageBoxMid = new Three.Box3().setFromObject(api.debug.albumBook.picks[1]);
+assert(pageBoxMid.max.y > 0.10, `turning leaf failed to lift in 3D curve (max.y=${pageBoxMid.max.y})`);
+api.debug.albumBook.endDrag(0);
+
+// Inside open 3D book: 1st BACK closes book to zoomed-in closed state; 2nd BACK returns to About room; 3rd BACK exits room
+assert(api.back()); draw();
+assert(!api.debug.albumOpen && api.debug.albumFramed, 'BACK inside book must return to closed framed book');
+assert(api.debug.albumBook.isClosed());
+assert.equal(api.debug.albumBook.getLoadedFaces().length, 0, 'closing album must dispose all inner page textures');
+assert(api.back()); draw();
+assert(!api.debug.albumFramed && stage.classList.contains('object-focused')===false);
+
 while(api.back()){}
 api.open('about');draw();const roomPose=api.debug.goal.t.clone();
 api.debug.inspect('studyDesk');draw();
@@ -113,17 +168,23 @@ api.setZoom(api.debug.zoom*.8);api.setZoom(api.debug.zoom*.8);
 assert(api.back());draw();assert(stage.classList.contains('object-focused')===false);
 assert(api.back());draw();assert(api.debug.goal.t.distanceTo(roomPose)<1e-8);
 assert(api.back());draw();assert(!api.isCustom());assert(!api.back());
-console.log('album entry/click-through, lightbox/book/back order and grouped view history: passed');
+console.log('3D book two-step entry, instructions, page turns, BACK steps and grouped history: passed');
 
 const animated=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:false,lang:'en',onPick(){},onAway(){}});
 animated.open('about');animated.debug.openAlbum();assert(animated.debug.albumPending);
+assert(animated.debug.albumBook.isClosed(),'book must remain closed while zooming in');
 let tick=performance.now()+clockOffset;
 for(let i=0;i<240&&animated.debug.albumPending;i++){tick+=16;frame(tick);}
-assert(!animated.debug.albumPending,'album never opened after the camera settled');
-animated.back();animated.debug.openAlbum();animated.open('writing');
-for(let i=0;i<180;i++){tick+=16;frame(tick);}
-assert(!animated.debug.albumPending,'room change failed to cancel album entry');
-console.log('animated album arrival and cancellation: passed');
+assert(!animated.debug.albumPending,'closed-book zoom never settled');
+assert(animated.debug.albumBook.isClosed(),'arrival at closed book must stay closed until 2nd click');
+animated.debug.openAlbum(); // 2nd click opens book!
+assert(animated.debug.albumOpen);
+for(let i=0;i<180&&animated.debug.albumBook.isAnimating();i++){tick+=16;frame(tick);}
+assert(!animated.debug.albumBook.isAnimating(),'3D book open animation settled');
+animated.open('writing');
+for(let i=0;i<60;i++){tick+=16;frame(tick);}
+assert(!animated.debug.albumOpen && animated.debug.albumBook.isClosed(),'room change failed to close 3D book');
+console.log('animated 2-step album arrival, opening curve and room cancellation: passed');
 
 const projectViewer=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick(){},onAway(){}});
 projectViewer.open('projects');projectViewer.debug.selectProject('monitor');draw();assert.equal(openedTabs.length,0);

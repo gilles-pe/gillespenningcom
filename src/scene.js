@@ -1,4 +1,5 @@
 import { createEnterprise } from './enterprise.js';
+import { createBookAlbum } from './book-album.js';
 // The four-room model, built from plain Three.js geometry and canvas textures.
 // No external assets: wood, plaster, lettering and picture placeholders are drawn here.
 import * as THREE from 'three';
@@ -725,6 +726,7 @@ export function buildScene() {
   const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
   const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [], inspectionTargets = [];
+  let albumBook = null;
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
     g.position.set(r.cx, 0, r.cz); scene.add(g);
@@ -772,13 +774,14 @@ export function buildScene() {
     if (extra?.trophyPicks) trophyPicks.push(...extra.trophyPicks);
     if (extra?.storyPicks) storyPicks.push(...extra.storyPicks);
     if (extra?.albumPicks) albumPicks.push(...extra.albumPicks);
+    if (extra?.albumBook) albumBook = extra.albumBook;
   }
   // Outline of the whole model, for the camera: base corners plus the top of every room.
   const outline = [];
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, inspectionTargets };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, inspectionTargets };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -868,60 +871,13 @@ function openLaptop(parent, x, y, z, rotY = 0) {
 }
 
 function deskPhotoAlbum(parent, x, y, z, rotY = -0.22) {
-  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
-  const w = 0.30, h = 0.042, d = 0.36;
-  const coverMat = mat(0x203d3b, { roughness: 0.82 });
-  const pageMat = mat(0xf4efe4, { roughness: 0.8 });
-  const gold = mat(0xb99a60, { metalness: 0.45, roughness: 0.52 });
-
-  const lower = box(g, w + 0.008, 0.005, d + 0.008, 0, 0, 0, coverMat);
-  const pages = box(g, w - 0.014, h - 0.011, d - 0.018, 0.004, 0.005, 0, pageMat);
-  const spine = box(g, 0.016, h + 0.008, d + 0.012, -w / 2 - 0.002, 0, 0, coverMat);
-  for (const sz of [-0.12, -0.085, 0.085, 0.12])
-    box(g, 0.018, 0.002, 0.006, -w / 2 - 0.003, h - 0.002, sz, gold);
-  for (const py of [0.011, 0.018, 0.025])
-    box(g, w - 0.018, 0.001, 0.002, 0.004, py, d / 2 - 0.006, mat(0xd9d0c0));
-  const ribbon = box(g, 0.017, 0.002, 0.055, 0.078, 0.006, d / 2 + 0.012, mat(0x789084));
-
-  const c = canvas(512, 640), k = c.getContext('2d'), t = tex(c);
-  const coverPhoto = new Image();
-  const drawCover = () => {
-    k.fillStyle = '#203d3b'; k.fillRect(0, 0, 512, 640);
-    const random = rng(406);
-    for (let i = 0; i < 2600; i++) {
-      k.fillStyle = `rgba(238,228,200,${random() * 0.055})`;
-      k.fillRect(random() * 512, random() * 640, 2, 2);
-    }
-    k.strokeStyle = '#b99a60'; k.lineWidth = 5; k.strokeRect(30, 30, 452, 580);
-    k.lineWidth = 2; k.strokeRect(42, 42, 428, 556);
-    k.fillStyle = '#efe7d7'; k.textAlign = 'center'; k.textBaseline = 'middle';
-    k.font = `600 45px ${FONT}`;
-    k.fillText(modelText().spots.album ?? 'Photo Album', 256, 105, 390);
-    k.fillStyle = '#efe7d7'; k.fillRect(82, 183, 348, 274);
-    if (coverPhoto.naturalWidth) {
-      const scale = Math.min(328 / coverPhoto.naturalWidth, 254 / coverPhoto.naturalHeight);
-      const pw = coverPhoto.naturalWidth * scale, ph = coverPhoto.naturalHeight * scale;
-      k.drawImage(coverPhoto, 92 + (328 - pw) / 2, 193 + (254 - ph) / 2, pw, ph);
-    }
-    else { k.fillStyle = '#8fa59a'; k.fillRect(92, 193, 328, 254); }
-    k.fillStyle = '#b99a60'; k.fillRect(166, 503, 180, 3);
-    k.font = '500 24px system-ui, sans-serif';
-    k.fillText('GILLES PENNING', 256, 545, 340);
-    t.needsUpdate = true;
-  };
-  whenFont(drawCover);
-  coverPhoto.onload = drawCover;
-  coverPhoto.src = `${import.meta.env.BASE_URL}album/photo-1.webp`;
-  const topMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 });
-  const cover = new THREE.Mesh(new THREE.BoxGeometry(w + 0.008, 0.005, d + 0.008), [coverMat, coverMat, topMat, coverMat, coverMat, coverMat]);
-  cover.position.set(0, h + 0.002, 0); cover.castShadow = true; g.add(cover);
-  for (const cx of [-w / 2 + 0.012, w / 2 - 0.012]) for (const cz of [-d / 2 + 0.012, d / 2 - 0.012])
-    box(g, 0.017, 0.002, 0.017, cx, h + 0.005, cz, gold);
-
-  const anchor = new THREE.Object3D(); anchor.position.set(0, h + 0.08, 0); g.add(anchor);
-  const picks = [lower, pages, spine, ribbon, cover];
-  picks.forEach(m => { m.userData.album = true; m.userData.anchor = anchor; });
-  return { picks, anchor };
+  const album = createBookAlbum(parent, { x, y, z, rotY, getModelText: modelText });
+  const light = new THREE.PointLight(0xfff7ea, 0, 1.5, 1.5);
+  light.position.set(0.02, 0.56, 0.14);
+  album.root.add(light);
+  album.light = light;
+  whenFont(() => album.refreshLanguage());
+  return album;
 }
 
 function coffeeMug(parent, x, y, z) {
@@ -1610,7 +1566,7 @@ function furnish(id, g, r, inspectionTargets) {
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
     studyRubberPlant(g, RW / 2 - 0.43, RD / 2 - 0.44);
-    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks };
+    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks, albumBook: album };
   }
   if (id === 'ai') {
     const projectPicks = [];

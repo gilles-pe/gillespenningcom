@@ -4,7 +4,6 @@ import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { t } from './i18n.js';
 import { createEgg } from './egg.js';
 import { PATHS } from './icons.js';
-import { albumPages } from './album-pages.js';
 import { openExternal } from './external-links.js';
 import { inspectionPose, clampZoom } from './inspection.js';
 
@@ -14,8 +13,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
+  let dirty = true;
+  const markDirty = () => { dirty = true; };
+
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, inspectionTargets } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, inspectionTargets } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -100,8 +102,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function goBack() {
     navigationGroup = null;
+    markDirty();
     if (albumLightbox && !albumLightbox.hidden) { closeAlbumPhoto(); return true; }
-    if (albumOpen) { closeAlbum(true); return true; }
+    if (albumOpen) { closeAlbumBook(true); return true; }
     if (!viewHistory.length) return false;
     const saved = viewHistory.pop();
     restoringView = true;
@@ -125,6 +128,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   };
 
   function resize() {
+    markDirty();
     const frame = stage.getBoundingClientRect(), region = hero.getBoundingClientRect();
     const w = frame.width, h = frame.height;
     if (!w || !h) return;
@@ -185,6 +189,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       roomPts[r.id].push(new THREE.Vector3(r.cx + sx * r.w / 2, y, r.cz + sz * r.d / 2));
   }
   function setGoal() {
+    markDirty();
     if (openId) {
       const room = rooms[openId];
       home.t.copy(room.center);
@@ -212,6 +217,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (a !== away) { away = a; onAway?.(a); }
   }
   function resetView() {
+    markDirty();
     rememberView('reset'); closeAlbum(false); closePop(false); restoreObjectView(); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
   }
@@ -220,6 +226,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     for (const k of ['az', 'el']) while (Math.abs(goal[k]) > Math.PI) { const d = goal[k] > 0 ? -TAU : TAU; goal[k] += d; view[k] += d; }
   }
   function orbit(dAz, dEl, instant) {
+    markDirty();
     rememberView('orbit', true);
     const s = Math.cos(instant ? view.el : goal.el) >= 0 ? 1 : -1;
     goal.az -= dAz * s; goal.el += dEl;
@@ -228,6 +235,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   const panRgt = new THREE.Vector3(), panUp = new THREE.Vector3(), panNext = new THREE.Vector3();
   function panBy(dxPx, dyPx, instant) {
+    markDirty();
     rememberView('pan', true);
     const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
     const scale = (instant ? view.dist : goal.dist) * (2 * tv) / Math.max(stageH, 1);
@@ -242,6 +250,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     checkAway();
   }
   function zoomBy(f, instant) {
+    markDirty();
     rememberView('zoom', true);
     zoom = Math.max(DMIN / home.dist, clampZoom(zoom * f)); custom = true;
     goal.dist = Math.max(DMIN, home.dist * zoom);
@@ -453,12 +462,37 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return null;
   }
   function focusObject(target, save = true) {
+    markDirty();
     if (save && !objectFocus) objectFocus = { target, custom, zoom, pan: panOffset.clone(), az: goal.az, el: goal.el, dist: goal.dist, point: goal.t.clone() };
     if (objectFocus) objectFocus.target = target;
-    const bounds = new THREE.Box3();
-    for (const object of target.objects) { object.updateWorldMatrix(true, true); bounds.expandByObject(object); }
-    const pose = inspectionPose({ min: bounds.min.toArray(), max: bounds.max.toArray(), az: target.az, el: target.el,
-      fov: camera.fov, width: stageW, height: stageH, captionHeight: target.album ? 0 : (popEl?.offsetHeight || 0) });
+    let poseArgs;
+    if (target.getCorners) {
+      poseArgs = {
+        corners: target.getCorners(),
+        az: target.az,
+        el: target.el,
+        fov: camera.fov,
+        width: stageW,
+        height: stageH,
+        captionHeight: typeof target.captionHeight === 'function' ? target.captionHeight() : (target.captionHeight ?? 0),
+        margin: target.margin ?? 1.06,
+      };
+    } else {
+      const bounds = new THREE.Box3();
+      for (const object of target.objects) { object.updateWorldMatrix(true, true); bounds.expandByObject(object); }
+      poseArgs = {
+        min: bounds.min.toArray(),
+        max: bounds.max.toArray(),
+        az: target.az,
+        el: target.el,
+        fov: camera.fov,
+        width: stageW,
+        height: stageH,
+        captionHeight: typeof target.captionHeight === 'function' ? target.captionHeight() : (target.album ? (albumHudEl?.offsetHeight || 56) : (popEl?.offsetHeight || 0)),
+        margin: target.margin ?? 1.08,
+      };
+    }
+    const pose = inspectionPose(poseArgs);
     panOffset.fromArray(pose.target).sub(home.t); custom = true; zoom = pose.distance / home.dist;
     goal.az = near(view.az, target.az); goal.el = near(view.el, target.el); goal.dist = pose.distance; goal.t.fromArray(pose.target);
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
@@ -570,7 +604,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return h && storyParts.has(h.object) ? h.object.userData.anchor : null;
   };
 
-  // Interactive Photo Album in About Me (D-039)
+  // Interactive 3D Photo Album in About Me (D-039, D-074, D-075)
   const albumParts = new Set(albumPicks ?? []), albumThings = [...(albumPicks ?? []), ...occluders];
   const albumRay = new THREE.Raycaster();
   const albumHit = ndcPos => {
@@ -578,211 +612,240 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const h = albumRay.intersectObjects(albumThings, false)[0];
     return h && albumParts.has(h.object) ? h.object.userData : null;
   };
-  let albumOpen = false, albumIndex = 0, albumPending = false, albumOpenedAt = 0;
-  let albumModal = null, albumBook = null, albumSpread = null, albumLightbox = null;
-  let albumPageLeft = null, albumPageRight = null, albumCounterEl = null, albumTagEl = null, albumHintEl = null;
-  let albumPrevBtn = null, albumNextBtn = null, albumCloseBtn = null, albumLightboxClose = null, albumBackBtn = null;
-  let albumLightboxImage = null, albumLightboxCaption = null;
-  let albumTimer = null, albumReturnFocus = null, albumPhotoFocus = null;
-  const getAlbumPhotos = () => t(curLang, 'model.album.photos') || [];
+  let albumFramed = false, albumZoomSettled = false, albumOpen = false, albumOpenedAt = 0;
+  let albumHudEl = null, albumHudPrompt = null, albumHudNav = null, albumPromptTitle = null, albumPromptCloseBtn = null;
+  let albumOpenBtn = null, albumPrevBtn = null, albumNextBtn = null, albumCounterEl = null, albumCloseBtn = null;
+  let albumLightbox = null, albumLightboxClose = null, albumLightboxImage = null, albumLightboxCaption = null;
+  let albumReturnFocus = null, albumPhotoFocus = null;
 
-  function buildAlbumModal() {
-    if (albumModal) return;
-    albumModal = document.createElement('div');
-    albumModal.className = 'album-modal';
-    albumModal.setAttribute('role', 'dialog');
-    albumModal.setAttribute('aria-modal', 'true');
-    albumModal.hidden = true;
-    albumModal.inert = true;
+  const closedAlbumTarget = () => ({
+    id: 'about:album',
+    room: 'about',
+    key: 'album',
+    objects: albumPicks,
+    az: -0.22,
+    el: 0.86,
+    album: true,
+    captionHeight: () => (albumHudEl && !albumHudEl.hidden ? albumHudEl.offsetHeight : 56),
+    margin: 1.08,
+  });
 
-    const backdrop = document.createElement('div');
-    backdrop.className = 'album-backdrop';
-    backdrop.addEventListener('click', () => closeAlbum(true));
-    albumBook = document.createElement('div');
-    albumBook.className = 'album-book';
+  const openAlbumTarget = () => ({
+    id: 'about:album:open',
+    room: 'about',
+    key: 'album',
+    objects: albumPicks,
+    getCorners: () => albumBook.getOpenCorners(),
+    az: -0.22,
+    el: 1.06,
+    album: true,
+    captionHeight: () => (albumHudEl && !albumHudEl.hidden ? albumHudEl.offsetHeight : 56),
+    margin: 1.03,
+  });
+
+  function buildAlbumHud() {
+    if (albumHudEl) return;
+    albumHudEl = document.createElement('div');
+    albumHudEl.className = 'album-hud';
+    albumHudEl.setAttribute('role', 'region');
+    albumHudEl.hidden = true;
+    albumHudEl.addEventListener('pointerdown', e => e.stopPropagation?.());
+
+    albumHudPrompt = document.createElement('div');
+    albumHudPrompt.className = 'album-hud-row';
+    albumPromptTitle = document.createElement('span');
+    albumPromptTitle.className = 'album-hud-title';
+    albumOpenBtn = document.createElement('button');
+    albumOpenBtn.type = 'button';
+    albumOpenBtn.className = 'album-btn album-open-btn';
+    albumOpenBtn.addEventListener('click', e => {
+      e.stopPropagation?.();
+      if (albumFramed && albumZoomSettled && !albumOpen) openAlbumBook();
+    });
+    albumPromptCloseBtn = document.createElement('button');
+    albumPromptCloseBtn.type = 'button';
+    albumPromptCloseBtn.className = 'card-x album-hud-close';
+    albumPromptCloseBtn.textContent = '×';
+    albumPromptCloseBtn.addEventListener('click', e => {
+      e.stopPropagation?.();
+      closeAlbum(true);
+    });
+    albumHudPrompt.append(albumPromptTitle, albumOpenBtn, albumPromptCloseBtn);
+
+    albumHudNav = document.createElement('div');
+    albumHudNav.className = 'album-hud-row';
+    albumPrevBtn = document.createElement('button');
+    albumPrevBtn.type = 'button';
+    albumPrevBtn.className = 'album-btn';
+    albumPrevBtn.addEventListener('click', e => { e.stopPropagation?.(); albumBook?.prev(reduced); });
+    albumCounterEl = document.createElement('span');
+    albumCounterEl.className = 'album-counter';
+    albumNextBtn = document.createElement('button');
+    albumNextBtn.type = 'button';
+    albumNextBtn.className = 'album-btn';
+    albumNextBtn.addEventListener('click', e => { e.stopPropagation?.(); albumBook?.next(reduced); });
     albumCloseBtn = document.createElement('button');
     albumCloseBtn.type = 'button';
-    albumCloseBtn.className = 'card-x album-close';
+    albumCloseBtn.className = 'card-x album-hud-close';
     albumCloseBtn.textContent = '×';
-    albumCloseBtn.addEventListener('click', () => closeAlbum(true));
+    albumCloseBtn.addEventListener('click', e => {
+      e.stopPropagation?.();
+      closeAlbumBook(true);
+    });
+    albumHudNav.append(albumPrevBtn, albumCounterEl, albumNextBtn, albumCloseBtn);
 
-    const header = document.createElement('div');
-    header.className = 'album-header';
-    albumTagEl = document.createElement('span'); albumTagEl.className = 'album-tag';
-    albumCounterEl = document.createElement('span'); albumCounterEl.className = 'album-counter';
-    albumBackBtn = document.createElement('button'); albumBackBtn.type = 'button'; albumBackBtn.className = 'album-btn'; albumBackBtn.textContent = 'BACK';
-    albumBackBtn.addEventListener('click', goBack);
-    header.append(albumTagEl, albumCounterEl, albumBackBtn);
-
-    albumSpread = document.createElement('div');
-    albumSpread.className = 'album-spread';
-    albumPageLeft = document.createElement('div'); albumPageLeft.className = 'album-page album-page-left';
-    const spine = document.createElement('div'); spine.className = 'album-spine';
-    albumPageRight = document.createElement('div'); albumPageRight.className = 'album-page album-page-right';
-    albumSpread.append(albumPageLeft, spine, albumPageRight);
-
-    let touchStart = null;
-    albumSpread.addEventListener('touchstart', e => {
-      if (e.touches.length === 1) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }, { passive: true });
-    albumSpread.addEventListener('touchend', e => {
-      if (!touchStart || !e.changedTouches.length) return;
-      const dx = e.changedTouches[0].clientX - touchStart.x;
-      const dy = e.changedTouches[0].clientY - touchStart.y;
-      touchStart = null;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-        e.preventDefault();
-        setAlbumIndex(albumIndex + (dx < 0 ? 2 : -2));
-      }
-    }, { passive: false });
-
-    const footer = document.createElement('div'); footer.className = 'album-footer';
-    albumPrevBtn = document.createElement('button'); albumPrevBtn.type = 'button';
-    albumPrevBtn.className = 'album-btn'; albumPrevBtn.addEventListener('click', () => setAlbumIndex(albumIndex - 2));
-    albumNextBtn = document.createElement('button'); albumNextBtn.type = 'button';
-    albumNextBtn.className = 'album-btn'; albumNextBtn.addEventListener('click', () => setAlbumIndex(albumIndex + 2));
-    const nav = document.createElement('div'); nav.className = 'album-nav'; nav.append(albumPrevBtn, albumNextBtn);
-    albumHintEl = document.createElement('p'); albumHintEl.className = 'album-hint';
-    footer.append(nav, albumHintEl);
-    albumBook.append(albumCloseBtn, header, albumSpread, footer);
+    albumHudEl.append(albumHudPrompt, albumHudNav);
+    stage.append(albumHudEl);
 
     albumLightbox = document.createElement('div');
     albumLightbox.className = 'album-lightbox';
     albumLightbox.setAttribute('role', 'dialog');
     albumLightbox.setAttribute('aria-modal', 'true');
     albumLightbox.hidden = true;
-    const lightboxBackdrop = document.createElement('div'); lightboxBackdrop.className = 'album-lightbox-backdrop';
+    albumLightbox.addEventListener('pointerdown', e => e.stopPropagation?.());
+    const lightboxBackdrop = document.createElement('div');
+    lightboxBackdrop.className = 'album-lightbox-backdrop';
     lightboxBackdrop.addEventListener('click', closeAlbumPhoto);
-    const lightboxFigure = document.createElement('figure'); lightboxFigure.className = 'album-lightbox-figure';
-    albumLightboxImage = document.createElement('img'); albumLightboxImage.className = 'album-lightbox-image';
-    albumLightboxCaption = document.createElement('figcaption'); albumLightboxCaption.className = 'album-lightbox-caption';
-    albumLightboxClose = document.createElement('button'); albumLightboxClose.type = 'button';
-    albumLightboxClose.className = 'card-x album-lightbox-close'; albumLightboxClose.textContent = '×';
+    const lightboxFigure = document.createElement('figure');
+    lightboxFigure.className = 'album-lightbox-figure';
+    albumLightboxImage = document.createElement('img');
+    albumLightboxImage.className = 'album-lightbox-image';
+    albumLightboxCaption = document.createElement('figcaption');
+    albumLightboxCaption.className = 'album-lightbox-caption';
+    albumLightboxClose = document.createElement('button');
+    albumLightboxClose.type = 'button';
+    albumLightboxClose.className = 'card-x album-lightbox-close';
+    albumLightboxClose.textContent = '×';
     albumLightboxClose.addEventListener('click', closeAlbumPhoto);
     lightboxFigure.append(albumLightboxImage, albumLightboxCaption);
     albumLightbox.append(lightboxBackdrop, lightboxFigure, albumLightboxClose);
-    albumModal.append(backdrop, albumBook, albumLightbox);
-    stage.append(albumModal);
+    stage.append(albumLightbox);
   }
 
-  function openAlbumPhoto(photo, button) {
-    // Ignore the synthetic click belonging to the pointer release that opened the book.
-    if (!albumOpen || performance.now() - albumOpenedAt < 350) return;
-    albumPhotoFocus = button;
+  function updateAlbumHud(state = albumBook?.getState()) {
+    if (!albumHudEl) return;
+    const title = t(curLang, 'model.album.title');
+    albumHudEl.setAttribute('aria-label', title);
+    albumHudEl.hidden = !albumFramed && !albumOpen;
+    albumHudPrompt.hidden = !albumFramed || albumOpen;
+    albumHudNav.hidden = !albumOpen;
+
+    if (!albumOpen && albumFramed) {
+      albumPromptTitle.textContent = albumZoomSettled
+        ? `${title} · ${t(curLang, 'model.album.tapToOpen')}`
+        : title;
+      albumOpenBtn.textContent = t(curLang, 'model.album.openBook');
+      albumOpenBtn.hidden = !albumZoomSettled;
+      albumPromptCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
+    } else if (albumOpen && state) {
+      albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
+      albumNextBtn.textContent = `${t(curLang, 'model.album.next')} ›`;
+      albumPrevBtn.disabled = !state.canPrev;
+      albumNextBtn.disabled = !state.canNext;
+      albumCounterEl.textContent = state.label;
+      albumCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
+    }
+  }
+
+  albumBook?.setCallbacks({
+    onStateChange: state => updateAlbumHud(state),
+    onNeedRender: markDirty,
+  });
+
+  function openAlbumPhoto(photo, returnEl) {
+    if (!albumOpen || performance.now() < albumOpenedAt) return;
+    buildAlbumHud();
+    albumPhotoFocus = returnEl || stage;
     albumLightboxImage.src = `${import.meta.env.BASE_URL}${photo.src}`;
     albumLightboxImage.alt = photo.title;
     albumLightboxCaption.textContent = `${photo.title} · ${photo.desc}`;
     albumLightbox.setAttribute('aria-label', `${t(curLang, 'model.album.openImage')}: ${photo.title}`);
     albumLightboxClose.setAttribute('aria-label', t(curLang, 'model.album.closeImage'));
-    albumBook.inert = true;
     albumLightbox.hidden = false;
     albumLightboxClose.focus({ preventScroll: true });
+    markDirty();
   }
 
   function closeAlbumPhoto() {
     if (!albumLightbox || albumLightbox.hidden) return;
     albumLightbox.hidden = true;
-    albumBook.inert = false;
-    (albumPhotoFocus?.isConnected && !albumPhotoFocus.closest('[hidden]') ? albumPhotoFocus : albumCloseBtn).focus({ preventScroll: true });
+    (albumPhotoFocus?.isConnected ? albumPhotoFocus : stage).focus({ preventScroll: true });
+    markDirty();
   }
 
-  function renderAlbumPage(element, page, pageNumber, totalPages) {
-    element.replaceChildren();
-    element.classList.toggle('album-page-portrait', page.length === 1 && page[0].orientation === 'portrait');
-    element.classList.toggle('album-page-single', page.length === 1);
-    if (!page.length) return;
-    for (const photo of page) {
-      const button = document.createElement('button'); button.type = 'button';
-      button.className = 'album-photo-card';
-      button.setAttribute('aria-label', `${t(curLang, 'model.album.openImage')}: ${photo.title}`);
-      const image = document.createElement('img'); image.src = `${import.meta.env.BASE_URL}${photo.src}`;
-      image.alt = photo.title; image.decoding = 'async';
-      const caption = document.createElement('span'); caption.className = 'album-photo-caption';
-      caption.textContent = photo.title;
-      button.append(image, caption);
-      button.addEventListener('click', () => openAlbumPhoto(photo, button));
-      element.append(button);
-    }
-    const number = document.createElement('span'); number.className = 'album-page-number';
-    number.textContent = `${pageNumber} / ${totalPages}`;
-    element.append(number);
-  }
-
-  function updateAlbumView() {
-    if (!albumModal || !albumOpen) return;
-    const photos = getAlbumPhotos(), pages = albumPages(photos);
-    if (!pages.length) return;
-    albumIndex = Math.floor(Math.max(0, Math.min(albumIndex, pages.length - 1)) / 2) * 2;
-    const left = pages[albumIndex], right = pages[albumIndex + 1] || [];
-    const pageCount = pages.length;
-    renderAlbumPage(albumPageLeft, left, albumIndex + 1, pageCount);
-    albumPageRight.hidden = false;
-    renderAlbumPage(albumPageRight, right, albumIndex + 2, pageCount);
-    const visible = [...left, ...right];
-    albumCounterEl.textContent = `${visible[0].index + 1}–${visible.at(-1).index + 1} / ${photos.length}`;
-    albumTagEl.textContent = t(curLang, 'model.album.title');
-    albumBackBtn.setAttribute('aria-label', t(curLang, 'ui.previousView'));
-    albumHintEl.textContent = t(curLang, 'model.album.hint');
-    albumCloseBtn.setAttribute('aria-label', t(curLang, 'model.album.close'));
-    albumPrevBtn.textContent = `‹ ${t(curLang, 'model.album.prev')}`;
-    albumNextBtn.textContent = `${t(curLang, 'model.album.next')} ›`;
-    albumPrevBtn.disabled = albumIndex === 0;
-    albumNextBtn.disabled = albumIndex + 2 >= pages.length;
-    albumModal.setAttribute('aria-label', `${t(curLang, 'model.album.title')} · ${albumCounterEl.textContent}`);
-  }
-
-  function setAlbumIndex(idx) {
-    const pages = albumPages(getAlbumPhotos());
-    if (!pages.length) return;
-    const next = Math.floor(Math.max(0, Math.min(idx, pages.length - 1)) / 2) * 2;
-    if (next === albumIndex) return;
-    const direction = next > albumIndex ? 'turn-forward' : 'turn-back';
-    albumIndex = next;
-    updateAlbumView();
-    if (!reduced) {
-      albumSpread.classList.remove('turn-forward', 'turn-back');
-      void albumSpread.offsetWidth;
-      albumSpread.classList.add(direction);
-    }
-  }
-
+  // Step 1: Frame the closed physical album first. Never open pages or photos on first click.
   function openAlbum() {
-    if (albumPending || albumOpen) return;
+    if (albumFramed && albumZoomSettled && !albumOpen) {
+      openAlbumBook();
+      return;
+    }
+    if (albumFramed || albumOpen) return;
     rememberView('album');
     closePhoto(false); closePop(false);
+    buildAlbumHud();
+    albumLightbox.hidden = true;
+    albumPhotoFocus = null;
     albumReturnFocus = document.activeElement;
-    const target = { id: 'about:album', room: 'about', key: 'album', objects: albumPicks, az: -.22, el: .82, album: true };
-    stage.classList.add('object-focused'); focusObject(target);
-    albumPending = true;
-    if (reduced) showAlbum();
-  }
-  function showAlbum() {
-    albumPending = false;
-    buildAlbumModal(); clearTimeout(albumTimer);
-    // Every entry starts as a book, never with a previously enlarged photograph.
-    albumLightbox.hidden = true; albumBook.inert = false; albumPhotoFocus = null;
-    albumOpenedAt = performance.now();
-    albumOpen = true; albumModal.hidden = false; albumModal.inert = false;
-    updateAlbumView();
-    void albumModal.offsetWidth; albumModal.classList.add('on');
-    albumCloseBtn.focus({ preventScroll: true });
+    albumFramed = true;
+    albumZoomSettled = Boolean(reduced);
+    albumOpen = false;
+    stage.classList.add('object-focused');
+    updateAlbumHud();
+    focusObject(closedAlbumTarget());
+    markDirty();
   }
 
+  // Step 2: Once framed, open the physical 3D book onto Page 1 instructions.
+  function openAlbumBook() {
+    if (!albumBook || albumOpen) return;
+    buildAlbumHud();
+    albumLightbox.hidden = true;
+    albumPhotoFocus = null;
+    albumFramed = true;
+    albumZoomSettled = true;
+    albumOpen = true;
+    albumOpenedAt = performance.now() + 340;
+    stage.classList.add('object-focused', 'album-open');
+    albumBook.open(reduced);
+    updateAlbumHud();
+    focusObject(openAlbumTarget(), false);
+    markDirty();
+  }
+
+  // Close open 3D book smoothly back to zoomed-in closed book view (for BACK while in book).
+  function closeAlbumBook(restoreFocus = false) {
+    if (!albumOpen) return;
+    if (albumLightbox && !albumLightbox.hidden) albumLightbox.hidden = true;
+    albumOpen = false;
+    albumFramed = true;
+    albumZoomSettled = true;
+    stage.classList.remove('album-open');
+    albumBook?.close(reduced);
+    updateAlbumHud();
+    focusObject(closedAlbumTarget(), false);
+    if (restoreFocus) (albumOpenBtn?.isConnected && !albumOpenBtn.hidden ? albumOpenBtn : stage).focus({ preventScroll: true });
+    markDirty();
+  }
+
+  // Leave album framing completely and restore pre-album camera view.
   function closeAlbum(restoreFocus = false) {
-    albumPending = false;
-    if (!albumModal || !albumOpen) return;
-    if (!albumLightbox.hidden) { albumLightbox.hidden = true; albumBook.inert = false; }
-    albumOpen = false; albumModal.classList.remove('on'); albumModal.inert = true;
-    clearTimeout(albumTimer);
-    const had = albumModal.contains(document.activeElement);
-    if (reduced) albumModal.hidden = true;
-    else albumTimer = setTimeout(() => { if (!albumOpen) albumModal.hidden = true; }, 260);
-    if (had || restoreFocus) (albumReturnFocus?.isConnected ? albumReturnFocus : stage).focus({ preventScroll: true });
+    const hadAny = albumFramed || albumOpen;
+    albumFramed = false;
+    albumZoomSettled = false;
+    albumOpen = false;
+    stage.classList.remove('album-open');
+    if (albumLightbox && !albumLightbox.hidden) albumLightbox.hidden = true;
+    albumBook?.close(true);
+    if (albumHudEl) albumHudEl.hidden = true;
+    if (hadAny && objectFocus?.target?.key === 'album') restoreObjectView();
+    if (restoreFocus && hadAny) (albumReturnFocus?.isConnected ? albumReturnFocus : stage).focus({ preventScroll: true });
+    markDirty();
   }
 
   function toggleAlbum() {
-    if (albumPending) { albumPending = false; goBack(); }
-    else if (albumOpen) closeAlbum(true);
+    if (albumOpen) closeAlbumBook(true);
+    else if (albumFramed && albumZoomSettled) openAlbumBook();
+    else if (albumFramed) return;
     else openAlbum();
   }
 
@@ -833,8 +896,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return { ...(action || { key: target.key, type: 'card', anchor: target.objects[0] }), room };
   };
   function updateHoverTip() {
-    if (!hoverTarget || drag) { hoverTip.hidden = true; return; }
-    const label = t(curLang, `model.spots.${hoverTarget.key}`) || t(curLang, `model.projectCards.${hoverTarget.key}.title`) || t(curLang, `model.inspections.${hoverTarget.key}.title`);
+    if (!hoverTarget || drag || (albumLightbox && !albumLightbox.hidden)) { hoverTip.hidden = true; return; }
+    let label = hoverTarget.customLabel;
+    if (!label) {
+      if (hoverTarget.type === 'album' && albumFramed && albumZoomSettled && !albumOpen) {
+        label = t(curLang, 'model.album.openBook');
+      } else {
+        label = t(curLang, `model.spots.${hoverTarget.key}`) || t(curLang, `model.projectCards.${hoverTarget.key}.title`) || t(curLang, `model.inspections.${hoverTarget.key}.title`);
+      }
+    }
     if (!label || typeof label !== 'string') { hoverTip.hidden = true; return; }
     hoverTarget.anchor.getWorldPosition(hoverV);
     hoverV.project(camera);
@@ -850,21 +920,23 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       if (e.key === 'Escape') {
         e.preventDefault();
         if (albumLightbox && !albumLightbox.hidden) closeAlbumPhoto();
-        else closeAlbum(true);
+        else closeAlbumBook(true);
+        return;
       } else if (albumLightbox && !albumLightbox.hidden) {
         if (e.key === 'Tab') { e.preventDefault(); albumLightboxClose.focus(); }
+        return;
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setAlbumIndex(albumIndex - 2);
+        albumBook?.prev(reduced);
+        return;
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setAlbumIndex(albumIndex + 2);
-      } else if (e.key === 'Tab') {
-        const focusable = [...albumBook.querySelectorAll('button:not(:disabled), [tabindex="0"]')].filter(el => !el.closest('[hidden]'));
-        const first = focusable[0], last = focusable.at(-1);
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        albumBook?.next(reduced);
+        return;
       }
+    } else if (albumFramed && albumZoomSettled && e.key === 'Enter' && e.target === stage) {
+      e.preventDefault();
+      openAlbumBook();
       return;
     }
     if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
@@ -875,16 +947,34 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   addEventListener('keyup', e => { if (e.code === 'Space') spaceDown = false; });
   const pinchState = () => { const [a, b] = [...pts.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; };
   stage.addEventListener('contextmenu', e => { if (e.target === stage) e.preventDefault(); });
+  const bookActionAt = ndcPos => {
+    if (!albumBook || !albumOpen) return null;
+    objectRay.setFromCamera(ndcPos, camera);
+    return albumBook.hitAction(objectRay);
+  };
   stage.addEventListener('pointerdown', e => {
     if (e.target !== stage) return;
     if (e.pointerType === 'mouse' && ![0, 1, 2].includes(e.button)) return;
     hoverTip.hidden = true;
+    markDirty();
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     try { stage.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     if (pts.size === 1) {
+      if (albumOpen && (!albumLightbox || albumLightbox.hidden) && (e.pointerType !== 'mouse' || e.button === 0)) {
+        const bHit = bookActionAt(ndc(e));
+        if (bHit) {
+          albumBook.startDrag();
+          drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: 'bookFlip', vx: 0, lastT: performance.now() };
+          stage.style.cursor = 'grabbing';
+          return;
+        }
+      }
       const pan = panMode || (e.pointerType === 'mouse' && (e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey || spaceDown));
       drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: pan ? 'pan' : e.pointerType === 'touch' ? 'pending' : 'orbit' };
-    } else if (pts.size === 2 && drag) { drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState(); }
+    } else if (pts.size === 2 && drag) {
+      if (drag.mode === 'bookFlip') { albumBook.endDrag(0); }
+      drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState();
+    }
     stage.style.cursor = drag?.mode === 'pan' ? 'move' : 'grabbing';
   });
   addEventListener('pointermove', e => {
@@ -898,14 +988,32 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       }
       if (!drag.moved && Math.abs(e.clientX - drag.sx) <= 5 && Math.abs(e.clientY - drag.sy) <= 5) return;
       drag.moved = true;
+      if (drag.mode === 'bookFlip') {
+        const nowT = performance.now();
+        const dtMs = Math.max(1, nowT - (drag.lastT || nowT));
+        const dx = e.clientX - drag.x;
+        drag.vx = dx / dtMs;
+        drag.lastT = nowT;
+        drag.x = e.clientX; drag.y = e.clientY;
+        albumBook?.moveDrag(dx, stageW);
+        return;
+      }
       if (drag.mode === 'pending') drag.mode = Math.abs(e.clientX - drag.sx) >= Math.abs(e.clientY - drag.sy) ? 'orbit' : 'scroll';
       if (drag.mode === 'orbit') { orbit((e.clientX - drag.x) * K, (e.clientY - drag.y) * K, true); drag.x = e.clientX; drag.y = e.clientY; }
       else if (drag.mode === 'pan') { panBy(e.clientX - drag.x, e.clientY - drag.y, true); drag.x = e.clientX; drag.y = e.clientY; }
     } else if (e.target === stage && !drag) {
       const n = ndc(e);
       hoverTarget = e.pointerType === 'mouse' ? hoverObject(n) : null;
+      if (hoverTarget && albumOpen) {
+        const bHit = bookActionAt(n);
+        if (bHit?.type === 'photo') hoverTarget.customLabel = bHit.photo.title;
+        else if (bHit?.type === 'prev') hoverTarget.customLabel = albumBook.getState().canPrev ? t(curLang, 'model.album.prev') : null;
+        else if (bHit?.type === 'next') hoverTarget.customLabel = albumBook.getState().canNext ? t(curLang, 'model.album.next') : null;
+      }
       const overObj = egg.hit(n) || !!hoverTarget;
+      const prevHoverId = hoverId;
       hoverId = !openId && !overObj ? pick(e) : null;
+      if (hoverId !== prevHoverId) markDirty();
       stage.style.cursor = panMode ? 'move' : hoverId || overObj ? 'pointer' : 'grab';
       updateHoverTip();
     } else if (!drag) {
@@ -916,6 +1024,22 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!pts.has(e.pointerId)) return;
     pts.delete(e.pointerId);
     if (drag && pts.size === 0) {
+      if (drag.mode === 'bookFlip') {
+        if (drag.moved) {
+          albumBook?.endDrag(drag.vx || 0);
+        } else {
+          albumBook?.endDrag(0);
+          if (!cancelled && e.target === stage && (e.pointerType !== 'mouse' || drag.btn === 0) && performance.now() >= albumOpenedAt) {
+            const bHit = bookActionAt(ndc(e));
+            if (bHit?.type === 'photo') openAlbumPhoto(bHit.photo, stage);
+            else if (bHit?.type === 'next') albumBook?.next(reduced);
+            else if (bHit?.type === 'prev') albumBook?.prev(reduced);
+          }
+        }
+        drag = null; navigationGroup = null; stage.style.cursor = panMode ? 'move' : 'grab';
+        markDirty();
+        return;
+      }
       if (!cancelled && !drag.moved && e.target === stage && drag.btn === 0) {
         const object = hoverObject(ndc(e));
         if (egg.hit(ndc(e))) egg.play();
@@ -924,9 +1048,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
           if (object.type === 'album') toggleAlbum();
           else if (object.type === 'photo') togglePhoto(object.key);
           else togglePop(object.key);
-        } else onPick(pick(e));
+        } else if (!albumOpen && !albumFramed) onPick(pick(e));
       }
       drag = null; navigationGroup = null; stage.style.cursor = panMode ? 'move' : 'grab';
+      markDirty();
     } else if (drag && drag.mode === 'pinch' && pts.size === 1) { drag.mode = 'orbit'; const [r] = [...pts.values()]; drag.x = r.x; drag.y = r.y; }
   };
   addEventListener('pointerup', e => endPointer(e, false));
@@ -935,7 +1060,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // Once a touch gesture moves the scene, keep the page from scrolling under it.
   stage.addEventListener('touchmove', e => {
     if (e.target !== stage || !e.cancelable) return;
-    if (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch') e.preventDefault();
+    if (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch' || drag?.mode === 'bookFlip') e.preventDefault();
   }, { passive: false });
   // Wheel zoom and horizontal trackpad panning in the interactive stage.
   stage.addEventListener('wheel', e => {
@@ -999,9 +1124,37 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     requestAnimationFrame(frame);
     if (!visible || document.hidden) { last = now; return; }
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
+    const bookMoving = albumBook ? albumBook.update(dt) : false;
+    if (albumBook?.light) {
+      const targetLight = albumOpen ? 1.35 : 0;
+      if (Math.abs(albumBook.light.intensity - targetLight) > 0.01) {
+        albumBook.light.intensity += (targetLight - albumBook.light.intensity) * (reduced ? 1 : Math.min(1, dt * 8));
+        dirty = true;
+      }
+    }
+    const camMoving = Math.abs(goal.az - view.az) > 1e-4 || Math.abs(goal.el - view.el) > 1e-4
+      || Math.abs(goal.dist - view.dist) > 1e-4 || goal.t.distanceToSquared(view.t) > 1e-7;
+    let roomsMoving = false;
+    for (const r of Object.values(rooms)) {
+      const targetOpen = r.id === openId ? 1 : 0;
+      const targetGlow = r.id === openId ? 1 : r.id === hoverId && !openId ? 0.35 : 0;
+      if (Math.abs(targetOpen - r.open) > 1e-4 || Math.abs(targetGlow - r.glow) > 1e-4) {
+        roomsMoving = true;
+        break;
+      }
+    }
+    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !egg.isOpen) return;
+    dirty = false;
+
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));
     view.az += (goal.az - view.az) * k; view.el += (goal.el - view.el) * k; view.dist += (goal.dist - view.dist) * k; view.t.lerp(goal.t, k); clampTarget(view.t);
-    if (albumPending && Math.abs(view.dist - goal.dist) < .02 && view.t.distanceTo(goal.t) < .01 && Math.abs(view.el - goal.el) < .01 && Math.abs(view.az - goal.az) < .01) showAlbum();
+    if (albumFramed && !albumZoomSettled && !albumOpen
+      && Math.abs(view.dist - goal.dist) < 0.025 && view.t.distanceTo(goal.t) < 0.012
+      && Math.abs(view.el - goal.el) < 0.015 && Math.abs(view.az - goal.az) < 0.015) {
+      albumZoomSettled = true;
+      updateAlbumHud();
+      dirty = true;
+    }
     const ce = Math.cos(view.el), se = Math.sin(view.el), sa = Math.sin(view.az), ca = Math.cos(view.az);
     camera.position.set(view.t.x + view.dist * ce * sa, view.t.y + view.dist * se, view.t.z + view.dist * ce * ca);
     camera.up.set(-se * sa, ce, -se * ca);                    // tangent of the elevation arc: no flip or jump at the poles
@@ -1010,7 +1163,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     egg.update(now, stageW, stageH);
     updatePhoto();
     updatePop();
-    if (openId !== 'about' && albumOpen) closeAlbum(false);
+    if (openId !== 'about' && (albumOpen || albumFramed)) closeAlbum(false);
 
     for (const r of Object.values(rooms)) {
       const isOpen = r.id === openId, isHot = r.id === hoverId && !openId;
@@ -1036,6 +1189,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   return {
     open(id, { keepView = false } = {}) {
+      markDirty();
       if (!keepView && (id !== openId || custom)) rememberView('room');
       if (id !== openId) closeAlbum(false);
       if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
@@ -1048,19 +1202,48 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       setGoal();
       if (objectFocus) focusObject(objectFocus.target, false);
     },
-    hover(id) { hoverId = id; },
+    hover(id) { hoverId = id; markDirty(); },
     setPanMode(on) { panMode = Boolean(on); stage.classList.toggle('panning', panMode); if (!drag) stage.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
     getPanMode: () => panMode,
     back: goBack,
     reset: resetView,
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
-      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumPending;
+      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumFramed;
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true);
+      markDirty();
       return had;
     },
     isCustom: () => custom,
-    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); if (objectFocus) focusObject(objectFocus.target, false); if (albumModal && albumOpen) updateAlbumView(); updateHoverTip(); },
-    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; }, inspectionTargets, inspect: key => openPop(key), selectProject: key => togglePop(key), openAlbum, get albumPending() { return albumPending; }, get historyLength() { return viewHistory.length; } } } : {}),
+    setLanguage(l) {
+      curLang = l;
+      setModelLanguage(l);
+      labelSpots();
+      egg.setLanguage(l);
+      labelPhoto();
+      fillPop();
+      albumBook?.refreshLanguage();
+      updateAlbumHud();
+      if (objectFocus) focusObject(objectFocus.target, false);
+      updateHoverTip();
+      markDirty();
+    },
+    ...(import.meta.env.DEV ? {
+      debug: {
+        camera, view, goal, egg, cellar, albumBook,
+        get custom() { return custom; },
+        get zoom() { return zoom; },
+        inspectionTargets,
+        inspect: key => openPop(key),
+        selectProject: key => togglePop(key),
+        openAlbum,
+        openAlbumBook,
+        closeAlbumBook,
+        get albumPending() { return albumFramed && !albumZoomSettled; },
+        get albumFramed() { return albumFramed; },
+        get albumOpen() { return albumOpen; },
+        get historyLength() { return viewHistory.length; },
+      },
+    } : {}),
   };
 }

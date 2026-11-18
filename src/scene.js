@@ -870,10 +870,10 @@ function openLaptop(parent, x, y, z, rotY = 0) {
   return picks;
 }
 
-function deskPhotoAlbum(parent, x, y, z, rotY = -0.22) {
+function deskPhotoAlbum(parent, x, y, z, rotY = -0.12) {
   const album = createBookAlbum(parent, { x, y, z, rotY, getModelText: modelText });
   const light = new THREE.PointLight(0xfff7ea, 0, 1.5, 1.5);
-  light.position.set(0.02, 0.56, 0.14);
+  light.position.set(0.06, 0.56, 0.14);
   album.root.add(light);
   album.light = light;
   whenFont(() => album.refreshLanguage());
@@ -881,7 +881,7 @@ function deskPhotoAlbum(parent, x, y, z, rotY = -0.22) {
 }
 
 function coffeeMug(parent, x, y, z) {
-  const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g);
+  const g = new THREE.Group(); g.name = 'coffeeMug'; g.position.set(x, y, z); parent.add(g);
   cyl(g, 0.042, 0.038, 0.088, 0, 0, 0, mat(C.cream), 20);
   cyl(g, 0.035, 0.035, 0.006, 0, 0.083, 0, mat(0x4a3121), 16);
   const handle = new THREE.Mesh(new THREE.TorusGeometry(0.023, 0.006, 8, 14, Math.PI), mat(C.cream));
@@ -1521,6 +1521,7 @@ function furnish(id, g, r, inspectionTargets) {
     // drawers. Keep its top at the original height so the album and laptop retain
     // their exact interaction positions.
     const deskTop = new THREE.Mesh(new RoundedBoxGeometry(1.32, 0.075, 0.72, 4, 0.018), w);
+    deskTop.name = 'studyDeskTop';
     deskTop.position.set(dx, 0.6525, dz); deskTop.castShadow = deskTop.receiveShadow = true; g.add(deskTop);
     const darkOak = wood(C.woodDark), warmMetal = mat(0xb39a6c, { roughness: 0.48, metalness: 0.45 });
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
@@ -1543,8 +1544,8 @@ function furnish(id, g, r, inspectionTargets) {
     ring.rotation.x = -Math.PI / 2; ring.position.set(dx + 0.51, 0.693, dz - 0.245); g.add(ring);
     // Open laptop ("My Story"), photo album and coffee mug on the desk (lamp moved onto the shelf)
     const storyPicks = openLaptop(g, dx - 0.24, 0.69, dz + 0.03, 0.14);
-    const album = deskPhotoAlbum(g, dx + 0.18, 0.69, dz + 0.07, -0.22);
-    coffeeMug(g, dx + 0.39, 0.69, dz - 0.12);
+    const album = deskPhotoAlbum(g, dx + 0.26, 0.69, dz + 0.08, -0.12);
+    coffeeMug(g, dx + 0.33, 0.69, dz - 0.23);
     // Ergonomic office chair behind the desk
     officeChair(g, dx, dz - 0.72, 0.12, 1);
     inspect('studyDesk', g.children.slice(deskStart), -0.20, 0.62, true);
@@ -1629,7 +1630,7 @@ export const HOTSPOTS = {
   about: [
     ['photo', null, LAY.about.pic[0], LAY.about.pic[1], -ROOMS.about.d / 2 + 0.1, 'photo'],
     ['story', null, LAY.about.desk[0] - 0.24, 0.85, LAY.about.desk[1] + 0.03, 'story'],
-    ['album', null, LAY.about.desk[0] + 0.18, 0.74, LAY.about.desk[1] + 0.07, 'album'],
+    ['album', null, LAY.about.desk[0] + 0.26, 0.74, LAY.about.desk[1] + 0.08, 'album'],
     ['enterprise', null, LAY.about.shelf[0] + 0.25, 1.40, LAY.about.shelf[1] + 0.02, 'enterprise'],
     ['enterpriseD', null, LAY.about.shelf[0] + 0.49, 1.40, LAY.about.shelf[1] + 0.02, 'enterpriseD'],
     ['signal', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'signal'],

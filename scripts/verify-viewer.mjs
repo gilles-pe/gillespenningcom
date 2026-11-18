@@ -120,6 +120,21 @@ const openFacesSpread1 = api.debug.albumBook.getLoadedFaces();
 assert(openFacesSpread1.includes('cover-in') && openFacesSpread1.includes('face-0'), 'instructions spread must allocate Page 1 & inner cover');
 assert(!openFacesSpread1.includes('face-9'), 'far pages must remain unloaded until needed');
 
+// Open book must clear laptop & coffee mug cleanly and stay on desk surface
+{
+  let rootScene = api.debug.albumBook.root; while (rootScene.parent) rootScene = rootScene.parent;
+  const openBookBox = new Three.Box3();
+  for (const m of api.debug.albumBook.picks) openBookBox.expandByObject(m);
+  const laptopBox = new Three.Box3();
+  rootScene.traverse(o => { if (o.isMesh && o.userData?.story) laptopBox.expandByObject(o); });
+  const mugBox = new Three.Box3().setFromObject(rootScene.getObjectByName('coffeeMug'));
+  const deskBox = new Three.Box3().setFromObject(rootScene.getObjectByName('studyDeskTop'));
+  assert(openBookBox.min.x > laptopBox.max.x + 0.02, `open book collides with laptop (book.min.x=${openBookBox.min.x.toFixed(4)} vs laptop.max.x=${laptopBox.max.x.toFixed(4)})`);
+  const mugOverlapXZ = !(openBookBox.max.x < mugBox.min.x - 0.02 || openBookBox.min.x > mugBox.max.x + 0.02 || openBookBox.max.z < mugBox.min.z - 0.02 || openBookBox.min.z > mugBox.max.z + 0.02);
+  assert(!mugOverlapXZ, `open book collides with coffee mug (book z=${openBookBox.min.z.toFixed(3)}..${openBookBox.max.z.toFixed(3)}, mug z=${mugBox.min.z.toFixed(3)}..${mugBox.max.z.toFixed(3)})`);
+  assert(openBookBox.max.x <= deskBox.max.x && openBookBox.max.z <= deskBox.max.z && openBookBox.min.x >= deskBox.min.x && openBookBox.min.z >= deskBox.min.z, 'open book overhangs desk top');
+}
+
 // Check open 3D book framing across Desktop, Portrait Phone, Landscape Phone, 5:4 Foldable, Tablet
 for (const [w, h, label] of [[1280,800,'desktop'], [390,844,'mobile-portrait'], [844,390,'mobile-landscape'], [884,717,'foldable-5:4'], [768,1024,'tablet']]) {
   viewport = { width: w, height: h }; resize(); draw();

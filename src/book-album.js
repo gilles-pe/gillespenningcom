@@ -7,6 +7,7 @@ const FONT_SANS = "'Source Sans 3', system-ui, sans-serif";
 const COVER_W = 0.308;
 const COVER_D = 0.368;
 const COVER_H = 0.005;
+const OPEN_SHIFT_X = 0.21;
 const PAGE_W = 0.286;
 const PAGE_D = 0.342;
 const PAGE_THICK = 0.0020;
@@ -738,14 +739,14 @@ export function createBookAlbum(parent, { x, y, z, rotY = -0.22, getModelText, o
   function applyProgressPose(immediate = false) {
     const openFactor = clamp(Math.min(progress, totalLeaves - progress, 1), 0, 1);
 
-    // Slide rightward slightly as book opens so left cover avoids colliding with desk laptop,
+    // Slide rightward as book opens so left cover clears nearby desk laptop,
     // and lift gently above desk surface during cover arc.
     const liftY = Math.sin(openFactor * Math.PI) * 0.022 + openFactor * 0.016;
-    bookGroup.position.x = openFactor * 0.145;
+    bookGroup.position.x = openFactor * OPEN_SHIFT_X;
     bookGroup.position.y = liftY;
 
-    // Anchor tracks visual center of book (x=0 when closed or open since bookGroup already slides +X)
-    anchor.position.set(openFactor * 0.0, closedStackH + 0.05, 0);
+    // Anchor tracks visual center of book (0 when closed, spineX inside shifted group when open)
+    anchor.position.set(openFactor * spineX, closedStackH + 0.05, 0);
 
     // Spine smoothly lays flat horizontally under open hinge
     const spineY = lerp(closedStackH / 2, COVER_H / 2, openFactor);
@@ -972,8 +973,8 @@ export function createBookAlbum(parent, { x, y, z, rotY = -0.22, getModelText, o
   // Exact 8 rotated world corners of the full open 2-page spread for optimal responsive framing.
   function getOpenCorners() {
     root.updateWorldMatrix(true, true);
-    const minX = spineX + 0.145 - COVER_W - 0.01;
-    const maxX = spineX + 0.145 + COVER_W + 0.01;
+    const minX = spineX + OPEN_SHIFT_X - COVER_W - 0.01;
+    const maxX = spineX + OPEN_SHIFT_X + COVER_W + 0.01;
     const minY = 0;
     const maxY = 0.085;
     const minZ = -COVER_D / 2 - 0.01;

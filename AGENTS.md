@@ -98,3 +98,8 @@ design, critique, audit and polish work.
 - The domain switch (DNS of `gillespenning.com`) is an owner step and must not touch `ai.gillespenning.com`.
 - No analytics, no cookies, no external fonts or scripts. The page stores only the language choice and loads the news list
   from `ai.gillespenning.com` (see D-020). The legal page `legal.html` carries the owner-supplied imprint and privacy text (D-028).
+
+## Direct room links
+The canonical links use URL fragments `#projects`, `#about`, `#ai` and `#writing`. Opening one on initial load must wait for the viewer and open that room and its details. If WebGL cannot load, reveal and scroll to the corresponding ordinary text section. Without JavaScript, the ordinary fragment targets must remain available.
+
+Selecting a room updates the fragment with a history entry. All rooms clears the fragment while keeping query parameters, including `lang`. Browser back/forward and direct hash changes restore the matching room or overview without creating additional entries. Ignore unknown fragments so unrelated anchors remain usable. Language changes and re-rendering must not create room history entries. Keep mobile room navigation and the existing transparent scene surfaces.

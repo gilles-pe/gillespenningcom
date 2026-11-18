@@ -50,6 +50,19 @@ source.hidden = true;
 let mode = 'loading';    // 'loading' | '3d' | 'static'
 let pending = null;
 
+function roomFromHash() {
+  const id = location.hash.slice(1);
+  return ORDER.includes(id) ? id : null;
+}
+
+function writeRoomHash(id) {
+  const hash = id ? `#${id}` : '';
+  if (location.hash === hash) return;
+  const url = new URL(location.href);
+  url.hash = hash;
+  history.pushState(null, '', url);
+}
+
 function roomNodes(id) {
   const nodes = [...document.getElementById(id).children].map(node => node.cloneNode(true));
   nodes[0].id = 'room-detail-title';
@@ -66,6 +79,7 @@ function roomNodes(id) {
 }
 
 function openRoom(id, auto = false) {
+  if (!auto) writeRoomHash(id);
   if (mode === 'loading') { pending = id; return; }
   const wasCurrent = current === id;
   current = id;
@@ -94,7 +108,9 @@ function openRoom(id, auto = false) {
     stage.scrollIntoView({ block: 'start', behavior: reduced ? 'instant' : 'smooth' });
   }
 }
-function closeRoom() {
+function closeRoom({ fromHistory = false } = {}) {
+  if (!fromHistory) writeRoomHash(null);
+  pending = null;
   current = null;
   const restoreFocus = document.activeElement === back || panel.contains(document.activeElement);
   stage.classList.remove('open'); panel.hidden = true; back.hidden = true;
@@ -104,6 +120,21 @@ function closeRoom() {
   api?.open(null);
   if (restoreFocus) stage.focus({ preventScroll: true });
 }
+
+function applyLocation() {
+  const id = roomFromHash();
+  if (id) {
+    if (mode === 'loading') pending = id;
+    else {
+      openRoom(id, true);
+      if (!api) document.getElementById(id)?.scrollIntoView();
+      else if (mobile()) stage.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  } else if (!location.hash) {
+    closeRoom({ fromHistory: true });
+  }
+}
+addEventListener('hashchange', applyLocation);
 // Desktop: clicking a room zooms/re-centers into that room (All rooms button on the right exits). Mobile: second tap toggles out.
 const toggleRoom = id => (current === id && mobile() ? closeRoom() : openRoom(id));
 // A tap on the canvas: id is the room under the pointer, or null.
@@ -113,7 +144,7 @@ function tapCanvas(id) {
   else if (id) openRoom(id);
   else if (mobile() && !api?.isCustom?.()) closeRoom();
 }
-back.addEventListener('click', closeRoom);
+back.addEventListener('click', () => closeRoom());
 panBtn.addEventListener('click', () => {
   if (!api) return;
   const on = api.setPanMode(!api.getPanMode());
@@ -153,13 +184,14 @@ function setLang(next, { save = true } = {}) {
 }
 langBtns.forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) setLang(b.dataset.lang); }));
 setLang(lang, { save: false });
+applyLocation();
 refreshNews();   // snapshot is already on screen; the live feed replaces it if it arrives and is valid
 
 function useStatic() {
   mode = 'static'; html.classList.remove('js'); html.classList.add('static'); source.hidden = false;
   canvas.hidden = true; stage.querySelector('.fallback').hidden = false; stage.classList.add('static');
   viewControls.hidden = true; bar.hidden = true;
-  if (pending) { const id = pending; pending = null; openRoom(id); }
+  if (pending) { pending = null; applyLocation(); }
 }
 
 // Text and links are usable before the 3D code arrives.
@@ -173,5 +205,5 @@ import('./viewer.js').then(({ startViewer }) => {
   stage.closest('.hero').classList.add('hero--rendered');
   if (import.meta.env.DEV) window.__gp = api.debug;
   mode = '3d';
-  if (pending) { const id = pending; pending = null; openRoom(id); }
+  if (pending) { pending = null; applyLocation(); }
 }).catch(useStatic);

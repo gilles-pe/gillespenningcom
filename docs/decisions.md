@@ -238,6 +238,8 @@ until a later entry replaces it.
 
 - **D-062 (2026-11-18) Laptop and endoscopy equipment.** Refine three props at their existing stations. Give the laptop raised keys and a trackpad, distinguish the three endoscopy tower modules by their front panels, and show the rigid scope diagonally with its optical tip, coupling, camera head and curved cable. Keep the laptop story target and the Wimmelbild monitor target.
 
+- **D-063 (2026-11-18) Practice desk, speaking photo and quieter controls.** Refine the practice desk with separate input devices and an aligned seating position. Move the framed speaking photo to the right shelf corner, away from the wall lettering. Replace the header contact button and language pills with quiet text controls. Group Move and Reset at the scene edge, with a below-canvas row on phones. Move also pans with a single touch when activated.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

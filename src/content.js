@@ -29,6 +29,7 @@ export const content = {
       langDe: 'Deutsch',
       resetView: 'Reset view',
       panMode: 'Move',
+      viewControls: '3D view',
     },
     nav: {
       label: 'Rooms',
@@ -251,8 +252,9 @@ export const content = {
       langLabel: 'Sprache',
       langEn: 'English',
       langDe: 'Deutsch',
-      resetView: 'Ansicht zurücksetzen',
+      resetView: 'Zurücksetzen',
       panMode: 'Verschieben',
+      viewControls: '3D-Ansicht',
     },
     nav: {
       label: 'Räume',

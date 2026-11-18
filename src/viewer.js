@@ -759,8 +759,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     try { canvas.setPointerCapture(e.pointerId); } catch { /* ignore */ }
     if (pts.size === 1) {
-      const pan = e.pointerType === 'mouse' && (e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey || spaceDown || panMode);
-      drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: e.pointerType === 'touch' ? 'pending' : pan ? 'pan' : 'orbit' };
+      const pan = panMode || (e.pointerType === 'mouse' && (e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey || spaceDown));
+      drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: pan ? 'pan' : e.pointerType === 'touch' ? 'pending' : 'orbit' };
     } else if (pts.size === 2 && drag) { drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState(); }
     canvas.style.cursor = drag?.mode === 'pan' ? 'move' : 'grabbing';
   });
@@ -815,7 +815,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   addEventListener('pointercancel', e => endPointer(e, true));   // the browser took over (vertical page scroll)
   canvas.addEventListener('pointerleave', () => { hoverId = null; hoverTarget = null; hoverTip.hidden = true; });
   // Touch: once a gesture is an orbit or a pinch, keep the page from scrolling under it.
-  canvas.addEventListener('touchmove', e => { if (e.cancelable && (e.touches.length > 1 || drag?.mode === 'orbit' || drag?.mode === 'pinch')) e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { if (e.cancelable && (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch')) e.preventDefault(); }, { passive: false });
   // Wheel zoom (and horizontal trackpad swipe pan), only over the canvas, without ctrl/cmd.
   canvas.addEventListener('wheel', e => {
     if (e.ctrlKey || e.metaKey || document.documentElement.scrollHeight > innerHeight + 4) return;
@@ -828,10 +828,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const S = 0.14, P = 48; let used = true;
     switch (e.key) {
-      case 'ArrowLeft': if (e.shiftKey) panBy(P, 0); else orbit(-S, 0); break;
-      case 'ArrowRight': if (e.shiftKey) panBy(-P, 0); else orbit(S, 0); break;
-      case 'ArrowUp': if (e.shiftKey) panBy(0, P); else orbit(0, -S); break;
-      case 'ArrowDown': if (e.shiftKey) panBy(0, -P); else orbit(0, S); break;
+      case 'ArrowLeft': if (e.shiftKey || panMode) panBy(P, 0); else orbit(-S, 0); break;
+      case 'ArrowRight': if (e.shiftKey || panMode) panBy(-P, 0); else orbit(S, 0); break;
+      case 'ArrowUp': if (e.shiftKey || panMode) panBy(0, P); else orbit(0, -S); break;
+      case 'ArrowDown': if (e.shiftKey || panMode) panBy(0, -P); else orbit(0, S); break;
       case '+': case '=': zoomBy(0.85); break;
       case '-': case '_': zoomBy(1 / 0.85); break;
       case 'Home': case '0': resetView(); break;
@@ -921,7 +921,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       setGoal();
     },
     hover(id) { hoverId = id; },
-    setPanMode(on) { panMode = Boolean(on); if (!drag) canvas.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
+    setPanMode(on) { panMode = Boolean(on); canvas.classList.toggle('panning', panMode); if (!drag) canvas.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
     getPanMode: () => panMode,
     reset: resetView,
     closeNote() {

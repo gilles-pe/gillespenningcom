@@ -98,7 +98,7 @@ not per room; only their position follows the room (the wall pictures of the AI 
 | `projects-board-3` | Projects | board on plinth 3 (Praxisfaden) | 4:3 landscape | 1200 x 900 px |
 | `projects-board-4` | Projects | board on plinth 4 (Elbstrand) | 4:3 landscape | 1200 x 900 px |
 | `writing-table-1` | Writing & Speaking | MedTech Signal (Substack) book on the round table (clickable) | 4:3 landscape | 800 x 600 px |
-| `writing-shelf-1` | Writing & Speaking | framed photo of Gilles speaking standing on the bookshelf (clickable) | 3:4 portrait | 768 x 1024 px |
+| `writing-shelf-1` | Writing & Speaking | framed photo of Gilles speaking in the bookshelf’s right corner (clickable) | 3:4 portrait | 768 x 1024 px |
 | `about-wall-1` | About Me | framed running photo on back wall (clickable) | 3:4 portrait | 900 x 1200 px |
 
 ### Interactive Photo Album (About Me desk, D-039)
@@ -143,3 +143,6 @@ Enterprise selection uses a compact bottom caption with the registry, a single c
 
 ### Laptop and endoscopy props (D-062, 2026-11-18)
 The About Me laptop uses five rows of raised keys, a wider space bar and an outlined trackpad. The endoscopy tower uses visibly separate modules with distinct front panels for the camera controller, light source and CO₂ insufflator. Set the rigid scope diagonally on the green drape. Give it a slim steel shaft, a dark lens, a ridged coupling, a side light port and a rounded camera head. Route the camera cable over the edge of the table.
+
+### Practice desk and quieter scene controls (D-063, 2026-11-18)
+Give the practice desk a slim rounded oak top, tapered legs, a stand-alone keyboard, a mouse on a sage mat, a folder, a pen and a short monitor cable. Align the chair and input devices with the screen. Set the speaking frame in the right corner of the Writing & Speaking shelf, with its hotspot following the frame. Use a plain contact link and underlined language selection. Place Move and Reset together at the lower edge on desktop and in a row below the canvas on phones. Keep 48 px touch targets, show Reset only after the view changes, and tint only the active Move icon.

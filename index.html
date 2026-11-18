@@ -35,6 +35,7 @@
     </nav>
     <div class="lang" id="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:ui.langLabel">
       <button type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="true" data-i18n-attr="aria-label:ui.langEn">EN</button>
+      <span aria-hidden="true">/</span>
       <button type="button" data-lang="de" lang="de" aria-label="Deutsch" aria-pressed="false" data-i18n-attr="aria-label:ui.langDe">DE</button>
     </div>
   </header>
@@ -67,6 +68,16 @@
         <img class="fallback" src="/reference-four-rooms.webp" alt="Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking." data-i18n-attr="alt:stage.alt" hidden>
         <div class="labels" id="labels"></div>
         <div class="spots" id="spots"></div>
+        <div class="view-controls" id="view-controls" role="group" aria-label="3D view" data-i18n-attr="aria-label:ui.viewControls" hidden>
+          <button class="view-action" id="pan-toggle" type="button" aria-pressed="false">
+            <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V7.5a1.5 1.5 0 0 1 3 0V5a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v5a7 7 0 0 1-13 3.6l-2.4-3.8a1.6 1.6 0 0 1 2.4-2l1 1.1Z"/></svg></span>
+            <span data-i18n="ui.panMode">Move</span>
+          </button>
+          <button class="view-action" id="reset-view" type="button" hidden>
+            <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v5h5M4.5 10a8 8 0 1 1 0 5.5"/></svg></span>
+            <span data-i18n="ui.resetView">Reset view</span>
+          </button>
+        </div>
         <div class="bar" id="bar" role="group" aria-label="Enter a room" data-i18n-attr="aria-label:stage.bar"></div>
         <button class="back" id="back" data-i18n="ui.allRooms" hidden>All rooms</button>
         <aside class="panel" id="panel" aria-live="polite" hidden></aside>

@@ -15,11 +15,9 @@ const back = document.getElementById('back');
 const bar = document.getElementById('bar');
 const dock = document.getElementById('dock');
 const spotsEl = document.getElementById('spots');
-const resetBtn = document.createElement('button');   // appears only after the model was turned, panned or zoomed away from the default
-resetBtn.type = 'button'; resetBtn.className = 'reset'; resetBtn.hidden = true;
-const panBtn = document.createElement('button');
-panBtn.type = 'button'; panBtn.className = 'pan-toggle'; panBtn.setAttribute('aria-pressed', 'false');
-stage.append(panBtn, resetBtn);
+const viewControls = document.getElementById('view-controls');
+const resetBtn = document.getElementById('reset-view');
+const panBtn = document.getElementById('pan-toggle');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => matchMedia('(max-width: 800px)').matches;
 const ORDER = ['projects', 'about', 'ai', 'writing'];
@@ -167,8 +165,6 @@ function setLang(next, { save = true } = {}) {
   if (!LANGS.includes(next)) return;
   lang = next;
   applyStatic(lang);
-  resetBtn.textContent = t(lang, 'ui.resetView');
-  panBtn.textContent = t(lang, 'ui.panMode');
   renderAll();
   langBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
   for (const id of ORDER) { labels[id].textContent = name(id); bar.querySelector(`[data-room="${id}"]`).textContent = name(id); }
@@ -191,6 +187,7 @@ import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
     onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) canvas.focus({ preventScroll: true }); } });
   if (!api) return useStatic();
+  viewControls.hidden = false;
   // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
   canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0; canvas.setAttribute('role', 'application');
   if (import.meta.env.DEV) window.__gp = api.debug;

@@ -86,7 +86,36 @@ export const content = {
         h: 'About Me',
         p1: 'Originally a surgical guy, I’ve spent 25 years in MedTech, with extensive experience in patient monitoring, digital health, ambulatory care and emergency medical services. Digital health has been part of that journey since 2004, from telemedicine to today’s AI and analytics.',
         p2: 'My strength is building businesses and transforming large teams, helping them succeed as healthcare itself changes, and bringing technology into practice to improve how care is delivered.',
+        more: 'More details',
         linkedin: 'Full profile',
+        leadership: {
+          h: 'Leadership & Business Development',
+          close: 'Close',
+          lead: 'Helping teams succeed through change, building businesses and bringing technology into everyday care. Over the years that meant reshaping organisations, guiding teams through integrations and opening new markets. Clear direction, personal support and the confidence to take responsibility matter throughout.',
+          casesTitle: 'Selected experience',
+          cases: [
+            {
+              h: 'Reorganising units and portfolio',
+              p: 'Responsible for 80+ people across five surgical lines. Together we reshaped the business units and portfolio - growing revenue by up to 28% with stronger margins and operating result.',
+            },
+            {
+              h: 'Leading through carve-out and integration',
+              p: 'Guided a regional organisation across up to 16 countries through a carve-out and corporate integration. The teams delivered over 20% annual growth.',
+            },
+            {
+              h: 'Rebuilding commercial execution',
+              p: 'Realigned a team of 65+ people across sales territories, pricing and strategy. Together we also launched wearable patient monitoring into the market.',
+            },
+          ],
+          quotesIntro: 'Feedback from colleagues',
+          quotes: [
+            '“Your challenging, goal-oriented and solution-focused approach helped the whole team move forward.”',
+            '“You have been my most important guide and mentor.”',
+            '“I admired your vision and determination to open up the market and enjoyed working with you to do exactly that.”',
+          ],
+          directionTitle: 'What I focus on today',
+          direction: 'Putting AI and digital tools to work in clinical care - simpler workflows, less time lost on routine tasks, and care models that make sense both medically and financially.',
+        },
       },
       ai: {
         h: 'AI & Digital Health',
@@ -319,7 +348,36 @@ export const content = {
         h: 'Über mich',
         p1: 'Ursprünglich aus der Chirurgie kommend, blicke ich auf 25 Jahre in der MedTech zurück – mit umfassender Erfahrung im Patientenmonitoring, in Digital Health, der ambulanten Versorgung und dem Rettungsdienst. Digital Health begleitet mich dabei seit 2004, von der Telemedizin bis zu heutiger KI und Analytics.',
         p2: 'Meine Stärke liegt im Aufbau von Geschäftsfeldern und der Transformation großer Teams: sie im Wandel des Gesundheitswesens zum Erfolg zu führen und Technologie wirksam in die Praxis zu bringen, um die Versorgung spürbar zu verbessern.',
+        more: 'Mehr Details',
         linkedin: 'Vollständiges Profil',
+        leadership: {
+          h: 'Leadership & Unternehmensentwicklung',
+          close: 'Schließen',
+          lead: 'Teams durch Veränderungen führen, Geschäfte aufbauen, Technik in die Praxis bringen. Das bedeutete über die Jahre: Organisationen umbauen, Integrationen begleiten, neue Märkte öffnen. Entscheidend bleiben dabei klare Richtung, persönlicher Rückhalt und das Vertrauen, dass Menschen Verantwortung übernehmen.',
+          casesTitle: 'Ausgewählte Erfahrungen',
+          cases: [
+            {
+              h: 'Organisation und Portfolio neu geordnet',
+              p: 'Verantwortung für über 80 Mitarbeitende und fünf chirurgische Geschäftsfelder. Wir haben Einheiten und Portfolio neu sortiert - bis zu 28 % mehr Umsatz, bessere Margen und höheres operatives Ergebnis.',
+            },
+            {
+              h: 'Durch Abspaltung und Integration geführt',
+              p: 'Eine regionale Organisation über bis zu 16 Länder durch eine Abspaltung und die spätere Konzernintegration gesteuert. Gemeinsam wuchsen die Teams um mehr als 20 % pro Jahr.',
+            },
+            {
+              h: 'Vertrieb und Markteinführung umgebaut',
+              p: 'Mit einem Team von über 65 Mitarbeitenden Gebiete, Preise und Vertriebsstrategie neu aufgestellt. Zusammen haben wir zudem tragbares Patientenmonitoring in den Markt gebracht.',
+            },
+          ],
+          quotesIntro: 'Feedback von Kollegen',
+          quotes: [
+            '„Dein fordernder, ziel- und lösungsorientierter Ansatz hat das ganze Team nach vorn gebracht.“',
+            '„Du warst mein wichtigster Wegbegleiter und Mentor.“',
+            '„Ich habe deine Vision und Entschlossenheit bewundert, den Markt zu erschließen - und genau das hat mir in der Zusammenarbeit mit dir große Freude bereitet.“',
+          ],
+          directionTitle: 'Woran ich heute arbeite',
+          direction: 'KI und digitale Werkzeuge so in die Versorgung bringen, dass sie im Alltag helfen statt aufzuhalten. Weniger Aufwand bei Dokumentation und Abläufen - und Angebote, die medizinisch tragen und sich wirtschaftlich rechnen.',
+        },
       },
       ai: {
         h: 'KI & Digital Health',

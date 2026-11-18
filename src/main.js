@@ -50,6 +50,32 @@ source.hidden = true;
 let mode = 'loading';    // 'loading' | '3d' | 'static'
 let pending = null;
 
+const leadershipSection = document.getElementById('leadership-deepdive');
+const leadershipHeading = document.getElementById('leadership-heading');
+const leadershipClose = document.getElementById('leadership-close');
+
+function openLeadership() {
+  if (!leadershipSection) return;
+  leadershipSection.hidden = false;
+  document.body.classList.add('has-leadership');
+  requestAnimationFrame(() => {
+    leadershipSection.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' });
+    leadershipHeading?.focus({ preventScroll: true });
+  });
+}
+
+function closeLeadership({ restoreFocus = false } = {}) {
+  if (!leadershipSection || leadershipSection.hidden) return;
+  leadershipSection.hidden = true;
+  document.body.classList.remove('has-leadership');
+  if (restoreFocus) {
+    const trigger = panel.querySelector('[data-open-leadership]') || stage;
+    trigger?.focus({ preventScroll: true });
+  }
+}
+
+leadershipClose?.addEventListener('click', () => closeLeadership({ restoreFocus: true }));
+
 function roomFromHash() {
   const id = location.hash.slice(1);
   return ORDER.includes(id) ? id : null;
@@ -73,6 +99,7 @@ function roomNodes(id) {
   close.setAttribute('aria-label', t(lang, 'ui.close'));
   close.addEventListener('click', () => {
     panel.hidden = true;
+    closeLeadership();
     stage.focus({ preventScroll: true });
   });
   return [close, ...nodes];
@@ -83,6 +110,7 @@ function openRoom(id, auto = false) {
   if (mode === 'loading') { pending = id; return; }
   const wasCurrent = current === id;
   current = id;
+  if (id !== 'about') closeLeadership();
   document.querySelectorAll('.top nav a').forEach(a => {
     const on = a.dataset.room === id;
     a.classList.toggle('active', on);
@@ -112,6 +140,7 @@ function closeRoom({ fromHistory = false } = {}) {
   if (!fromHistory) writeRoomHash(null);
   pending = null;
   current = null;
+  closeLeadership();
   const restoreFocus = document.activeElement === back || panel.contains(document.activeElement);
   stage.classList.remove('open'); panel.hidden = true; back.hidden = true;
   panel.replaceChildren();
@@ -155,11 +184,14 @@ resetBtn.addEventListener('click', () => { api?.reset(); stage.focus({ preventSc
 addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (api?.closeNote?.()) return;
+  if (leadershipSection && !leadershipSection.hidden) { closeLeadership({ restoreFocus: true }); return; }
   if (current) { closeRoom(); return; }
   if (api?.isCustom?.()) api.reset();
 });
 // Links to the room texts (#projects, #about ...) open the room in the model; without 3D they scroll to the section.
 document.addEventListener('click', e => {
+  const lead = e.target.closest?.('[data-open-leadership]');
+  if (lead) { e.preventDefault(); openLeadership(); return; }
   const a = e.target.closest?.('a[href^="#"]');
   if (!a || mode === 'static' || (a.getAttribute('href').length < 2)) return;
   const h = a.getAttribute('href').slice(1);

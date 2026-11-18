@@ -224,6 +224,11 @@ until a later entry replaces it.
 
 - **D-068 (2026-11-18) Required scene continuity and transparency.** Keep the D-067 grid while allowing the 3D view to continue under the translucent introduction, room details and controls. This applies to desktop and mobile. Use 86% paper opacity for those backgrounds and full opacity for text. Text regions must remain separate. Frame room names and interactive objects within the clear view with extra headroom. See the required rule in DESIGN.md.
 
+- **D-069 (2026-11-18) About Me Leadership & Business Development Deep-Dive (owner request):**
+  - **Short First View & Coupled Visibility:** Kept the initial visible `About Me` text concise (`Originally a surgical guy...` + `My strength is building businesses...`) and added a discreet link (`More details` / `Mehr Details`). `#leadership-deepdive` opens strictly when clicking that link and automatically closes when closing the About-Me card, leaving the room, or switching rooms.
+  - **Voice & Content (`writing_style_substack.md` + `gilles-wortliste-substack-2026.md`):** Written in Gilles' direct, concrete, hyphen-separated style without AI clichés or P&L amounts. Includes the leadership foundation text, three anonymized business development cases under `Selected experience` / `Ausgewählte Erfahrungen` (80+ staff / 5 surgical lines / up to 28% growth; carve-out & integration / up to 16 countries / 20%+ annual growth; 65+ staff / commercial realignment / wearable patient monitoring), three anonymous quotes under `Feedback from colleagues` / `Feedback von Kollegen`, and today's focus (`What I focus on today` / `Woran ich heute arbeite`).
+  - **Bilingual & Responsive:** Full EN/DE translation via `src/content.js`, three-column desktop grid collapsing to single-column cards and quiet typographic blockquotes on mobile.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

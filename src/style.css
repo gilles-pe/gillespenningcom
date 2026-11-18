@@ -377,3 +377,42 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
   .ship-card .pop-body { flex-basis: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .ship-actions .ship-warp svg { transition: none; } .ship-actions .ship-warp:hover svg { transform: none; } }
+
+/* ---- About Me: Leadership & Business Development deep-dive ---- */
+.about-more-row { margin: var(--s1) 0; }
+.about-more-link { display: inline-flex; align-items: center; min-height: var(--h1); font-size: var(--t1); font-weight: 600; color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); }
+.about-more-link:hover, .about-more-link:focus-visible { color: var(--brass-ink); text-decoration-color: var(--brass); }
+.dock .about-more-link, .rooms .about-more-link { font-size: var(--t2); }
+
+@media (min-width: 801px) and (min-height: 640px) {
+  html.js body.has-leadership { height: auto; min-height: 100svh; }
+  html.js body.has-leadership .hero { min-height: calc(100svh - var(--s7)); position: relative; }
+}
+
+.leadership-section { position: relative; z-index: 4; background: var(--paper); border-top: 1px solid var(--line); scroll-margin-top: var(--s4); }
+.leadership-sheet { max-width: calc(var(--s7) * 11); margin: 0 auto; padding: var(--s6) var(--s5); display: grid; gap: var(--s5); }
+.leadership-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s4); }
+.leadership-head h2 { font-size: var(--t4); line-height: 1.15; font-weight: 600; color: var(--petrol); }
+.leadership-head h2:focus { outline: none; }
+.leadership-head h2:focus-visible { outline: 2px solid var(--brass); outline-offset: var(--s1); }
+.leadership-close { position: static; flex: none; background: transparent; border: 1px solid var(--line); }
+.leadership-close:hover { border-color: var(--brass); }
+.leadership-lead { max-width: 72ch; font-size: var(--t2); line-height: 1.6; color: var(--ink); }
+.leadership-sub { font-family: var(--sans); font-size: var(--t1); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.leadership-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
+.leadership-case { display: grid; gap: var(--s2); align-content: start; padding: var(--s4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r1); }
+.leadership-case h4 { font-size: var(--t2); font-weight: 600; line-height: 1.3; color: var(--petrol); }
+.leadership-case p { font-size: var(--t1); line-height: 1.55; color: var(--ink); }
+.leadership-quotes-block { display: grid; gap: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--line); }
+.leadership-quotes-intro { font-size: var(--t1); color: var(--muted); }
+.leadership-quotes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
+.leadership-quote { margin: 0; padding: var(--s1) 0 var(--s1) var(--s3); border-left: 2px solid var(--line); font-family: var(--serif); font-size: var(--t2); line-height: 1.5; font-style: italic; color: var(--ink); }
+.leadership-direction { display: grid; gap: var(--s2); padding-top: var(--s4); border-top: 1px solid var(--line); }
+.leadership-direction p { max-width: 72ch; font-size: var(--t2); line-height: 1.6; color: var(--ink); }
+
+@media (max-width: 800px) {
+  .leadership-sheet { padding: var(--s5) var(--s3); gap: var(--s4); }
+  .leadership-head h2 { font-size: var(--t3); }
+  .leadership-cases { grid-template-columns: 1fr; gap: var(--s3); }
+  .leadership-quotes { grid-template-columns: 1fr; gap: var(--s3); }
+}

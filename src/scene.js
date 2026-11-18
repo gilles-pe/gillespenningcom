@@ -724,7 +724,7 @@ export function buildScene() {
   const brassHot = new THREE.MeshStandardMaterial({ color: 0xffd27a, emissive: 0xd9a03c, emissiveIntensity: 0.9, metalness: 0.5, roughness: 0.3 });
   const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
-  const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [];
+  const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [], inspectionTargets = [];
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
     g.position.set(r.cx, 0, r.cz); scene.add(g);
@@ -765,7 +765,7 @@ export function buildScene() {
     rooms[id] = { ...r, id, group: g, floor, door, light, hit, hotGeo, hotSegs: SEG, hotCount: SEG * 6 * 6,
       doorZ: ds.z0, doorSlide: ds.slide,
       center: new THREE.Vector3(r.cx, 0.5, r.cz), labelAt: new THREE.Vector3(r.cx, r.h + 0.35, r.cz - d / 2), open: 0, glow: 0 };
-    const extra = furnish(id, g, r);
+    const extra = furnish(id, g, r, inspectionTargets);
     if (extra?.photo) rooms[id].photo = extra.photo;
     if (extra?.speakingPic) rooms[id].speakingPic = extra.speakingPic;
     if (extra?.projectPicks) projectPicks.push(...extra.projectPicks);
@@ -778,7 +778,7 @@ export function buildScene() {
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, inspectionTargets };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -1457,6 +1457,7 @@ function operatingRoom(g, L, projectPicks) {
     tagProject(monPic, 'wimmelbild', ec, monPic.position),
     tagProject(monBezel, 'wimmelbild', ec, monPic.position),
   );
+  return { table: op, cart: ec };
 }
 
 function practiceCorner(g, L, projectPicks) {
@@ -1528,10 +1529,18 @@ function practiceCorner(g, L, projectPicks) {
     [-0.155, 0.006, -0.111], [-0.175, 0.005, -0.260], [-0.167, -0.10, -0.287],
   ].map(point => new THREE.Vector3(...point)));
   monitor.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 16, 0.0035, 6), dark));
+  return desk;
 }
 
 const PROJECT_KEYS = ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'];
-function furnish(id, g, r) {
+function furnish(id, g, r, inspectionTargets) {
+  // Register the actual meshes, not invisible hit boxes. Specific laptop, photo,
+  // social and ship actions take precedence over their containing furniture.
+  const inspect = (key, objects, az, el, furniture = false) => {
+    const meshes = [];
+    for (const object of objects) object.traverse(o => { if (o.isMesh) meshes.push(o); });
+    inspectionTargets.push({ id: `${id}:${key}`, room: id, key, objects, meshes, az, el, furniture });
+  };
   const w = wood(), cream = mat(C.cream), L = layout(id), { w: RW, d: RD } = r;
   if (id === 'projects') {
     const projectPicks = [];
@@ -1544,12 +1553,14 @@ function furnish(id, g, r) {
         tagProject(b, PROJECT_KEYS[i], g, b.position),
         tagProject(plinth, PROJECT_KEYS[i], g, b.position),
       );
+      inspect(PROJECT_KEYS[i], [b, plinth], 0, 0.60);
     });
     galleryOlive(g, -RW / 2 + 0.44, RD / 2 - 0.48);
     return { projectPicks };
   }
   if (id === 'about') {
     const [dx, dz] = L.desk;
+    const deskStart = g.children.length;
     // A compact joiner's desk: softly eased oak top, tapered legs and two slim
     // drawers. Keep its top at the original height so the album and laptop retain
     // their exact interaction positions.
@@ -1580,6 +1591,7 @@ function furnish(id, g, r) {
     coffeeMug(g, dx + 0.39, 0.69, dz - 0.12);
     // Ergonomic office chair behind the desk
     officeChair(g, dx, dz - 0.72, 0.12, 1);
+    inspect('studyDesk', g.children.slice(deskStart), -0.20, 0.62, true);
     // Cabinet bookshelf with imperfect books and Substack / Bluesky / LinkedIn trophies
     const shelfH = 1.18, trophyPicks = [];
     const sh = cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], shelfH, 0, { imperfect: true, skipUpperRight: true });
@@ -1594,6 +1606,7 @@ function furnish(id, g, r) {
     studyLamp(sh, 0.005, shelfH, -0.045);
     trophyPicks.push(...enterpriseModel(sh, 0.22, shelfH, 0.02, -1.12, 'tos'));
     trophyPicks.push(...enterpriseModel(sh, 0.49, shelfH, 0.02, -0.82, 'tng'));
+    inspect('studyShelf', [sh], -0.16, 0.30, true);
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
     studyRubberPlant(g, RW / 2 - 0.43, RD / 2 - 0.44);
@@ -1602,8 +1615,12 @@ function furnish(id, g, r) {
   if (id === 'ai') {
     const projectPicks = [];
     internalGlassWall(g, r);
-    operatingRoom(g, L, projectPicks);
-    practiceCorner(g, L, projectPicks);
+    const operating = operatingRoom(g, L, projectPicks);
+    inspect('opTable', [operating.table], -0.24, 0.82, true);
+    inspect('wimmelbild', [operating.cart], -0.10, 0.40);
+    const desk = practiceCorner(g, L, projectPicks);
+    inspect('practiceDesk', [desk], 0.06, 0.64, true);
+    inspect('rack', projectPicks.filter(o => o.userData.project === 'rack'), 0, 0.26);
     return { projectPicks };
   }
   if (id === 'writing') {
@@ -1619,10 +1636,12 @@ function furnish(id, g, r) {
       tagProject(paperBase, 'signal', g, sheet.position),
     );
     tableMic(g, tx + 0.28, 0.47, tz - 0.05);
+    inspect('signal', [paperBase, sheet], -0.10, 0.85);
     tailoredArmchair(g, tx - 1.0, tz, 0.5);
     podcastArmchair(g, tx + 1.0, tz - 0.15, -0.6);
     loungeFloorLamp(g, ...L.lamp);
-    writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
+    const shelf = writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
+    inspect('writingShelf', [shelf], -0.18, 0.30, true);
     const speakingPic = standingPicture(g, 'writing-shelf-1', ...L.speaking, -0.12, 0.78);
     loungeFern(g, -RW / 2 + 0.47, RD / 2 - 0.54);
     return { projectPicks, speakingPic };

@@ -31,6 +31,7 @@ export const content = {
       resetView: 'Reset view',
       panMode: 'Move',
       viewControls: '3D view',
+      zoom: 'Zoom', zoomIn: 'Zoom in', zoomOut: 'Zoom out',
     },
     nav: {
       label: 'Rooms',
@@ -180,6 +181,13 @@ export const content = {
           },
         ],
       },
+      inspections: {
+        opTable: { title: 'Operating table', text: 'Rigid endoscope and camera head on the sterile drape.' },
+        practiceDesk: { title: 'Digital workspace', text: 'A closer look at the monitor, keyboard and workspace.' },
+        studyDesk: { title: 'My desk', text: 'The laptop tells my story. The album holds a few photos from outside work.' },
+        studyShelf: { title: 'Books and a little Star Trek', text: 'Choose a miniature or a social plaque to take a closer look.' },
+        writingShelf: { title: 'Writing & Speaking', text: 'Books and a moment from a talk. Select the photo to open it.' },
+      },
       projectCards: {
         wimmelbild: {
           title: 'Wimmelbild',
@@ -293,6 +301,7 @@ export const content = {
       resetView: 'Zurücksetzen',
       panMode: 'Verschieben',
       viewControls: '3D-Ansicht',
+      zoom: 'Zoom', zoomIn: 'Vergrößern', zoomOut: 'Verkleinern',
     },
     nav: {
       label: 'Räume',
@@ -441,6 +450,13 @@ export const content = {
             desc: 'Baumsilhouette, Rastbank und Wegweiser vor leuchtendem Abendrot am Horizont',
           },
         ],
+      },
+      inspections: {
+        opTable: { title: 'OP-Tisch', text: 'Starres Endoskop und Kamerakopf auf dem sterilen Tuch.' },
+        practiceDesk: { title: 'Digitaler Arbeitsplatz', text: 'Monitor, Tastatur und Arbeitsplatz aus der Nähe.' },
+        studyDesk: { title: 'Mein Schreibtisch', text: 'Der Laptop erzählt meine Geschichte. Im Album liegen ein paar Fotos abseits der Arbeit.' },
+        studyShelf: { title: 'Bücher und ein wenig Star Trek', text: 'Ein Modell oder eines der Social-Media-Schilder auswählen, um näher hinzuschauen.' },
+        writingShelf: { title: 'Schreiben & Vorträge', text: 'Bücher und ein Moment aus einem Vortrag. Ein Klick auf das Foto öffnet es.' },
       },
       projectCards: {
         rack: {

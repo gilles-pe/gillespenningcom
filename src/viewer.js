@@ -5,15 +5,16 @@ import { t } from './i18n.js';
 import { createEgg } from './egg.js';
 import { PATHS } from './icons.js';
 import { albumPages } from './album-pages.js';
+import { inspectionPose, clampZoom } from './inspection.js';
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway }) {
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, inspectionTargets } = buildScene();
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -27,7 +28,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   // Hotspots are real links (or buttons for soon/project cards), placed over the objects they belong to.
   const spots = [];
-  for (const [id, list] of Object.entries(HOTSPOTS)) for (const [key, href, x, y, z, project] of list) {
+  const allHotspots = Object.fromEntries(Object.entries(HOTSPOTS).map(([id, list]) => [id, [...list]]));
+  scene.updateMatrixWorld(true);
+  for (const target of inspectionTargets.filter(target => target.furniture)) {
+    const bounds = new THREE.Box3();
+    for (const object of target.objects) bounds.expandByObject(object);
+    const local = rooms[target.room].group.worldToLocal(bounds.getCenter(new THREE.Vector3()));
+    allHotspots[target.room].push([target.key, null, ...local.toArray(), target.key]);
+  }
+  for (const [id, list] of Object.entries(allHotspots)) for (const [key, href, x, y, z, project] of list) {
     // 3D project/social hotspots always open their preview card first. Keep
     // external navigation on the card, never on the object hit target.
     const el = document.createElement(project ? 'button' : href ? 'a' : 'span');
@@ -49,7 +58,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   let curLang = lang;
   function labelSpots() {
     for (const s of spots) {
-      s.el.textContent = t(curLang, `model.spots.${s.sp.key}`);
+      s.el.textContent = t(curLang, `model.spots.${s.sp.key}`) || t(curLang, `model.inspections.${s.sp.key}.title`);
       if (!s.el.href && !s.sp.project) s.el.title = t(curLang, 'ui.soon');
     }
   }
@@ -69,9 +78,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const home = { az: 0, el: EL, dist: 30, t: view.t.clone() };   // the default pose for the current state
   const panOffset = new THREE.Vector3();
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
-  let shipFocus = null;
+  let objectFocus = null;
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
-  const ZMIN = 0.06, ZMAX = 1.8, DMIN = 0.7;
+  const DMIN = 0.7;
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
   const clampTarget = v => {
     v.x = THREE.MathUtils.clamp(v.x, -14, 14);
@@ -102,8 +111,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (stageW !== w || stageH !== h) {
       stageW = w; stageH = h; camera.aspect = w / h; camera.updateProjectionMatrix();
       setGoal();
-      if (shipFocus) focusShip(shipFocus.key, false);
+      if (objectFocus) {
+        objectFocus.dist = Math.max(DMIN, home.dist * objectFocus.zoom);
+        objectFocus.point.copy(home.t).add(objectFocus.pan);
+      }
     }
+    if (objectFocus) focusObject(objectFocus.target, false);
   }
   // Camera distance at which all points fit into [leftNdc, rightNdc] x [-below, above] (NDC), seen from azimuth az.
   const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), upv = new THREE.Vector3(), dv = new THREE.Vector3();
@@ -158,13 +171,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     clampTarget(goal.t);
   }
   function checkAway() {
+    onZoom?.(zoom);
     const panned = panOffset.lengthSq() > 0.002;
     const a = custom && (panned || Math.abs(near(goal.az, home.az) - goal.az) > 0.03 || Math.abs(near(goal.el, EL) - goal.el) > 0.03 || Math.abs(zoom - 1) > 0.03);
     if (a !== away) { away = a; onAway?.(a); }
   }
   function resetView() {
     closePop(false); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
-    if (reduced) { view.az = goal.az; view.el = goal.el; view.t.copy(goal.t); }
+    if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
   }
   // Turning: signs are for a drag; when the model is upside down (cos el < 0) the horizontal sense is mirrored.
   function wrap() {
@@ -191,7 +205,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     checkAway();
   }
   function zoomBy(f, instant) {
-    zoom = THREE.MathUtils.clamp(zoom * f, ZMIN, ZMAX); custom = true;
+    zoom = Math.max(DMIN / home.dist, clampZoom(zoom * f)); custom = true;
     goal.dist = Math.max(DMIN, home.dist * zoom);
     if (instant) view.dist = goal.dist;
     aim(); checkAway();
@@ -283,7 +297,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const popAllowed = (roomId, key) =>
     roomId === 'projects' || roomId === 'ai'
     || (roomId === 'writing' && SOCIAL_CARDS.has(key))
-    || (roomId === 'about' && ABOUT_CARDS.has(key));
+    || (roomId === 'about' && ABOUT_CARDS.has(key))
+    || inspectionTargets.some(target => target.room === roomId && target.key === key);
   let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popTimeline = null, popClose = null, shipActions = null;
   let popKey = null, popTimer = null;
   const projectHit = ndcPos => {
@@ -330,7 +345,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popBody.href = 'https://www.linkedin.com/in/gillespenning/';
       return;
     }
-    const data = t(curLang, `model.projectCards.${popKey}`);
+    const data = t(curLang, `model.projectCards.${popKey}`) || t(curLang, `model.inspections.${popKey}`);
     if (!data) return;
     popEl.setAttribute('aria-label', data.title);
     popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
@@ -344,7 +359,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const label = document.createElement('span'); label.textContent = entry.label;
       row.append(year, label); popTimeline.append(row);
     }
-    if (data.timeline || isShip) {
+    if (data.timeline || inspectionFor(popKey)) {
       popImg.hidden = true;
       popImg.removeAttribute('src');
     } else if (data.icon && PATHS[data.icon]) {
@@ -364,43 +379,44 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (data.href) popBody.href = data.href;
     else popBody.removeAttribute('href');
   }
-  // Inspect the physical miniature in the room before offering the separate viewer.
-  // Preserve the incoming room view so closing the card returns to that framing.
-  function focusShip(key, save = true) {
-    const miniature = trophyPicks.find(o => o.userData.project === key)?.userData.miniature;
-    if (!miniature) return;
-    if (save && !shipFocus) shipFocus = { key, custom, zoom, pan: panOffset.clone(), az: goal.az, el: goal.el, dist: goal.dist, target: goal.t.clone() };
-    if (shipFocus) shipFocus.key = key;
-    miniature.updateWorldMatrix(true, true);
-    const bounds = new THREE.Box3().setFromObject(miniature), target = bounds.getCenter(new THREE.Vector3());
-    const radius = bounds.getSize(new THREE.Vector3()).length() / 2;
-    const rect = stage.getBoundingClientRect(), card = popEl.getBoundingClientRect();
-    const left = 16;
-    const right = stageW - 16, top = 16;
-    const bottom = Math.max(top + 80, card.top - rect.top - 16);
-    const width = Math.max(100, right - left), height = Math.max(80, bottom - top);
-    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
-    const dist = Math.max(DMIN, radius * 1.25 / Math.sin(Math.atan(Math.min(tv * height / stageH, tv * camera.aspect * width / stageW))));
-    const az = -.28, el = .32;
-    const rightVector = new THREE.Vector3(Math.cos(az), 0, -Math.sin(az));
-    const upVector = new THREE.Vector3(-Math.sin(el)*Math.sin(az), Math.cos(el), -Math.sin(el)*Math.cos(az));
-    const nx = (left + right) / stageW - 1, ny = 1 - (top + bottom) / stageH;
-    target.addScaledVector(rightVector, -nx * dist * tv * camera.aspect).addScaledVector(upVector, -ny * dist * tv);
-    panOffset.copy(target).sub(home.t); custom = true; zoom = dist / home.dist;
-    goal.az = near(view.az, az); goal.el = near(view.el, el); goal.dist = dist; goal.t.copy(target);
-    if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = dist; view.t.copy(target); }
+  // The same inspection path serves furniture, projects and the miniatures.
+  function inspectionFor(key) {
+    const exact = inspectionTargets.find(target => target.room === openId && target.key === key);
+    if (exact) return exact;
+    const alias = openId === 'ai' && key === 'monitor' ? 'practiceDesk'
+      : openId === 'about' && key === 'story' ? 'studyDesk' : null;
+    if (alias) return inspectionTargets.find(target => target.room === openId && target.key === alias);
+    if (openId === 'about') {
+      const objects = trophyPicks.filter(object => object.userData.project === key);
+      if (objects.length) {
+        const miniature = objects[0].userData.miniature;
+        return { id: `about:${key}`, room: 'about', key, objects: miniature ? [miniature] : objects, az: -0.20, el: 0.32 };
+      }
+    }
+    return null;
+  }
+  function focusObject(target, save = true) {
+    if (save && !objectFocus) objectFocus = { target, custom, zoom, pan: panOffset.clone(), az: goal.az, el: goal.el, dist: goal.dist, point: goal.t.clone() };
+    if (objectFocus) objectFocus.target = target;
+    const bounds = new THREE.Box3();
+    for (const object of target.objects) { object.updateWorldMatrix(true, true); bounds.expandByObject(object); }
+    const pose = inspectionPose({ min: bounds.min.toArray(), max: bounds.max.toArray(), az: target.az, el: target.el,
+      fov: camera.fov, width: stageW, height: stageH, captionHeight: popEl?.offsetHeight || 0 });
+    panOffset.fromArray(pose.target).sub(home.t); custom = true; zoom = pose.distance / home.dist;
+    goal.az = near(view.az, target.az); goal.el = near(view.el, target.el); goal.dist = pose.distance; goal.t.fromArray(pose.target);
+    if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
     checkAway();
   }
-  function restoreShipView() {
-    if (!shipFocus) return;
-    const saved = shipFocus; shipFocus = null;
-    stage.classList.remove('ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
-    goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.target);
+  function restoreObjectView() {
+    if (!objectFocus) return;
+    const saved = objectFocus; objectFocus = null;
+    stage.classList.remove('object-focused', 'ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
+    goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.point);
     checkAway();
   }
   function closePop(restoreFocus = false) {
     if (!popEl || !popKey) return;
-    restoreShipView();
+    restoreObjectView();
     popKey = null; popEl.classList.remove('on'); popEl.inert = true;
     stopAutoCard();
     clearTimeout(popTimer);
@@ -412,7 +428,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function openPop(key) {
     closePhoto(false);
     closeAlbum(false);
-    if (!['enterprise', 'enterpriseD'].includes(key)) restoreShipView();
+    if (!inspectionFor(key)) restoreObjectView();
     if (!popEl) {
       popEl = document.createElement('div'); popEl.className = 'pop-card'; popEl.setAttribute('role', 'region'); popEl.hidden = true;
       popClose = document.createElement('button'); popClose.type = 'button'; popClose.className = 'card-x'; popClose.textContent = '×';
@@ -423,7 +439,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popText = document.createElement('p'); popText.className = 'pop-text';
       popTimeline = document.createElement('ol'); popTimeline.className = 'pop-timeline'; popTimeline.hidden = true;
       popEl.addEventListener('pointerenter', stopAutoCard);
-      popEl.addEventListener('pointerleave', () => { if (popKey && !['rack', 'enterprise', 'enterpriseD'].includes(popKey)) startAutoCard(() => closePop(false)); });
+      popEl.addEventListener('pointerleave', () => { if (popKey && !objectFocus && !['rack', 'enterprise', 'enterpriseD'].includes(popKey)) startAutoCard(() => closePop(false)); });
       popBody.append(popImg, popTitle, popText, popTimeline);
       shipActions = document.createElement('div'); shipActions.className = 'ship-actions'; shipActions.hidden = true;
       for (const launch of [false, true]) {
@@ -440,21 +456,24 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       }
       popEl.append(popClose, popBody, shipActions);
       stage.append(popEl);
+      observer.observe(popEl);
     }
     clearTimeout(popTimer);
     stopAutoCard();
     popKey = key;
     popEl.classList.toggle('rack-card', key === 'rack');
     popEl.classList.toggle('ship-card', ['enterprise', 'enterpriseD'].includes(key));
+    popEl.classList.toggle('inspection-card', Boolean(inspectionFor(key)));
     fillPop();
     popEl.hidden = false;
     popEl.inert = false;
     updatePop();
     void popEl.offsetWidth;
     popEl.classList.add('on');
-    if (['enterprise', 'enterpriseD'].includes(key)) { stage.classList.add('ship-focused'); focusShip(key); }
+    const target = inspectionFor(key);
+    if (target) { stage.classList.add('object-focused'); focusObject(target); }
     popClose.focus({ preventScroll: true });
-    if (!['rack', 'enterprise', 'enterpriseD'].includes(key)) startAutoCard(() => closePop(false));
+    if (!objectFocus && !['rack', 'enterprise', 'enterpriseD'].includes(key)) startAutoCard(() => closePop(false));
   }
   function togglePop(key) {
     if (popKey === key) closePop(true);
@@ -698,30 +717,39 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   let drag = null, spaceDown = false, panMode = false, hoverTarget = null;
   const hoverTip = document.createElement('div'); hoverTip.className = 'hover-tip'; hoverTip.hidden = true; stage.append(hoverTip);
   const hoverV = new THREE.Vector3();
+  const targetByMesh = new Map();
+  for (const target of inspectionTargets) for (const mesh of target.meshes) targetByMesh.set(mesh, target);
+  const objectParts = new Map();
+  for (const object of [...projectPicks, ...trophyPicks]) objectParts.set(object, { key: object.userData.project, type: 'card', anchor: object.userData.anchor });
+  for (const object of storyPicks) objectParts.set(object, { key: 'story', type: 'card', anchor: object.userData.anchor });
+  for (const object of albumPicks) objectParts.set(object, { key: 'album', type: 'album', anchor: object.userData.anchor });
+  for (const object of photo?.pick || []) objectParts.set(object, { key: 'photo', type: 'photo', anchor: photo.anchor });
+  for (const object of speakingPhoto?.pick || []) objectParts.set(object, { key: 'speaking', type: 'photo', anchor: speakingPhoto.anchor });
+  const surfaceMeshes = [];
+  scene.traverse(object => {
+    if (!object.isMesh) return;
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    // Glass stays rendered, but does not intercept an object behind the pane.
+    if (materials.some(material => material.visible && !(material.transparent && material.opacity < 0.85))) surfaceMeshes.push(object);
+  });
+  const objectRay = new THREE.Raycaster();
   const hoverObject = n => {
-    if (openId === 'about') {
-      const ph = photoHit(n);
-      if (ph === 'photo' && photo) return { key: 'photo', anchor: photo.anchor };
-      const alb = albumHit(n);
-      if (alb) return { key: 'album', anchor: alb.anchor };
-      const tr = trophyHit(n);
-      if (tr?.project) return { key: tr.project, anchor: tr.anchor };
-      const st = storyHit(n);
-      if (st) return { key: 'story', anchor: st };
-    }
-    if (openId === 'writing') {
-      const ph = photoHit(n);
-      if (ph === 'speaking' && speakingPhoto) return { key: 'speaking', anchor: speakingPhoto.anchor };
-    }
-    if (openId === 'projects' || openId === 'ai' || openId === 'writing') {
-      const pr = projectHit(n);
-      if (pr) return { key: pr.userData.project, anchor: pr.userData.anchor };
-    }
-    return null;
+    objectRay.setFromCamera(n, camera);
+    const hit = objectRay.intersectObjects(surfaceMeshes, false).find(hit => {
+      let object = hit.object;
+      while (object) { if (!object.visible) return false; object = object.parent; }
+      return true;
+    });
+    if (!hit) return null;
+    const target = targetByMesh.get(hit.object), action = objectParts.get(hit.object);
+    if (!target && !action) return null;
+    let parent = hit.object, room = target?.room;
+    while (!room && parent) { room = Object.values(rooms).find(room => room.group === parent)?.id; parent = parent.parent; }
+    return { ...(action || { key: target.key, type: 'card', anchor: target.objects[0] }), room };
   };
   function updateHoverTip() {
-    if (!hoverTarget || drag || !openId) { hoverTip.hidden = true; return; }
-    const label = t(curLang, `model.spots.${hoverTarget.key}`) || t(curLang, `model.projectCards.${hoverTarget.key}.title`);
+    if (!hoverTarget || drag) { hoverTip.hidden = true; return; }
+    const label = t(curLang, `model.spots.${hoverTarget.key}`) || t(curLang, `model.projectCards.${hoverTarget.key}.title`) || t(curLang, `model.inspections.${hoverTarget.key}.title`);
     if (!label || typeof label !== 'string') { hoverTip.hidden = true; return; }
     hoverTarget.anchor.getWorldPosition(hoverV);
     hoverV.project(camera);
@@ -804,19 +832,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     pts.delete(e.pointerId);
     if (drag && pts.size === 0) {
       if (!cancelled && !drag.moved && e.target === stage && drag.btn === 0) {
-        const proj = (openId === 'projects' || openId === 'ai' || openId === 'writing') ? projectHit(ndc(e)) : null;
-        const trophy = openId === 'about' ? trophyHit(ndc(e)) : null;
-        const stAnchor = openId === 'about' ? storyHit(ndc(e)) : null;
-        const albHit = openId === 'about' ? albumHit(ndc(e)) : null;
-        const pHit = photoHit(ndc(e));
+        const object = hoverObject(ndc(e));
         if (egg.hit(ndc(e))) egg.play();
-        else if (albHit) toggleAlbum();
-        else if (openId === 'about' && pHit === 'photo') togglePhoto('photo');
-        else if (openId === 'writing' && pHit === 'speaking') togglePhoto('speaking');
-        else if (trophy?.project) togglePop(trophy.project);
-        else if (stAnchor) togglePop('story');
-        else if (proj) togglePop(proj.userData.project);
-        else onPick(pick(e));
+        else if (object) {
+          if (object.room !== openId) onPick(object.room);
+          if (object.type === 'album') toggleAlbum();
+          else if (object.type === 'photo') togglePhoto(object.key);
+          else togglePop(object.key);
+        } else onPick(pick(e));
       }
       drag = null; stage.style.cursor = panMode ? 'move' : 'grab';
     } else if (drag && drag.mode === 'pinch' && pts.size === 1) { drag.mode = 'orbit'; const [r] = [...pts.values()]; drag.x = r.x; drag.y = r.y; }
@@ -832,7 +855,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // Wheel zoom and horizontal trackpad panning in the interactive stage.
   stage.addEventListener('wheel', e => {
     if (e.target !== stage) return;
-    if (e.ctrlKey || e.metaKey || document.documentElement.scrollHeight > innerHeight + 4) return;
+    if (e.ctrlKey || e.metaKey) return;
     e.preventDefault();
     if (Math.abs(e.deltaX) > 2 && Math.abs(e.deltaX) >= Math.abs(e.deltaY)) panBy(-e.deltaX * 0.8, 0, false);
     else zoomBy(Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), false);
@@ -849,7 +872,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       case 'ArrowDown': if (e.shiftKey || panMode) panBy(0, -P); else orbit(0, S); break;
       case '+': case '=': zoomBy(0.85); break;
       case '-': case '_': zoomBy(1 / 0.85); break;
-      case 'Home': case '0': resetView(); break;
+      case 'Home': case '0': case 't': case 'T': resetView(); break;
       default: used = false;
     }
     if (used) e.preventDefault();
@@ -891,7 +914,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     requestAnimationFrame(frame);
     if (!visible || document.hidden) { last = now; return; }
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
-    const k = reduced ? 1 : 1 - Math.exp(-dt * 2.6);
+    const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));
     view.az += (goal.az - view.az) * k; view.el += (goal.el - view.el) * k; view.dist += (goal.dist - view.dist) * k; view.t.lerp(goal.t, k); clampTarget(view.t);
     const ce = Math.cos(view.el), se = Math.sin(view.el), sa = Math.sin(view.az), ca = Math.cos(view.az);
     camera.position.set(view.t.x + view.dist * ce * sa, view.t.y + view.dist * se, view.t.z + view.dist * ce * ca);
@@ -926,7 +949,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   return {
     open(id, { keepView = false } = {}) {
-      if (shipFocus) closePop(false);
+      if (objectFocus && (id !== openId || !keepView)) closePop(false);
       openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
       if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
       if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
@@ -934,18 +957,20 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       if (popKey && !popAllowed(id, popKey)) closePop(false);
       if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
       setGoal();
+      if (objectFocus) focusObject(objectFocus.target, false);
     },
     hover(id) { hoverId = id; },
     setPanMode(on) { panMode = Boolean(on); stage.classList.toggle('panning', panMode); if (!drag) stage.style.cursor = panMode ? 'move' : 'grab'; return panMode; },
     getPanMode: () => panMode,
     reset: resetView,
+    setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
       const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen;
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true);
       return had;
     },
     isCustom: () => custom,
-    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); if (albumModal && albumOpen) updateAlbumView(); updateHoverTip(); },
-    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; } } } : {}),
+    setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); if (objectFocus) focusObject(objectFocus.target, false); if (albumModal && albumOpen) updateAlbumView(); updateHoverTip(); },
+    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; }, inspectionTargets, inspect: key => openPop(key) } } : {}),
   };
 }

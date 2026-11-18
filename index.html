@@ -80,6 +80,15 @@
             <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V7.5a1.5 1.5 0 0 1 3 0V5a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v5a7 7 0 0 1-13 3.6l-2.4-3.8a1.6 1.6 0 0 1 2.4-2l1 1.1Z"/></svg></span>
             <span data-i18n="ui.panMode">Move</span>
           </button>
+          <div class="zoom-control">
+            <button class="view-action zoom-step" id="zoom-out" type="button" aria-label="Zoom out" data-i18n-attr="aria-label:ui.zoomOut">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>
+            </button>
+            <input id="zoom-view" type="range" min="0" max="100" step="0.1" value="12.3" aria-label="Zoom" data-i18n-attr="aria-label:ui.zoom">
+            <button class="view-action zoom-step" id="zoom-in" type="button" aria-label="Zoom in" data-i18n-attr="aria-label:ui.zoomIn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12M12 6v12"/></svg>
+            </button>
+          </div>
           <button class="view-action" id="reset-view" type="button" hidden>
             <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v5h5M4.5 10a8 8 0 1 1 0 5.5"/></svg></span>
             <span data-i18n="ui.resetView">Reset view</span>

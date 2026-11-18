@@ -231,6 +231,8 @@ until a later entry replaces it.
 
 - **D-070 (2026-11-18) Approved favicon for gillespenning.com.** Replace the previous petrol-on-cream GP icon with the owner-selected white GP monogram and dotted globe on royal blue. Use the exact SVG artwork and matching ICO/PNG exports (16, 32, 180, 512 and 1024 px). Install in `public/`, reference from both `index.html` and `legal.html`, and use a URL version suffix so returning visitors receive the new icon. Keep the site's 3D design and other colours unchanged.
 
+- **D-071 (2026-11-18) Quiet zoom controls and consistent object inspection (owner approved).** Enable mouse-wheel zoom over the clear 3D stage on scrollable pages. Add a discreet logarithmic slider and minus/plus actions beside Reset, synchronized with touch and keyboard zoom. Clicking the OP table, either desk, either shelf, a project, rack or Enterprise opens a card and a tailored close view; direct clicks can enter the object's room from the overview. Keep walls and furniture intact, reserve space above the caption, retain translucent backgrounds on desktop and phone, and restore the prior view when closing. Reset returns to the room view. Restrict the stage outline to keyboard interaction and reduce it to a 1 px hairline.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

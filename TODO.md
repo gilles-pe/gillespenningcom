@@ -40,3 +40,8 @@
 - [x] Build/token checks and CPU geometry/bounds checks passed.
 - [ ] Acquire the referenced Sketchfab binaries through an authenticated download (HTTP 401 without a session). Current shipped miniatures are original procedural geometry, not those files; external asset tasks above remain open.
 - [ ] Verify actual appearance, mobile GPU memory/FPS and interaction on a WebGL-capable desktop and phone. Cloud browser cannot reach the local preview.
+
+## Completed 2026-11-18 - object inspection (D-071)
+- [x] Mouse wheel on a scrollable page; quiet synchronized toolbar zoom; mobile touch targets.
+- [x] Per-object camera poses for desks, OP table, shelves, projects, rack and miniatures; card-first actions and return view.
+- [x] Keyboard-only stage outline; transparency retained; geometry/interaction checks and production build.

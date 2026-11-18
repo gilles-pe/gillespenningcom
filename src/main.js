@@ -6,6 +6,7 @@ import './style.css';
 import { t, initialLang, rememberLang, applyStatic, LANGS } from './i18n.js';
 import { renderSocial, renderNews, renderLatest } from './widgets.js';
 import { onNews, refreshNews } from './news.js';
+import { zoomToSlider, sliderToZoom } from './inspection.js';
 
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('scene');
@@ -17,6 +18,19 @@ const spotsEl = document.getElementById('spots');
 const viewControls = document.getElementById('view-controls');
 const resetBtn = document.getElementById('reset-view');
 const panBtn = document.getElementById('pan-toggle');
+const zoomSlider = document.getElementById('zoom-view');
+// Programmatic focus after a mouse action must not draw a frame around the scene.
+document.addEventListener('keydown', e => {
+  if (!e.metaKey && !e.ctrlKey && !e.altKey) html.classList.add('keyboard-navigation');
+}, true);
+document.addEventListener('pointerdown', () => html.classList.remove('keyboard-navigation'), true);
+const syncZoom = zoom => {
+  zoomSlider.value = zoomToSlider(zoom);
+  zoomSlider.setAttribute('aria-valuetext', `${Math.round(100 / zoom)}%`);
+};
+zoomSlider.addEventListener('input', () => api?.setZoom(sliderToZoom(Number(zoomSlider.value))));
+document.getElementById('zoom-out').addEventListener('click', () => { zoomSlider.value = Math.max(0, Number(zoomSlider.value) - 4); api?.setZoom(sliderToZoom(Number(zoomSlider.value))); });
+document.getElementById('zoom-in').addEventListener('click', () => { zoomSlider.value = Math.min(100, Number(zoomSlider.value) + 4); api?.setZoom(sliderToZoom(Number(zoomSlider.value))); });
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => matchMedia('(max-width: 800px)').matches;
 const ORDER = ['projects', 'about', 'ai', 'writing'];
@@ -229,6 +243,7 @@ function useStatic() {
 // Text and links are usable before the 3D code arrives.
 import('./viewer.js').then(({ startViewer }) => {
   api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
+    onZoom: syncZoom,
     onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
   if (!api) return useStatic();
   viewControls.hidden = false;

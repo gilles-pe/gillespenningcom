@@ -247,3 +247,6 @@ until a later entry replaces it.
 7. Enable the Impeccable design hook, yes or no?
 8. Legal imprint and privacy policy for the live site (owner must supply the texts, D-020).
 9. A share image (Open Graph picture) for link previews. None exists, so previews show text only.
+
+
+- **D-073 (2026-11-18) Additional photo album images (owner request):** Added nine supplied photos to the About Me album, with concise location labels where identifiable. Images are stored as WebP in `public/album/`; uncertain locations are left unspecified.

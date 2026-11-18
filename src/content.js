@@ -179,6 +179,51 @@ export const content = {
             title: 'Quiet Sunset',
             desc: 'Silhouetted tree, bench and hiking signpost against a blazing golden horizon · Evening tranquility',
           },
+          {
+            src: 'album/photo-8.webp',
+            title: 'Solar Eclipse',
+            desc: 'A moment under the darkened sun.',
+          },
+          {
+            src: 'album/photo-9.webp',
+            title: 'Baku',
+            desc: 'Old and new architecture in Azerbaijan’s capital.',
+          },
+          {
+            src: 'album/photo-10.webp',
+            title: 'Elbe, Hamburg',
+            desc: 'Sunset by the river.',
+          },
+          {
+            src: 'album/photo-11.webp',
+            title: 'Morning light',
+            desc: 'A misty morning in the park.',
+          },
+          {
+            src: 'album/photo-12.webp',
+            title: 'Köhlbrandbrücke, Hamburg',
+            desc: 'Running across the bridge.',
+          },
+          {
+            src: 'album/photo-13.webp',
+            title: 'Blankenese, Hamburg',
+            desc: 'Evening on the Elbe.',
+          },
+          {
+            src: 'album/photo-14.webp',
+            title: 'Frankfurt am Main',
+            desc: 'The skyline at sunset.',
+          },
+          {
+            src: 'album/photo-15.webp',
+            title: 'Paris',
+            desc: 'The Louvre at night.',
+          },
+          {
+            src: 'album/photo-16.webp',
+            title: 'Blankenese, Hamburg',
+            desc: 'High water at the lighthouse.',
+          },
         ],
       },
       storyCard: { text: 'Leading teams through change, building businesses and bringing technology into care. See how this worked in practice and what colleagues say about working together.' },
@@ -449,6 +494,51 @@ export const content = {
             src: 'album/photo-7.webp',
             title: 'Abendstille',
             desc: 'Baumsilhouette, Rastbank und Wegweiser vor leuchtendem Abendrot am Horizont',
+          },
+          {
+            src: 'album/photo-8.webp',
+            title: 'Sonnenfinsternis',
+            desc: 'Ein Moment unter der verdunkelten Sonne.',
+          },
+          {
+            src: 'album/photo-9.webp',
+            title: 'Baku',
+            desc: 'Alte und neue Architektur in Aserbaidschans Hauptstadt.',
+          },
+          {
+            src: 'album/photo-10.webp',
+            title: 'Elbe, Hamburg',
+            desc: 'Sonnenuntergang am Fluss.',
+          },
+          {
+            src: 'album/photo-11.webp',
+            title: 'Morgenlicht',
+            desc: 'Ein nebliger Morgen im Park.',
+          },
+          {
+            src: 'album/photo-12.webp',
+            title: 'Köhlbrandbrücke, Hamburg',
+            desc: 'Lauf über die Brücke.',
+          },
+          {
+            src: 'album/photo-13.webp',
+            title: 'Blankenese, Hamburg',
+            desc: 'Abend an der Elbe.',
+          },
+          {
+            src: 'album/photo-14.webp',
+            title: 'Frankfurt am Main',
+            desc: 'Die Skyline im Abendlicht.',
+          },
+          {
+            src: 'album/photo-15.webp',
+            title: 'Paris',
+            desc: 'Der Louvre bei Nacht.',
+          },
+          {
+            src: 'album/photo-16.webp',
+            title: 'Blankenese, Hamburg',
+            desc: 'Hochwasser am Leuchtturm.',
           },
         ],
       },

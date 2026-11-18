@@ -42,12 +42,13 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `stage.bar` | Enter a room | Raum betreten |
 | `rooms.label` | The four rooms | Die vier Räume |
 | `rooms.projects.h` | Projects | Projekte |
-| `rooms.projects.p` | Three projects are linked here. DocEase is coming soon. | Drei Projekte sind hier verlinkt. DocEase kommt demnächst. |
+| `rooms.projects.p` | Four projects are linked here. Praxisfaden is coming soon. | Vier Projekte sind hier verlinkt. Praxisfaden kommt demnächst. |
 | `rooms.projects.wimmelbild` | The patient’s path | Der Weg des Patienten |
 | `rooms.projects.monitor` | Studies and benchmarks | Studien und Benchmarks |
+| `rooms.projects.hdrg` | Hybrid-DRG guidance for practices | Leitfaden für Praxen und MVZ |
 | `rooms.about.h` | About Me | Über mich |
-| `rooms.about.p1` | I started in surgery in 2001, moved into telemedicine in 2004, and from 2008 worked on system integration and digital workflows in the operating room. | Ich habe 2001 in der Chirurgie begonnen, bin 2004 in die Telemedizin gewechselt und habe ab 2008 an Systemintegration und digitalen Abläufen im Operationssaal gearbeitet. |
-| `rooms.about.p2` | Since then MedTech has been my field: marketing, sales and sales leadership, large teams, change management and entrepreneurial work. | Seitdem ist die MedTech mein Feld: Marketing, Vertrieb und Vertriebsleitung, große Teams, Change Management und unternehmerische Arbeit. |
+| `rooms.about.p1` | Originally a surgical guy, I’ve spent 25 years in MedTech, with extensive experience in patient monitoring, digital health, ambulatory care and emergency medical services. Digital health has been part of that journey since 2004, from telemedicine to today’s AI and analytics. | Ursprünglich aus der Chirurgie kommend, blicke ich auf 25 Jahre in der MedTech zurück – mit umfassender Erfahrung im Patientenmonitoring, in Digital Health, der ambulanten Versorgung und dem Rettungsdienst. Digital Health begleitet mich dabei seit 2004, von der Telemedizin bis zu heutiger KI und Analytics. |
+| `rooms.about.p2` | My strength is building businesses and transforming large teams, helping them succeed as healthcare itself changes, and bringing technology into practice to improve how care is delivered. | Meine Stärke liegt im Aufbau von Geschäftsfeldern und der Transformation großer Teams: sie im Wandel des Gesundheitswesens zum Erfolg zu führen und Technologie wirksam in die Praxis zu bringen, um die Versorgung spürbar zu verbessern. |
 | `rooms.about.linkedin` | Full profile | Vollständiges Profil |
 | `rooms.ai.h` | AI & Digital Health | KI & Digital Health |
 | `rooms.ai.pHtml` | AI, longitudinal data and digitalisation in medicine. Two ways in: [Wimmelbild](https://wimmelbild.gillespenning.com/en/) follows the patient, the [AI in Medicine Monitor](https://ai.gillespenning.com/) follows the evidence. | KI, Längsschnittdaten und Digitalisierung in der Medizin. Es gibt zwei Zugänge: [Wimmelbild](https://wimmelbild.gillespenning.com/en/) folgt dem Patienten, der [AI in Medicine Monitor](https://ai.gillespenning.com/) folgt der Evidenz. |

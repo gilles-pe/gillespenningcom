@@ -62,10 +62,11 @@ function doorSpec(r, id) {
 export const SLOTS = [
   { name: 'ai-wall-1',        room: 'ai',       size: [1.04, 0.52], text: 'Wimmelbild',   tint: '#b9c7a6' },
   { name: 'ai-wall-2',        room: 'ai',       size: [0.76, 0.38], text: 'AI Monitor',   tint: '#cdd9c0' },
-  { name: 'projects-board-1', room: 'projects', size: [0.72, 0.54], text: 'Wimmelbild',   tint: '#b9c7a6' },
-  { name: 'projects-board-2', room: 'projects', size: [0.72, 0.54], text: 'AI Monitor',   tint: '#b9c7a6' },
-  { name: 'projects-board-3', room: 'projects', size: [0.72, 0.54], text: 'Praxisfaden',  tint: '#b9c7a6' },
-  { name: 'projects-board-4', room: 'projects', size: [0.72, 0.54], text: 'Elbstrand',    tint: '#b9c7a6' },
+  { name: 'projects-board-1', room: 'projects', size: [0.66, 0.50], text: 'Wimmelbild',   tint: '#b9c7a6' },
+  { name: 'projects-board-2', room: 'projects', size: [0.66, 0.50], text: 'AI Monitor',   tint: '#b9c7a6' },
+  { name: 'projects-board-3', room: 'projects', size: [0.66, 0.50], text: 'Praxisfaden',  tint: '#b9c7a6' },
+  { name: 'projects-board-4', room: 'projects', size: [0.66, 0.50], text: 'hDRG-Kompass', tint: '#b9c7a6' },
+  { name: 'projects-board-5', room: 'projects', size: [0.66, 0.50], text: 'Elbstrand',    tint: '#b9c7a6' },
   { name: 'writing-table-1',  room: 'writing',  size: [0.44, 0.33], text: 'MedTech Signal', tint: '#d9c7a8' },
   { name: 'writing-shelf-1',  room: 'writing',  size: [0.36, 0.48], text: 'Speaking',     tint: '#d9c7a8' },
   { name: 'about-wall-1',     room: 'about',    size: [0.54, 0.72], text: 'About',        tint: '#b9c7a6' },
@@ -745,7 +746,7 @@ export function buildScene() {
 function layout(id) {
   const { w, d } = ROOMS[id], back = -d / 2;
   if (id === 'projects') {
-    const pitch = 1.1, z = back + 0.42, xs = [0, 1, 2, 3].map(n => (n - 1.5) * pitch);
+    const pitch = 0.85, z = back + 0.42, xs = [0, 1, 2, 3, 4].map(n => (n - 2) * pitch);
     return { xs, z, spotZ: z + 0.6 };
   }
   if (id === 'about') {
@@ -1490,16 +1491,16 @@ function practiceCorner(g, L, projectPicks) {
   monitor.add(new THREE.Mesh(new THREE.TubeGeometry(cable, 16, 0.0035, 6), dark));
 }
 
-const PROJECT_KEYS = ['wimmelbild', 'monitor', 'praxisfaden', 'elbstrand'];
+const PROJECT_KEYS = ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'];
 function furnish(id, g, r) {
   const w = wood(), cream = mat(C.cream), L = layout(id), { w: RW, d: RD } = r;
   if (id === 'projects') {
     const projectPicks = [];
     L.xs.forEach((x, i) => {
-      const plinth = box(g, 0.78, 0.5, 0.6, x, 0, L.z, w);
+      const plinth = box(g, 0.70, 0.5, 0.56, x, 0, L.z, w);
       const face = slotMaterial(`projects-board-${i + 1}`);
-      const b = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.54, 0.04), [cream, cream, cream, cream, face, cream]);
-      b.position.set(x, 0.86, L.z); b.rotation.x = -0.18; b.castShadow = true; g.add(b);
+      const b = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.50, 0.04), [cream, cream, cream, cream, face, cream]);
+      b.position.set(x, 0.84, L.z); b.rotation.x = -0.18; b.castShadow = true; g.add(b);
       projectPicks.push(
         tagProject(b, PROJECT_KEYS[i], g, b.position),
         tagProject(plinth, PROJECT_KEYS[i], g, b.position),
@@ -1605,7 +1606,8 @@ export const HOTSPOTS = {
     ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.projects.xs[0], 0.1, LAY.projects.spotZ, 'wimmelbild'],
     ['monitorShort', 'https://ai.gillespenning.com/', LAY.projects.xs[1], 0.1, LAY.projects.spotZ, 'monitor'],
     ['praxisfaden', null, LAY.projects.xs[2], 0.1, LAY.projects.spotZ, 'praxisfaden'],
-    ['elbstrand', 'https://penning.info/', LAY.projects.xs[3], 0.1, LAY.projects.spotZ, 'elbstrand'],
+    ['hdrg', 'https://www.hdrg-kompass.de/', LAY.projects.xs[3], 0.1, LAY.projects.spotZ, 'hdrg'],
+    ['elbstrand', 'https://penning.info/', LAY.projects.xs[4], 0.1, LAY.projects.spotZ, 'elbstrand'],
   ],
   writing: [
     ['signal', 'https://medtechsignal.substack.com/', LAY.writing.table[0] - 0.05, 0.52, LAY.writing.table[1], 'signal'],

@@ -9,8 +9,9 @@ No file means the placeholder stays. Full table and style brief: `DESIGN.md`.
 | ai-wall-2 | 2:1 landscape | 1200 x 600 px |
 | projects-board-1 (Wimmelbild) | 4:3 landscape | 1200 x 900 px |
 | projects-board-2 (AI Monitor) | 4:3 landscape | 1200 x 900 px |
-| projects-board-3 (Praxisfaden) | 4:3 landscape | 1200 x 900 px |
-| projects-board-4 (Elbstrand) | 4:3 landscape | 1200 x 900 px |
+| projects-board-3 (Praxisfaden mascot) | 4:3 landscape | 1200 x 900 px |
+| projects-board-4 (hDRG-Kompass) | 4:3 landscape | 1200 x 900 px |
+| projects-board-5 (Elbstrand) | 4:3 landscape | 1200 x 900 px |
 | writing-table-1 (MedTech Signal) | 4:3 landscape | 800 x 600 px |
 | writing-shelf-1 (Speaking photo) | 3:4 portrait | 768 x 1024 px |
 | about-wall-1 | 3:4 portrait | 900 x 1200 px |

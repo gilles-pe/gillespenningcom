@@ -7,6 +7,7 @@
 export const LINKS = {
   wimmelbild: 'https://wimmelbild.gillespenning.com/en/',   // confirmed path; a German path is an open question
   monitor: 'https://ai.gillespenning.com/',
+  hdrg: 'https://www.hdrg-kompass.de/',
   signal: 'https://medtechsignal.substack.com/',
   linkedin: 'https://www.linkedin.com/in/gillespenning/',
   bluesky: 'https://bsky.app/profile/gillespe.bsky.social',
@@ -75,15 +76,16 @@ export const content = {
       label: 'The four rooms',
       projects: {
         h: 'Projects',
-        p: 'Three projects are linked here. Praxisfaden is coming soon.',
+        p: 'Four projects are linked here. Praxisfaden is coming soon.',
         cardHint: 'Click a project in the room for details.',
         wimmelbild: 'The patient’s path',
         monitor: 'Studies and benchmarks',
+        hdrg: 'Hybrid-DRG guidance for practices',
       },
       about: {
         h: 'About Me',
-        p1: 'MedTech since 2001, digital workflows from telemedicine to AI since 2004, and OR system integration in minimally invasive surgery and patient monitoring from 2008.',
-        p2: 'Healthcare leadership since 2005 across large teams, change management, sales leadership and today AI and analytics.',
+        p1: 'Originally a surgical guy, I’ve spent 25 years in MedTech, with extensive experience in patient monitoring, digital health, ambulatory care and emergency medical services. Digital health has been part of that journey since 2004, from telemedicine to today’s AI and analytics.',
+        p2: 'My strength is building businesses and transforming large teams, helping them succeed as healthcare itself changes, and bringing technology into practice to improve how care is delivered.',
         linkedin: 'Full profile',
       },
       ai: {
@@ -168,9 +170,15 @@ export const content = {
           text: 'A tool for medical assistants (MFAs) in outpatient medicine to relieve practice workload. Coming soon.',
           href: null,
         },
+        hdrg: {
+          title: 'hDRG-Kompass',
+          img: 'slots/projects-board-4.webp',
+          text: 'An analysis and guidance platform for Hybrid-DRG potentials in outpatient practices and medical centres (MVZ).',
+          href: LINKS.hdrg,
+        },
         elbstrand: {
           title: 'Elbstrand',
-          img: 'slots/projects-board-4.webp',
+          img: 'slots/projects-board-5.webp',
           text: 'Just chill and relax.',
           href: LINKS.elbstrand,
         },
@@ -225,6 +233,7 @@ export const content = {
         monitor: 'AI in Medicine Monitor',
         monitorShort: 'AI Monitor',
         praxisfaden: 'Praxisfaden',
+        hdrg: 'hDRG-Kompass',
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
         bluesky: 'Bluesky',
@@ -300,15 +309,16 @@ export const content = {
       label: 'Die vier Räume',
       projects: {
         h: 'Projekte',
-        p: 'Drei Projekte sind hier verlinkt. Praxisfaden kommt demnächst.',
+        p: 'Vier Projekte sind hier verlinkt. Praxisfaden kommt demnächst.',
         cardHint: 'Klicke im Raum auf ein Projekt für Details.',
         wimmelbild: 'Der Weg des Patienten',
         monitor: 'Studien und Benchmarks',
+        hdrg: 'Leitfaden für Praxen und MVZ',
       },
       about: {
         h: 'Über mich',
-        p1: 'Seit 2001 in der MedTech, seit 2004 digitale Workflows von Telemedizin bis KI, ab 2008 OP-Systemintegration in minimalinvasiver Chirurgie und Patientenmonitoring.',
-        p2: 'Seit 2005 Führungserfahrung im Gesundheitswesen mit großen Teams, Change Management, Vertriebsleitung und heute Fokus auf KI und Analytics.',
+        p1: 'Ursprünglich aus der Chirurgie kommend, blicke ich auf 25 Jahre in der MedTech zurück – mit umfassender Erfahrung im Patientenmonitoring, in Digital Health, der ambulanten Versorgung und dem Rettungsdienst. Digital Health begleitet mich dabei seit 2004, von der Telemedizin bis zu heutiger KI und Analytics.',
+        p2: 'Meine Stärke liegt im Aufbau von Geschäftsfeldern und der Transformation großer Teams: sie im Wandel des Gesundheitswesens zum Erfolg zu führen und Technologie wirksam in die Praxis zu bringen, um die Versorgung spürbar zu verbessern.',
         linkedin: 'Vollständiges Profil',
       },
       ai: {
@@ -431,9 +441,15 @@ export const content = {
           text: 'Ein Tool für MFAs in der ambulanten Medizin, um Praxen im Alltag zu entlasten. Demnächst.',
           href: null,
         },
+        hdrg: {
+          title: 'hDRG-Kompass',
+          img: 'slots/projects-board-4.webp',
+          text: 'Orientierungshilfe und Analyseplattform für Hybrid-DRG-Potenziale in Arztpraxen und MVZ.',
+          href: LINKS.hdrg,
+        },
         elbstrand: {
           title: 'Elbstrand',
-          img: 'slots/projects-board-4.webp',
+          img: 'slots/projects-board-5.webp',
           text: 'Just chill and relax.',
           href: LINKS.elbstrand,
         },
@@ -450,6 +466,7 @@ export const content = {
         monitor: 'AI in Medicine Monitor',
         monitorShort: 'AI Monitor',
         praxisfaden: 'Praxisfaden',
+        hdrg: 'hDRG-Kompass',
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
         bluesky: 'Bluesky',

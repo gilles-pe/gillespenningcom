@@ -95,8 +95,9 @@ not per room; only their position follows the room (the wall pictures of the AI 
 | `ai-wall-2` | AI & Digital Health | desktop monitor on practice desk (AI Monitor) | 2:1 landscape | 1200 x 600 px |
 | `projects-board-1` | Projects | board on plinth 1 (Wimmelbild) | 4:3 landscape | 1200 x 900 px |
 | `projects-board-2` | Projects | board on plinth 2 (AI Monitor) | 4:3 landscape | 1200 x 900 px |
-| `projects-board-3` | Projects | board on plinth 3 (Praxisfaden) | 4:3 landscape | 1200 x 900 px |
-| `projects-board-4` | Projects | board on plinth 4 (Elbstrand) | 4:3 landscape | 1200 x 900 px |
+| `projects-board-3` | Projects | board on plinth 3 (Praxisfaden mascot) | 4:3 landscape | 1200 x 900 px |
+| `projects-board-4` | Projects | board on plinth 4 (hDRG-Kompass) | 4:3 landscape | 1200 x 900 px |
+| `projects-board-5` | Projects | board on plinth 5 (Elbstrand) | 4:3 landscape | 1200 x 900 px |
 | `writing-table-1` | Writing & Speaking | MedTech Signal (Substack) book on the round table (clickable) | 4:3 landscape | 800 x 600 px |
 | `writing-shelf-1` | Writing & Speaking | framed photo of Gilles speaking in the bookshelf’s right corner (clickable) | 3:4 portrait | 768 x 1024 px |
 | `about-wall-1` | About Me | framed running photo on back wall (clickable) | 3:4 portrait | 900 x 1200 px |

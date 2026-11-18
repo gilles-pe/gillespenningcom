@@ -28,24 +28,30 @@ export function renderSocial(lang, root = document) {
 const sig = (items, lang, n) => `${lang}|${items.slice(0, n).map(i => [i.id, i.date, pick(i.title, lang), pick(i.summary, lang), newsLink(i)].join('\u0001')).join('\u0002')}`;
 function ext(a, href) { a.href = href; a.rel = 'noopener'; return a; }
 
-// The Writing & Speaking card: heading, the three newest items, link to the full archive.
+// Writing & Speaking shows the latest post and a link to the archive.
 export function renderNews(lang, root = document) {
   const items = getNews();
   root.querySelectorAll('[data-news]').forEach(el => {
-    const key = sig(items, lang, 3);
+    const compact = el.dataset.news === 'compact';
+    const count = compact ? 1 : 3;
+    const key = sig(items, lang, count);
     if (el.dataset.sig === key) return;
     el.dataset.sig = key;
     const h = document.createElement('h3'); h.className = 'news-h'; h.textContent = t(lang, 'news.latest');
     const ul = document.createElement('ul'); ul.className = 'news-list';
-    for (const it of items.slice(0, 3)) {
+    for (const it of items.slice(0, count)) {
       const li = document.createElement('li');
       const time = document.createElement('time'); time.dateTime = it.date; time.textContent = formatDate(it.date, lang);
       const a = ext(document.createElement('a'), newsLink(it)); a.textContent = pick(it.title, lang);
-      const sum = document.createElement('span'); sum.className = 'news-sum'; sum.textContent = pick(it.summary, lang);
-      li.append(time, a, sum); ul.append(li);
+      li.append(time, a);
+      if (!compact) {
+        const sum = document.createElement('span'); sum.className = 'news-sum'; sum.textContent = pick(it.summary, lang);
+        li.append(sum);
+      }
+      ul.append(li);
     }
     const all = ext(document.createElement('a'), NEWS_ARCHIVE); all.className = 'news-all'; all.textContent = t(lang, 'news.all');
-    el.replaceChildren(h, ul, all);
+    el.replaceChildren(...(items.length ? [h, ul, all] : [all]));
   });
 }
 

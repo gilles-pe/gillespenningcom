@@ -63,12 +63,15 @@
         </div>
       </div>
 
-      <div class="stage" id="stage">
-        <canvas id="scene" aria-hidden="true" aria-label="Interactive 3D model of the four rooms. Drag or use the arrow keys to rotate it, plus and minus to zoom, Home to reset the view. The rooms are also in the room bar." data-i18n-attr="aria-label:stage.canvas"></canvas>
-        <img class="fallback" src="/reference-four-rooms.webp" alt="Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking." data-i18n-attr="alt:stage.alt" hidden>
-        <div class="labels" id="labels"></div>
-        <div class="spots" id="spots"></div>
+      <div class="scene-column">
+        <div class="stage" id="stage">
+          <canvas id="scene" aria-hidden="true" aria-label="Interactive 3D model of the four rooms. Drag or use the arrow keys to rotate it, plus and minus to zoom, Home to reset the view. The rooms are also in the room bar." data-i18n-attr="aria-label:stage.canvas"></canvas>
+          <img class="fallback" src="/reference-four-rooms.webp" alt="Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking." data-i18n-attr="alt:stage.alt" hidden>
+          <div class="labels" id="labels"></div>
+          <div class="spots" id="spots"></div>
+        </div>
         <div class="view-controls" id="view-controls" role="group" aria-label="3D view" data-i18n-attr="aria-label:ui.viewControls" hidden>
+          <button class="view-action back" id="back" type="button" data-i18n="ui.allRooms" hidden>All rooms</button>
           <button class="view-action" id="pan-toggle" type="button" aria-pressed="false">
             <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V7.5a1.5 1.5 0 0 1 3 0V5a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v5a7 7 0 0 1-13 3.6l-2.4-3.8a1.6 1.6 0 0 1 2.4-2l1 1.1Z"/></svg></span>
             <span data-i18n="ui.panMode">Move</span>
@@ -79,10 +82,8 @@
           </button>
         </div>
         <div class="bar" id="bar" role="group" aria-label="Enter a room" data-i18n-attr="aria-label:stage.bar"></div>
-        <button class="back" id="back" data-i18n="ui.allRooms" hidden>All rooms</button>
-        <aside class="panel" id="panel" aria-live="polite" hidden></aside>
-        <div class="dock" id="dock" aria-live="polite" hidden></div>
       </div>
+      <aside class="panel" id="panel" aria-labelledby="room-detail-title" hidden></aside>
     </section>
 
     <div class="source" id="source">
@@ -115,15 +116,15 @@
       <article id="writing" data-room="writing">
         <h2 data-i18n="rooms.writing.h">Writing &amp; Speaking</h2>
         <p data-i18n="rooms.writing.p">Essays, notes and talks in English and German.</p>
-        <p class="cta"><a class="btn primary" href="https://www.linkedin.com/in/gillespenning/" rel="noopener" data-i18n="rooms.writing.book">Contact</a></p>
+        <p><a class="contact-link" href="https://www.linkedin.com/in/gillespenning/" rel="noopener" data-i18n="rooms.writing.book">Contact</a></p>
         <!-- Without JavaScript these are plain text links. With JavaScript they get their logo marks (src/icons.js). -->
-        <div class="social-row" data-social="labelled">
+        <div class="social-row writing-profiles" data-social="icons">
           <a href="https://medtechsignal.substack.com/" rel="me noopener">MedTech Signal</a>
           <a href="https://bsky.app/profile/gillespe.bsky.social" rel="me noopener">Bluesky</a>
           <a href="https://www.linkedin.com/in/gillespenning/" rel="me noopener">LinkedIn</a>
         </div>
         <!-- Without JavaScript: one link to the archive. With JavaScript: the latest news (src/news.js). -->
-        <div class="news" data-news><a class="pill" href="https://ai.gillespenning.com/news/">News</a></div>
+        <div class="news writing-news" data-news="compact"><a class="pill" href="https://ai.gillespenning.com/news/">All posts</a></div>
       </article>
     </section>
     </div>

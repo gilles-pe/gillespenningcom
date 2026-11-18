@@ -65,7 +65,7 @@ export const content = {
     news: {
       latest: 'Latest',
       latestSubstacks: 'Latest Substacks',
-      all: 'All news',
+      all: 'All posts',
     },
     stage: {
       alt: 'Architectural model of a home with four rooms: Projects, About Me, AI and Digital Health, Writing and Speaking.',

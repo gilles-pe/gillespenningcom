@@ -25,7 +25,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 30 });
     sun.shadow.bias = -0.0004; sun.shadow.radius = 6; sun.shadow.intensity = 0.5; scene.add(sun);
   }
-  const phone = () => matchMedia('(max-width: 800px)').matches;
 
   // Hotspots are real links (or buttons for soon/project cards), placed over the objects they belong to.
   const spots = [];
@@ -64,7 +63,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const goal = { az: 0, el: EL, dist: 30, t: view.t.clone() };
   const home = { az: 0, el: EL, dist: 30, t: view.t.clone() };   // the default pose for the current state
   const panOffset = new THREE.Vector3();
-  const panelEl = stage.querySelector('#panel');
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
   let shipFocus = null;
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
@@ -79,6 +77,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w || !h) return;
     renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); stageW = w; stageH = h;
     setGoal();
     if (shipFocus) focusShip(shipFocus.key, false);
@@ -108,7 +107,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     return dist;
   }
-  const BAR = 104;                                         // bottom clearance on desktop (footer strip + room bar)
   const roomPts = {};
   for (const r of Object.values(rooms)) {
     roomPts[r.id] = [];
@@ -116,23 +114,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       roomPts[r.id].push(new THREE.Vector3(r.cx + sx * r.w / 2, y, r.cz + sz * r.d / 2));
   }
   function setGoal() {
-    const mob = phone();
-    const topPad = mob ? 0 : 2 * 74 / stageH;
     if (openId) {
-      const r = rooms[openId];
-      home.t.copy(r.center); home.t.y += openId === 'ai' ? 0.12 : 0.22; home.az = -r.x * 0.32;
-      const bar = mob ? 0 : 2 * BAR / stageH;
-      const left = mob ? -0.94 : -0.45, right = mob ? 0.96 : 0.90;
-      home.dist = fitView(roomPts[openId], home.t, home.az, left, right, Math.max(0.55, 0.92 - topPad), Math.max(0.5, 0.92 - bar)) * 0.68;
+      const room = rooms[openId];
+      home.t.copy(room.center);
+      home.az = -room.x * 0.32;
+      home.dist = fitView(roomPts[openId], home.t, home.az, -0.96, 0.96, 0.94, 0.94);
     } else {
-      home.t.copy(center); home.az = AZ;
-      const bar = mob ? 0 : 2 * 90 / stageH;
-      const left = mob ? -0.96 : -0.58, right = mob ? 0.96 : 0.88;
-      home.dist = fitView(outline, home.t, home.az, left, right, Math.max(0.55, 0.94 - topPad), Math.max(0.5, 0.94 - bar)) * 0.92;
-      // On the taller mobile canvas, lower the overview so it is centred in
-      // the open area beneath the translucent introduction. Room views keep
-      // their own framing; reset returns to this same overview position.
-      if (mob) home.t.addScaledVector(upv, home.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * 0.80);
+      home.t.copy(center);
+      home.az = AZ;
+      home.dist = fitView(outline, home.t, home.az, -0.96, 0.96, 0.94, 0.94);
     }
     if (!custom) { panOffset.set(0, 0, 0); goal.az = near(view.az, home.az); goal.el = near(view.el, EL); goal.dist = home.dist; zoom = 1; }
     else goal.dist = Math.max(DMIN, home.dist * zoom);
@@ -215,7 +205,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!pCard || !pOpen) return;
     pOpen = false; pCard.classList.remove('on'); pCard.inert = true;
     stopAutoCard();
-    stage.classList.toggle('card-open', Boolean(popKey));
     clearTimeout(pTimer);
     const had = pCard.contains(document.activeElement);
     if (reduced) pCard.hidden = true;
@@ -241,7 +230,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     pImg.src = `${import.meta.env.BASE_URL}${slotFile}`;
     labelPhoto();
     clearTimeout(pTimer); pOpen = true; pCard.hidden = false; pCard.inert = false; pCard.removeAttribute('aria-hidden');
-    stage.classList.add('card-open');
     updatePhoto();
     void pCard.offsetWidth;
     pCard.classList.add('on');
@@ -363,10 +351,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     miniature.updateWorldMatrix(true, true);
     const bounds = new THREE.Box3().setFromObject(miniature), target = bounds.getCenter(new THREE.Vector3());
     const radius = bounds.getSize(new THREE.Vector3()).length() / 2;
-    popEl.style.top = phone() ? `${Math.max(0, stageH - popEl.offsetHeight - 8)}px` : '';
     const rect = canvas.getBoundingClientRect(), card = popEl.getBoundingClientRect();
-    const left = phone() ? 16 : stageW * .36;
-    const right = stageW - 16, top = phone() ? 16 : 88;
+    const left = 16;
+    const right = stageW - 16, top = 16;
     const bottom = Math.max(top + 80, card.top - rect.top - 16);
     const width = Math.max(100, right - left), height = Math.max(80, bottom - top);
     const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
@@ -384,7 +371,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function restoreShipView() {
     if (!shipFocus) return;
     const saved = shipFocus; shipFocus = null;
-    stage.classList.remove('ship-focused'); popEl.style.top = ''; custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
+    stage.classList.remove('ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
     goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.target);
     checkAway();
   }
@@ -393,7 +380,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     restoreShipView();
     popKey = null; popEl.classList.remove('on'); popEl.inert = true;
     stopAutoCard();
-    stage.classList.toggle('card-open', Boolean(pOpen));
     clearTimeout(popTimer);
     const had = popEl.contains(document.activeElement);
     if (reduced) popEl.hidden = true;
@@ -440,7 +426,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     fillPop();
     popEl.hidden = false;
     popEl.inert = false;
-    stage.classList.add('card-open');
     updatePop();
     void popEl.offsetWidth;
     popEl.classList.add('on');
@@ -456,7 +441,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!popEl || popEl.hidden || !popKey) return;
     if (!popAllowed(openId, popKey)) closePop(false);
   }
-  new ResizeObserver(resize).observe(stage); resize();
+  new ResizeObserver(resize).observe(canvas); resize();
   Object.assign(view, { az: goal.az, el: goal.el, dist: goal.dist }); view.t.copy(goal.t);
 
   // Social trophies and laptop ("My Story") inside About Me
@@ -651,7 +636,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     albumReturnFocus = document.activeElement;
     buildAlbumModal(); clearTimeout(albumTimer);
     albumOpen = true; albumModal.hidden = false; albumModal.inert = false;
-    stage.classList.add('album-open');
     updateAlbumView();
     void albumModal.offsetWidth; albumModal.classList.add('on');
     albumCloseBtn.focus({ preventScroll: true });
@@ -661,7 +645,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!albumModal || !albumOpen) return;
     if (!albumLightbox.hidden) { albumLightbox.hidden = true; albumBook.inert = false; }
     albumOpen = false; albumModal.classList.remove('on'); albumModal.inert = true;
-    stage.classList.remove('album-open'); clearTimeout(albumTimer);
+    clearTimeout(albumTimer);
     const had = albumModal.contains(document.activeElement);
     if (reduced) albumModal.hidden = true;
     else albumTimer = setTimeout(() => { if (!albumOpen) albumModal.hidden = true; }, 260);
@@ -720,7 +704,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const ty = (-hoverV.y * 0.5 + 0.5) * stageH;
     hoverTip.textContent = label;
     hoverTip.style.left = `${Math.min(Math.max(tx, 64), stageW - 64)}px`;
-    hoverTip.style.top = `${Math.max(88, ty - 14)}px`;
+    hoverTip.style.top = `${Math.max(40, ty - 14)}px`;
     hoverTip.hidden = false;
   }
   addEventListener('keydown', e => {
@@ -844,8 +828,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; }).observe(stage);
 
   const v3 = new THREE.Vector3(); let last = performance.now();
-  // Hotspots follow their objects. Where two would overlap, the later one moves down by its own height,
-  // and none may sit under the text panel, so every label stays readable at any stage width.
+  // Hotspots follow their objects and stay inside the canvas.
   const GAP = 4;
   function placeSpots() {
     const live = [];
@@ -860,17 +843,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     live.sort((a, b) => a.px - b.px);
     const placed = [];
-    const pr = panelEl && !panelEl.hidden ? { l: panelEl.offsetLeft, r: panelEl.offsetLeft + panelEl.offsetWidth, t: panelEl.offsetTop, b: panelEl.offsetTop + panelEl.offsetHeight } : null;
     for (const s of live) {
       let l = s.px - s.w / 2, b = s.py;
-      if (pr && l < pr.r + GAP && l + s.w > pr.l && b > pr.t && b - s.h < pr.b) l = pr.r + GAP;
       l = Math.min(Math.max(l, GAP), stageW - s.w - GAP);
       for (let n = 0; n < 8; n++) {
         const hit = placed.find(p => l < p.l + p.w + GAP && p.l < l + s.w + GAP && b - s.h < p.b + GAP && p.b - p.h < b + GAP);
         if (!hit) break;
         b = hit.b + GAP + s.h;
       }
-      b = Math.min(Math.max(b, phone() ? s.h + 8 : 88 + s.h), phone() ? stageH - 12 : stageH - 124);   // keep clear of header, room bar & footer strip
+      b = Math.min(Math.max(b, s.h + 8), stageH - 8);
       placed.push({ l, b, w: s.w, h: s.h });
       s.el.style.left = `${l + s.w / 2}px`; s.el.style.top = `${b}px`;
     }

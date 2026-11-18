@@ -13,7 +13,6 @@ const labelsEl = document.getElementById('labels');
 const panel = document.getElementById('panel');
 const back = document.getElementById('back');
 const bar = document.getElementById('bar');
-const dock = document.getElementById('dock');
 const spotsEl = document.getElementById('spots');
 const viewControls = document.getElementById('view-controls');
 const resetBtn = document.getElementById('reset-view');
@@ -38,6 +37,7 @@ for (const id of ORDER) {
   labelsEl.append(b); labels[id] = b;
   const tb = document.createElement('button');
   tb.textContent = name(id); tb.dataset.room = id;
+  tb.setAttribute('aria-pressed', 'false'); tb.setAttribute('aria-controls', 'panel');
   tb.addEventListener('click', () => toggleRoom(id));
   bar.append(tb);
 }
@@ -50,31 +50,23 @@ source.hidden = true;
 let mode = 'loading';    // 'loading' | '3d' | 'static'
 let pending = null;
 
-const clean = n => { n.removeAttribute?.('id'); n.querySelectorAll?.('[id]').forEach(e => e.removeAttribute('id')); return n; };
-function roomNodes(id, { compact = false } = {}) {
-  if (compact && id === 'projects') {
-    const h = document.createElement('h2'); h.textContent = t(lang, 'rooms.projects.h');
-    const p = document.createElement('p'); p.textContent = t(lang, 'rooms.projects.cardHint');
-    return [h, p];
-  }
-  return [...document.getElementById(id).children].map(n => clean(n.cloneNode(true)));
-}
-function panelCloseBtn() {
-  const b = document.createElement('button');
-  b.type = 'button'; b.className = 'card-x'; b.textContent = '×';
-  b.setAttribute('aria-label', t(lang, 'ui.close'));
-  b.addEventListener('click', () => { panel.hidden = true; canvas.focus({ preventScroll: true }); });
-  return b;
-}
-function showSpeaking() {
-  const host = mobile() ? dock : panel, part = host.querySelector('.speaking-part');
-  if (!part) return;
-  part.scrollIntoView({ block: mobile() ? 'nearest' : 'start', behavior: reduced ? 'auto' : 'smooth' });
-  part.querySelector('h3').focus({ preventScroll: true });
+function roomNodes(id) {
+  const nodes = [...document.getElementById(id).children].map(node => node.cloneNode(true));
+  nodes[0].id = 'room-detail-title';
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'card-x';
+  close.textContent = '×';
+  close.setAttribute('aria-label', t(lang, 'ui.close'));
+  close.addEventListener('click', () => {
+    panel.hidden = true;
+    canvas.focus({ preventScroll: true });
+  });
+  return [close, ...nodes];
 }
 
-function openRoom(id, auto = false, { speaking = false } = {}) {
-  if (mode === 'loading') { pending = { id, speaking }; return; }
+function openRoom(id, auto = false) {
+  if (mode === 'loading') { pending = id; return; }
   const wasCurrent = current === id;
   current = id;
   document.querySelectorAll('.top nav a').forEach(a => {
@@ -89,40 +81,28 @@ function openRoom(id, auto = false, { speaking = false } = {}) {
   });
   bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.room === id));
   if (!api) {
-    if (!auto) document.getElementById(speaking && document.getElementById('speaking') ? 'speaking' : id)?.scrollIntoView();
+    if (!auto) document.getElementById(id)?.scrollIntoView();
     return;
   }
-  stage.classList.add('open'); back.hidden = false;
-  if (id === 'ai') {
-    panel.replaceChildren();
-    panel.hidden = true;
-  } else {
-    panel.replaceChildren(panelCloseBtn(), ...roomNodes(id, { compact: true }));
-    // The card scrolls inside: make it a named, keyboard-focusable region so the keyboard can scroll it in every browser.
-    panel.tabIndex = 0; panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', name(id));
-    panel.hidden = false; panel.scrollTop = 0;   // reset after un-hiding: a hidden element keeps its old scroll position
-  }
-  // Phone: the room's content sits in the dock under the model; skip off-screen live-region mutations on desktop.
-  if (mobile()) {
-    const all = document.createElement('button');
-    all.type = 'button'; all.className = 'allrooms'; all.textContent = t(lang, 'ui.allRooms');
-    all.addEventListener('click', () => { closeRoom(); bar.querySelector('button')?.focus({ preventScroll: true }); });
-    dock.replaceChildren(all, ...roomNodes(id));
-    dock.hidden = false;
-  } else {
-    dock.hidden = true;
-    dock.replaceChildren();
-  }
+  stage.classList.add('open');
+  back.hidden = false;
+  panel.replaceChildren(...roomNodes(id));
+  panel.hidden = false;
   api.open(id, { keepView: auto && wasCurrent });
-  if (speaking) showSpeaking();
+  // Header navigation should make the scene reachable on a vertically stacked page.
+  if (!auto && mobile() && stage.getBoundingClientRect().top > window.innerHeight) {
+    stage.scrollIntoView({ block: 'start', behavior: reduced ? 'instant' : 'smooth' });
+  }
 }
 function closeRoom() {
   current = null;
-  stage.classList.remove('open'); panel.hidden = true; back.hidden = true; dock.hidden = true;
-  dock.replaceChildren();
+  const restoreFocus = document.activeElement === back || panel.contains(document.activeElement);
+  stage.classList.remove('open'); panel.hidden = true; back.hidden = true;
+  panel.replaceChildren();
   bar.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', false));
   document.querySelectorAll('.top nav a').forEach(a => { a.classList.remove('active'); a.removeAttribute('aria-current'); });
   api?.open(null);
+  if (restoreFocus) canvas.focus({ preventScroll: true });
 }
 // Desktop: clicking a room zooms/re-centers into that room (All rooms button on the right exits). Mobile: second tap toggles out.
 const toggleRoom = id => (current === id && mobile() ? closeRoom() : openRoom(id));
@@ -141,7 +121,6 @@ panBtn.addEventListener('click', () => {
   canvas.focus({ preventScroll: true });
 });
 resetBtn.addEventListener('click', () => { api?.reset(); canvas.focus({ preventScroll: true }); });
-matchMedia('(max-width: 800px)').addEventListener('change', () => { if (current) openRoom(current, true); });
 addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (api?.closeNote?.()) return;
@@ -156,7 +135,7 @@ document.addEventListener('click', e => {
   if (ORDER.includes(h)) { e.preventDefault(); openRoom(h); }
 });
 
-// Language switch: static text, room names, 3D lettering, and the open room's panel and dock.
+// Language switch: static text, room names, 3D lettering and room details.
 // Social links and news are rendered into every placeholder on the page (source sections, footer, open card).
 function renderAll() { renderSocial(lang); renderNews(lang); renderLatest(lang); }
 onNews(renderAll);
@@ -179,7 +158,8 @@ refreshNews();   // snapshot is already on screen; the live feed replaces it if 
 function useStatic() {
   mode = 'static'; html.classList.remove('js'); html.classList.add('static'); source.hidden = false;
   canvas.hidden = true; stage.querySelector('.fallback').hidden = false; stage.classList.add('static');
-  if (pending) { const p = pending; pending = null; openRoom(p.id, false, p); }
+  viewControls.hidden = true; bar.hidden = true;
+  if (pending) { const id = pending; pending = null; openRoom(id); }
 }
 
 // Text and links are usable before the 3D code arrives.
@@ -192,5 +172,5 @@ import('./viewer.js').then(({ startViewer }) => {
   canvas.removeAttribute('aria-hidden'); canvas.tabIndex = 0; canvas.setAttribute('role', 'application');
   if (import.meta.env.DEV) window.__gp = api.debug;
   mode = '3d';
-  if (pending) { const p = pending; pending = null; openRoom(p.id, false, p); }
+  if (pending) { const id = pending; pending = null; openRoom(id); }
 }).catch(useStatic);

@@ -220,6 +220,8 @@ until a later entry replaces it.
 
 - **D-066 (2026-11-18) Subtle refinement of the lounge floor lamp.** Keep its position, height and classic tapered silhouette in Writing & Speaking. Give it a low bronze base, a slimmer stem, a rounded linen shade with narrow hems, a warm diffuser and a short cord routed toward the wall.
 
+- **D-067 (2026-11-18) Separate page text from the 3D canvas.** Replace the overlapping intro and room-card layout with a responsive grid. Show room details alongside the model on wide screens and below it on smaller screens. Fit and centre the camera within its own canvas and keep controls outside it. Use one room details region across layouts. In Writing & Speaking show a short introduction, contact, social links, and one recent post plus the archive.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

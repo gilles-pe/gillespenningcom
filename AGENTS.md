@@ -116,3 +116,6 @@ The About laptop opens a short leadership card; its internal More details action
 
 ## Album arrival and BACK (D-074)
 The initial album click must frame the physical album before opening the book; only a subsequent deliberate photo click opens the lightbox. Clear lightbox state on every entry, block click-through from the opening pointer gesture, and cancel delayed opening on room changes, Reset or BACK. The translucent top-right BACK control restores prior room/object/camera views. Group wheel, slider, pinch and drag events into useful steps, cap the local history, and do not record history while restoring it. Album BACK returns from photo to book, book to scene, then previous camera views. Preserve All rooms, Reset, URL room synchronization and reduced motion. Validate with the inspection harness and build.
+
+## External links and projects (D-076)
+External HTTP(S) destinations open in a new tab with a focus request; browsers may control focus. Internal navigation remains in-page. A project object first opens its card; another click on that same project opens its external destination. A destination-less project never navigates and instead displays the Coming Soon badge over the image. Do not apply this two-click rule to furniture or social plaques.

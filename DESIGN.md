@@ -176,3 +176,6 @@ The About laptop introduces Leadership & Business Development and links to the e
 
 ### Album arrival and BACK (D-074)
 The first album tap moves the camera to the book before displaying the facing pages. Never open an enlarged photo from this initial gesture. Every new entry clears the lightbox state. BACK is a quiet 48 px control on the shared translucent paper surface at the top-right of the interactive stage. It appears when a previous view exists and reverses room/object changes or grouped manual camera gestures. A matching album-header action returns from the book; an enlarged photo returns to the spread first. Respect reduced motion and cancel pending album entry when leaving its room.
+
+### Project activation (D-076)
+A project opens its card on first selection and its external destination in a new tab on the next selection. For a project without a destination, show a small Coming Soon badge over its picture on the translucent paper surface, and keep the card open. External links request foreground focus; browsers retain final control.

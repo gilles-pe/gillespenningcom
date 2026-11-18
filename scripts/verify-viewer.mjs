@@ -26,7 +26,9 @@ const globalListeners={};let frame,resize;
 const document={createElement:tag=>new Element(tag),createElementNS:(_,tag)=>new Element(tag),get activeElement(){return active;},hidden:false,documentElement:{scrollHeight:1800}};
 class Renderer{constructor(){this.shadowMap={};}getPixelRatio(){return 1;}setPixelRatio(){}setSize(){}render(scene){scene.updateMatrixWorld(true);}}
 class TextureLoader {load(){return new Three.Texture();}}
-const globals={console,document,Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
+let openedTabs=[];
+const window={open(url,target){const tab={url,target,focused:false,opener:{},focus(){this.focused=true;}};openedTabs.push(tab);return tab;}};
+const globals={console,document,window,Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
 const ctx=vm.createContext(globals);const cache=new Map();
 async function external(name){const ns=name==='three'?{...Three,WebGLRenderer:Renderer,TextureLoader}:await import(name);return new vm.SyntheticModule(Object.keys(ns),function(){for(const [key,val]of Object.entries(ns))this.setExport(key,val);},{context:ctx,identifier:name});}
 async function getModule(file){if(cache.has(file))return cache.get(file);const mod=new vm.SourceTextModule(readFileSync(file,'utf8'),{context:ctx,identifier:file,initializeImportMeta:meta=>{meta.env={BASE_URL:'/',DEV:true};}});cache.set(file,mod);return mod;}
@@ -122,3 +124,10 @@ animated.back();animated.debug.openAlbum();animated.open('writing');
 for(let i=0;i<180;i++){tick+=16;frame(tick);}
 assert(!animated.debug.albumPending,'room change failed to cancel album entry');
 console.log('animated album arrival and cancellation: passed');
+
+const projectViewer=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick(){},onAway(){}});
+projectViewer.open('projects');projectViewer.debug.selectProject('monitor');draw();assert.equal(openedTabs.length,0);
+projectViewer.debug.selectProject('monitor');assert.equal(openedTabs.length,1);assert.equal(openedTabs[0].target,'_blank');assert(openedTabs[0].focused);assert.equal(openedTabs[0].opener,null);
+projectViewer.closeNote();projectViewer.debug.selectProject('praxisfaden');draw();const badge=stage.children.findLast(element=>element.classList.contains('project-soon-badge'));assert(!badge.hidden);assert.equal(badge.textContent,'Coming Soon');
+projectViewer.debug.selectProject('praxisfaden');assert.equal(openedTabs.length,1);assert(!badge.hidden);
+console.log('project first/second click, new-tab focus and Coming Soon: passed');

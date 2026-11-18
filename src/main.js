@@ -7,6 +7,8 @@ import { t, initialLang, rememberLang, applyStatic, LANGS } from './i18n.js';
 import { renderSocial, renderNews, renderLatest } from './widgets.js';
 import { onNews, refreshNews } from './news.js';
 import { zoomToSlider, sliderToZoom } from './inspection.js';
+import { enableExternalLinks } from './external-links.js';
+enableExternalLinks();
 
 const stage = document.getElementById('stage');
 const canvas = document.getElementById('scene');

@@ -115,7 +115,9 @@ export const content = {
             '“I admired your vision and determination to open up the market and enjoyed working with you to do exactly that.”',
           ],
           directionTitle: 'What I focus on today',
-          direction: 'Putting AI and digital tools to work in clinical care - simpler workflows, less time lost on routine tasks, and care models that make sense both medically and financially.',
+          direction: 'Putting AI and digital tools to work in clinical & ambulatory care, creating simpler workflows, reducing time lost on routine tasks, and building models that work both medically and financially.',
+          howTitle: 'How I lead',
+          how: 'Leading people through change, building businesses and bringing technology into everyday care. Over the years that meant reshaping organizations, guiding teams through post-merger integrations and change,  opening new markets, driven by clear direction, real trust and the backing to take ownership.',
         },
       },
       ai: {
@@ -442,6 +444,8 @@ export const content = {
           ],
           directionTitle: 'Woran ich heute arbeite',
           direction: 'KI und digitale Werkzeuge so in die Versorgung bringen, dass sie im Alltag helfen statt aufzuhalten. Weniger Aufwand bei Dokumentation und Abläufen - und Angebote, die medizinisch tragen und sich wirtschaftlich rechnen.',
+          howTitle: 'Wie ich führe',
+          how: 'Menschen durch Veränderungen führen, Geschäftsfelder aufbauen und Technologie in den Versorgungsalltag bringen. Dazu gehörten die Neuausrichtung von Organisationen, die Begleitung von Teams bei Integrationen nach Fusionen und durch Veränderungen sowie die Erschließung neuer Märkte. Entscheidend sind eine klare Richtung, echtes Vertrauen und der Rückhalt, Verantwortung zu übernehmen.',
         },
       },
       ai: {

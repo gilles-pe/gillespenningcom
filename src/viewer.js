@@ -5,6 +5,7 @@ import { t } from './i18n.js';
 import { createEgg } from './egg.js';
 import { PATHS } from './icons.js';
 import { albumPages } from './album-pages.js';
+import { openExternal } from './external-links.js';
 import { inspectionPose, clampZoom } from './inspection.js';
 
 export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack }) {
@@ -338,6 +339,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     || inspectionTargets.some(target => target.room === roomId && target.key === key);
   let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popMore = null, popTimeline = null, popClose = null, shipActions = null;
   let popKey = null, popTimer = null;
+  const projectKeys = new Set(['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand']);
+  const soonBadge = document.createElement('div'); soonBadge.className = 'project-soon-badge';
+  soonBadge.setAttribute('role', 'status'); soonBadge.hidden = true; stage.append(soonBadge);
+  const badgePos = new THREE.Vector3(), badgeBox = new THREE.Box3();
+  function updateSoonBadge() {
+    const data = t(curLang, `model.projectCards.${popKey}`);
+    const target = openId === 'projects' && projectKeys.has(popKey) && !data?.href ? inspectionFor(popKey) : null;
+    if (!target) { soonBadge.hidden = true; return; }
+    const board = target.objects[0]; board.updateWorldMatrix(true, false);
+    badgeBox.setFromObject(board).getCenter(badgePos); badgePos.project(camera);
+    if (soonBadge.textContent !== 'Coming Soon') soonBadge.textContent = 'Coming Soon';
+    soonBadge.hidden = badgePos.z >= 1 || Math.abs(badgePos.x) > 1 || Math.abs(badgePos.y) > 1;
+    soonBadge.style.left = `${(badgePos.x * .5 + .5) * stageW}px`;
+    soonBadge.style.top = `${(-badgePos.y * .5 + .5) * stageH}px`;
+  }
   const projectHit = ndcPos => {
     projRay.setFromCamera(ndcPos, camera);
     const h = projRay.intersectObjects(projThings, false)[0];
@@ -459,7 +475,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function closePop(restoreFocus = false) {
     if (!popEl || !popKey) return;
     restoreObjectView();
-    popKey = null; popEl.classList.remove('on'); popEl.inert = true;
+    popKey = null; soonBadge.hidden = true; popEl.classList.remove('on'); popEl.inert = true;
     stopAutoCard();
     clearTimeout(popTimer);
     const had = popEl.contains(document.activeElement);
@@ -522,7 +538,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!objectFocus && !['rack', 'enterprise', 'enterpriseD'].includes(key)) startAutoCard(() => closePop(false));
   }
   function togglePop(key) {
-    if (popKey === key) closePop(true);
+    if (popKey === key && projectKeys.has(key)) {
+      const data = t(curLang, `model.projectCards.${key}`);
+      if (data?.href) openExternal(data.href);
+      else updateSoonBadge();
+    } else if (popKey === key) closePop(true);
     else openPop(key);
   }
   function updatePop() {
@@ -1006,6 +1026,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       labels[r.id].style.top = `${(-v3.y * 0.5 + 0.5) * 100}%`;
     }
     placeSpots();
+    updateSoonBadge();
     updateHoverTip();
     renderCamera.position.copy(camera.position);
     renderCamera.quaternion.copy(camera.quaternion);
@@ -1040,6 +1061,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     },
     isCustom: () => custom,
     setLanguage(l) { curLang = l; setModelLanguage(l); labelSpots(); egg.setLanguage(l); labelPhoto(); fillPop(); if (objectFocus) focusObject(objectFocus.target, false); if (albumModal && albumOpen) updateAlbumView(); updateHoverTip(); },
-    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; }, inspectionTargets, inspect: key => openPop(key), openAlbum, get albumPending() { return albumPending; }, get historyLength() { return viewHistory.length; } } } : {}),
+    ...(import.meta.env.DEV ? { debug: { camera, view, goal, egg, cellar, get custom() { return custom; }, get zoom() { return zoom; }, inspectionTargets, inspect: key => openPop(key), selectProject: key => togglePop(key), openAlbum, get albumPending() { return albumPending; }, get historyLength() { return viewHistory.length; } } } : {}),
   };
 }

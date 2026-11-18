@@ -74,6 +74,16 @@ for(const target of api.debug.inspectionTargets){
 }
 }
 console.log('Geometry visibility: '+visibility.length+' object/view combinations checked');
+api.open('about');api.debug.inspect('story');draw();
+const card=stage.children.find(element=>element.classList.contains('pop-card'));
+const body=card.children.find(element=>element.classList.contains('pop-body'));
+assert.equal(body.href,'#leadership-deepdive');
+assert('openLeadership' in body.dataset);
+assert(body.children.some(element=>element.classList.contains('pop-more') && !element.hidden));
+assert(body.children.some(element=>element.textContent?.includes('Leading teams through change')));
+api.closeNote();
+api.open('projects');api.debug.inspect('monitor');draw();assert(card.classList.contains('project-link'));api.closeNote();
+api.debug.inspect('praxisfaden');draw();assert(!card.classList.contains('project-link'));api.closeNote();
 api.open('about');api.debug.inspect('enterprise');draw();assert(stage.classList.contains('object-focused'));api.setLanguage('de');draw();assert(stage.classList.contains('object-focused'));api.open('about',{keepView:true});assert(stage.classList.contains('object-focused'));api.reset();draw();assert(!stage.classList.contains('object-focused'));assert.equal(api.debug.zoom,1);
 let prevented=false;const before=api.debug.zoom;stage.fire('wheel',{deltaX:0,deltaY:-100,deltaMode:0,preventDefault(){prevented=true;}});assert(prevented);assert(api.debug.zoom<before);
 prevented=false;stage.fire('wheel',{ctrlKey:true,preventDefault(){prevented=true;}});assert(!prevented);

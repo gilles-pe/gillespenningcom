@@ -299,7 +299,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     || (roomId === 'writing' && SOCIAL_CARDS.has(key))
     || (roomId === 'about' && ABOUT_CARDS.has(key))
     || inspectionTargets.some(target => target.room === roomId && target.key === key);
-  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popTimeline = null, popClose = null, shipActions = null;
+  let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popMore = null, popTimeline = null, popClose = null, shipActions = null;
   let popKey = null, popTimer = null;
   const projectHit = ndcPos => {
     projRay.setFromCamera(ndcPos, camera);
@@ -334,17 +334,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     shipActions.hidden = !isShip;
     labelShipAction(shipActions.children[0], shipCopy.inspect, 'inspect');
     labelShipAction(shipActions.children[1], shipCopy.warp, 'warp');
+    popMore.hidden = popKey !== 'story';
     if (popKey === 'story') {
       const title = t(curLang, 'model.spots.story');
       popEl.setAttribute('aria-label', title);
       popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
       popImg.hidden = true; popImg.removeAttribute('src');
       popTitle.textContent = title;
-      popText.textContent = `${t(curLang, 'rooms.about.p1')} ${t(curLang, 'rooms.about.p2')}`;
+      popText.textContent = t(curLang, 'model.storyCard.text');
+      popMore.textContent = t(curLang, 'rooms.about.more') + ' →';
       popTimeline.hidden = true;
-      popBody.href = 'https://www.linkedin.com/in/gillespenning/';
+      popBody.href = '#leadership-deepdive';
+      popBody.dataset.openLeadership = '';
       return;
     }
+    delete popBody.dataset.openLeadership;
     const data = t(curLang, `model.projectCards.${popKey}`) || t(curLang, `model.inspections.${popKey}`);
     if (!data) return;
     popEl.setAttribute('aria-label', data.title);
@@ -437,10 +441,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popImg = document.createElement('img'); popImg.className = 'pop-img'; popImg.decoding = 'async';
       popTitle = document.createElement('h3'); popTitle.className = 'pop-title';
       popText = document.createElement('p'); popText.className = 'pop-text';
+      popMore = document.createElement('span'); popMore.className = 'pop-more'; popMore.hidden = true;
       popTimeline = document.createElement('ol'); popTimeline.className = 'pop-timeline'; popTimeline.hidden = true;
       popEl.addEventListener('pointerenter', stopAutoCard);
       popEl.addEventListener('pointerleave', () => { if (popKey && !objectFocus && !['rack', 'enterprise', 'enterpriseD'].includes(popKey)) startAutoCard(() => closePop(false)); });
-      popBody.append(popImg, popTitle, popText, popTimeline);
+      popBody.append(popImg, popTitle, popText, popMore, popTimeline);
       shipActions = document.createElement('div'); shipActions.className = 'ship-actions'; shipActions.hidden = true;
       for (const launch of [false, true]) {
         const action = document.createElement('button'); action.type = 'button';
@@ -465,6 +470,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     popEl.classList.toggle('ship-card', ['enterprise', 'enterpriseD'].includes(key));
     popEl.classList.toggle('inspection-card', Boolean(inspectionFor(key)));
     fillPop();
+    const project = t(curLang, `model.projectCards.${key}`);
+    popEl.classList.toggle('project-link', ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'].includes(key) && Boolean(project?.href));
     popEl.hidden = false;
     popEl.inert = false;
     updatePop();

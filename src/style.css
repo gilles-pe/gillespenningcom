@@ -121,7 +121,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .bar button:hover { background: var(--paper); border-color: var(--line); }
 .bar button[aria-pressed=true] { background: var(--teal-surface); border-color: var(--line); font-weight: 600; }
 .view-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--s1); border-bottom: 1px solid var(--line); }
-.view-controls .back { margin-right: auto; }
+.view-controls .back { margin-right: auto; flex-shrink: 0; }
 .zoom-control { display: flex; align-items: center; gap: 0; }
 .zoom-control .zoom-step { justify-content: center; width: var(--h1); padding: 0; }
 .zoom-step svg { width: var(--s3); height: var(--s3); }
@@ -130,7 +130,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .zoom-control input::-moz-range-track { height: 0; border-top: 1px solid var(--petrol); }
 .zoom-control input::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: var(--s2); height: var(--s2); margin-top: calc(var(--s1) * -1); border: 0; border-radius: var(--r-full); background: var(--petrol); }
 .zoom-control input::-moz-range-thumb { width: var(--s2); height: var(--s2); border: 0; border-radius: var(--r-full); background: var(--petrol); }
-@media (max-width: 800px) {
+@media (max-width: 600px) {
   .zoom-control { order: 3; flex-basis: 100%; justify-content: center; }
   .zoom-control .zoom-step { width: var(--h3); }
   .zoom-control input { width: min(calc(var(--s7) * 2), 60vw); }
@@ -272,6 +272,8 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 .stage.object-focused .inspection-card { top: auto; bottom: var(--s2); right: var(--s2); left: var(--s2); width: auto; max-height: 45%; padding: var(--s3); background: var(--scene-surface); transform: none; }
 .inspection-card .pop-body { gap: var(--s1); }
 .stage.object-focused .spot:not(:focus-visible) { opacity: 0; pointer-events: none; }
+.pop-more { color: var(--petrol); font-size: var(--t1); text-decoration: underline; text-underline-offset: var(--s1); }
+.project-link .pop-title::after { content: " →"; font-family: var(--sans); font-weight: 400; }
 .pop-body[href]:hover .pop-title { color: var(--brass-ink); }
 .pop-img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r1); }
 .pop-title { font-size: var(--t3); line-height: 1.15; color: var(--petrol); padding-right: var(--s5); }

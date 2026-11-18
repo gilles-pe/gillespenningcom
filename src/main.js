@@ -183,9 +183,8 @@ const toggleRoom = id => (current === id && mobile() ? closeRoom() : openRoom(id
 // A tap on the canvas: id is the room under the pointer, or null.
 function tapCanvas(id) {
   if (!current) { if (id) openRoom(id); return; }
-  if (id === current) { if (mobile() && !api?.isCustom?.()) closeRoom(); }
-  else if (id) openRoom(id);
-  else if (mobile() && !api?.isCustom?.()) closeRoom();
+  // A stray tap on the room or empty space should not dismiss its navigation.
+  if (id && id !== current) openRoom(id);
 }
 back.addEventListener('click', () => closeRoom());
 panBtn.addEventListener('click', () => {

@@ -233,6 +233,8 @@ until a later entry replaces it.
 
 - **D-071 (2026-11-18) Quiet zoom controls and consistent object inspection (owner approved).** Enable mouse-wheel zoom over the clear 3D stage on scrollable pages. Add a discreet logarithmic slider and minus/plus actions beside Reset, synchronized with touch and keyboard zoom. Clicking the OP table, either desk, either shelf, a project, rack or Enterprise opens a card and a tailored close view; direct clicks can enter the object's room from the overview. Keep walls and furniture intact, reserve space above the caption, retain translucent backgrounds on desktop and phone, and restore the prior view when closing. Reset returns to the room view. Restrict the stage outline to keyboard interaction and reduce it to a 1 px hairline.
 
+- **D-072 (2026-11-18) About laptop, compact controls and project artwork.** The About Me laptop opens a short leadership preview with an explicit link to the existing leadership section; it no longer repeats the room biography or links directly to LinkedIn. Keep the card-first interaction. On wider displays, including unfolded foldables and landscape phones, fit zoom and view controls in one row where space permits; on narrow phones use a second row. Tapping unused scene space must not dismiss the room. Keep All rooms visible while a room is open. Add a quiet right arrow to project cards only when they have a destination. Replace the Projects room Wimmelbild slot with the owner-supplied artwork, contained in the 4:3 slot without cropping.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

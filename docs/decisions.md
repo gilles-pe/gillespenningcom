@@ -218,6 +218,8 @@ until a later entry replaces it.
   - **Praxisfaden Mascot:** Added `public/slots/projects-board-3.webp` (1200 x 900) featuring the owner-supplied turquoise reading mascot on warm paper background.
   - **hDRG-Kompass Project:** Added `hDRG-Kompass` (`https://www.hdrg-kompass.de/`) as the 5th plinth/board in the `Projects` room (`projects-board-4.webp`, moving `Elbstrand` to `projects-board-5.webp`), with balanced 5-plinth spacing (`pitch = 0.85`), 3D picking, hotspot, pop-up card, and bilingual copy.
 
+- **D-066 (2026-11-18) Subtle refinement of the lounge floor lamp.** Keep its position, height and classic tapered silhouette in Writing & Speaking. Give it a low bronze base, a slimmer stem, a rounded linen shade with narrow hems, a warm diffuser and a short cord routed toward the wall.
+
 ## Open questions
 
 1. Texts and links for DocEase and Elbstrand.

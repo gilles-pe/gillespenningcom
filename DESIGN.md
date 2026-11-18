@@ -150,3 +150,6 @@ Give the practice desk a slim rounded oak top, tapered legs, a stand-alone keybo
 
 ### Study lamp and individual plants (D-064, 2026-11-18)
 The study cabinet holds a lamp with a pleated linen shade, a small warm diffuser, a brass stem and a petrol base. Its shade sits above the neighbouring ship models. The gallery has an airy olive tree in terracotta, the study a rubber plant with broad staggered leaves in ivory ceramic, and the lounge a low fern with arching fronds in a sage bowl. Use shaped geometry and varied greens with instanced leaves and stems. Keep planting in the front corners so the paths and clickable props have room.
+
+### Lounge floor lamp (D-066, 2026-11-18)
+Keep the slender post and the tapered, warm shade in Writing & Speaking. A low bronze base, a lightly curved linen shade with two sewn hems, and a recessed diffuser add definition at close range. The cord runs back toward the wall, leaving the seating area clear.

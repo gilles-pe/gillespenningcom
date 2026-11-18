@@ -381,6 +381,45 @@ function loungeFern(parent, x, z) {
   });
 }
 
+function loungeFloorLamp(parent, x, z) {
+  const lamp = new THREE.Group();
+  lamp.name = 'lounge-floor-lamp';
+  lamp.position.set(x, 0.06, z);
+  parent.add(lamp);
+
+  const bronze = mat(0x9c7845, { metalness: 0.55, roughness: 0.38 });
+  const linen = mat(0xf3e5cc, { roughness: 0.9, emissive: 0xffd39a, emissiveIntensity: 0.13, side: THREE.DoubleSide });
+  const seam = mat(0xd0ba98, { roughness: 0.82 });
+  cyl(lamp, 0.125, 0.132, 0.024, 0, 0, 0, bronze, 32);
+  cyl(lamp, 0.106, 0.125, 0.007, 0, 0.024, 0, bronze, 32);
+  cyl(lamp, 0.022, 0.032, 0.047, 0, 0.031, 0, bronze, 16);
+  cyl(lamp, 0.013, 0.016, 1.13, 0, 0.078, 0, bronze, 18);
+  cyl(lamp, 0.025, 0.019, 0.052, 0, 1.187, 0, bronze, 18);
+
+  const outline = [[0.212, 1.184], [0.216, 1.19], [0.214, 1.206], [0.188, 1.268], [0.152, 1.343], [0.119, 1.385], [0.115, 1.389]];
+  const shade = new THREE.Mesh(new THREE.LatheGeometry(outline.map(([r, y]) => new THREE.Vector2(r, y)), 48), linen);
+  shade.castShadow = true;
+  lamp.add(shade);
+  for (const [radius, height] of [[0.214, 1.191], [0.117, 1.386]]) {
+    const hem = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.0036, 6, 48), seam);
+    hem.rotation.x = Math.PI / 2;
+    hem.position.y = height;
+    lamp.add(hem);
+  }
+  const diffuser = new THREE.Mesh(new THREE.CircleGeometry(0.194, 36),
+    mat(0xffedcf, { emissive: 0xffcf89, emissiveIntensity: 0.45, roughness: 0.83 }));
+  diffuser.rotation.x = Math.PI / 2;
+  diffuser.position.y = 1.22;
+  lamp.add(diffuser);
+
+  const cord = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0.014, -0.116), new THREE.Vector3(-0.026, 0.007, -0.18),
+    new THREE.Vector3(-0.089, 0.006, -0.26), new THREE.Vector3(-0.079, 0.006, -0.39),
+    new THREE.Vector3(-0.12, 0.006, -0.57),
+  ]);
+  lamp.add(new THREE.Mesh(new THREE.TubeGeometry(cord, 16, 0.003, 6), mat(0x635449, { roughness: 0.93 })));
+}
+
 function studyLamp(parent, x, y, z) {
   const lamp = new THREE.Group();
   lamp.name = 'study-lamp';
@@ -1582,8 +1621,7 @@ function furnish(id, g, r) {
     tableMic(g, tx + 0.28, 0.47, tz - 0.05);
     tailoredArmchair(g, tx - 1.0, tz, 0.5);
     podcastArmchair(g, tx + 1.0, tz - 0.15, -0.6);
-    cyl(g, 0.02, 0.02, 1.25, L.lamp[0], 0, L.lamp[1], mat(C.brass, { metalness: 0.5 }));
-    cyl(g, 0.12, 0.22, 0.2, L.lamp[0], 1.2, L.lamp[1], new THREE.MeshStandardMaterial({ color: 0xfff1cf, emissive: 0xffd48a, emissiveIntensity: 0.9 }));
+    loungeFloorLamp(g, ...L.lamp);
     writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
     const speakingPic = standingPicture(g, 'writing-shelf-1', ...L.speaking, -0.12, 0.78);
     loungeFern(g, -RW / 2 + 0.47, RD / 2 - 0.54);

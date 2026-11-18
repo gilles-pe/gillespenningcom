@@ -103,6 +103,11 @@ assert(!hud.hidden, 'album prompt HUD missing after 1st click');
 assert(promptRow.hidden===false && navRow.hidden===true, '1st click must keep book closed');
 assert(api.debug.albumBook.isClosed(), '1st click must never open the book');
 assert.equal(api.debug.albumBook.getLoadedFaces().length, 0, 'inner page textures must not load before opening');
+const coverBoxClosed = new Three.Box3().setFromObject(api.debug.albumBook.picks[0]);
+for (let i = 1; i < api.debug.albumBook.picks.length - 3; i++) {
+  const leafBox = new Three.Box3().setFromObject(api.debug.albumBook.picks[i]);
+  assert(leafBox.max.y <= coverBoxClosed.min.y + 0.002, `closed sheet ${i} protrudes above front cover (${leafBox.max.y.toFixed(4)} vs cover ${coverBoxClosed.min.y.toFixed(4)})`);
+}
 
 // 2nd click once settled opens the 3D book onto Page 1 (Instructions)
 api.debug.openAlbumBook(); draw();
@@ -158,6 +163,11 @@ assert(api.back()); draw();
 assert(!api.debug.albumOpen && api.debug.albumFramed, 'BACK inside book must return to closed framed book');
 assert(api.debug.albumBook.isClosed());
 assert.equal(api.debug.albumBook.getLoadedFaces().length, 0, 'closing album must dispose all inner page textures');
+const coverBoxAfterClose = new Three.Box3().setFromObject(api.debug.albumBook.picks[0]);
+for (let i = 1; i < api.debug.albumBook.picks.length - 3; i++) {
+  const leafBox = new Three.Box3().setFromObject(api.debug.albumBook.picks[i]);
+  assert(leafBox.max.y <= coverBoxAfterClose.min.y + 0.002, `re-closed sheet ${i} protrudes above front cover (${leafBox.max.y.toFixed(4)} vs cover ${coverBoxAfterClose.min.y.toFixed(4)})`);
+}
 assert(api.back()); draw();
 assert(!api.debug.albumFramed && stage.classList.contains('object-focused')===false);
 

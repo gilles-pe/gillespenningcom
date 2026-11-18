@@ -64,6 +64,7 @@ class PageLeaf {
     this.elevationRight = 0;
     this.turnProgress = 1;
     this.turnProgressLag = 1;
+    this.openFactor = 0;
     this.bendingEnabled = false;
     this.dirty = true;
     this.baseSpineY = 0;
@@ -149,27 +150,29 @@ class PageLeaf {
       return new THREE.QuadraticBezierCurve(p0, p1, p2);
     }
 
-    const absTp = Math.abs(this.turnProgress);
-    const piProgress = absTp * (Math.PI / 2);
-    const eFactorSin = Math.sin(piProgress);
-    const eFactorCos = -Math.cos(piProgress) + 1;
-
+    const absTp = clamp(Math.abs(this.turnProgress), 0, 1);
+    const midTurn = Math.cos(absTp * (Math.PI / 2)); // 0 when flat (|tp|=1), 1 at mid-flip (tp=0)
     const isRight = this.turnProgress >= 0;
     const stackH = isRight ? this.elevationRight : this.elevationLeft;
+    const open = clamp(this.openFactor, 0, 1);
 
-    // Gentle upward arch during flip (scaled to our 0.286 m page width).
-    const baseArc = 0.028;
-    const p1elev = eFactorSin * (stackH + baseArc) * 1.45;
-    const outerElev = eFactorCos * stackH;
+    // Closed book (open=0): perfectly flat at y=0 so pages stay strictly below the leather cover.
+    // Open book (open>0): subtle spine saddle when resting + arched Bezier curve during page flip.
+    const baseArc = 0.030;
+    const restingSaddle = open * 0.0055;
+    const liftPeak = open * midTurn * (stackH + baseArc);
+    const p1elev = restingSaddle + liftPeak * 1.4;
+    const outerElev = open * midTurn * stackH;
 
     const calcPt = (tp, dist) => {
       const a = (1 - tp) * (Math.PI / 2);
       return new THREE.Vector2(Math.cos(a) * dist, Math.sin(a) * dist + outerElev);
     };
 
+    const signDir = this.turnProgress >= 0 ? 1 : -1;
     const p0 = new THREE.Vector2(0, 0);
-    const p1 = new THREE.Vector2(0, p1elev);
-    const p2 = calcPt(this.turnProgress, this.width * 0.5);
+    const p1 = new THREE.Vector2(signDir * this.width * 0.25 * (1 - midTurn * 0.85), p1elev);
+    const p2 = calcPt(this.turnProgress, this.width * 0.55);
     const p3 = calcPt(this.turnProgressLag, this.width);
 
     return new THREE.CubicBezierCurve(p0, p1, p2, p3);
@@ -773,6 +776,7 @@ export function createBookAlbum(parent, { x, y, z, rotY = -0.22, getModelText, o
         else tp = 1 - local * 2;
       }
 
+      leaf.openFactor = openFactor;
       leaf.bendingEnabled = !leaf.isCover && progress > 0.85 && progress < totalLeaves - 0.85;
       if (!leaf.isCover) {
         const leftFrac = clamp((1 - tp) / 2, 0, 1);

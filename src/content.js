@@ -224,6 +224,16 @@ export const content = {
             title: 'Blankenese, Hamburg',
             desc: 'High water at the lighthouse.',
           },
+          {
+            src: 'album/photo-17.webp',
+            title: 'Salzburg',
+            desc: 'The Salzach and Hohensalzburg Fortress.',
+          },
+          {
+            src: 'album/photo-18.webp',
+            title: 'AIDAperla',
+            desc: 'A ship among the mountains.',
+          },
         ],
       },
       storyCard: { text: 'Leading teams through change, building businesses and bringing technology into care. See how this worked in practice and what colleagues say about working together.' },
@@ -539,6 +549,16 @@ export const content = {
             src: 'album/photo-16.webp',
             title: 'Blankenese, Hamburg',
             desc: 'Hochwasser am Leuchtturm.',
+          },
+          {
+            src: 'album/photo-17.webp',
+            title: 'Salzburg',
+            desc: 'Salzach und Festung Hohensalzburg.',
+          },
+          {
+            src: 'album/photo-18.webp',
+            title: 'AIDAperla',
+            desc: 'Ein Schiff zwischen den Bergen.',
           },
         ],
       },

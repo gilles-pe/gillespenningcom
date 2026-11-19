@@ -479,6 +479,99 @@ function bookStack(parent, x, y, z, count, imperfect, rand) {
   }
 }
 
+function antiqueGlobe(parent, x, y, z) {
+  const globe = new THREE.Group();
+  globe.name = 'Antique shelf globe';
+  globe.position.set(x, y, z);
+  parent.add(globe);
+
+  const brass = mat(0xb38242, { metalness: 0.58, roughness: 0.37 });
+  const brightBrass = mat(0xd7ad6c, { metalness: 0.55, roughness: 0.28 });
+  const engraving = mat(0x614525, { metalness: 0.28, roughness: 0.58 });
+  const walnut = wood(0x69422c);
+  const add = (parent, geometry, material, name) => {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = name;
+    mesh.castShadow = mesh.receiveShadow = true;
+    parent.add(mesh);
+    return mesh;
+  };
+
+  // A single turned profile gives the foot a rolled edge and the stem a narrow waist.
+  const profile = [
+    [0, 0], [.059, 0], [.065, .003], [.067, .007], [.066, .012], [.062, .016],
+    [.055, .018], [.051, .021], [.036, .021], [.030, .024], [.025, .029],
+    [.021, .035], [.022, .041], [.025, .045], [.024, .050], [.020, .054], [0, .054],
+  ].map(([r, h]) => new THREE.Vector2(r, h));
+  add(globe, new THREE.LatheGeometry(profile, 40), walnut, 'Turned walnut stand');
+  cyl(globe, .064, .066, .002, 0, .0135, 0, brightBrass, 36);
+  cyl(globe, .015, .020, .014, 0, .053, 0, brass, 24);
+
+  const meridian = new THREE.Group();
+  meridian.position.y = .153;
+  meridian.rotation.y = -.30;
+  globe.add(meridian);
+  const outer = .091, inner = .079;
+  const band = new THREE.Shape();
+  band.absarc(0, 0, outer, 0, Math.PI * 2, false);
+  const cutout = new THREE.Path();
+  cutout.absarc(0, 0, inner, 0, Math.PI * 2, true);
+  band.holes.push(cutout);
+  const ring = add(meridian, new THREE.ExtrudeGeometry(band, {
+    depth: .007, bevelEnabled: true, bevelSegments: 1, bevelSize: .001,
+    bevelThickness: .001, curveSegments: 28,
+  }), brass, 'Brass meridian');
+  ring.position.z = -.0035;
+  for (const radius of [inner + .001, outer - .001]) {
+    const lip = add(meridian, new THREE.TorusGeometry(radius, .0009, 6, 56), brightBrass, 'Polished meridian edge');
+    lip.position.z = .004;
+  }
+
+  const divisions = 72;
+  const ticks = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), engraving, divisions);
+  const mark = new THREE.Object3D();
+  for (let i = 0; i < divisions; i++) {
+    const angle = i * 2 * Math.PI / divisions;
+    const length = i % 6 === 0 ? .008 : i % 2 === 0 ? .005 : .003;
+    const radius = outer - .0018 - length / 2;
+    mark.position.set(radius * Math.cos(angle), radius * Math.sin(angle), .00465);
+    mark.rotation.z = angle;
+    mark.scale.set(length, i % 6 === 0 ? .0015 : .0009, .00035);
+    mark.updateMatrix();
+    ticks.setMatrixAt(i, mark.matrix);
+  }
+  ticks.name = 'Engraved degree divisions';
+  meridian.add(ticks);
+
+  const axis = new THREE.Group();
+  axis.rotation.z = -23.44 * Math.PI / 180;
+  meridian.add(axis);
+  const radius = .075;
+  const atlas = mat(0xd7c092, { roughness: 0.49 });
+  const earth = add(axis, new THREE.SphereGeometry(radius, 48, 32), atlas, 'Parchment globe');
+  earth.rotation.y = -1.55;
+  for (const pole of [-1, 1]) {
+    cyl(axis, .0034, .0034, inner - radius + .004, 0, pole > 0 ? radius - .001 : -inner - .003, 0, brass, 12);
+    const cap = add(axis, new THREE.SphereGeometry(.0052, 12, 8), brightBrass, 'Brass polar pivot');
+    cap.position.y = pole * (inner + .002);
+  }
+
+  // Map plate based on Natural Earth 1:110m land and lakes. Keep a warm fallback while it loads.
+  const image = new Image();
+  image.decoding = 'async';
+  image.onload = () => {
+    const map = new THREE.Texture(image);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.wrapS = THREE.RepeatWrapping;
+    map.anisotropy = 4;
+    map.needsUpdate = true;
+    atlas.color.set(0xffffff);
+    atlas.map = map;
+    atlas.needsUpdate = true;
+  };
+  image.src = `${import.meta.env.BASE_URL}models/antique-globe-map.webp`;
+}
+
 function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpperRight = false } = {}) {
   const g = new THREE.Group(); g.position.set(x, 0.06, z); g.rotation.y = rotY; parent.add(g);
   const rand = rng(Math.round((x * 131 + z * 73 + w * 41) * 10) + 19);
@@ -527,14 +620,7 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
     // Right cluster: horizontal stacked books (skipped when trophies occupy upper-right)
     if (!(skipUpperRight && si === 1)) bookStack(g, innerW * 0.2, sy, 0.04, si === 0 ? 3 : 2, imperfect, rand);
   }
-  if (skipUpperRight) {
-    // Small brass globe / paperweight beside the lower shelf stack so the bookshelf feels lived-in
-    const gx = innerW * 0.40, gy = cabH;
-    cyl(g, 0.036, 0.042, 0.014, gx, gy, 0.05, mat(C.woodDark));
-    cyl(g, 0.008, 0.008, 0.045, gx, gy + 0.014, 0.05, mat(C.brass, { metalness: 0.6 }));
-    const globe = new THREE.Mesh(new THREE.SphereGeometry(0.052, 16, 12), mat(0x6e8882, { roughness: 0.5 }));
-    globe.position.set(gx, gy + 0.095, 0.05); globe.castShadow = true; g.add(globe);
-  }
+  if (skipUpperRight) antiqueGlobe(g, innerW * 0.40, cabH, 0.05);
   g.userData.upperY = midY + 0.028;
   return g;
 }

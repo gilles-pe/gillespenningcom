@@ -68,7 +68,7 @@ combining an operating room zone (operating table with 10 mm rigid endoscope and
 dual-wing surgical light, rolling drawer cart, and an endoscopic equipment tower with a large rolling monitor)
 separated in its front/middle stretch by an internal glass partition wall with doorway from a consultation Vorraum
 (19-inch IT server rack tucked into the back-right corner and angled desk with monitor). About Me features a refined oak
-desk and upholstered swivel chair, plus a two-door cabinet bookshelf with slightly imperfect books, a brass globe, three clickable brass-rimmed social trophies (Substack,
+desk and upholstered swivel chair, plus a two-door cabinet bookshelf with slightly imperfect books, an antique globe, three clickable brass-rimmed social trophies (Substack,
 Bluesky, LinkedIn), the brass table lamp and a side-profile miniature USS Enterprise NCC-1701-E on top, an open
 "My Story" laptop, book and coffee mug on the desk, and an interactive running photo on the back wall. Writing &
 Speaking carries the open oak display shelf with books, a small globe and the standing talk photo, plus a detailed table condenser microphone.
@@ -182,3 +182,6 @@ A project opens its card on first selection and its external destination in a ne
 
 ### Animated 3D Photo Album (D-077, 2026-11-18)
 Replace the 2D HTML book dialog with an articulated Three.js hardcover album inside `src/book-album.js` on the study desk, inspired by the curved-page mechanics of `Qbject/the-book-of-qbject` (MIT) without external animation or UI dependencies. Clicking the closed album zooms to frame it while keeping the book physically shut; a second tap (or Open button once settled) swings the cover open onto Page 1 instructions rendered directly onto the 3D paper sheet. Inner paper leaves use cosine spine vertex clustering, CubicBezier page-turn deflection with trailing tip flex, vertex-color gutter shading and soft fill lighting. Only spreads within the active window load textures, disposing distant sheets and closing state textures cleanly. Pointer/touch clicks and horizontal drag-to-flip on open pages are isolated from camera movement, while compact single-row 48 px HUD controls and rotated open-spread camera framing keep all 18 photos crisp and unclipped across desktop, portrait/landscape phones and 5:4 foldables.
+
+### Antique shelf globe (D-080)
+The lower right compartment of the About Me cabinet holds a turned walnut stand, a softly aged brass meridian ring with degree marks and a 23.44°-tilted parchment globe with emerald continents. The local plate at `public/models/antique-globe-map.webp` uses [Natural Earth 1:110m land and lake outlines](https://www.naturalearthdata.com/downloads/110m-physical-vectors/) with a fine graticule, engraved-style labels and a small compass rose.

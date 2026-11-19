@@ -68,8 +68,8 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `model.rooms.ai` | AI & Digital Health | KI & Digital Health |
 | `model.rooms.writing` | Writing & Speaking | Schreiben & Vorträge |
 | `model.egg.note` | You found it! The fax device that keeps healthcare working in Germany. | Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält. |
-| `model.inspections.globe.title` | Antique globe | Antiker Globus |
-| `model.inspections.globe.text` | A parchment globe on a turned walnut stand. | Ein Pergament-Globus auf einem gedrechselten Nussbaumfuß. |
+| `model.inspections.globe.title` | Globe | Globus |
+| `model.inspections.globe.text` | Click to feel adventurous | Klick, um dich abenteuerlustig zu fühlen |
 | `model.egg.cta` | Send me a message | Schreib mir eine Nachricht |
 | `model.egg.display.ready` | READY | BEREIT |
 | `model.egg.display.receiving` | RECEIVING | EMPFANG |

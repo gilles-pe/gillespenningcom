@@ -247,7 +247,7 @@ export const content = {
         practiceDesk: { title: 'Digital workspace', text: 'A closer look at the monitor, keyboard and workspace.' },
         studyDesk: { title: 'My desk', text: 'The laptop opens my leadership experience. The album holds a few photos from outside work.' },
         writingShelf: { title: 'Writing & Speaking', text: 'Books and a moment from a talk. Select the photo to open it.' },
-        globe: { title: 'Antique globe', text: 'A parchment globe on a turned walnut stand.' },
+        globe: { title: 'Globe', text: 'Click to feel adventurous' },
       },
       projectCards: {
         wimmelbild: {
@@ -583,7 +583,7 @@ export const content = {
         practiceDesk: { title: 'Digitaler Arbeitsplatz', text: 'Monitor, Tastatur und Arbeitsplatz aus der Nähe.' },
         studyDesk: { title: 'Mein Schreibtisch', text: 'Der Laptop führt zu meinen Führungserfahrungen. Im Album liegen ein paar Fotos abseits der Arbeit.' },
         writingShelf: { title: 'Schreiben & Vorträge', text: 'Bücher und ein Moment aus einem Vortrag. Ein Klick auf das Foto öffnet es.' },
-        globe: { title: 'Antiker Globus', text: 'Ein Pergament-Globus auf einem gedrechselten Nussbaumfuß.' },
+        globe: { title: 'Globus', text: 'Klick, um dich abenteuerlustig zu fühlen' },
       },
       projectCards: {
         rack: {

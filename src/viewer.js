@@ -26,9 +26,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   setModelLanguage(lang);
   const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets, projectDisplays } = buildScene();
   const roomWarp = enterprise ? createRoomWarp(scene, enterprise.root) : null;
-  // Default light rig, only if the scene does not bring its own (room point lights do not count).
+  // Default light rig, only if the scene does not bring its own. Room point lights and local fixture spots (the operating light) do not count.
   let sceneLit = false;
-  scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
+  scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isRectAreaLight) sceneLit = true; });
   if (!sceneLit) {
     scene.add(new THREE.HemisphereLight(0xfff6e8, 0xe0d0b6, 1.95));
     const sun = new THREE.DirectionalLight(0xffeed8, 1.7);
@@ -1378,7 +1378,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     },
     ...(import.meta.env.DEV ? {
       debug: {
-        camera, view, goal, egg, cellar, albumBook,
+        scene, camera, view, goal, egg, cellar, albumBook,
         get music() { return music.state; },
         get custom() { return custom; },
         get zoom() { return zoom; },

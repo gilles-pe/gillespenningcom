@@ -289,6 +289,7 @@ window.AudioContext=class{constructor(){audioMade++;}resume(){}close(){audioClos
 const mv=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick(){},onAway(){},musicLoader:async()=>{loaderCalls++;return (ctx,onEnd)=>{played++;return {stop(){playerStopped++;}};};}});
 stage.classList.remove('object-focused');
 mv.open('about');draw();
+let ambientRig=false;mv.debug.scene.traverse(o=>{if(o.isHemisphereLight||o.isDirectionalLight)ambientRig=true;});assert(ambientRig,'default hemisphere and sun light must exist: local spot lights (operating light) must not suppress them');
 assert(mv.debug.inspectionTargets.some(t=>t.room==='about'&&t.key==='globe'),'globe must be an inspectable object');
 mv.debug.inspect('studyDesk');draw();assert.equal(audioMade,0,'other objects must not create audio');assert.equal(loaderCalls,0);mv.closeNote();draw();
 mv.debug.inspect('globe');assert.equal(audioMade,0,'first click on the globe only zooms, no audio');assert.equal(mv.debug.music,'idle');assert.equal(loaderCalls,0);

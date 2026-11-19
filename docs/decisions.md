@@ -301,3 +301,5 @@ until a later entry replaces it.
   The binary was generated from the MIDI file with a throwaway script (tracks and pitches unchanged, the identical trumpet, horn and trombone lines stored once and played as one layered voice).
   Rights: the composition is protected; the owner is responsible for clearing its public use (the MIDI arrangement and this synth rendition are not a licence). Checked in `scripts/verify-viewer.mjs`.
 
+
+- **D-088 (2026-11-19) Visible wall lamp in the hidden cellar (owner request).** The cellar light now has a visible source: a small brass wall lamp with a caged, self-lit bulb (toneMapped off) on the far wall of the recess. The point light sits just in front of it and still only lights when the model is seen from below. It flickers by about 3 % (steady in reduced motion) and dips slightly in time with the display blink while the fax receives. Still one light only, no shadows, for mobile performance.

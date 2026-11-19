@@ -748,7 +748,20 @@ function buildCellar(scene, occluders) {
   for (const sx of [-1, 1]) {
     const m = new THREE.Mesh(new THREE.BoxGeometry(ft, fd, H.d), fm); m.position.set(H.x + sx * (H.w / 2 + ft / 2), bottom - fd / 2 + 0.002, H.z); scene.add(m);
   }
-  const lamp = new THREE.PointLight(0xffe2b0, 3.2, 3.2, 1.4); lamp.position.set(H.x, bottom - 0.12, H.z - 0.15); lamp.userData.base = 3.2; scene.add(lamp);
+  // A small brass wall lamp on the far wall of the recess, so the light has a visible source. The bulb glows by itself
+  // (toneMapped off) and the point light sits just in front of it; viewer.js lights it only when seen from below.
+  const wallZ = H.z + H.d / 2 - 0.002, lampY = bottom + (top - bottom) * 0.42, lampX = H.x;
+  const brassL = new THREE.MeshStandardMaterial({ color: 0xb08d4a, roughness: 0.35, metalness: 0.85 });
+  const bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff0c8, toneMapped: false });
+  const lampG = new THREE.Group(); lampG.name = 'cellar-wall-lamp'; lampG.position.set(lampX, lampY, wallZ); scene.add(lampG);
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.012, 28), brassL); plate.rotation.x = Math.PI / 2; plate.position.z = -0.006; lampG.add(plate);
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.07, 12), brassL); arm.rotation.x = Math.PI / 2; arm.position.z = -0.045; lampG.add(arm);
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.018, 0.03, 20), brassL); cup.rotation.x = Math.PI / 2; cup.position.z = -0.085; lampG.add(cup);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.036, 24, 16), bulbMat); bulb.position.z = -0.12; lampG.add(bulb);
+  const cage = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 8), new THREE.MeshStandardMaterial({ color: 0x8a6c3a, roughness: 0.4, metalness: 0.85, wireframe: true }));
+  cage.position.z = -0.12; lampG.add(cage);
+  const lamp = new THREE.PointLight(0xffe2b0, 3.2, 3.2, 1.4); lamp.position.set(lampX, lampY, wallZ - 0.2); lamp.userData.base = 3.2; scene.add(lamp);
+  lamp.userData.glow = bulbMat; lamp.userData.group = lampG;
 
   // Everything of the machine is built upright in `g` (y up from the standing surface, front towards +z)
   // and the group is turned over so that it stands on the ceiling of the recess and its front faces world -z.

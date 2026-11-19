@@ -14,7 +14,14 @@ const loadGlobeMusic = async () => {
   return (ctx, onEnd) => mod.playGlobeTheme(ctx, buf, onEnd);
 };
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, musicLoader = loadGlobeMusic }) {
+// The warp flight sounds (about 220 KB of audio and a small scheduler) are fetched when the Enterprise card opens or the flight starts.
+const loadWarpSound = async () => {
+  const mod = await import('./warp-sound.js');
+  const data = await mod.fetchWarpSound(import.meta.env.BASE_URL);
+  return (ctx, t0) => mod.playWarpSound(ctx, data, t0);
+};
+
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, musicLoader = loadGlobeMusic, warpLoader = loadWarpSound }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -116,7 +123,29 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const m = music; m.state = 'playing';
     m.player = m.play(m.ctx, () => { if (music === m) music = { state: 'idle', ctx: null, play: null, player: null }; });
   }
-  document.addEventListener?.('visibilitychange', () => { if (document.hidden && music.state !== 'idle') stopGlobeMusic(); });
+  // Warp flight sound: the AudioContext is created inside the click, the sounds are scheduled against the flight clock.
+  let warpLoad = null, warpSound = null;
+  const loadWarp = () => (warpLoad ??= warpLoader().catch(error => { warpLoad = null; throw error; }));
+  function prepareWarpSound() {
+    stopWarpSound();
+    if (reduced) return null;
+    let ctx = null;
+    try { const AC = window.AudioContext || window.webkitAudioContext; ctx = AC ? new AC() : null; ctx?.resume?.(); } catch { ctx = null; }
+    if (!ctx) return null;
+    const ws = { ctx, play: null, player: null, t0: null };
+    warpSound = ws;
+    loadWarp().then(play => { ws.play = play; kickWarpSound(ws); }).catch(() => { if (warpSound === ws) stopWarpSound(); });
+    return ws;
+  }
+  function beginWarpSound(ws) { if (!ws || warpSound !== ws) return; ws.t0 = performance.now(); kickWarpSound(ws); }
+  function kickWarpSound(ws) { if (warpSound === ws && ws.play && ws.t0 !== null && !ws.player) ws.player = ws.play(ws.ctx, ws.t0); }
+  function stopWarpSound() {
+    const ws = warpSound; warpSound = null;
+    if (!ws) return;
+    if (ws.player) ws.player.stop(); else { try { ws.ctx.close(); } catch { /* ignore */ } }
+  }
+  function cancelWarp() { roomWarp?.cancel(); stopWarpSound(); }
+  document.addEventListener?.('visibilitychange', () => { if (document.hidden && music.state !== 'idle') stopGlobeMusic(); if (document.hidden) stopWarpSound(); });
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
   const DMIN = 0.7;
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
@@ -138,7 +167,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function goBack() {
     navigationGroup = null;
     markDirty();
-    if (roomWarp?.isActive()) { roomWarp.cancel(); return true; }
+    if (roomWarp?.isActive()) { cancelWarp(); return true; }
     if (albumLightbox && !albumLightbox.hidden) { closeAlbumPhoto(); return true; }
     if (albumOpen) { closeAlbumBook(true); return true; }
     if (!viewHistory.length) return false;
@@ -254,7 +283,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function resetView() {
     markDirty();
-    roomWarp?.cancel();
+    cancelWarp();
     rememberView('reset'); closeAlbum(false); closePop(false); restoreObjectView(); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
   }
@@ -435,13 +464,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   async function triggerRoomWarp() {
     if (reduced) { if (popText) popText.textContent = enterpriseCopy[curLang].reduced; return; }
-    await ensureEnterpriseGlb();
+    const ws = prepareWarpSound();   // still inside the click: browsers only allow audio that starts from a gesture
+    try { await ensureEnterpriseGlb(); } catch (error) { if (warpSound === ws) stopWarpSound(); throw error; }
     closePop(false);
     restoreObjectView();
     // Stay inside the About Me room at normal room framing so the entire 180° curve & warp-in stay in view
     openId = 'about'; custom = false; zoom = 1; panOffset.set(0, 0, 0);
     setGoal();
-    roomWarp?.engage(() => markDirty());
+    if (roomWarp?.engage(() => markDirty())) beginWarpSound(ws); else if (warpSound === ws) stopWarpSound();
     markDirty();
   }
   engageBtn.addEventListener('click', () => { triggerRoomWarp(); });
@@ -672,7 +702,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     clearTimeout(popTimer);
     stopAutoCard();
     popKey = key;
-    if (key === 'enterprise') ensureEnterpriseGlb();
+    if (key === 'enterprise') { ensureEnterpriseGlb(); if (!reduced) loadWarp().catch(() => {}); }
     popEl.classList.toggle('rack-card', key === 'rack');
     popEl.classList.toggle('ship-card', key === 'enterprise');
     popEl.classList.toggle('inspection-card', Boolean(inspectionFor(key)));
@@ -1358,7 +1388,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   return {
     open(id, { keepView = false } = {}) {
       markDirty();
-      roomWarp?.cancel();
+      cancelWarp();
       if (id === 'about') ensureEnterpriseGlb();
       if (!keepView && (id !== openId || custom)) rememberView('room');
       if (id !== openId) closeAlbum(false);
@@ -1381,7 +1411,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     closeNote() {
       const faxFocused = objectFocus?.target === faxTarget || objectFocus?.target === sheetTarget;
       const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
-      egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); roomWarp?.cancel();
+      egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); cancelWarp();
       if (faxFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
       markDirty();
       return had;

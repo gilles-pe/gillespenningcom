@@ -90,8 +90,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const panOffset = new THREE.Vector3();
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
   let objectFocus = null;
-  // Globe theme: armed by the click that frames the globe (the AudioContext must be created inside that gesture),
-  // started once the camera has settled on the globe, stopped as soon as the view leaves it.
+  // Globe theme: the click that frames the globe creates the AudioContext (browser rule) and loads the player;
+  // it plays as soon as it is loaded and stops when the view leaves the globe.
   let music = { state: 'idle', ctx: null, play: null, player: null };
   function armGlobeMusic() {
     if (music.state !== 'idle') return;
@@ -100,7 +100,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!ctx) return;
     music = { state: 'loading', ctx, play: null, player: null };
     const mine = music;
-    musicLoader().then(play => { if (music === mine && mine.state === 'loading') { mine.play = play; mine.state = 'ready'; markDirty(); } }).catch(() => { if (music === mine) stopGlobeMusic(); });
+    musicLoader().then(play => { if (music === mine && mine.state === 'loading') { mine.play = play; startGlobeMusic(); } }).catch(() => { if (music === mine) stopGlobeMusic(); });
   }
   function stopGlobeMusic() {
     const m = music; music = { state: 'idle', ctx: null, play: null, player: null };
@@ -1292,9 +1292,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       updateAlbumHud();
       dirty = true;
     }
-    if (music.state === 'ready' && objectFocus?.target?.key === 'globe'
-      && Math.abs(view.dist - goal.dist) < 0.025 && view.t.distanceTo(goal.t) < 0.012
-      && Math.abs(view.el - goal.el) < 0.015 && Math.abs(view.az - goal.az) < 0.015) startGlobeMusic();
     const ce = Math.cos(view.el), se = Math.sin(view.el), sa = Math.sin(view.az), ca = Math.cos(view.az);
     camera.position.set(view.t.x + view.dist * ce * sa, view.t.y + view.dist * se, view.t.z + view.dist * ce * ca);
     camera.up.set(-se * sa, ce, -se * ca);                    // tangent of the elevation arc: no flip or jump at the poles

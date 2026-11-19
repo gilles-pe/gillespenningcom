@@ -1422,7 +1422,8 @@ function operatingRoom(g, L, projectPicks) {
   rail.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), railVec.clone().normalize());
   rail.castShadow = true; g.add(rail);
   cyl(g, 0.042, 0.042, 0.14, hubX, hubY, hubZ, putty, 18);          // central ceiling swivel column
-  const lensM = new THREE.MeshStandardMaterial({ color: 0xfff8e6, emissive: 0xffe4a8, emissiveIntensity: 1.4, roughness: 0.2 });
+  // Lenses glow by themselves: near white, unaffected by tone mapping (the same trick as the cellar bulb).
+  const lensM = new THREE.MeshBasicMaterial({ color: 0xfffaf0, toneMapped: false });
   const wings = [
     { head: [-0.30, 1.26, 0.18], rot: [0.38, 0.15, -0.24], r: 0.27 },   // primary surgical wing
     { head: [0.34, 1.32, -0.22], rot: [0.34, -0.28, 0.28], r: 0.21 },   // satellite wing
@@ -1439,6 +1440,13 @@ function operatingRoom(g, L, projectPicks) {
       seg.castShadow = true; g.add(seg);
     }
     const lampHead = new THREE.Group(); lampHead.position.copy(hPos); lampHead.rotation.set(...w.rot); g.add(lampHead);
+    if (w === wings[0]) {
+      // One real light for the primary wing: a soft pool on the operating table. viewer.js scales it with the room's glow.
+      const spot = new THREE.SpotLight(0xfff1d6, 0, 3.2, 0.62, 0.85, 1.3);
+      spot.position.copy(hPos); spot.position.y -= 0.05;
+      spot.target.position.set(L.table[0], 0.55, L.table[1]);
+      g.add(spot, spot.target); g.userData.opSpot = spot;
+    }
     cyl(lampHead, w.r, w.r * 0.93, 0.052, 0, 0, 0, cream, 26);
     cyl(lampHead, 0.016, 0.018, 0.055, 0, -0.055, 0, drape, 12);
     for (let i = 0; i < 6; i++) {

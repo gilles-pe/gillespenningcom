@@ -1310,6 +1310,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       r.glow += ((isOpen ? 1 : isHot ? 0.35 : 0) - r.glow) * (reduced ? 1 : 1 - Math.exp(-dt * 6));
       r.door.position.z = r.doorZ - r.open * r.doorSlide;
       r.light.intensity = r.glow * 9;
+      if (r.group.userData.opSpot) r.group.userData.opSpot.intensity = r.glow * 11;   // operating light: a pool on the table, only while the room is lit
       r.floor.material.emissiveIntensity = r.glow * 0.12;
       r.hotGeo.setDrawRange(0, Math.floor(r.open * r.hotSegs) * 36);
       labels[r.id].classList.toggle('hot', isHot);

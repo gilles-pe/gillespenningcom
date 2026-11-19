@@ -301,3 +301,5 @@ until a later entry replaces it.
   The binary was generated from the MIDI file with a throwaway script (tracks and pitches unchanged, the identical trumpet, horn and trombone lines stored once and played as one layered voice).
   Rights: the composition is protected; the owner is responsible for clearing its public use (the MIDI arrangement and this synth rendition are not a licence). Checked in `scripts/verify-viewer.mjs`.
 
+
+- **D-089 (2026-11-19) Operating light lights the table (owner request).** The primary wing of the ceiling-suspended surgical light now carries one SpotLight aimed at the operating table (cone 0.62 rad, soft edge, range 3.2); its intensity follows the room glow in `viewer.js` (11 at full, 0 when the room is not lit). The lenses of both wings are now self-lit and not tone-mapped (near white). Only one light was added; no shadows, for mobile performance. Frame rate on weak phones is not measured.

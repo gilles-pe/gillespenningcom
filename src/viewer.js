@@ -679,7 +679,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     void popEl.offsetWidth;
     popEl.classList.add('on');
     const target = inspectionFor(key);
-    if (target) { stage.classList.add('object-focused'); focusObject(target); if (key === 'globe') armGlobeMusic(); }
+    if (target) { stage.classList.add('object-focused'); focusObject(target); }
     popClose.focus({ preventScroll: true });
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
@@ -690,7 +690,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const data = t(curLang, `model.projectCards.${key}`);
       if (data?.href) openExternal(data.href);
       else updateSoonBadge();
-    } else if (popKey === key) closePop(true);
+    } else if (popKey === key && key === 'globe' && music.state === 'idle') armGlobeMusic();
+    else if (popKey === key) closePop(true);
     else openPop(key);
   }
   function updatePop() {

@@ -243,7 +243,7 @@ export const content = {
       },
       storyCard: { text: 'Leading teams through change, building businesses and bringing technology into care. See how this worked in practice and what colleagues say about working together.' },
       inspections: {
-        opTable: { title: 'Operating table', text: 'Rigid endoscope and camera head on the sterile drape.' },
+        opTable: { title: 'Operating table', text: 'Rigid endoscope and camera head - patients are already benefiting from minimally invasive procedures, but reimbursement systems and ambulatory care often lag behind.' },
         practiceDesk: { title: 'Digital workspace', text: 'A closer look at the monitor, keyboard and workspace.' },
         studyDesk: { title: 'My desk', text: 'The laptop opens my leadership experience. The album holds a few photos from outside work.' },
         writingShelf: { title: 'Writing & Speaking', text: 'Books and a moment from a talk. Select the photo to open it.' },

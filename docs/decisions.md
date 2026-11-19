@@ -285,3 +285,10 @@ until a later entry replaces it.
   First click: the camera frames the object, upright; no action yet. Second click: the object's action. BACK, Reset, Escape and room changes restore the previous view and the object's start state.
   Written down in `AGENTS.md` ("Clickable objects: zoom first"). Escape now also restores the view when only the fax machine is framed (before, only the sheet was retracted).
   The cellar fax is covered by a check in `scripts/verify-viewer.mjs` (found only from below, first click frames, second starts, sheet button opens LinkedIn, close restores).
+
+- **D-086 (2026-11-19) Cellar fax: better model, display shows RECEIVING and blinks (owner request).** The machine has rounded bodies, a two-tone shell,
+  a drawer front with a brass knob on the cabinet, a larger display with function buttons and two LEDs, a coiled handset cord, a badge and paper guides.
+  The display is a canvas texture with three states: READY / BEREIT (idle, green LED on), RECEIVING / EMPFANG (from the second click until the sheet is out; text and red LED blink
+  about 1.4 times a second, with a progress bar and "P.1"), then 1 PAGE OK / 1 SEITE OK. Closing, Reset and Escape return it to READY. Reduced motion: no blinking, the display goes straight to the done state.
+  Texts live in `model.egg.display` in `src/content.js`. The close-up of the machine frames the body, tray and sheet (not the whole cabinet), so the display stays legible. Checked in `scripts/verify-viewer.mjs`.
+

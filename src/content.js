@@ -133,7 +133,7 @@ export const content = {
     },
     model: {
       rooms: { projects: 'Projects', about: 'About Me', ai: 'AI & Digital Health', writing: 'Writing & Speaking' },
-      egg: { note: 'You found it! The fax device that keeps healthcare working in Germany.', cta: 'Send me a message' },
+      egg: { note: 'You found it! The fax device that keeps healthcare working in Germany.', cta: 'Send me a message', display: { ready: 'READY', receiving: 'RECEIVING', done: '1 PAGE OK' } },
       photo: { alt: 'Gilles Penning running in Porto.', caption: 'Passionate marathon runner', close: 'Close' },
       speakingPhoto: { alt: 'Gilles Penning speaking on stage in Marburg on AI, data, and the pharmacy of the future.', caption: 'Keynote · Marburg, 2026: AI, Data and the Future of Pharmacy', close: 'Close' },
       album: {
@@ -468,7 +468,7 @@ export const content = {
     },
     model: {
       rooms: { projects: 'Projekte', about: 'Über mich', ai: 'KI & Digital Health', writing: 'Schreiben & Vorträge' },
-      egg: { note: 'Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält.', cta: 'Schreib mir eine Nachricht' },
+      egg: { note: 'Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält.', cta: 'Schreib mir eine Nachricht', display: { ready: 'BEREIT', receiving: 'EMPFANG', done: '1 SEITE OK' } },
       photo: { alt: 'Gilles Penning beim Lauf in Porto.', caption: 'Begeisterter Marathonläufer', close: 'Schließen' },
       speakingPhoto: { alt: 'Gilles Penning bei seinem Vortrag in Marburg zu KI, Daten und der Apotheke der Zukunft.', caption: 'Keynote · Marburg, 2026: KI, Daten und die Apotheke der Zukunft', close: 'Schließen' },
       album: {

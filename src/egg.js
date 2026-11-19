@@ -29,7 +29,7 @@ export function createEgg({ cellar, camera, reduced, onDone }) {
 
   function close() {
     anim = null; done = false;
-    cellar.shake(0, 0, 0); cellar.feed(0);
+    cellar.shake(0, 0, 0); cellar.feed(0); cellar.display('idle');
   }
 
   return {
@@ -39,7 +39,8 @@ export function createEgg({ cellar, camera, reduced, onDone }) {
     play() {
       if (anim || done) return;
       cellar.feed(0);
-      if (reduced) { cellar.feed(1); cellar.shake(0, 0, 0); done = true; onDone?.(); return; }
+      if (reduced) { cellar.feed(1); cellar.shake(0, 0, 0); cellar.display('done'); done = true; onDone?.(); return; }
+      cellar.display('receiving', 0, true);
       anim = { t0: performance.now() };
     },
     close,
@@ -55,7 +56,9 @@ export function createEgg({ cellar, camera, reduced, onDone }) {
         Math.sin(ph * 1.3 + 1) * (0.004 * jolt + 0.0008 * run),
         Math.sin(ph * 0.9 + 2) * (0.012 * jolt + 0.0025 * run));
       cellar.feed(ease(u));
-      if (e >= FEED_MS) { cellar.shake(0, 0, 0); cellar.feed(1); anim = null; done = true; onDone?.(); }
+      // The display shows RECEIVING and, like the red LED, blinks slowly (about 1.4 times a second).
+      cellar.display('receiving', u, Math.floor(e / 350) % 2 === 0);
+      if (e >= FEED_MS) { cellar.shake(0, 0, 0); cellar.feed(1); cellar.display('done'); anim = null; done = true; onDone?.(); }
     },
   };
 }

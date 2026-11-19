@@ -753,34 +753,91 @@ function buildCellar(scene, occluders) {
   // and the group is turned over so that it stands on the ceiling of the recess and its front faces world -z.
   const root = new THREE.Group(); root.position.set(H.x, top, H.z + 0.05); root.rotation.x = Math.PI; scene.add(root);
   const g = new THREE.Group(); root.add(g);
-  const putty = new THREE.MeshStandardMaterial({ color: 0xdcd5c6, roughness: 0.6 }), dark = new THREE.MeshStandardMaterial({ color: 0x3a403e, roughness: 0.5 });
-  const key = new THREE.MeshStandardMaterial({ color: 0xf3ede0, roughness: 0.5 });
-  const screen = new THREE.MeshStandardMaterial({ color: 0xa9c4ad, emissive: 0x7fa28a, emissiveIntensity: 0.6, roughness: 0.4 });
-  const woodM = wood(C.woodDark);
+  const putty = new THREE.MeshStandardMaterial({ color: 0xdcd5c6, roughness: 0.55 }), dark = new THREE.MeshStandardMaterial({ color: 0x3a403e, roughness: 0.5 });
+  const shell = new THREE.MeshStandardMaterial({ color: 0xe9e3d4, roughness: 0.5 }), grey = new THREE.MeshStandardMaterial({ color: 0x555b58, roughness: 0.45 });
+  const key = new THREE.MeshStandardMaterial({ color: 0xf3ede0, roughness: 0.45 });
+  const brass = mat(C.brass, { metalness: 0.6, roughness: 0.4 });
+  const woodM = wood(C.woodDark), woodL = wood();
   const pick = [];
   const add = (geo, m, x, y, z, rx = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.x = rx; g.add(o); pick.push(o); return o; };
   const bx = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-  add(bx(0.72, 0.2, 0.44), woodM, 0, 0.1, 0);                            // little cabinet
-  const bodyY = 0.2, bodyH = 0.16, front = 0.17;
-  add(bx(0.54, bodyH, 0.34), putty, 0, bodyY + bodyH / 2, 0);            // body
-  add(bx(0.4, 0.1, 0.06), putty, 0, bodyY + bodyH + 0.04, -0.12, -0.3); // rear paper holder
-  add(bx(0.19, 0.15, 0.006), new THREE.MeshStandardMaterial({ color: 0xfffdf8, roughness: 0.9 }), 0, bodyY + bodyH + 0.1, -0.165, -0.3); // blank sheet waiting at the back
-  const panelY = bodyY + bodyH + 0.012, panelZ = 0.07, tilt = 0.16;      // control panel, tilted towards the user
-  add(bx(0.33, 0.012, 0.15), dark, 0.07, panelY, panelZ, tilt);
+  const rb = (w, h, d, r = 0.008) => new RoundedBoxGeometry(w, h, d, 3, r);
+  const cyl = (r, h, n = 16) => new THREE.CylinderGeometry(r, r, h, n);
+  // Little cabinet with a drawer front and a brass knob.
+  add(rb(0.72, 0.2, 0.44, 0.012), woodM, 0, 0.1, 0);
+  add(rb(0.5, 0.07, 0.008, 0.003), woodL, 0, 0.1, 0.222);
+  add(cyl(0.008, 0.014, 14), brass, 0, 0.1, 0.231, Math.PI / 2);
+  const bodyY = 0.2, bodyH = 0.16, front = 0.17, topY = bodyY + bodyH;
+  const body = add(rb(0.54, bodyH, 0.34, 0.02), putty, 0, bodyY + bodyH / 2, 0);   // body
+  add(rb(0.54, 0.05, 0.34, 0.018), shell, 0, topY - 0.025, 0);                      // lighter top shell
+  add(bx(0.542, 0.004, 0.342), dark, 0, bodyY + bodyH - 0.052, 0);                  // seam between the two shells
+  add(rb(0.5, 0.02, 0.006, 0.002), grey, 0, bodyY + 0.022, front + 0.001);          // dark band on the front
+  // Rear paper holder with side guides and the blank sheet waiting in it.
+  add(rb(0.4, 0.1, 0.05, 0.01), shell, 0, topY + 0.04, -0.12, -0.3);
+  for (const sx of [-1, 1]) add(rb(0.008, 0.07, 0.05, 0.003), grey, sx * 0.1, topY + 0.07, -0.146, -0.3);
+  add(bx(0.19, 0.15, 0.006), new THREE.MeshStandardMaterial({ color: 0xfffdf8, roughness: 0.9 }), 0, topY + 0.1, -0.165, -0.3);
+  // Control panel, tilted towards the user.
+  const panelX = 0.085, panelY = topY + 0.012, panelZ = 0.07, tilt = 0.16;
+  add(rb(0.35, 0.012, 0.15, 0.004), dark, panelX, panelY, panelZ, tilt);
   const onPanel = (x, dz, h) => [x, panelY + h - Math.sin(tilt) * dz, panelZ + dz];
-  add(bx(0.12, 0.014, 0.045), screen, ...onPanel(-0.01, -0.02, 0.012), tilt);
-  const dot = new THREE.CylinderGeometry(0.0105, 0.0105, 0.01, 10);
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) add(dot, key, ...onPanel(0.105 + c * 0.045, (r - 1.5) * 0.03, 0.01), tilt);
-  // handset on a cradle at the left
-  add(bx(0.13, 0.03, 0.28), dark, -0.19, bodyY + bodyH + 0.015, 0.0);
-  add(bx(0.045, 0.03, 0.26), dark, -0.19, bodyY + bodyH + 0.05, 0.0);
-  add(new THREE.CylinderGeometry(0.036, 0.036, 0.03, 16), dark, -0.19, bodyY + bodyH + 0.055, 0.125);
-  add(new THREE.CylinderGeometry(0.036, 0.036, 0.03, 16), dark, -0.19, bodyY + bodyH + 0.055, -0.125);
-  // paper slot on the front, and the tray below it
+  // Display: a bezel and a flat LCD with its own texture (states are drawn by `display` below).
+  add(rb(0.215, 0.014, 0.088, 0.004), grey, ...onPanel(0.02, -0.02, 0.008), tilt);
+  const lcd = canvas(256, 104), lcdTex = new THREE.CanvasTexture(lcd);
+  lcdTex.colorSpace = THREE.SRGBColorSpace; lcdTex.anisotropy = 4;
+  add(new THREE.PlaneGeometry(0.195, 0.07), new THREE.MeshBasicMaterial({ map: lcdTex, toneMapped: false }), ...onPanel(0.02, -0.02, 0.0165), tilt - Math.PI / 2);
+  // Function buttons below the display, and two status LEDs.
+  const btnCols = [0x6f9a72, 0xb2574c, 0xcfc8b8, 0xcfc8b8];
+  btnCols.forEach((c, i) => add(rb(0.028, 0.008, 0.017, 0.003), new THREE.MeshStandardMaterial({ color: c, roughness: 0.5 }), ...onPanel(-0.045 + i * 0.036, 0.046, 0.009), tilt));
+  const ledRx = new THREE.MeshStandardMaterial({ color: 0x5a1712, emissive: 0xff3b2e, emissiveIntensity: 0.05, roughness: 0.3 });
+  const ledOk = new THREE.MeshStandardMaterial({ color: 0x1c4a2a, emissive: 0x3cdc6a, emissiveIntensity: 0.9, roughness: 0.3 });
+  add(cyl(0.0055, 0.006, 12), ledRx, ...onPanel(0.092, 0.046, 0.008), tilt);
+  add(cyl(0.0055, 0.006, 12), ledOk, ...onPanel(0.112, 0.046, 0.008), tilt);
+  const dot = cyl(0.0095, 0.009, 14);
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) add(dot, key, ...onPanel(0.15 + c * 0.04, (r - 1.5) * 0.03, 0.01), tilt);
+  // Handset on a cradle at the left, with a coiled cord to the side of the body.
+  add(rb(0.13, 0.03, 0.3, 0.008), dark, -0.19, topY + 0.015, 0.0);
+  add(rb(0.04, 0.028, 0.25, 0.012), grey, -0.19, topY + 0.046, 0.0);
+  for (const sz of [-1, 1]) add(cyl(0.034, 0.03, 20), grey, -0.19, topY + 0.052, sz * 0.125);
+  const cord = [[-0.19, topY + 0.04, 0.15], [-0.25, topY + 0.02, 0.2], [-0.33, bodyY + 0.14, 0.16], [-0.3, bodyY + 0.07, 0.06], [-0.272, bodyY + 0.07, 0.02]].map(q => new THREE.Vector3(...q));
+  const spine = new THREE.CatmullRomCurve3(cord), coil = [];
+  for (let i = 0; i <= 260; i++) { const t = i / 260, q = spine.getPoint(t), a = t * 26 * Math.PI * 2; coil.push(new THREE.Vector3(q.x, q.y + Math.cos(a) * 0.007, q.z + Math.sin(a) * 0.007)); }
+  add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(coil), 520, 0.0022, 6), dark, 0, 0, 0);
+  // Badge on the front.
+  const badge = canvas(128, 40), bk = badge.getContext('2d');
+  bk.fillStyle = '#b8862f'; bk.fillRect(0, 0, 128, 40); bk.fillStyle = '#12383a'; bk.font = `700 26px ${FONT}`; bk.textAlign = 'center'; bk.textBaseline = 'middle'; bk.fillText('FAX', 64, 22);
+  const badgeTex = new THREE.CanvasTexture(badge); badgeTex.colorSpace = THREE.SRGBColorSpace;
+  add(new THREE.PlaneGeometry(0.07, 0.022), new THREE.MeshBasicMaterial({ map: badgeTex, toneMapped: false }), -0.18, bodyY + 0.065, front + 0.0012);
+  // Paper slot on the front with a lip, and the tray below it with side rails.
   const A = 0.26, slotY = bodyY + 0.075;
-  add(bx(0.32, 0.014, 0.012), dark, 0, slotY, front + 0.001);
-  const trayLen = 0.22;
-  add(bx(0.26, 0.012, trayLen), putty, 0, slotY - Math.sin(A) * trayLen / 2 - 0.008, front + Math.cos(A) * trayLen / 2, A);
+  add(rb(0.34, 0.02, 0.014, 0.004), grey, 0, slotY, front + 0.002);
+  add(bx(0.32, 0.012, 0.014), dark, 0, slotY, front + 0.004);
+  const trayLen = 0.22, trayY = slotY - Math.sin(A) * trayLen / 2 - 0.008, trayZ = front + Math.cos(A) * trayLen / 2;
+  const tray = add(rb(0.26, 0.012, trayLen, 0.004), shell, 0, trayY, trayZ, A);
+  for (const sx of [-1, 1]) add(rb(0.008, 0.02, trayLen, 0.003), shell, sx * 0.134, trayY + 0.006, trayZ, A);
+
+  // The LCD and the two LEDs. States: 'idle', 'receiving' (text and LED blink) and 'done'. `prog` is 0..1.
+  let dKey = '', dState = 'idle', dProg = 0, dBlink = true;
+  function drawLcd() {
+    const k = lcd.getContext('2d'), w = lcd.width, h = lcd.height, tx = modelText().egg?.display ?? {};
+    k.fillStyle = '#a9c4a0'; k.fillRect(0, 0, w, h);
+    k.fillStyle = 'rgba(24,52,32,0.07)'; for (let y = 0; y < h; y += 4) k.fillRect(0, y, w, 1);
+    k.fillStyle = '#1b3524'; k.textBaseline = 'alphabetic'; k.font = `700 20px 'Courier New', monospace`; k.textAlign = 'left';
+    k.fillText('FAX', 12, 26); k.textAlign = 'right'; k.fillText(dState === 'idle' ? '' : 'P.1', w - 12, 26);
+    k.fillRect(10, 34, w - 20, 2);
+    k.textAlign = 'center'; k.font = `700 38px 'Courier New', monospace`;
+    const label = dState === 'receiving' ? tx.receiving : dState === 'done' ? tx.done : tx.ready;
+    if (dState !== 'receiving' || dBlink) k.fillText(label ?? '', w / 2, 76, w - 20);
+    if (dState === 'receiving') { k.fillRect(12, 88, w - 24, 8); k.fillStyle = '#a9c4a0'; k.fillRect(14, 90, w - 28, 4); k.fillStyle = '#1b3524'; k.fillRect(14, 90, (w - 28) * dProg, 4); }
+  }
+  function display(state, prog = 0, blink = true) {
+    const keyNow = `${state}|${Math.round(prog * 24)}|${blink}|${LANG}`;
+    if (keyNow === dKey) return;
+    dKey = keyNow; dState = state; dProg = prog; dBlink = blink;
+    drawLcd(); lcdTex.needsUpdate = true;
+    ledRx.emissiveIntensity = state === 'receiving' ? (blink ? 2 : 0.05) : 0.05;
+    ledOk.emissiveIntensity = state === 'idle' ? 0.9 : state === 'done' ? 1.6 : 0.1;
+  }
+  whenFont(() => { dKey = ''; display(dState, dProg, dBlink); });
   // The sheet: its leading edge (page bottom) is the pivot; the page extends back into the machine.
   const sheetTex = new THREE.CanvasTexture(canvas(512, Math.round(512 * EGG_PAPER.h / EGG_PAPER.w)));
   sheetTex.colorSpace = THREE.SRGBColorSpace; sheetTex.anisotropy = 8;
@@ -794,7 +851,7 @@ function buildCellar(scene, occluders) {
   feed(0);
   // `shake` moves the machine (not the sheet's own feed) a little: x/z in metres, roll in radians.
   const shake = (x, z, roll) => { g.position.set(x, 0, z); g.rotation.z = roll; };
-  return { pick, occluders, sheet, button: () => paperButton, feed, shake, lamp, center: new THREE.Vector3(H.x, bottom - 0.1, H.z) };
+  return { pick, occluders, sheet, button: () => paperButton, display, displayState: () => ({ state: dState, blink: dBlink }), frame: [body, tray, sheet], feed, shake, lamp, center: new THREE.Vector3(H.x, bottom - 0.1, H.z) };
 }
 
 export function buildScene() {

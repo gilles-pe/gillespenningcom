@@ -79,7 +79,7 @@ Hidden underside (maintainers only, not mentioned in the README or the UI, see D
 around a recess on its underside, the cellar (`CELLAR` and `buildCellar` in `src/scene.js`): cream lining, a thin wooden frame, a small point
 light and a fax machine built from boxes and cylinders, standing on the recess "floor" (the underside of the slab), so it reads upright when the
 model is turned over. The sheet in its slot carries the sentence from `model.egg.note` and a button (`model.egg.cta`) as a canvas texture (see D-084).
-The first click frames the machine, the second starts the fax (7 s), the button opens LinkedIn. Clicks are handled in `src/egg.js` and `eggClick` in
+The first click frames the machine, the second starts the fax (7 s, the display shows RECEIVING and blinks, see D-086), the button opens LinkedIn. Clicks are handled in `src/egg.js` and `eggClick` in
 `src/viewer.js` (raycast against the machine and the base, so it only hits when it faces the camera). The model can be turned freely
 (`src/viewer.js`); the camera orbit centre drifts to the recess when zoomed in on the underside. The legal page `legal.html` is described in D-028.
 

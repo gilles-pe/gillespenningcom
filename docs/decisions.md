@@ -266,3 +266,5 @@ until a later entry replaces it.
 - **D-080 (2026-11-19) Antique globe in the About Me bookcase (owner request).** Replace the plain sphere with a parchment globe with emerald continents, a tilted axis, a graduated brass meridian ring and a turned walnut plinth. Keep it in the lower right open shelf beside the stacked books. The map uses Natural Earth 1:110m land and lake outlines with original colors, graticule and compass ornament, baked into a single local WebP.
 
 - **D-081 (2026-11-19) MedTech Signal document activation.** In Writing & Speaking, the first click on the document frames it and opens its card; a second click on the same document opens MedTech Signal in a new tab. The About Me social plaques keep their existing behavior.
+
+- **D-082 (2026-11-19) Compact introductory project links.** Show each project title and its shortened description on one line where space allows, with natural wrapping on narrow screens; apply the shorter copy in both languages.

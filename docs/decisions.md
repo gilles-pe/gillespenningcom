@@ -268,3 +268,12 @@ until a later entry replaces it.
 - **D-081 (2026-11-19) MedTech Signal document activation.** In Writing & Speaking, the first click on the document frames it and opens its card; a second click on the same document opens MedTech Signal in a new tab. The About Me social plaques keep their existing behavior.
 
 - **D-082 (2026-11-19) Compact introductory project links.** Show each project title and its shortened description on one line where space allows, with natural wrapping on narrow screens; apply the shorter copy in both languages.
+
+- **D-083 (2026-11-19) Cellar fax machine: zoom first, slow sheet, button on the sheet (owner request).** Supersedes the click behaviour, the note and the note texts of D-025.
+  The first click on the machine frames it (same path as objects in the rooms, seen from below so it reads upright, BACK and Reset restore the view);
+  the second click starts the fax. The sheet leaves the slot slowly (7 s, a short jolt at the start, then a faint rattle). When it is out, the view moves to the sheet face-on.
+  The sheet carries the text and a "Send me a message" / "Schreib mir eine Nachricht" button as a canvas texture; clicking the button opens LinkedIn in a new tab.
+  The DOM note (text, LinkedIn link, close button) and its CSS are removed; the keys `model.egg.label` and `model.egg.close` are gone. New note text,
+  EN "You found it! The fax device that keeps healthcare working in Germany." DE "Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält."
+  Reduced motion: the sheet is out at once. The cellar lamp only lights when the camera is below the base. The heights of the lower base part live once in `BASE_LOW` in `src/scene.js`.
+  The machine stays out of the tab order and is still not announced; the LinkedIn link exists elsewhere on the page.

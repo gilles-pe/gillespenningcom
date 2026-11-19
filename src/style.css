@@ -240,17 +240,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 }
 @media (max-width: 360px) { .top { flex-wrap: wrap; } }
 @media (max-width: 480px) { .bar { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .egg, .photo-card, .pop-card, .album-btn { transition: none; } }
-
-/* ---- Note near the fax machine (see src/egg.js). Exists only after the machine was clicked. ---- */
-.egg { position: absolute; z-index: 6; pointer-events: auto; right: var(--s2); top: var(--s2); width: min(calc(var(--s7) * 2 + var(--s4)), calc(100% - var(--s3))); max-height: calc(100% - var(--s3)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s3); display: grid; gap: var(--s2); justify-items: start; background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); font-size: var(--t2); transition: opacity .3s, visibility .3s; }
-.egg p { font-size: var(--t2); line-height: 1.3; color: var(--petrol); }
-.egg-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
-.egg-link { display: inline-flex; align-items: center; min-height: var(--h1); font-size: var(--t2); font-weight: 600; color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); }
-.egg-link:hover { text-decoration-color: var(--brass); }
-.egg-close { height: var(--h1); padding: 0 var(--s2); font: var(--t1) var(--font); color: var(--petrol); background: transparent; border: 0; border-radius: var(--r1); cursor: pointer; }
-.egg-close:hover { color: var(--brass-ink); }
-.egg.away { opacity: 0; visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .label, .spot, .photo-card, .pop-card, .album-btn { transition: none; } }
 
 /* ---- Animated photo card and compact project/social card at a fixed top-right stage position ---- */
 .photo-card { position: absolute; z-index: 6; pointer-events: none; right: var(--s2); top: var(--s2); width: min(calc(var(--s7) * 2), calc(100% - var(--s4))); max-height: calc(100% - var(--s3)); overflow-y: auto; overscroll-behavior: contain; padding: var(--s2); background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 0; border-radius: var(--r1); opacity: 0; transform: scale(0.86); transition: opacity .26s ease, transform .34s cubic-bezier(0.22, 1, 0.36, 1); }

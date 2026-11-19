@@ -1299,7 +1299,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     camera.lookAt(view.t);
     camera.updateMatrixWorld();
     egg.update(now);
-    cellar.lamp.intensity = cellar.lamp.userData.base * THREE.MathUtils.clamp((0.15 - Math.sin(view.el)) / 0.15, 0, 1);   // lit only when seen from below
+    const lampOn = THREE.MathUtils.clamp((0.15 - Math.sin(view.el)) / 0.15, 0, 1);   // lit only when seen from below
+    // Barely visible mains flicker (about 3 %), calm in reduced motion; a short dip while the fax receives.
+    const flick = reduced ? 1 : 1 + 0.018 * Math.sin(now * 0.0071) + 0.012 * Math.sin(now * 0.0193 + 1.3) - (egg.isAnimating ? 0.05 * (Math.floor(now / 350) % 2) : 0);
+    cellar.lamp.intensity = cellar.lamp.userData.base * lampOn * flick;
+    cellar.lamp.userData.group.visible = lampOn > 0;
     updatePhoto();
     updatePop();
     if (openId !== 'about' && (albumOpen || albumFramed)) closeAlbum(false);

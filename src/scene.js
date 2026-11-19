@@ -1099,64 +1099,6 @@ export function podcastArmchair(parent, x, z, rotY = 0) {
   }
 }
 
-// The tailored left chair contrasts with the sculptural tub chair on the right.
-export function tailoredArmchair(parent, x, z, rotY = 0) {
-  const chair = new THREE.Group();
-  chair.position.set(x, 0.02, z); chair.rotation.y = rotY; parent.add(chair);
-
-  // A tiny woven bump pattern breaks up the flat surfaces without image assets.
-  const weave = canvas(128, 128), ctx = weave.getContext('2d');
-  ctx.fillStyle = '#b8b8b8'; ctx.fillRect(0, 0, 128, 128);
-  const random = rng(734);
-  for (let i = 0; i < 4200; i++) {
-    const shade = 140 + Math.floor(random() * 72);
-    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
-    ctx.fillRect(random() * 128, random() * 128, 1.2, 2.2);
-  }
-  const bump = tex(weave, { wrap: true, repeat: [2, 2] });
-  const shell = mat(0xe4ddce, { roughness: 0.96, bumpMap: bump, bumpScale: 0.006 });
-  const seat = mat(0xf0e8d9, { roughness: 0.94, bumpMap: bump, bumpScale: 0.007 });
-  const seam = mat(0xc9bda8, { roughness: 0.95 });
-  const pillow = mat(0x718c84, { roughness: 0.92, bumpMap: bump, bumpScale: 0.006 });
-  const timber = wood(C.woodDark);
-  const darkTimber = mat(0x826f59, { roughness: 0.72 });
-
-  function soft(w, h, d, radius, px, py, pz, material, tilt = 0) {
-    const mesh = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, radius), material);
-    mesh.position.set(px, py, pz); mesh.rotation.x = tilt;
-    mesh.castShadow = mesh.receiveShadow = true; chair.add(mesh);
-    return mesh;
-  }
-
-  // Four splayed oak legs, with the back pair visible under the open frame.
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.029, 0.19, 10), timber);
-    leg.position.set(sx * 0.255, 0.105, sz * 0.215);
-    leg.rotation.z = sx * 0.12; leg.rotation.x = sz * 0.10;
-    leg.castShadow = true; chair.add(leg);
-  }
-  soft(0.64, 0.075, 0.57, 0.027, 0, 0.22, 0.015, darkTimber);
-  soft(0.66, 0.125, 0.60, 0.052, 0, 0.305, 0.015, shell);
-  soft(0.505, 0.115, 0.52, 0.05, 0, 0.38, 0.075, seat);
-  // The inset line gives the cushion a separate upholstered edge.
-  soft(0.48, 0.012, 0.018, 0.005, 0, 0.342, 0.337, seam);
-
-  // Outer back, slightly reclined; a second padded insert and narrow piping
-  // read as a sewn chair rather than a solid block of foam.
-  soft(0.64, 0.62, 0.17, 0.075, 0, 0.60, -0.275, shell, -0.13);
-  soft(0.52, 0.50, 0.05, 0.025, 0, 0.615, -0.171, seam, -0.13);
-  soft(0.49, 0.47, 0.073, 0.043, 0, 0.619, -0.137, seat, -0.13);
-
-  for (const sx of [-1, 1]) {
-    soft(0.14, 0.31, 0.54, 0.065, sx * 0.325, 0.405, -0.015, shell);
-    soft(0.125, 0.037, 0.44, 0.018, sx * 0.325, 0.552, 0.005, seat);
-    // Tiny side seam: present up close, quiet at overview scale.
-    soft(0.008, 0.15, 0.39, 0.003, sx * 0.398, 0.395, 0.005, seam);
-  }
-  // A small removable cushion echoes the muted green of the model's base.
-  soft(0.265, 0.15, 0.065, 0.037, 0.02, 0.46, -0.098, pillow, -0.09);
-}
-
 // The five drawers of the IT rack double as a career timeline, oldest at the base.
 // Large years and small subject labels become legible when the visitor zooms in;
 // the preview card carries the same language-specific data at normal reading size.
@@ -1552,7 +1494,7 @@ function furnish(id, g, r, inspectionTargets) {
     // Cabinet bookshelf with imperfect books and Substack / Bluesky / LinkedIn trophies
     const shelfH = 1.18, trophyPicks = [];
     const sh = cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], shelfH, 0, { imperfect: true, skipUpperRight: true });
-    for (const [key, project, tx] of [['substack', 'signal', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
+    for (const [key, project, tx] of [['substack', 'substack', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
       trophyPicks.push(...trophyPlaque(sh, key, project, tx, sh.userData.upperY, 0.05));
     }
     // On top of the About Me shelf: books with leaning end book, brass lamp, and two distinct Enterprise miniatures
@@ -1594,7 +1536,7 @@ function furnish(id, g, r, inspectionTargets) {
     );
     tableMic(g, tx + 0.28, 0.47, tz - 0.05);
     inspect('signal', [paperBase, sheet], -0.10, 0.85);
-    tailoredArmchair(g, tx - 1.0, tz, 0.5);
+    podcastArmchair(g, tx - 1.0, tz, 0.5);
     podcastArmchair(g, tx + 1.0, tz - 0.15, -0.6);
     loungeFloorLamp(g, ...L.lamp);
     const shelf = writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
@@ -1633,7 +1575,7 @@ export const HOTSPOTS = {
     ['album', null, LAY.about.desk[0] + 0.26, 0.74, LAY.about.desk[1] + 0.08, 'album'],
     ['enterprise', null, LAY.about.shelf[0] + 0.25, 1.40, LAY.about.shelf[1] + 0.02, 'enterprise'],
     ['enterpriseD', null, LAY.about.shelf[0] + 0.49, 1.40, LAY.about.shelf[1] + 0.02, 'enterpriseD'],
-    ['signal', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'signal'],
+    ['substack', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'substack'],
     ['bluesky', LINKS.bluesky, LAY.about.shelf[0] + 0.25, 0.9, LAY.about.shelf[1] + 0.05, 'bluesky'],
     ['linkedin', LINKS.linkedin, LAY.about.shelf[0] + 0.44, 0.9, LAY.about.shelf[1] + 0.05, 'linkedin'],
   ],

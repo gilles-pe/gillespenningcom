@@ -306,6 +306,12 @@ export const content = {
           text: 'Notes on clinical AI and digital health on Substack.',
           href: LINKS.signal,
         },
+        substack: {
+          title: 'Substack',
+          icon: 'substack',
+          text: 'Notes on clinical AI and digital health on Substack.',
+          href: LINKS.signal,
+        },
         linkedin: {
           title: 'LinkedIn',
           icon: 'linkedin',
@@ -334,6 +340,7 @@ export const content = {
         hdrg: 'hDRG-Kompass',
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
+        substack: 'Substack',
         bluesky: 'Bluesky',
         speaking: 'Keynote Marburg',
         linkedin: 'LinkedIn',
@@ -607,6 +614,12 @@ export const content = {
           text: 'Beiträge zu klinischer KI und Digital Health auf Substack.',
           href: LINKS.signal,
         },
+        substack: {
+          title: 'Substack',
+          icon: 'substack',
+          text: 'Beiträge zu klinischer KI und Digital Health auf Substack.',
+          href: LINKS.signal,
+        },
         linkedin: {
           title: 'LinkedIn',
           icon: 'linkedin',
@@ -665,6 +678,7 @@ export const content = {
         hdrg: 'hDRG-Kompass',
         elbstrand: 'Elbstrand',
         signal: 'MedTech Signal',
+        substack: 'Substack',
         bluesky: 'Bluesky',
         speaking: 'Vortrag Marburg',
         linkedin: 'LinkedIn',

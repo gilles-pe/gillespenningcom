@@ -69,6 +69,9 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `model.rooms.writing` | Writing & Speaking | Schreiben & Vorträge |
 | `model.egg.note` | You found it! The fax device that keeps healthcare working in Germany. | Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält. |
 | `model.egg.cta` | Send me a message | Schreib mir eine Nachricht |
+| `model.egg.display.ready` | READY | BEREIT |
+| `model.egg.display.receiving` | RECEIVING | EMPFANG |
+| `model.egg.display.done` | 1 PAGE OK | 1 SEITE OK |
 | `model.slots.ai-wall-1` | Consultation | Sprechstunde |
 | `model.slots.ai-wall-2` | Progress | Verlauf |
 | `model.slots.writing-table-1` | Writing | Schreiben |

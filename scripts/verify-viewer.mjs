@@ -268,3 +268,17 @@ assert.equal(openedTabs.length,tabs+1);assert(openedTabs.at(-1).url.includes('li
 assert(faxViewer.closeNote());draw();
 assert(!fe.isOpen&&!stage.classList.contains('object-focused'),'close must restore the view and retract the sheet');
 console.log('cellar fax: found only from below, first click frames, second starts, sheet button opens LinkedIn, close restores: passed');
+
+// Fax display: READY when idle, RECEIVING with a blinking text and LED while the sheet comes out, then done; DE texts exist.
+const motion=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:false,lang:'en',onPick(){},onAway(){}});
+const mc=motion.debug.cellar,me=motion.debug.egg;
+assert.equal(mc.displayState().state,'idle');
+me.play();assert.equal(mc.displayState().state,'receiving');
+let mt=performance.now()+clockOffset;const seen=new Set();
+for(let i=0;i<700&&me.isAnimating;i++){mt+=16;frame(mt);if(mc.displayState().state==='receiving')seen.add(mc.displayState().blink);}
+assert(seen.has(true)&&seen.has(false),'receiving display must blink');
+assert(!me.isAnimating&&mc.displayState().state==='done','display must show done when the sheet is out');
+me.close();assert.equal(mc.displayState().state,'idle');
+const {default:contentData}=await import('../src/content.js');
+for(const l of ['en','de'])for(const k of ['ready','receiving','done'])assert(contentData[l].model.egg.display[k],`missing ${l} display text ${k}`);
+console.log('cellar fax display: idle, blinking receiving, done, close, both languages: passed');

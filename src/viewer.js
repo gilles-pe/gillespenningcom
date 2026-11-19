@@ -271,11 +271,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   };
   const egg = createEgg({ cellar, camera, reduced, onDone: () => { if (objectFocus?.target === faxTarget) focusObject(sheetTarget, false); } });
   cellar.feed(1);
-  const faxCorners = cornersOf(cellar.pick), sheetCorners = cornersOf([cellar.sheet]);
+  const faxCorners = cornersOf(cellar.frame), sheetCorners = cornersOf([cellar.sheet]);
   cellar.feed(0);
   // Seen from below and past the pole (el < -90 degrees), so the machine, which hangs from the ceiling of the recess, reads upright.
   // The sheet is framed face-on once it is out, so the text and the button can be read and clicked.
-  const faxTarget = { id: 'cellar:fax', room: null, key: 'fax', objects: cellar.pick, az: 0, el: -Math.PI / 2 - 0.5, margin: 1.12, captionHeight: 0, getCorners: () => faxCorners };
+  const faxTarget = { id: 'cellar:fax', room: null, key: 'fax', objects: cellar.pick, az: 0, el: -Math.PI / 2 - 0.5, margin: 1.05, captionHeight: 0, getCorners: () => faxCorners };
   const sheetTarget = { id: 'cellar:sheet', room: null, key: 'fax-sheet', objects: [cellar.sheet], az: 0, el: -Math.PI / 2 - 0.26, margin: 1.08, captionHeight: 0, getCorners: () => sheetCorners };
   // First click on the machine zooms in like on the objects in the rooms, the next one starts the fax and, when the sheet is out,
   // the view moves on to the sheet. The button on the sheet opens LinkedIn.

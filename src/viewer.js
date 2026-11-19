@@ -261,7 +261,38 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (instant) view.dist = goal.dist;
     aim(); checkAway();
   }
-  const egg = createEgg({ cellar, camera, stage, reduced, lang });
+  // Framing for the fax machine and for its sheet: fixed boxes with the sheet fully out, so the close-up does not change while it prints.
+  const cornersOf = objects => {
+    const box = new THREE.Box3();
+    for (const object of objects) { object.updateWorldMatrix(true, true); box.expandByObject(object); }
+    const out = [];
+    for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) out.push([x, y, z]);
+    return out;
+  };
+  const egg = createEgg({ cellar, camera, reduced, onDone: () => { if (objectFocus?.target === faxTarget) focusObject(sheetTarget, false); } });
+  cellar.feed(1);
+  const faxCorners = cornersOf(cellar.pick), sheetCorners = cornersOf([cellar.sheet]);
+  cellar.feed(0);
+  // Seen from below and past the pole (el < -90 degrees), so the machine, which hangs from the ceiling of the recess, reads upright.
+  // The sheet is framed face-on once it is out, so the text and the button can be read and clicked.
+  const faxTarget = { id: 'cellar:fax', room: null, key: 'fax', objects: cellar.pick, az: 0, el: -Math.PI / 2 - 0.5, margin: 1.12, captionHeight: 0, getCorners: () => faxCorners };
+  const sheetTarget = { id: 'cellar:sheet', room: null, key: 'fax-sheet', objects: [cellar.sheet], az: 0, el: -Math.PI / 2 - 0.26, margin: 1.08, captionHeight: 0, getCorners: () => sheetCorners };
+  // First click on the machine zooms in like on the objects in the rooms, the next one starts the fax and, when the sheet is out,
+  // the view moves on to the sheet. The button on the sheet opens LinkedIn.
+  function eggClick(kind) {
+    if (kind === 'button') { egg.send(); return; }
+    if (egg.isOpen && !egg.isAnimating) { if (objectFocus?.target !== sheetTarget) focusFax(sheetTarget); return; }
+    if (objectFocus?.target === faxTarget) { egg.play(); return; }
+    focusFax(faxTarget);
+  }
+  function focusFax(target) {
+    if (!objectFocus) {
+      closeAlbum(false); closePhoto(false); closePop(false);
+      rememberView('inspect');
+      stage.classList.add('object-focused');
+    }
+    focusObject(target);
+  }
   const allPhotoPicks = [...(photo?.pick ?? []), ...(speakingPhoto?.pick ?? [])];
   const photoParts = new Set(allPhotoPicks), photoThings = [...allPhotoPicks, ...occluders];
   const photoRay = new THREE.Raycaster(), pv = new THREE.Vector3(), pDir = new THREE.Vector3();
@@ -1108,7 +1139,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       }
       if (!cancelled && !drag.moved && e.target === stage && drag.btn === 0) {
         const object = hoverObject(ndc(e));
-        if (egg.hit(ndc(e))) egg.play();
+        const eggKind = egg.pick(ndc(e));
+        if (eggKind) eggClick(eggKind);
         else if (object) {
           if (object.room !== openId) onPick(object.room);
           if (object.type === 'album') toggleAlbum();
@@ -1220,7 +1252,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         break;
       }
     }
-    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !warpMoving && !displaysMoving && !egg.isOpen) return;
+    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !warpMoving && !displaysMoving && !egg.isAnimating) return;
     dirty = false;
 
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));
@@ -1237,7 +1269,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     camera.up.set(-se * sa, ce, -se * ca);                    // tangent of the elevation arc: no flip or jump at the poles
     camera.lookAt(view.t);
     camera.updateMatrixWorld();
-    egg.update(now, stageW, stageH);
+    egg.update(now);
+    cellar.lamp.intensity = cellar.lamp.userData.base * THREE.MathUtils.clamp((0.15 - Math.sin(view.el)) / 0.15, 0, 1);   // lit only when seen from below
     updatePhoto();
     updatePop();
     if (openId !== 'about' && (albumOpen || albumFramed)) closeAlbum(false);
@@ -1289,8 +1322,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     reset: resetView,
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
-      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
+      const faxFocused = objectFocus?.target === faxTarget || objectFocus?.target === sheetTarget;
+      const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); roomWarp?.cancel();
+      if (faxFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
       markDirty();
       return had;
     },
@@ -1299,7 +1334,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       curLang = l;
       setModelLanguage(l);
       labelSpots();
-      egg.setLanguage(l);
       labelPhoto();
       fillPop();
       albumBook?.refreshLanguage();

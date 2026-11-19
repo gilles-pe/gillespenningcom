@@ -67,9 +67,8 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 | `model.rooms.about` | About Me | Über mich |
 | `model.rooms.ai` | AI & Digital Health | KI & Digital Health |
 | `model.rooms.writing` | Writing & Speaking | Schreiben & Vorträge |
-| `model.egg.note` | This is where healthcare keeps its interoperability. | Hier bewahrt das Gesundheitswesen seine Interoperabilität auf. |
-| `model.egg.label` | Note from the cellar | Notiz aus dem Keller |
-| `model.egg.close` | Close | Schließen |
+| `model.egg.note` | You found it! The fax device that keeps healthcare working in Germany. | Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält. |
+| `model.egg.cta` | Send me a message | Schreib mir eine Nachricht |
 | `model.slots.ai-wall-1` | Consultation | Sprechstunde |
 | `model.slots.ai-wall-2` | Progress | Verlauf |
 | `model.slots.writing-table-1` | Writing | Schreiben |

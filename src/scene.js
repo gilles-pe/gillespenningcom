@@ -44,6 +44,8 @@ export const ROOMS = {
 const BASE = { x0: -5.7, x1: 5.3, z0: -5.4, z1: 4.3 };
 // Recess in the underside of the base (a small cellar, see buildCellar). Centre and inner size in world units.
 const CELLAR = { x: 0.5, z: -0.6, w: 1.8, d: 1.3 };
+// The lower part of the base around the recess: world y of its underside and its height. buildScene and buildCellar both use it.
+const BASE_LOW = { y: -0.66, h: 0.45 };
 const CORR = { frontX: 0.75, backX: 0.0, jogZ: -1.7 };                      // corridor centre lines, z of the jog
 // Door: a sliding pane in the corridor-side wall. The AI room uses a 3-panel frosted glass partition where the front panel slides.
 function doorSpec(r, id) {
@@ -713,6 +715,8 @@ function brassPath(pts, radius) {
 // (which is the underside of the slab, so the machine hangs downwards and reads upright when the model is turned over).
 // Nothing in the normal views can see it. viewer.js and egg.js make it clickable.
 const EGG_PAPER = { w: 0.19, h: 0.27 };
+// The "Send me a message" button printed on the sheet, in texture coordinates (u right, v up). Updated by drawPaper.
+const paperButton = { u0: 0, u1: 0, v0: 0, v1: 0 };
 function drawPaper(c) {
   const k = c.getContext('2d'), w = c.width, h = c.height;
   k.fillStyle = '#fffdf8'; k.fillRect(0, 0, w, h);
@@ -723,9 +727,15 @@ function drawPaper(c) {
   for (const wd of words) { const tst = cur ? `${cur} ${wd}` : wd; if (k.measureText(tst).width > w * 0.8 && cur) { lines.push(cur); cur = wd; } else cur = tst; }
   if (cur) lines.push(cur);
   lines.forEach((ln, i) => k.fillText(ln, w * 0.1, h * 0.27 + i * fs * 1.28));
+  // Button below the text: a petrol pill with the call to action.
+  const bx = w * 0.1, bw = w * 0.8, bh = fs * 2, by = h * 0.27 + (lines.length - 1) * fs * 1.28 + fs * 1.1;
+  k.fillStyle = PETROL; k.beginPath(); k.roundRect(bx, by, bw, bh, bh / 2); k.fill();
+  k.fillStyle = '#fffdf8'; k.textAlign = 'center'; k.textBaseline = 'middle'; k.font = `600 ${fs * 0.85}px ${FONT}`;
+  k.fillText(modelText().egg?.cta ?? '', w / 2, by + bh / 2 + 1, bw * 0.9);
+  Object.assign(paperButton, { u0: bx / w, u1: (bx + bw) / w, v0: 1 - (by + bh) / h, v1: 1 - by / h });
 }
 function buildCellar(scene, occluders) {
-  const H = CELLAR, top = -0.66 + 0.45, bottom = -0.66;               // ceiling and opening of the recess (world y)
+  const H = CELLAR, top = BASE_LOW.y + BASE_LOW.h, bottom = BASE_LOW.y;   // ceiling and opening of the recess (world y)
   const cream = new THREE.MeshStandardMaterial({ color: C.cream, roughness: 0.95, side: THREE.BackSide, emissive: 0xf3e4c8, emissiveIntensity: 0.25 });
   const lining = new THREE.Mesh(new THREE.BoxGeometry(H.w - 0.004, top - bottom - 0.004, H.d - 0.004), cream);
   lining.position.set(H.x, (top + bottom) / 2 - 0.0, H.z); scene.add(lining);
@@ -737,7 +747,7 @@ function buildCellar(scene, occluders) {
   for (const sx of [-1, 1]) {
     const m = new THREE.Mesh(new THREE.BoxGeometry(ft, fd, H.d), fm); m.position.set(H.x + sx * (H.w / 2 + ft / 2), bottom - fd / 2 + 0.002, H.z); scene.add(m);
   }
-  const lamp = new THREE.PointLight(0xffe2b0, 3.2, 3.2, 1.4); lamp.position.set(H.x, bottom - 0.12, H.z - 0.15); scene.add(lamp);
+  const lamp = new THREE.PointLight(0xffe2b0, 3.2, 3.2, 1.4); lamp.position.set(H.x, bottom - 0.12, H.z - 0.15); lamp.userData.base = 3.2; scene.add(lamp);
 
   // Everything of the machine is built upright in `g` (y up from the standing surface, front towards +z)
   // and the group is turned over so that it stands on the ceiling of the recess and its front faces world -z.
@@ -776,16 +786,15 @@ function buildCellar(scene, occluders) {
   sheetTex.colorSpace = THREE.SRGBColorSpace; sheetTex.anisotropy = 8;
   whenFont(() => { drawPaper(sheetTex.image); sheetTex.needsUpdate = true; });
   const sg = new THREE.PlaneGeometry(EGG_PAPER.w, EGG_PAPER.h); sg.translate(0, EGG_PAPER.h / 2, 0);
-  const sheet = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({ map: sheetTex, roughness: 0.9, emissive: 0xffffff, emissiveMap: sheetTex, emissiveIntensity: 0.35 }));
+  const sheet = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ map: sheetTex, toneMapped: false }));
   sheet.rotation.x = A - Math.PI / 2; g.add(sheet); pick.push(sheet);
   const dir = new THREE.Vector3(0, -Math.sin(A), Math.cos(A)), slot = new THREE.Vector3(0, slotY + 0.004, front);
   const E0 = 0.07, E1 = 0.22;
   const feed = p => sheet.position.copy(slot).addScaledVector(dir, E0 + (E1 - E0) * p);
   feed(0);
-  const anchor = new THREE.Object3D(); anchor.position.set(0, 0.3, 0.1); g.add(anchor);
   // `shake` moves the machine (not the sheet's own feed) a little: x/z in metres, roll in radians.
   const shake = (x, z, roll) => { g.position.set(x, 0, z); g.rotation.z = roll; };
-  return { pick, occluders, anchor, feed, shake, lamp, center: new THREE.Vector3(H.x, bottom - 0.1, H.z) };
+  return { pick, occluders, sheet, button: () => paperButton, feed, shake, lamp, center: new THREE.Vector3(H.x, bottom - 0.1, H.z) };
 }
 
 export function buildScene() {
@@ -796,7 +805,7 @@ export function buildScene() {
   const BW = BASE.x1 - BASE.x0, BD = BASE.z1 - BASE.z0, bx = (BASE.x0 + BASE.x1) / 2, bz = (BASE.z0 + BASE.z1) / 2;
   // The base is a slab with a lower part around a recess on the underside (the cellar, see buildCellar).
   const baseMat = mat(C.base, { roughness: 0.95 }), occluders = [];
-  const SLAB = 0.15, LOW = 0.45, lowY = -0.66, H = CELLAR;
+  const SLAB = 0.15, LOW = BASE_LOW.h, lowY = BASE_LOW.y, H = CELLAR;
   occluders.push(box(scene, BW, SLAB, BD, bx, lowY + LOW, bz, baseMat));
   const hx0 = H.x - H.w / 2, hx1 = H.x + H.w / 2, hz0 = H.z - H.d / 2, hz1 = H.z + H.d / 2;
   occluders.push(

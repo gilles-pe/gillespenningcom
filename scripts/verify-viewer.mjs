@@ -305,13 +305,13 @@ delete window.AudioContext;
 
 // Warp flight sound: both sounds are scheduled against the flight clock, late decoding joins at the right position, stop fades and closes.
 {
-  const { playWarpSound, ARRIVE_AT } = await import('../src/warp-sound.js');
+  const { playWarpSound, ARRIVE_AT, LANDING_END } = await import('../src/warp-sound.js');
   const make = (now) => {
-    const c = { currentTime: now, started: [], closed: 0, gains: [] };
-    c.createGain = () => { const g = { gain: { value: 1, setTargetAtTime() {} }, connect() {} }; c.gains.push(g); return g; };
+    const c = { currentTime: now, started: [], closed: 0, gains: [], ramps: [], stops: [] };
+    c.createGain = () => { const g = { gain: { value: 1, setTargetAtTime() {}, setValueAtTime() {}, linearRampToValueAtTime(v, t) { c.ramps.push([v, t]); } }, connect() {} }; c.gains.push(g); return g; };
     c.destination = {};
     c.decodeAudioData = (bytes, ok) => { const n = bytes.byteLength; ok({ duration: n === 1 ? 8.9 : 7.0 }); return Promise.resolve(); };
-    c.createBufferSource = () => { const s = { connect() {}, start(when, offset = 0) { c.started.push({ d: s.buffer.duration, when, offset }); }, stop() {} }; return s; };
+    c.createBufferSource = () => { const s = { connect() {}, start(when, offset = 0) { c.started.push({ d: s.buffer.duration, when, offset }); }, stop(t) { c.stops.push(t); } }; return s; };
     c.close = () => { c.closed++; };
     return c;
   };
@@ -320,6 +320,8 @@ delete window.AudioContext;
   let c = make(10); playWarpSound(c, data, ago(0)); await new Promise(r => setTimeout(r, 0));
   assert.ok(c.started[0].offset < 0.05); assert.ok(Math.abs(c.started[0].when - 10) < 0.05);
   assert.ok(Math.abs(c.started[1].when - (10 + ARRIVE_AT)) < 0.05); assert.equal(c.started[1].offset, 0);
+  // the arrival sound is cut and faded so that it is silent at the landing (LANDING_END), the departure sound plays on
+  assert.equal(c.stops.length, 1); assert.ok(Math.abs(c.stops[0] - (10 + LANDING_END)) < 0.05); assert.ok(Math.abs(c.ramps[0][1] - (10 + LANDING_END)) < 0.05); assert.equal(c.ramps[0][0], 0);
   // decoding finished 5 s late: the departure sound joins at 5 s, the arrival sound at 1.3 s
   c = make(10); playWarpSound(c, data, ago(5)); await new Promise(r => setTimeout(r, 0));
   assert.ok(Math.abs(c.started[0].offset - 5) < 0.05); assert.ok(Math.abs(c.started[1].offset - (5 - ARRIVE_AT)) < 0.05);

@@ -1,4 +1,5 @@
 import { enterpriseCopy, labelShipAction } from './enterprise-copy.js';
+import { loadEnterpriseGlb, createRoomWarp } from './enterprise.js';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { t } from './i18n.js';
@@ -17,7 +18,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const markDirty = () => { dirty = true; };
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, inspectionTargets } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets } = buildScene();
+  const roomWarp = enterprise ? createRoomWarp(scene, enterprise.root) : null;
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isSpotLight || o.isRectAreaLight) sceneLit = true; });
@@ -103,6 +105,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function goBack() {
     navigationGroup = null;
     markDirty();
+    if (roomWarp?.isActive()) { roomWarp.cancel(); return true; }
     if (albumLightbox && !albumLightbox.hidden) { closeAlbumPhoto(); return true; }
     if (albumOpen) { closeAlbumBook(true); return true; }
     if (!viewHistory.length) return false;
@@ -218,6 +221,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function resetView() {
     markDirty();
+    roomWarp?.cancel();
     rememberView('reset'); closeAlbum(false); closePop(false); restoreObjectView(); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
   }
@@ -340,7 +344,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const projParts = new Set(projectPicks), projThings = [...projectPicks, ...occluders];
   const projRay = new THREE.Raycaster();
   const SOCIAL_CARDS = new Set(['signal', 'substack', 'bluesky', 'linkedin']);
-  const ABOUT_CARDS = new Set(['story', 'enterprise', 'enterpriseD', ...SOCIAL_CARDS]);
+  const ABOUT_CARDS = new Set(['story', 'enterprise', ...SOCIAL_CARDS]);
   const popAllowed = (roomId, key) =>
     roomId === 'projects' || roomId === 'ai'
     || (roomId === 'writing' && SOCIAL_CARDS.has(key))
@@ -352,6 +356,37 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const soonBadge = document.createElement('div'); soonBadge.className = 'project-soon-badge';
   soonBadge.setAttribute('role', 'status'); soonBadge.hidden = true; stage.append(soonBadge);
   const badgePos = new THREE.Vector3(), badgeBox = new THREE.Box3();
+  const engageBtn = document.createElement('button');
+  engageBtn.type = 'button'; engageBtn.className = 'ship-engage-btn'; engageBtn.textContent = 'Engage';
+  engageBtn.hidden = true; stage.append(engageBtn);
+  const engagePos = new THREE.Vector3();
+  async function triggerRoomWarp() {
+    if (reduced) { if (popText) popText.textContent = enterpriseCopy[curLang].reduced; return; }
+    await ensureEnterpriseGlb();
+    closePop(false);
+    restoreObjectView();
+    // Stay inside the About Me room at normal room framing so the entire 180° curve & warp-in stay in view
+    openId = 'about'; custom = false; zoom = 1; panOffset.set(0, 0, 0);
+    setGoal();
+    roomWarp?.engage(() => markDirty());
+    markDirty();
+  }
+  engageBtn.addEventListener('click', () => { triggerRoomWarp(); });
+  function updateEngageBtn() {
+    if (!enterprise?.engageAnchor || roomWarp?.isActive() || albumOpen) { engageBtn.hidden = true; return; }
+    enterprise.engageAnchor.getWorldPosition(engagePos);
+    const camDist = camera.position.distanceTo(engagePos);
+    const closeZoom = popKey === 'enterprise' || (openId === 'about' && camDist < 2.8) || (!openId && camDist < 2.3);
+    if (!closeZoom) { engageBtn.hidden = true; return; }
+    const p = engagePos.clone().project(camera);
+    if (p.z < -1 || p.z > 1) { engageBtn.hidden = true; return; }
+    const x = (p.x * 0.5 + 0.5) * stageW;
+    const y = (-p.y * 0.5 + 0.5) * stageH;
+    if (x < 24 || x > stageW - 24 || y < 24 || y > stageH - 24) { engageBtn.hidden = true; return; }
+    engageBtn.style.left = `${x}px`;
+    engageBtn.style.top = `${y}px`;
+    engageBtn.hidden = false;
+  }
   function updateSoonBadge() {
     const data = t(curLang, `model.projectCards.${popKey}`);
     const target = openId === 'projects' && projectKeys.has(popKey) && !data?.href ? inspectionFor(popKey) : null;
@@ -391,7 +426,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function fillPop() {
     if (!popEl || !popKey) return;
-    const isShip = popKey === 'enterprise' || popKey === 'enterpriseD';
+    const isShip = popKey === 'enterprise';
     const shipCopy = enterpriseCopy[curLang];
     shipActions.hidden = !isShip;
     labelShipAction(shipActions.children[0], shipCopy.inspect, 'inspect');
@@ -415,8 +450,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!data) return;
     popEl.setAttribute('aria-label', data.title);
     popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
-    popTitle.textContent = isShip ? (popKey === 'enterpriseD' ? 'NCC-1701-D' : 'NCC-1701') : data.title;
-    popText.textContent = isShip ? shipCopy[popKey === 'enterpriseD' ? 'tng' : 'tos'] : data.text;
+    popTitle.textContent = isShip ? 'NCC-1701' : data.title;
+    popText.textContent = isShip ? shipCopy.tos : data.text;
     popTimeline.replaceChildren();
     popTimeline.hidden = !Array.isArray(data.timeline);
     for (const entry of data.timeline || []) {
@@ -533,7 +568,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       popMore = document.createElement('span'); popMore.className = 'pop-more'; popMore.hidden = true;
       popTimeline = document.createElement('ol'); popTimeline.className = 'pop-timeline'; popTimeline.hidden = true;
       popEl.addEventListener('pointerenter', stopAutoCard);
-      popEl.addEventListener('pointerleave', () => { if (popKey && !objectFocus && !['rack', 'enterprise', 'enterpriseD'].includes(popKey)) startAutoCard(() => closePop(false)); });
+      popEl.addEventListener('pointerleave', () => { if (popKey && !objectFocus && !['rack', 'enterprise'].includes(popKey)) startAutoCard(() => closePop(false)); });
       popBody.append(popImg, popTitle, popText, popMore, popTimeline);
       shipActions = document.createElement('div'); shipActions.className = 'ship-actions'; shipActions.hidden = true;
       for (const launch of [false, true]) {
@@ -541,8 +576,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         action.addEventListener('click', async () => {
           const key = popKey; action.disabled = true;
           try {
-            const { showEnterprise } = await import('./enterprise-inspector.js');
-            if (popKey === key && !showEnterprise(key === 'enterpriseD' ? 'tng' : 'tos', enterpriseCopy[curLang], reduced, launch)) popText.textContent = enterpriseCopy[curLang].error;
+            if (launch) {
+              await triggerRoomWarp();
+            } else {
+              const { showEnterprise } = await import('./enterprise-inspector.js');
+              if (popKey === key && !showEnterprise(enterpriseCopy[curLang], reduced, () => { triggerRoomWarp(); })) popText.textContent = enterpriseCopy[curLang].error;
+            }
           } catch { popText.textContent = enterpriseCopy[curLang].error; }
           finally { action.disabled = false; }
         });
@@ -555,8 +594,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     clearTimeout(popTimer);
     stopAutoCard();
     popKey = key;
+    if (key === 'enterprise') ensureEnterpriseGlb();
     popEl.classList.toggle('rack-card', key === 'rack');
-    popEl.classList.toggle('ship-card', ['enterprise', 'enterpriseD'].includes(key));
+    popEl.classList.toggle('ship-card', key === 'enterprise');
     popEl.classList.toggle('inspection-card', Boolean(inspectionFor(key)));
     fillPop();
     const project = t(curLang, `model.projectCards.${key}`);
@@ -569,7 +609,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const target = inspectionFor(key);
     if (target) { stage.classList.add('object-focused'); focusObject(target); }
     popClose.focus({ preventScroll: true });
-    if (!objectFocus && !['rack', 'enterprise', 'enterpriseD'].includes(key)) startAutoCard(() => closePop(false));
+    if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
   function togglePop(key) {
     if (popKey === key && projectKeys.has(key)) {
@@ -590,6 +630,17 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   // Social trophies and laptop ("My Story") inside About Me
   const trophyParts = new Set(trophyPicks), trophyThings = [...trophyPicks, ...occluders];
+  function ensureEnterpriseGlb() {
+    if (!enterprise) return Promise.resolve();
+    return loadEnterpriseGlb(enterprise.root, { tagMesh: enterprise.tagMesh }).then(meshes => {
+      if (!meshes.length) return;
+      for (const m of meshes) {
+        trophyParts.add(m);
+        trophyThings.unshift(m);
+      }
+      markDirty();
+    });
+  }
   const trophyRay = new THREE.Raycaster();
   const trophyHit = ndcPos => {
     trophyRay.setFromCamera(ndcPos, camera);
@@ -1125,6 +1176,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!visible || document.hidden) { last = now; return; }
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const bookMoving = albumBook ? albumBook.update(dt) : false;
+    const warpMoving = roomWarp ? roomWarp.update(now) : false;
     if (albumBook?.light) {
       const targetLight = albumOpen ? 1.35 : 0;
       if (Math.abs(albumBook.light.intensity - targetLight) > 0.01) {
@@ -1143,7 +1195,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         break;
       }
     }
-    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !egg.isOpen) return;
+    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !warpMoving && !egg.isOpen) return;
     dirty = false;
 
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));
@@ -1180,6 +1232,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     placeSpots();
     updateSoonBadge();
+    updateEngageBtn();
     updateHoverTip();
     renderCamera.position.copy(camera.position);
     renderCamera.quaternion.copy(camera.quaternion);
@@ -1190,6 +1243,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   return {
     open(id, { keepView = false } = {}) {
       markDirty();
+      roomWarp?.cancel();
+      if (id === 'about') ensureEnterpriseGlb();
       if (!keepView && (id !== openId || custom)) rememberView('room');
       if (id !== openId) closeAlbum(false);
       if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
@@ -1209,8 +1264,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     reset: resetView,
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
-      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumFramed;
-      egg.close(true); closePhoto(true); closePop(true); closeAlbum(true);
+      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
+      egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); roomWarp?.cancel();
       markDirty();
       return had;
     },

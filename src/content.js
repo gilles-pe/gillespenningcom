@@ -246,7 +246,6 @@ export const content = {
         opTable: { title: 'Operating table', text: 'Rigid endoscope and camera head on the sterile drape.' },
         practiceDesk: { title: 'Digital workspace', text: 'A closer look at the monitor, keyboard and workspace.' },
         studyDesk: { title: 'My desk', text: 'The laptop opens my leadership experience. The album holds a few photos from outside work.' },
-        studyShelf: { title: 'Books and a little Star Trek', text: 'Choose a miniature or a social plaque to take a closer look.' },
         writingShelf: { title: 'Writing & Speaking', text: 'Books and a moment from a talk. Select the photo to open it.' },
       },
       projectCards: {
@@ -293,7 +292,6 @@ export const content = {
           ],
           href: null,
         },
-        enterpriseD: { title: 'USS Enterprise NCC-1701-D', text: 'Galaxy class · The Next Generation', href: null },
         enterprise: {
           title: 'USS Enterprise NCC-1701',
           icon: 'enterprise',
@@ -349,7 +347,6 @@ export const content = {
         photo: 'Marathon',
         rack: 'Digital workflows',
         enterprise: 'NCC-1701',
-        enterpriseD: 'NCC-1701-D',
       },
     },
   },
@@ -584,7 +581,6 @@ export const content = {
         opTable: { title: 'OP-Tisch', text: 'Starres Endoskop und Kamerakopf auf dem sterilen Tuch.' },
         practiceDesk: { title: 'Digitaler Arbeitsplatz', text: 'Monitor, Tastatur und Arbeitsplatz aus der Nähe.' },
         studyDesk: { title: 'Mein Schreibtisch', text: 'Der Laptop führt zu meinen Führungserfahrungen. Im Album liegen ein paar Fotos abseits der Arbeit.' },
-        studyShelf: { title: 'Bücher und ein wenig Star Trek', text: 'Ein Modell oder eines der Social-Media-Schilder auswählen, um näher hinzuschauen.' },
         writingShelf: { title: 'Schreiben & Vorträge', text: 'Bücher und ein Moment aus einem Vortrag. Ein Klick auf das Foto öffnet es.' },
       },
       projectCards: {
@@ -601,7 +597,6 @@ export const content = {
           ],
           href: null,
         },
-        enterpriseD: { title: 'USS Enterprise NCC-1701-D', text: 'Galaxy class · The Next Generation', href: null },
         enterprise: {
           title: 'USS Enterprise NCC-1701',
           icon: 'enterprise',
@@ -687,7 +682,6 @@ export const content = {
         photo: 'Marathon',
         rack: 'Digitale Workflows',
         enterprise: 'NCC-1701',
-        enterpriseD: 'NCC-1701-D',
       },
     },
   },

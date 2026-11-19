@@ -726,7 +726,7 @@ export function buildScene() {
   const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
   const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [], inspectionTargets = [];
-  let albumBook = null;
+  let albumBook = null, enterprise = null;
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
     g.position.set(r.cx, 0, r.cz); scene.add(g);
@@ -775,13 +775,14 @@ export function buildScene() {
     if (extra?.storyPicks) storyPicks.push(...extra.storyPicks);
     if (extra?.albumPicks) albumPicks.push(...extra.albumPicks);
     if (extra?.albumBook) albumBook = extra.albumBook;
+    if (extra?.enterprise) enterprise = extra.enterprise;
   }
   // Outline of the whole model, for the camera: base corners plus the top of every room.
   const outline = [];
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, inspectionTargets };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -802,13 +803,19 @@ function layout(id) {
 }
 
 // ---- Detailed props & room assemblies -----------------------------------------------
-function enterpriseModel(parent, x, y, z, rotY = -0.5, era = 'tos') {
-  const g = createEnterprise(era); g.scale.setScalar(0.08);
+function enterpriseModel(parent, x, y, z, rotY = -0.95) {
+  const g = createEnterprise(true); g.scale.setScalar(0.095);
   g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
   const anchor = new THREE.Object3D(); anchor.position.set(0, 1.8, 0); g.add(anchor);
+  const engageAnchor = new THREE.Object3D(); engageAnchor.position.set(-0.55, 0.36, 1.45); g.add(engageAnchor);
+  const tagMesh = o => {
+    o.userData.project = 'enterprise';
+    o.userData.anchor = anchor;
+    o.userData.miniature = g;
+  };
   const picks = [];
-  g.traverse(o => { if (o.isMesh) { o.userData.project = era === 'tng' ? 'enterpriseD' : 'enterprise'; o.userData.anchor = anchor; o.userData.miniature = g; picks.push(o); } });
-  return picks;
+  g.traverse(o => { if (o.isMesh) { tagMesh(o); picks.push(o); } });
+  return { root: g, anchor, engageAnchor, tagMesh, picks };
 }
 
 // Raised keys shared by the laptop and the practice keyboard.
@@ -1497,19 +1504,18 @@ function furnish(id, g, r, inspectionTargets) {
     for (const [key, project, tx] of [['substack', 'substack', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
       trophyPicks.push(...trophyPlaque(sh, key, project, tx, sh.userData.upperY, 0.05));
     }
-    // On top of the About Me shelf: books with leaning end book, brass lamp, and two distinct Enterprise miniatures
+    // On top of the About Me shelf: books with leaning end book, brass lamp, and the classic TOS Enterprise
     const topPal = [0xebe3d3, 0xd8cbb4, 0xc9d0bd];
     for (let i = 0; i < 3; i++) box(sh, 0.048, 0.23, 0.16, -0.44 + i * 0.056, shelfH, 0.03, mat(topPal[i]));
     const lean = box(sh, 0.044, 0.22, 0.15, -0.22, shelfH, 0.03, mat(0xd8cbb4));
     lean.rotation.z = -0.25;
     studyLamp(sh, 0.005, shelfH, -0.045);
-    trophyPicks.push(...enterpriseModel(sh, 0.22, shelfH, 0.02, -1.12, 'tos'));
-    trophyPicks.push(...enterpriseModel(sh, 0.49, shelfH, 0.02, -0.82, 'tng'));
-    inspect('studyShelf', [sh], -0.16, 0.30, true);
+    const enterprise = enterpriseModel(sh, 0.34, shelfH, 0.02, -0.95);
+    trophyPicks.push(...enterprise.picks);
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
     studyRubberPlant(g, RW / 2 - 0.43, RD / 2 - 0.44);
-    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks, albumBook: album };
+    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks, albumBook: album, enterprise };
   }
   if (id === 'ai') {
     const projectPicks = [];
@@ -1536,7 +1542,7 @@ function furnish(id, g, r, inspectionTargets) {
     );
     tableMic(g, tx + 0.28, 0.47, tz - 0.05);
     inspect('signal', [paperBase, sheet], -0.10, 0.85);
-    podcastArmchair(g, tx - 1.0, tz, 0.5);
+    podcastArmchair(g, tx - 1.0, tz - 0.15, 0.6);
     podcastArmchair(g, tx + 1.0, tz - 0.15, -0.6);
     loungeFloorLamp(g, ...L.lamp);
     const shelf = writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
@@ -1573,8 +1579,7 @@ export const HOTSPOTS = {
     ['photo', null, LAY.about.pic[0], LAY.about.pic[1], -ROOMS.about.d / 2 + 0.1, 'photo'],
     ['story', null, LAY.about.desk[0] - 0.24, 0.85, LAY.about.desk[1] + 0.03, 'story'],
     ['album', null, LAY.about.desk[0] + 0.26, 0.74, LAY.about.desk[1] + 0.08, 'album'],
-    ['enterprise', null, LAY.about.shelf[0] + 0.25, 1.40, LAY.about.shelf[1] + 0.02, 'enterprise'],
-    ['enterpriseD', null, LAY.about.shelf[0] + 0.49, 1.40, LAY.about.shelf[1] + 0.02, 'enterpriseD'],
+    ['enterprise', null, LAY.about.shelf[0] + 0.34, 1.40, LAY.about.shelf[1] + 0.02, 'enterprise'],
     ['substack', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'substack'],
     ['bluesky', LINKS.bluesky, LAY.about.shelf[0] + 0.25, 0.9, LAY.about.shelf[1] + 0.05, 'bluesky'],
     ['linkedin', LINKS.linkedin, LAY.about.shelf[0] + 0.44, 0.9, LAY.about.shelf[1] + 0.05, 'linkedin'],

@@ -1,6 +1,32 @@
 export const enterpriseCopy = {
-  en: { inspect: 'Explore', warp: 'Warp', reset: 'Reset view', close: 'Close', hint: 'Drag to rotate · Pinch to zoom · Arrow keys to rotate', ready: '', departing: 'Warp departure…', reduced: 'Reduced motion is enabled. The model stays on its stand.', error: 'The model could not open. Please try again.', tos: 'Constitution class · The Original Series', tng: 'Galaxy class · The Next Generation' },
-  de: { inspect: 'Ansehen', warp: 'Warp', reset: 'Ansicht zurücksetzen', close: 'Schließen', hint: 'Ziehen zum Drehen · Zwei Finger zum Zoomen · Pfeiltasten zum Drehen', ready: '', departing: 'Warpflug…', reduced: 'Reduzierte Bewegung ist aktiviert. Das Modell bleibt auf seinem Sockel.', error: 'Das Modell konnte nicht geöffnet werden. Bitte erneut versuchen.', tos: 'Constitution-Klasse · Die Originalserie', tng: 'Galaxy-Klasse · The Next Generation' },
+  en: {
+    inspect: 'Explore',
+    warp: 'Warp',
+    reset: 'Reset view',
+    close: 'Close',
+    hint: 'Drag to rotate · Pinch to zoom · Arrow keys to rotate',
+    ready: '',
+    departing: 'Warp flight…',
+    reduced: 'Reduced motion is enabled. The model stays on its stand.',
+    error: 'The model could not open. Please try again.',
+    tos: 'Constitution class',
+    creditLabel: 'Model',
+    credit: 'TOS Enterprise by Raul Mamoru · trekmeshes.ch',
+  },
+  de: {
+    inspect: 'Ansehen',
+    warp: 'Warp',
+    reset: 'Ansicht zurücksetzen',
+    close: 'Schließen',
+    hint: 'Ziehen zum Drehen · Zwei Finger zum Zoomen · Pfeiltasten zum Drehen',
+    ready: '',
+    departing: 'Warpflug…',
+    reduced: 'Reduzierte Bewegung ist aktiviert. Das Modell bleibt auf seinem Sockel.',
+    error: 'Das Modell konnte nicht geöffnet werden. Bitte erneut versuchen.',
+    tos: 'Constitution-Klasse',
+    creditLabel: 'Model',
+    credit: 'TOS Enterprise von Raul Mamoru · trekmeshes.ch',
+  },
 };
 
 // Quiet text actions with a single authored line icon, shared by caption and inspector.

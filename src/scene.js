@@ -1448,6 +1448,9 @@ function operatingRoom(g, L, projectPicks) {
       g.add(spot, spot.target); g.userData.opSpot = spot;
     }
     cyl(lampHead, w.r, w.r * 0.93, 0.052, 0, 0, 0, cream, 26);
+    // The head itself glows: a lit diffuser disc underneath and a luminous rim, so the lamp reads as lit from any side.
+    const diff = new THREE.Mesh(new THREE.CircleGeometry(w.r * 0.9, 32), lensM); diff.rotation.x = Math.PI / 2; diff.position.y = -0.0275; lampHead.add(diff);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(w.r * 0.97, 0.007, 8, 40), lensM); rim.rotation.x = Math.PI / 2; rim.position.y = -0.004; lampHead.add(rim);
     cyl(lampHead, 0.016, 0.018, 0.055, 0, -0.055, 0, drape, 12);
     for (let i = 0; i < 6; i++) {
       const a = (i / 6) * Math.PI * 2;

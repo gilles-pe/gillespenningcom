@@ -295,7 +295,9 @@ mv.debug.inspect('globe');assert.equal(audioMade,0,'first click on the globe onl
 mv.debug.selectProject('globe');assert.equal(audioMade,1,'audio context must be created inside the second click');assert.equal(mv.debug.music,'loading');assert.equal(played,0);
 await new Promise(r=>setTimeout(r,0));
 assert.equal(mv.debug.music,'playing');assert.equal(played,1,'theme must start on the second click, as soon as it is loaded');
+mv.debug.selectProject('globe');assert.equal(playerStopped,1,'click while playing must stop the theme');assert.equal(mv.debug.music,'idle');assert(mv.debug.goal,'view stays on the globe');
+mv.debug.selectProject('globe');await new Promise(r=>setTimeout(r,0));assert.equal(played,2,'click again restarts');
 assert(Math.cos(mv.debug.goal.el)>0&&mv.debug.goal.dist<2,'globe close-up must be a real zoom');
-mv.closeNote();draw();assert.equal(playerStopped,1,'leaving the globe must stop the theme');assert.equal(mv.debug.music,'idle');
+mv.closeNote();draw();assert.equal(playerStopped,2,'leaving the globe must stop the theme');assert.equal(mv.debug.music,'idle');
 console.log('globe theme: lazy, first click zooms only, second click starts, stops on leaving: passed');
 delete window.AudioContext;

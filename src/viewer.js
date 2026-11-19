@@ -690,7 +690,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const data = t(curLang, `model.projectCards.${key}`);
       if (data?.href) openExternal(data.href);
       else updateSoonBadge();
-    } else if (popKey === key && key === 'globe' && music.state === 'idle') armGlobeMusic();
+    } else if (popKey === key && key === 'globe') { if (music.state === 'idle') armGlobeMusic(); else stopGlobeMusic(); }
     else if (popKey === key) closePop(true);
     else openPop(key);
   }

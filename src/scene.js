@@ -811,7 +811,7 @@ export function buildScene() {
   const brassHot = new THREE.MeshStandardMaterial({ color: 0xffd27a, emissive: 0xd9a03c, emissiveIntensity: 0.9, metalness: 0.5, roughness: 0.3 });
   const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
-  const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [], inspectionTargets = [];
+  const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [], inspectionTargets = [], projectDisplays = [];
   let albumBook = null, enterprise = null;
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
@@ -857,6 +857,7 @@ export function buildScene() {
     if (extra?.photo) rooms[id].photo = extra.photo;
     if (extra?.speakingPic) rooms[id].speakingPic = extra.speakingPic;
     if (extra?.projectPicks) projectPicks.push(...extra.projectPicks);
+    if (extra?.projectDisplays) projectDisplays.push(...extra.projectDisplays);
     if (extra?.trophyPicks) trophyPicks.push(...extra.trophyPicks);
     if (extra?.storyPicks) storyPicks.push(...extra.storyPicks);
     if (extra?.albumPicks) albumPicks.push(...extra.albumPicks);
@@ -868,7 +869,7 @@ export function buildScene() {
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets, projectDisplays };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -1524,6 +1525,99 @@ function practiceCorner(g, L, projectPicks) {
 }
 
 const PROJECT_KEYS = ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'];
+
+function projectDisplay(parent, key, index, x, z, picks) {
+  const root = new THREE.Group();
+  root.name = `Project display: ${key}`;
+  root.position.set(x, 0, z);
+  parent.add(root);
+  const base = new THREE.Group();
+  base.name = 'Oak exhibition plinth';
+  root.add(base);
+  const oak = wood(), darkOak = wood(0x665442);
+  const brass = mat(0xb28a4f, { metalness: 0.48, roughness: 0.39 });
+  const cream = mat(C.cream, { roughness: 0.61 });
+  const rounded = (parent, size, position, material, radius, name) => {
+    const mesh = new THREE.Mesh(new RoundedBoxGeometry(...size, 3, radius), material);
+    mesh.name = name;
+    mesh.position.set(...position);
+    mesh.castShadow = mesh.receiveShadow = true;
+    parent.add(mesh);
+    return mesh;
+  };
+
+  rounded(base, [.57, .043, .43], [0, .035, 0], darkOak, .008, 'Recessed foot');
+  rounded(base, [.66, .436, .51], [0, .269, 0], oak, .014, 'Soft edged oak body');
+  rounded(base, [.682, .008, .53], [0, .489, 0], brass, .003, 'Brass edge under cap');
+  rounded(base, [.694, .027, .542], [0, .507, 0], cream, .008, 'Cream display cap');
+
+  const board = new THREE.Group();
+  board.name = 'Framed project board';
+  const restHeight = .843;
+  board.position.set(0, restHeight, -.026);
+  board.rotation.x = -.14;
+  root.add(board);
+  rounded(board, [.676, .522, .038], [0, 0, 0], oak, .012, 'Oak picture frame');
+  const frameMaterial = mat(0xb7955d, {
+    metalness: 0.42, roughness: 0.42, emissive: C.brass, emissiveIntensity: 0,
+  });
+  // Four flush rails leave the entire original picture surface clear.
+  for (const side of [-1, 1]) {
+    box(board, .654, .008, .006, 0, side * .252 - .004, .021, frameMaterial);
+    box(board, .008, .496, .006, side * .323, -.248, .021, frameMaterial);
+  }
+  const image = new THREE.Mesh(new THREE.PlaneGeometry(.632, .479), slotMaterial(`projects-board-${index + 1}`));
+  image.name = `projects-board-${index + 1}`;
+  image.position.z = .023;
+  board.add(image);
+
+  // Fixed brass pins support the frame as it slides upward on selection.
+  for (const side of [-1, 1]) {
+    cyl(base, .009, .009, .125, side * .22, .523, -.035, brass, 12);
+    rounded(base, [.052, .006, .056], [side * .22, .523, -.035], brass, .002, 'Stand mounting shoe');
+  }
+  const rearSupport = cyl(base, .006, .006, .18, 0, .523, -.13, brass, 12);
+  rearSupport.rotation.x = -.38;
+  rounded(base, [.10, .006, .063], [0, .523, -.13], brass, .002, 'Rear mounting shoe');
+
+  const plate = rounded(base, [.555, .098, .009], [0, .359, .258], brass, .004, 'Inset project nameplate');
+  const plateCanvas = canvas(768, 128), plateTexture = tex(plateCanvas);
+  const caption = new THREE.Mesh(new THREE.PlaneGeometry(.523, .087),
+    new THREE.MeshBasicMaterial({ map: plateTexture, toneMapped: false }));
+  caption.name = `Project name: ${key}`;
+  caption.position.set(0, plate.position.y, .263);
+  base.add(caption);
+  whenFont(() => {
+    const ctx = plateCanvas.getContext('2d');
+    ctx.fillStyle = '#c4a370';
+    ctx.fillRect(0, 0, 768, 128);
+    ctx.fillStyle = '#34382e';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const title = modelText().projectCards[key].title;
+    const lines = key === 'monitor' ? ['AI in Medicine', 'Monitor'] : [title];
+    ctx.font = `600 ${lines.length === 2 ? 38 : 46}px 'Source Sans 3', sans-serif`;
+    lines.forEach((line, i) => ctx.fillText(line, 384, lines.length === 2 ? 40 + i * 48 : 66, 700));
+    plateTexture.needsUpdate = true;
+  });
+  for (const side of [-1, 1]) {
+    const rivet = new THREE.Mesh(new THREE.SphereGeometry(.0035, 8, 6), brass);
+    rivet.position.set(side * .268, .359, .265);
+    base.add(rivet);
+  }
+
+  const anchor = new THREE.Object3D();
+  anchor.position.z = .025;
+  board.add(anchor);
+  root.traverse(object => {
+    if (!object.isMesh) return;
+    object.userData.project = key;
+    object.userData.anchor = anchor;
+    picks.push(object);
+  });
+  return { key, base, board, frameMaterial, restHeight, selection: 0 };
+}
+
 function furnish(id, g, r, inspectionTargets) {
   // Register the actual meshes, not invisible hit boxes. Specific laptop, photo,
   // social and ship actions take precedence over their containing furniture.
@@ -1535,19 +1629,14 @@ function furnish(id, g, r, inspectionTargets) {
   const w = wood(), cream = mat(C.cream), L = layout(id), { w: RW, d: RD } = r;
   if (id === 'projects') {
     const projectPicks = [];
+    const projectDisplays = [];
     L.xs.forEach((x, i) => {
-      const plinth = box(g, 0.70, 0.5, 0.56, x, 0, L.z, w);
-      const face = slotMaterial(`projects-board-${i + 1}`);
-      const b = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.50, 0.04), [cream, cream, cream, cream, face, cream]);
-      b.position.set(x, 0.84, L.z); b.rotation.x = -0.18; b.castShadow = true; g.add(b);
-      projectPicks.push(
-        tagProject(b, PROJECT_KEYS[i], g, b.position),
-        tagProject(plinth, PROJECT_KEYS[i], g, b.position),
-      );
-      inspect(PROJECT_KEYS[i], [b, plinth], 0, 0.60);
+      const display = projectDisplay(g, PROJECT_KEYS[i], i, x, L.z, projectPicks);
+      projectDisplays.push(display);
+      inspect(PROJECT_KEYS[i], [display.board, display.base], 0, 0.60);
     });
     galleryOlive(g, -RW / 2 + 0.44, RD / 2 - 0.48);
-    return { projectPicks };
+    return { projectPicks, projectDisplays };
   }
   if (id === 'about') {
     const [dx, dz] = L.desk;

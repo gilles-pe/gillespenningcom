@@ -185,3 +185,6 @@ Replace the 2D HTML book dialog with an articulated Three.js hardcover album ins
 
 ### Antique shelf globe (D-080)
 The lower right compartment of the About Me cabinet holds a turned walnut stand, a softly aged brass meridian ring with degree marks and a 23.44°-tilted parchment globe with emerald continents. The local plate at `public/models/antique-globe-map.webp` uses [Natural Earth 1:110m land and lake outlines](https://www.naturalearthdata.com/downloads/110m-physical-vectors/) with a fine graticule, engraved-style labels and a small compass rose.
+
+### Projects exhibition displays (D-083, 2026-11-19)
+All five projects share a rounded pale-oak plinth on a recessed dark foot, a slim cream cap with a brass edge, and a framed image on brass supports. A small brass nameplate on the front carries the project title. The images remain in their existing slots. Selecting a project raises its frame by 0.035 model units and gently warms the brass rails. The frame returns when the card closes or the visitor leaves Projects. Reduced motion applies the final state immediately. All physical parts retain the project's first-click preview and second-click destination behavior.

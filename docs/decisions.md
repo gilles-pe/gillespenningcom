@@ -268,3 +268,5 @@ until a later entry replaces it.
 - **D-081 (2026-11-19) MedTech Signal document activation.** In Writing & Speaking, the first click on the document frames it and opens its card; a second click on the same document opens MedTech Signal in a new tab. The About Me social plaques keep their existing behavior.
 
 - **D-082 (2026-11-19) Compact introductory project links.** Show each project title and its shortened description on one line where space allows, with natural wrapping on narrow screens; apply the shorter copy in both languages.
+
+- **D-083 (2026-11-19) Museum-style project displays (owner approved).** Refine all five project plinths with rounded oak bodies, recessed dark feet, cream caps edged in brass, framed project images on visible supports and front brass title plates. Use a small selection lift and a restrained warm frame accent, with immediate state changes for reduced motion. Fit the displays within the existing gallery layout and preserve the preview, second-click external link, Coming Soon and BACK interactions.

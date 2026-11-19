@@ -217,3 +217,19 @@ projectViewer.debug.selectProject('monitor');assert.equal(openedTabs.length,1);a
 projectViewer.closeNote();projectViewer.debug.selectProject('praxisfaden');draw();const badge=stage.children.findLast(element=>element.classList.contains('project-soon-badge'));assert(!badge.hidden);assert.equal(badge.textContent,'Coming Soon');
 projectViewer.debug.selectProject('praxisfaden');assert.equal(openedTabs.length,1);assert(!badge.hidden);
 console.log('project first/second click, new-tab focus and Coming Soon: passed');
+
+// Selection feedback must settle in reduced motion and return to the idle pose.
+projectViewer.closeNote();
+projectViewer.open('projects');
+projectViewer.debug.inspect('wimmelbild');
+draw();
+const framedProject = projectViewer.debug.inspectionTargets.find(target => target.room === 'projects' && target.key === 'wimmelbild');
+const frameBoard = framedProject.objects[0];
+assert(Math.abs(frameBoard.position.y - .878) < .00001, 'selected picture did not rise');
+for (const root of framedProject.objects) root.traverse(object => {
+  if (object.isMesh) assert.equal(object.userData.project, 'wimmelbild', 'display part lost its project action');
+});
+projectViewer.closeNote();
+draw();
+assert(Math.abs(frameBoard.position.y - .843) < .00001, 'picture did not return to its stand');
+console.log('project frame lift, reduced motion and project actions on display parts: passed');

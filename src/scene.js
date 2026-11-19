@@ -1439,6 +1439,7 @@ function operatingRoom(g, L, projectPicks) {
       seg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.clone().normalize());
       seg.castShadow = true; g.add(seg);
     }
+    for (const [pt, rad] of [[hubPt, 0.026], [elbow, 0.022]]) { const j = new THREE.Mesh(new THREE.SphereGeometry(rad, 16, 12), steel); j.position.copy(pt); g.add(j); }
     const lampHead = new THREE.Group(); lampHead.position.copy(hPos); lampHead.rotation.set(...w.rot); g.add(lampHead);
     if (w === wings[0]) {
       // One real light for the primary wing: a soft pool on the operating table. viewer.js scales it with the room's glow.
@@ -1447,16 +1448,35 @@ function operatingRoom(g, L, projectPicks) {
       spot.target.position.set(L.table[0], 0.55, L.table[1]);
       g.add(spot, spot.target); g.userData.opSpot = spot;
     }
-    cyl(lampHead, w.r, w.r * 0.93, 0.052, 0, 0, 0, cream, 26);
-    // The head itself glows: a lit diffuser disc underneath and a luminous rim, so the lamp reads as lit from any side.
-    const diff = new THREE.Mesh(new THREE.CircleGeometry(w.r * 0.9, 32), lensM); diff.rotation.x = Math.PI / 2; diff.position.y = -0.0275; lampHead.add(diff);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(w.r * 0.97, 0.007, 8, 40), lensM); rim.rotation.x = Math.PI / 2; rim.position.y = -0.004; lampHead.add(rim);
-    cyl(lampHead, 0.016, 0.018, 0.055, 0, -0.055, 0, drape, 12);
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2;
-      const lens = new THREE.Mesh(new THREE.CylinderGeometry(w.r * 0.18, w.r * 0.18, 0.008, 12), lensM);
-      lens.position.set(Math.cos(a) * w.r * 0.54, -0.002, Math.sin(a) * w.r * 0.54); lampHead.add(lens);
+    const R = w.r;
+    cyl(lampHead, R, R * 0.93, 0.052, 0, 0, 0, cream, 36);                    // lower housing
+    // Domed hood: a shallow lathed shell above the housing, with a ring of vent slots and a rating plate on the rim.
+    const prof = []; for (let i = 0; i <= 10; i++) { const u = i / 10, rr = R * 0.97 * (1 - u); prof.push(new THREE.Vector2(rr, 0.026 + 0.045 * (1 - (rr / (R * 0.97)) ** 2))); }
+    lampHead.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 40), cream));
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2, rr = R * 0.52;
+      const slot = box(lampHead, R * 0.22, 0.004, 0.012, Math.cos(a) * rr, 0.026 + 0.045 * (1 - 0.52 ** 2) + 0.002, Math.sin(a) * rr, dark);
+      slot.rotation.y = -a;
     }
+    const plate = box(lampHead, 0.07, 0.016, 0.004, 0, 0, R * 0.935 + 0.004, steel);
+    plate.position.set(Math.sin(1.1) * R * 0.935, 0, Math.cos(1.1) * R * 0.935); plate.rotation.y = 1.1;
+    // Dark reflector with three rings of small LED lenses (6 / 12 / 18), lit by themselves like the rim.
+    const reflector = new THREE.Mesh(new THREE.CircleGeometry(R * 0.9, 40), dark); reflector.rotation.x = Math.PI / 2; reflector.position.y = -0.0265; lampHead.add(reflector);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(R * 0.97, 0.007, 8, 48), lensM); rim.rotation.x = Math.PI / 2; rim.position.y = -0.004; lampHead.add(rim);
+    const rings = [[6, 0.30, 0.11], [12, 0.58, 0.075], [18, 0.82, 0.055]];
+    const lensMesh = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 0.006, 14), lensM, 36);
+    const dummy = new THREE.Object3D(); let li = 0;
+    for (const [n, rad, size] of rings) for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + (n === 12 ? Math.PI / 12 : 0);
+      dummy.position.set(Math.cos(a) * R * rad, -0.0305, Math.sin(a) * R * rad); dummy.scale.set(R * size, 1, R * size); dummy.updateMatrix(); lensMesh.setMatrixAt(li++, dummy.matrix);
+    }
+    lampHead.add(lensMesh);
+    // Central handle for aiming: stem, steel grip ring and a petrol cap.
+    cyl(lampHead, 0.016, 0.02, 0.05, 0, -0.07, 0, steel, 16);
+    cyl(lampHead, 0.034, 0.034, 0.014, 0, -0.098, 0, steel, 20);
+    cyl(lampHead, 0.026, 0.03, 0.018, 0, -0.112, 0, mat(PETROL, { roughness: 0.5 }), 20);
+    // Yoke on top of the hood where the arm ends.
+    cyl(lampHead, 0.014, 0.014, 0.05, 0, 0.082, 0, steel, 12);
   }
 
   // 3. Small Rolling Drawer Cart (Beistellwagen) flush against the left OR wall

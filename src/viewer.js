@@ -625,7 +625,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
   function togglePop(key) {
-    if (popKey === key && projectKeys.has(key)) {
+    // The Writing room's MedTech Signal document opens its destination on a
+    // second deliberate click after inspection, just like a project object.
+    if (popKey === key && (projectKeys.has(key) || (openId === 'writing' && key === 'signal'))) {
       const data = t(curLang, `model.projectCards.${key}`);
       if (data?.href) openExternal(data.href);
       else updateSoonBadge();

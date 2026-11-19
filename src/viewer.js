@@ -18,7 +18,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const markDirty = () => { dirty = true; };
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets } = buildScene();
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets, projectDisplays } = buildScene();
   const roomWarp = enterprise ? createRoomWarp(scene, enterprise.root) : null;
   // Default light rig, only if the scene does not bring its own (room point lights do not count).
   let sceneLit = false;
@@ -1224,6 +1224,16 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const bookMoving = albumBook ? albumBook.update(dt) : false;
     const warpMoving = roomWarp ? roomWarp.update(now) : false;
+    let displaysMoving = false;
+    for (const display of projectDisplays) {
+      const target = openId === 'projects' && popKey === display.key ? 1 : 0;
+      if (Math.abs(display.selection - target) < .0001) continue;
+      display.selection = reduced ? target : THREE.MathUtils.damp(display.selection, target, 14, dt);
+      display.board.position.y = display.restHeight + .035 * display.selection;
+      display.frameMaterial.emissiveIntensity = .14 * display.selection;
+      display.board.updateMatrixWorld(true);
+      displaysMoving = true;
+    }
     if (albumBook?.light) {
       const targetLight = albumOpen ? 1.35 : 0;
       if (Math.abs(albumBook.light.intensity - targetLight) > 0.01) {
@@ -1242,7 +1252,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         break;
       }
     }
-    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !warpMoving && !egg.isAnimating) return;
+    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !warpMoving && !displaysMoving && !egg.isAnimating) return;
     dirty = false;
 
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));

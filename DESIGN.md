@@ -78,7 +78,7 @@ picture slots, furniture, hotspots and the camera framing are derived from it, s
 Hidden underside (maintainers only, not mentioned in the README or the UI, see D-024 and D-025): the base is a slab with a lower part
 around a recess on its underside, the cellar (`CELLAR` and `buildCellar` in `src/scene.js`): cream lining, a thin wooden frame, a small point
 light and a fax machine built from boxes and cylinders, standing on the recess "floor" (the underside of the slab), so it reads upright when the
-model is turned over. The sheet in its slot carries the sentence from `model.egg.note` and a button (`model.egg.cta`) as a canvas texture (see D-083).
+model is turned over. The sheet in its slot carries the sentence from `model.egg.note` and a button (`model.egg.cta`) as a canvas texture (see D-084).
 The first click frames the machine, the second starts the fax (7 s), the button opens LinkedIn. Clicks are handled in `src/egg.js` and `eggClick` in
 `src/viewer.js` (raycast against the machine and the base, so it only hits when it faces the camera). The model can be turned freely
 (`src/viewer.js`); the camera orbit centre drifts to the recess when zoomed in on the underside. The legal page `legal.html` is described in D-028.
@@ -186,3 +186,6 @@ Replace the 2D HTML book dialog with an articulated Three.js hardcover album ins
 
 ### Antique shelf globe (D-080)
 The lower right compartment of the About Me cabinet holds a turned walnut stand, a softly aged brass meridian ring with degree marks and a 23.44°-tilted parchment globe with emerald continents. The local plate at `public/models/antique-globe-map.webp` uses [Natural Earth 1:110m land and lake outlines](https://www.naturalearthdata.com/downloads/110m-physical-vectors/) with a fine graticule, engraved-style labels and a small compass rose.
+
+### Projects exhibition displays (D-083, 2026-11-19)
+All five projects share a rounded pale-oak plinth on a recessed dark foot, a slim cream cap with a brass edge, and a framed image on brass supports. A small brass nameplate on the front carries the project title. The images remain in their existing slots. Selecting a project raises its frame by 0.035 model units and gently warms the brass rails. The frame returns when the card closes or the visitor leaves Projects. Reduced motion applies the final state immediately. All physical parts retain the project's first-click preview and second-click destination behavior.

@@ -269,7 +269,9 @@ until a later entry replaces it.
 
 - **D-082 (2026-11-19) Compact introductory project links.** Show each project title and its shortened description on one line where space allows, with natural wrapping on narrow screens; apply the shorter copy in both languages.
 
-- **D-083 (2026-11-19) Cellar fax machine: zoom first, slow sheet, button on the sheet (owner request).** Supersedes the click behaviour, the note and the note texts of D-025.
+- **D-083 (2026-11-19) Museum-style project displays (owner approved).** Refine all five project plinths with rounded oak bodies, recessed dark feet, cream caps edged in brass, framed project images on visible supports and front brass title plates. Use a small selection lift and a restrained warm frame accent, with immediate state changes for reduced motion. Fit the displays within the existing gallery layout and preserve the preview, second-click external link, Coming Soon and BACK interactions.
+
+- **D-084 (2026-11-19) Cellar fax machine: zoom first, slow sheet, button on the sheet (owner request).** Supersedes the click behaviour, the note and the note texts of D-025.
   The first click on the machine frames it (same path as objects in the rooms, seen from below so it reads upright, BACK and Reset restore the view);
   the second click starts the fax. The sheet leaves the slot slowly (7 s, a short jolt at the start, then a faint rattle). When it is out, the view moves to the sheet face-on.
   The sheet carries the text and a "Send me a message" / "Schreib mir eine Nachricht" button as a canvas texture; clicking the button opens LinkedIn in a new tab.
@@ -279,7 +281,7 @@ until a later entry replaces it.
   The machine stays out of the tab order and is still not announced; the LinkedIn link exists elsewhere on the page.
 
 
-- **D-084 (2026-11-19) Rule: first click on a clickable object zooms to it (owner request).** Applies to every clickable object in the model, hidden ones included.
+- **D-085 (2026-11-19) Rule: first click on a clickable object zooms to it (owner request).** Applies to every clickable object in the model, hidden ones included.
   First click: the camera frames the object, upright; no action yet. Second click: the object's action. BACK, Reset, Escape and room changes restore the previous view and the object's start state.
   Written down in `AGENTS.md` ("Clickable objects: zoom first"). Escape now also restores the view when only the fax machine is framed (before, only the sheet was retracted).
   The cellar fax is covered by a check in `scripts/verify-viewer.mjs` (found only from below, first click frames, second starts, sheet button opens LinkedIn, close restores).

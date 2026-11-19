@@ -111,7 +111,7 @@ Clicking an inspectable object opens its card and smoothly frames the actual geo
 
 Keep the continuous translucent scene required by D-068. The stage focus outline appears only for keyboard navigation; do not remove keyboard focus indicators from controls. Run `npm run check`, `npm run test:inspection` and `npm run build` after camera or zoom changes. The geometry/DOM harness does not replace visual browser checks.
 
-## Clickable objects: zoom first (D-084)
+## Clickable objects: zoom first (D-085)
 This is a rule for every object in the 3D model that can be clicked, including hidden ones such as the cellar fax machine and anything added later.
 - First click: the camera glides to the object and frames its real geometry (see D-071), seen so that it reads upright. Nothing else happens yet: no external link, no animation, no state change.
 - Second click: the object's action (card link, album, fax feed, external link). A multi-step object may move the framing on at the end of its action (the fax frames its sheet when it is out), and controls drawn on the object itself (the fax sheet button) act on one click once the object is framed.

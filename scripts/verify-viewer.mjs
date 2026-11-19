@@ -282,3 +282,19 @@ me.close();assert.equal(mc.displayState().state,'idle');
 const {default:contentData}=await import('../src/content.js');
 for(const l of ['en','de'])for(const k of ['ready','receiving','done'])assert(contentData[l].model.egg.display[k],`missing ${l} display text ${k}`);
 console.log('cellar fax display: idle, blinking receiving, done, close, both languages: passed');
+
+// Globe theme: nothing is created for other objects; the globe arms audio inside the click, plays once the view has settled, stops when the view leaves.
+let audioMade=0,audioClosed=0,played=0,playerStopped=0,loaderCalls=0;
+window.AudioContext=class{constructor(){audioMade++;}resume(){}close(){audioClosed++;}};
+const mv=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick(){},onAway(){},musicLoader:async()=>{loaderCalls++;return (ctx,onEnd)=>{played++;return {stop(){playerStopped++;}};};}});
+stage.classList.remove('object-focused');
+mv.open('about');draw();
+assert(mv.debug.inspectionTargets.some(t=>t.room==='about'&&t.key==='globe'),'globe must be an inspectable object');
+mv.debug.inspect('studyDesk');draw();assert.equal(audioMade,0,'other objects must not create audio');assert.equal(loaderCalls,0);mv.closeNote();draw();
+mv.debug.inspect('globe');assert.equal(audioMade,1,'audio context must be created inside the click');assert.equal(mv.debug.music,'loading');assert.equal(played,0);
+await new Promise(r=>setTimeout(r,0));draw();draw();
+assert.equal(mv.debug.music,'playing');assert.equal(played,1,'theme must start once the globe is framed');
+assert(Math.cos(mv.debug.goal.el)>0&&mv.debug.goal.dist<2,'globe close-up must be a real zoom');
+mv.closeNote();draw();assert.equal(playerStopped,1,'leaving the globe must stop the theme');assert.equal(mv.debug.music,'idle');
+console.log('globe theme: lazy, armed in the click, starts when framed, stops on leaving: passed');
+delete window.AudioContext;

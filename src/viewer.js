@@ -62,8 +62,13 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     else if (project === 'speaking') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('speaking'); });
     else if (project === 'album') el.addEventListener('click', e => { e.preventDefault(); toggleAlbum(); });
     else if (project) el.addEventListener('click', e => { e.preventDefault(); togglePop(project); });
+    // Anchor mark: a small dot on the object and a thin line to the label, so it is clear which label belongs to which object.
+    const SVGNS = 'http://www.w3.org/2000/svg', deco = document.createElementNS(SVGNS, 'svg');
+    deco.setAttribute('class', 'spot-deco'); deco.setAttribute('aria-hidden', 'true'); deco.setAttribute('focusable', 'false');
+    const link = document.createElementNS(SVGNS, 'line'), dot = document.createElementNS(SVGNS, 'circle'); dot.setAttribute('r', '3');
+    deco.append(link, dot);
     spotsEl.append(el);
-    spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos });
+    spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos, deco, link, dot, mark: '' });
   }
 
   let curLang = lang;
@@ -71,6 +76,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     for (const s of spots) {
       s.el.textContent = t(curLang, `model.spots.${s.sp.key}`) || t(curLang, `model.inspections.${s.sp.key}.title`);
       if (!s.el.href && !s.sp.project) s.el.title = t(curLang, 'ui.soon');
+      s.el.append(s.deco);
     }
   }
   labelSpots();
@@ -1220,7 +1226,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   const v3 = new THREE.Vector3(); let last = performance.now();
   // Hotspots follow their objects and stay inside the canvas.
-  const GAP = 4;
+  const GAP = 4, LIFT = 14;   // LIFT: gap between the anchor and the label, where the line shows
   function placeSpots() {
     const live = [];
     for (const s of spots) {
@@ -1235,16 +1241,33 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     live.sort((a, b) => a.px - b.px);
     const placed = [];
     for (const s of live) {
-      let l = s.px - s.w / 2, b = s.py;
-      l = Math.min(Math.max(l, GAP), stageW - s.w - GAP);
-      for (let n = 0; n < 8; n++) {
-        const hit = placed.find(p => l < p.l + p.w + GAP && p.l < l + s.w + GAP && b - s.h < p.b + GAP && p.b - p.h < b + GAP);
-        if (!hit) break;
-        b = hit.b + GAP + s.h;
+      // Prefer a spot just above the anchor; if that is taken, try the rows above and below and slightly to the side,
+      // so labels dodge each other and stay close to their object instead of drifting away in a staircase.
+      const row = s.h + GAP, side = s.w * 0.55 + GAP, tries = [];
+      for (const dy of [-LIFT, -LIFT - row, LIFT + s.h, -LIFT - 2 * row]) for (const dx of [0, side, -side]) tries.push([dx, dy]);
+      let pick = null;
+      for (const [dx, dy] of tries) {
+        const l = s.px - s.w / 2 + dx, b = s.py + dy;
+        if (l < GAP || l + s.w > stageW - GAP || b - s.h < GAP || b > stageH - 8) continue;
+        if (placed.some(p => l < p.l + p.w + GAP && p.l < l + s.w + GAP && b - s.h < p.b + GAP && p.b - p.h < b + GAP)) continue;
+        pick = { l, b }; break;
       }
-      b = Math.min(Math.max(b, s.h + 8), stageH - 8);
+      if (!pick) pick = { l: Math.min(Math.max(s.px - s.w / 2, GAP), stageW - s.w - GAP), b: Math.min(Math.max(s.py - LIFT, s.h + GAP), stageH - 8) };
+      const { l, b } = pick;
       placed.push({ l, b, w: s.w, h: s.h });
       s.el.style.left = `${l + s.w / 2}px`; s.el.style.top = `${b}px`;
+      // Line from the nearest label edge to the anchor, relative to the label's own box.
+      const ax = s.px - l, ay = s.py - (b - s.h);
+      let cx, cy;
+      if (ay > s.h) { cx = Math.min(Math.max(ax, 10), s.w - 10); cy = s.h; }
+      else if (ay < 0) { cx = Math.min(Math.max(ax, 10), s.w - 10); cy = 0; }
+      else { cx = ax < 0 ? 0 : s.w; cy = ay; }
+      const mark = `${Math.round(cx)},${Math.round(cy)},${Math.round(ax)},${Math.round(ay)}`;
+      if (mark !== s.mark) {
+        s.mark = mark;
+        s.link.setAttribute('x1', cx.toFixed(1)); s.link.setAttribute('y1', cy.toFixed(1)); s.link.setAttribute('x2', ax.toFixed(1)); s.link.setAttribute('y2', ay.toFixed(1));
+        s.dot.setAttribute('cx', ax.toFixed(1)); s.dot.setAttribute('cy', ay.toFixed(1));
+      }
     }
   }
   function frame(now) {

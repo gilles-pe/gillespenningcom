@@ -217,3 +217,39 @@ projectViewer.debug.selectProject('monitor');assert.equal(openedTabs.length,1);a
 projectViewer.closeNote();projectViewer.debug.selectProject('praxisfaden');draw();const badge=stage.children.findLast(element=>element.classList.contains('project-soon-badge'));assert(!badge.hidden);assert.equal(badge.textContent,'Coming Soon');
 projectViewer.debug.selectProject('praxisfaden');assert.equal(openedTabs.length,1);assert(!badge.hidden);
 console.log('project first/second click, new-tab focus and Coming Soon: passed');
+
+// Hidden cellar fax: found only from below, first click frames it, second starts it, the button on the sheet opens LinkedIn.
+const faxViewer=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick(){},onAway(){}});
+viewport={width:740,height:580};resize();draw();
+const {camera:fcam,cellar:fc,egg:fe,goal:fg}=faxViewer.debug;
+const bodyCentre=()=>new Three.Box3().setFromObject(fc.pick[1]).getCenter(new Three.Vector3());
+const toNdc=p=>p.clone().project(fcam);
+const clickAt=p=>{const n=toNdc(p),e={target:stage,pointerId:1,pointerType:'mouse',button:0,clientX:(n.x+1)*viewport.width/2,clientY:(1-n.y)*viewport.height/2};stage.fire('pointerdown',e);for(const fn of globalListeners.pointerup||[])fn(e);};
+const lookFrom=(az,el,dist)=>{const ce=Math.cos(el),se=Math.sin(el),sa=Math.sin(az),ca=Math.cos(az);fcam.position.set(fc.center.x+dist*ce*sa,fc.center.y+dist*se,fc.center.z+dist*ce*ca);fcam.up.set(-se*sa,ce,-se*ca);fcam.lookAt(fc.center);fcam.updateMatrixWorld(true);};
+// From above the base hides the machine.
+lookFrom(0,0.54,6);assert.equal(fe.pick(toNdc(bodyCentre())),null,'machine must not be found from above');
+// From below, past the pole, it is found.
+lookFrom(0,-Math.PI/2-0.5,2.4);assert.equal(fe.pick(toNdc(bodyCentre())),'machine','machine must be found from below');
+stage.classList.remove('object-focused');
+// 1st click: frame the machine, upright (elevation past the pole), fax not started.
+clickAt(bodyCentre());draw();
+assert(stage.classList.contains('object-focused'),'first click must frame the machine');
+assert(!fe.isOpen,'first click must not start the fax');
+assert(Math.cos(fg.el)<0&&Math.sin(fg.el)<-0.5,'framing must be from below, past the pole');
+assert(Number.isFinite(fg.dist)&&fg.dist>0);
+// 2nd click: the fax starts (reduced motion: sheet is out at once) and the view moves on to the sheet.
+const frameEl=fg.el;lookFrom(0,fg.el,fg.dist);fcam.position.copy(faxViewer.debug.camera.position);
+clickAt(bodyCentre());draw();
+assert(fe.isOpen&&!fe.isAnimating,'second click must start the fax');
+assert(Math.abs(fg.el-frameEl)>0.05,'view must move on to the sheet');
+// Button on the sheet.
+const b=fc.button(),sh=fc.sheet,W=0.19,H=0.27;
+const btn=sh.localToWorld(new Three.Vector3(((b.u0+b.u1)/2-0.5)*W,((b.v0+b.v1)/2)*H,0));
+sh.updateWorldMatrix(true,false);
+assert.equal(fe.pick(toNdc(btn)),'button','button must be hit on the finished sheet');
+const tabs=openedTabs.length;clickAt(btn);
+assert.equal(openedTabs.length,tabs+1);assert(openedTabs.at(-1).url.includes('linkedin.com'));assert.equal(openedTabs.at(-1).target,'_blank');
+// Reset/BACK restore the view and put the sheet back.
+assert(faxViewer.closeNote());draw();
+assert(!fe.isOpen&&!stage.classList.contains('object-focused'),'close must restore the view and retract the sheet');
+console.log('cellar fax: found only from below, first click frames, second starts, sheet button opens LinkedIn, close restores: passed');

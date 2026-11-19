@@ -277,3 +277,9 @@ until a later entry replaces it.
   EN "You found it! The fax device that keeps healthcare working in Germany." DE "Du hast es gefunden! Das Faxgerät, das das deutsche Gesundheitswesen am Laufen hält."
   Reduced motion: the sheet is out at once. The cellar lamp only lights when the camera is below the base. The heights of the lower base part live once in `BASE_LOW` in `src/scene.js`.
   The machine stays out of the tab order and is still not announced; the LinkedIn link exists elsewhere on the page.
+
+
+- **D-084 (2026-11-19) Rule: first click on a clickable object zooms to it (owner request).** Applies to every clickable object in the model, hidden ones included.
+  First click: the camera frames the object, upright; no action yet. Second click: the object's action. BACK, Reset, Escape and room changes restore the previous view and the object's start state.
+  Written down in `AGENTS.md` ("Clickable objects: zoom first"). Escape now also restores the view when only the fax machine is framed (before, only the sheet was retracted).
+  The cellar fax is covered by a check in `scripts/verify-viewer.mjs` (found only from below, first click frames, second starts, sheet button opens LinkedIn, close restores).

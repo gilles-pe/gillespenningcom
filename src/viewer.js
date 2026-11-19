@@ -1312,8 +1312,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     reset: resetView,
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
-      const had = egg.isOpen || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
+      const faxFocused = objectFocus?.target === faxTarget || objectFocus?.target === sheetTarget;
+      const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); roomWarp?.cancel();
+      if (faxFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
       markDirty();
       return had;
     },

@@ -111,6 +111,14 @@ Clicking an inspectable object opens its card and smoothly frames the actual geo
 
 Keep the continuous translucent scene required by D-068. The stage focus outline appears only for keyboard navigation; do not remove keyboard focus indicators from controls. Run `npm run check`, `npm run test:inspection` and `npm run build` after camera or zoom changes. The geometry/DOM harness does not replace visual browser checks.
 
+## Clickable objects: zoom first (D-084)
+This is a rule for every object in the 3D model that can be clicked, including hidden ones such as the cellar fax machine and anything added later.
+- First click: the camera glides to the object and frames its real geometry (see D-071), seen so that it reads upright. Nothing else happens yet: no external link, no animation, no state change.
+- Second click: the object's action (card link, album, fax feed, external link). A multi-step object may move the framing on at the end of its action (the fax frames its sheet when it is out), and controls drawn on the object itself (the fax sheet button) act on one click once the object is framed.
+- BACK, Reset, Escape and a room change restore the view from before the first click and reset the object to its start state.
+- Reduced motion: jump without animation, same order of steps.
+- Register the framing in the same path as other objects (`focusObject` in `src/viewer.js`, `inspectionTargets` or a target like `faxTarget`), add a check to `scripts/verify-viewer.mjs`, and run `npm run test:inspection`.
+
 ## About laptop and mobile view controls (D-072)
 The About laptop opens a short leadership card; its internal More details action opens the existing leadership section, never a direct external link. Project cards with external destinations have a subtle right arrow, with none for coming-soon items. Keep the toolbar on one row on wider displays when it fits, including unfolded foldables, and use a second row on narrow screens. All rooms remains accessible while a room is selected; do not close a room on blank scene taps. The supplied Wimmelbild artwork belongs in the existing `projects-board-1.webp` slot without cropping.
 

@@ -41,8 +41,8 @@ export function showEnterprise(copy, reduced, onWarp = null) {
   const { ship } = model.userData;
 
   const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = false; controls.enablePan = false; controls.minDistance = 3.6; controls.maxDistance = 11;
-  const home = () => { camera.position.set(4.5, 3.3, -5.2); controls.target.set(0, 0.55, 0); controls.update(); };
+  controls.enableDamping = false; controls.enablePan = false; controls.minDistance = 2.4; controls.maxDistance = 10;
+  const home = () => { camera.position.set(2.9, 1.9, -3.4); controls.target.set(0, 0.55, 0); controls.update(); };
   home();
 
   const positions = new Float32Array(96 * 6);

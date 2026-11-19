@@ -356,10 +356,19 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const soonBadge = document.createElement('div'); soonBadge.className = 'project-soon-badge';
   soonBadge.setAttribute('role', 'status'); soonBadge.hidden = true; stage.append(soonBadge);
   const badgePos = new THREE.Vector3(), badgeBox = new THREE.Box3();
+  const engageGroup = document.createElement('div');
+  engageGroup.className = 'ship-engage-group'; engageGroup.hidden = true;
   const engageBtn = document.createElement('button');
   engageBtn.type = 'button'; engageBtn.className = 'ship-engage-btn'; engageBtn.textContent = 'Engage';
-  engageBtn.hidden = true; stage.append(engageBtn);
+  const exploreBtn = document.createElement('button');
+  exploreBtn.type = 'button'; exploreBtn.className = 'ship-engage-btn'; exploreBtn.textContent = 'Explore';
+  engageGroup.append(engageBtn, exploreBtn);
+  stage.append(engageGroup);
   const engagePos = new THREE.Vector3();
+  async function openShipInspector() {
+    const { showEnterprise } = await import('./enterprise-inspector.js');
+    return showEnterprise(enterpriseCopy[curLang], reduced, () => { triggerRoomWarp(); });
+  }
   async function triggerRoomWarp() {
     if (reduced) { if (popText) popText.textContent = enterpriseCopy[curLang].reduced; return; }
     await ensureEnterpriseGlb();
@@ -372,20 +381,24 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     markDirty();
   }
   engageBtn.addEventListener('click', () => { triggerRoomWarp(); });
+  exploreBtn.addEventListener('click', async () => {
+    exploreBtn.disabled = true;
+    try { await openShipInspector(); } finally { exploreBtn.disabled = false; }
+  });
   function updateEngageBtn() {
-    if (!enterprise?.engageAnchor || roomWarp?.isActive() || albumOpen) { engageBtn.hidden = true; return; }
+    if (!enterprise?.engageAnchor || roomWarp?.isActive() || albumOpen) { engageGroup.hidden = true; return; }
     enterprise.engageAnchor.getWorldPosition(engagePos);
     const camDist = camera.position.distanceTo(engagePos);
     const closeZoom = popKey === 'enterprise' || (openId === 'about' && camDist < 2.8) || (!openId && camDist < 2.3);
-    if (!closeZoom) { engageBtn.hidden = true; return; }
+    if (!closeZoom) { engageGroup.hidden = true; return; }
     const p = engagePos.clone().project(camera);
-    if (p.z < -1 || p.z > 1) { engageBtn.hidden = true; return; }
+    if (p.z < -1 || p.z > 1) { engageGroup.hidden = true; return; }
     const x = (p.x * 0.5 + 0.5) * stageW;
     const y = (-p.y * 0.5 + 0.5) * stageH;
-    if (x < 24 || x > stageW - 24 || y < 24 || y > stageH - 24) { engageBtn.hidden = true; return; }
-    engageBtn.style.left = `${x}px`;
-    engageBtn.style.top = `${y}px`;
-    engageBtn.hidden = false;
+    if (x < 24 || x > stageW - 24 || y < 24 || y > stageH - 24) { engageGroup.hidden = true; return; }
+    engageGroup.style.left = `${x}px`;
+    engageGroup.style.top = `${y}px`;
+    engageGroup.hidden = false;
   }
   function updateSoonBadge() {
     const data = t(curLang, `model.projectCards.${popKey}`);

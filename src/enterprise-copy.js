@@ -1,7 +1,7 @@
 export const enterpriseCopy = {
   en: {
     inspect: 'Explore',
-    warp: 'Warp',
+    warp: 'Engage Warp',
     reset: 'Reset view',
     close: 'Close',
     hint: 'Drag to rotate · Pinch to zoom · Arrow keys to rotate',
@@ -15,7 +15,7 @@ export const enterpriseCopy = {
   },
   de: {
     inspect: 'Ansehen',
-    warp: 'Warp',
+    warp: 'Engage Warp',
     reset: 'Ansicht zurücksetzen',
     close: 'Schließen',
     hint: 'Ziehen zum Drehen · Zwei Finger zum Zoomen · Pfeiltasten zum Drehen',

@@ -572,6 +572,7 @@ function antiqueGlobe(parent, x, y, z) {
     atlas.needsUpdate = true;
   };
   image.src = `${import.meta.env.BASE_URL}models/antique-globe-map.webp`;
+  return globe;
 }
 
 function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpperRight = false } = {}) {
@@ -622,7 +623,7 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
     // Right cluster: horizontal stacked books (skipped when trophies occupy upper-right)
     if (!(skipUpperRight && si === 1)) bookStack(g, innerW * 0.2, sy, 0.04, si === 0 ? 3 : 2, imperfect, rand);
   }
-  if (skipUpperRight) antiqueGlobe(g, innerW * 0.40, cabH, 0.05);
+  if (skipUpperRight) g.userData.globe = antiqueGlobe(g, innerW * 0.40, cabH, 0.05);
   g.userData.upperY = midY + 0.028;
   return g;
 }
@@ -1590,6 +1591,8 @@ function practiceCorner(g, L, projectPicks) {
   return desk;
 }
 
+// Viewing angle for the globe close-up (azimuth and elevation, radians).
+const GLOBE_VIEW = { az: 0, el: 0.22 };
 const PROJECT_KEYS = ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'];
 
 function projectDisplay(parent, key, index, x, z, picks) {
@@ -1742,6 +1745,7 @@ function furnish(id, g, r, inspectionTargets) {
     // Cabinet bookshelf with imperfect books and Substack / Bluesky / LinkedIn trophies
     const shelfH = 1.18, trophyPicks = [];
     const sh = cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], shelfH, 0, { imperfect: true, skipUpperRight: true });
+    inspect('globe', [sh.userData.globe], GLOBE_VIEW.az, GLOBE_VIEW.el);   // the globe plays the theme once framed (D-087)
     for (const [key, project, tx] of [['substack', 'substack', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
       trophyPicks.push(...trophyPlaque(sh, key, project, tx, sh.userData.upperY, 0.05));
     }

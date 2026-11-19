@@ -8,7 +8,13 @@ import { PATHS } from './icons.js';
 import { openExternal } from './external-links.js';
 import { inspectionPose, clampZoom } from './inspection.js';
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack }) {
+// The globe theme (a small synth player and 5 KB of notes) is fetched only when the globe is framed.
+const loadGlobeMusic = async () => {
+  const [mod, buf] = await Promise.all([import('./globe-music.js'), fetch(`${import.meta.env.BASE_URL}audio/indy-theme.bin`).then(r => r.arrayBuffer())]);
+  return (ctx, onEnd) => mod.playGlobeTheme(ctx, buf, onEnd);
+};
+
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, musicLoader = loadGlobeMusic }) {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -84,6 +90,27 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const panOffset = new THREE.Vector3();
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
   let objectFocus = null;
+  // Globe theme: the click that frames the globe creates the AudioContext (browser rule) and loads the player;
+  // it plays as soon as it is loaded and stops when the view leaves the globe.
+  let music = { state: 'idle', ctx: null, play: null, player: null };
+  function armGlobeMusic() {
+    if (music.state !== 'idle') return;
+    let ctx = null;
+    try { const AC = window.AudioContext || window.webkitAudioContext; ctx = AC ? new AC() : null; ctx?.resume?.(); } catch { ctx = null; }
+    if (!ctx) return;
+    music = { state: 'loading', ctx, play: null, player: null };
+    const mine = music;
+    musicLoader().then(play => { if (music === mine && mine.state === 'loading') { mine.play = play; startGlobeMusic(); } }).catch(() => { if (music === mine) stopGlobeMusic(); });
+  }
+  function stopGlobeMusic() {
+    const m = music; music = { state: 'idle', ctx: null, play: null, player: null };
+    if (m.player) m.player.stop(); else { try { m.ctx?.close(); } catch { /* ignore */ } }
+  }
+  function startGlobeMusic() {
+    const m = music; m.state = 'playing';
+    m.player = m.play(m.ctx, () => { if (music === m) music = { state: 'idle', ctx: null, play: null, player: null }; });
+  }
+  document.addEventListener?.('visibilitychange', () => { if (document.hidden && music.state !== 'idle') stopGlobeMusic(); });
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
   const DMIN = 0.7;
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
@@ -580,6 +607,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function restoreObjectView() {
     if (!objectFocus) return;
     const saved = objectFocus; objectFocus = null;
+    if (saved.target?.key === 'globe') stopGlobeMusic();
     stage.classList.remove('object-focused', 'ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
     goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.point);
     if (!restoringView) while (viewHistory.length && samePose(viewHistory.at(-1), snapshot())) viewHistory.pop();
@@ -651,7 +679,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     void popEl.offsetWidth;
     popEl.classList.add('on');
     const target = inspectionFor(key);
-    if (target) { stage.classList.add('object-focused'); focusObject(target); }
+    if (target) { stage.classList.add('object-focused'); focusObject(target); if (key === 'globe') armGlobeMusic(); }
     popClose.focus({ preventScroll: true });
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
@@ -1345,6 +1373,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     ...(import.meta.env.DEV ? {
       debug: {
         camera, view, goal, egg, cellar, albumBook,
+        get music() { return music.state; },
         get custom() { return custom; },
         get zoom() { return zoom; },
         inspectionTargets,

@@ -292,3 +292,12 @@ until a later entry replaces it.
   about 1.4 times a second, with a progress bar and "P.1"), then 1 PAGE OK / 1 SEITE OK. Closing, Reset and Escape return it to READY. Reduced motion: no blinking, the display goes straight to the done state.
   Texts live in `model.egg.display` in `src/content.js`. The close-up of the machine frames the body, tray and sheet (not the whole cabinet), so the display stays legible. Checked in `scripts/verify-viewer.mjs`.
 
+- **D-087 (2026-11-19) Globe is an inspectable object and plays a short theme once framed (owner request).** The antique globe in the About Me bookcase is registered as an inspection target
+  (`globe`, view `GLOBE_VIEW` in `src/scene.js`), so a click frames it like the other objects and opens a card (`model.inspections.globe`).
+  On the click on the globe, a short instrumental theme plays as soon as it is loaded (owner change, same day: not after the zoom has settled): 5 s to 1:05 of the owner-supplied MIDI file (John Williams, Indiana Jones theme), 60 s, with a 1.5 s fade at the end.
+  This is the one documented exception to "first click: no action yet" in D-085: the click that frames the globe also starts the music.
+  It stops when the view leaves the globe (BACK, Reset, Escape, second click on the globe, room change) and when the tab is hidden. The audio context is created inside the click (browser autoplay rule).
+  Size: nothing is loaded up front. On the first globe click the page fetches `src/globe-music.js` (a Web Audio synth, 2.7 kB, 1.2 kB gzipped) and `public/audio/indy-theme.bin` (4.7 kB, 1.3 kB gzipped; 13 voices as note lists, no samples, no libraries).
+  The binary was generated from the MIDI file with a throwaway script (tracks and pitches unchanged, the identical trumpet, horn and trombone lines stored once and played as one layered voice).
+  Rights: the composition is protected; the owner is responsible for clearing its public use (the MIDI arrangement and this synth rendition are not a licence). Checked in `scripts/verify-viewer.mjs`.
+

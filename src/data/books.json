@@ -61,7 +61,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "open-library-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -70,12 +70,15 @@
         "en": "Fast intuition meets slower reasoning. Kahneman shows where both lead us wrong."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/89308/thinking-fast-and-slow-by-daniel-kahneman/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/thinking-fast-and-slow/cover-sm.webp",
+        "large": "/books/thinking-fast-and-slow/cover-lg.webp"
+      },
       "coverResearch": {
-        "editionSourceUrl": "https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "editionSourceUrl": "https://openlibrary.org/books/OL25426844M/Thinking_Fast_and_Slow",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/id/15262536-L.jpg",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 321 x 500 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20",
         "ownerVisualConfirmation": "2026-11-20: owner confirms the previously displayed live cover was correct; the image bytes and exact edition remain to be retrieved and checked.",
         "previousLiveImageUrl": "https://covers.openlibrary.org/b/isbn/9780141033570-M.jpg?default=false"
@@ -100,7 +103,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "google-books-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -109,12 +112,15 @@
         "en": "How Homo sapiens shaped the planet - from myths to empires and science."
       },
       "summarySourceUrl": "https://www.ynharari.com/book/sapiens-2/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/sapiens/cover-sm.webp",
+        "large": "/books/sapiens/cover-lg.webp"
+      },
       "coverResearch": {
-        "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "editionSourceUrl": "https://books.google.com/books/about/Sapiens.html?id=FILmrQEACAAJ",
+        "imageSourceUrl": "https://books.google.com/books/about/Sapiens.html?id=FILmrQEACAAJ",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 128 x 192 pixels.",
+        "usageRights": "Google Books image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20",
         "ownerVisualConfirmation": "2026-11-20: owner confirms the previously displayed live cover was correct; the image bytes and exact edition remain to be retrieved and checked.",
         "previousLiveImageUrl": "https://covers.openlibrary.org/b/isbn/9780062316110-M.jpg?default=false"
@@ -179,7 +185,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "open-library-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -188,12 +194,15 @@
         "en": "200 million years of female evolution - and a different human history."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/227568/eve-by-cat-bohannon/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/eve/cover-sm.webp",
+        "large": "/books/eve/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/id/14750524-L.jpg",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 261 x 400 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -216,7 +225,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "open-library-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -225,12 +234,15 @@
         "en": "A patient's story shows why tuberculosis still kills despite good treatments."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/312472/everything-is-tuberculosis-by-john-green/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/everything-is-tuberculosis/cover-sm.webp",
+        "large": "/books/everything-is-tuberculosis/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/id/14853332-L.jpg",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 145 x 219 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -333,7 +345,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "open-library-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -342,12 +354,15 @@
         "en": "Ten maps explain how terrain, borders and seas still shape political choices."
       },
       "summarySourceUrl": "https://eandtbooks.com/books/prisoners-of-geography/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/prisoners-of-geography/cover-sm.webp",
+        "large": "/books/prisoners-of-geography/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/id/9453474-L.jpg",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 326 x 500 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -370,7 +385,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "google-books-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -379,12 +394,15 @@
         "en": "How dictators share money, technology and political support to keep power."
       },
       "summarySourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/autocracy-inc/cover-sm.webp",
+        "large": "/books/autocracy-inc/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "imageSourceUrl": "https://books.google.com/books/about/Autocracy_Inc.html?id=2Z7JEAAAQBAJ",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 128 x 196 pixels.",
+        "usageRights": "Google Books image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -647,7 +665,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -656,12 +674,15 @@
         "en": "The devil arrives in Soviet Moscow. Satire, love and fantasy collide."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-master-and-margarita/cover-sm.webp",
+        "large": "/books/the-master-and-margarita/cover-lg.webp"
+      },
       "coverResearch": {
-        "editionSourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "editionSourceUrl": "https://www.penguinrandomhouseretail.com/book/?isbn=9780141180144",
+        "imageSourceUrl": "https://images.penguinrandomhouse.com/cover/9780141180144",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 291 x 450 pixels.",
+        "usageRights": "Penguin Random House image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -684,7 +705,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -693,12 +714,15 @@
         "en": "A young radical returns home and unsettles his family in a changing Russia."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/306002/fathers-and-sons-by-ivan-turgenev/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/fathers-and-sons/cover-sm.webp",
+        "large": "/books/fathers-and-sons/cover-lg.webp"
+      },
       "coverResearch": {
-        "editionSourceUrl": "https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "editionSourceUrl": "https://www.penguinrandomhouse.com/books/306002/fathers-and-sons-by-ivan-turgenev/9780141441337/",
+        "imageSourceUrl": "https://images3.penguinrandomhouse.com/cover/9780141441337",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 293 x 450 pixels.",
+        "usageRights": "Penguin Random House image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -761,7 +785,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL35577396M/Project_Hail_Mary",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "open-library-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -770,12 +794,15 @@
         "en": "An astronaut wakes far from Earth without his memory. He must find out why."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/611315/project-hail-mary-by-andy-weir/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/project-hail-mary/cover-sm.webp",
+        "large": "/books/project-hail-mary/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL35577396M/Project_Hail_Mary",
-        "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/id/14433087-L.jpg",
+        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 326 x 500 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },

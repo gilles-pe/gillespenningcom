@@ -1866,10 +1866,10 @@ function furnish(id, g, r, inspectionTargets) {
     const projectPicks = [];
     internalGlassWall(g, r);
     const operating = operatingRoom(g, L, projectPicks);
-    inspect('opTable', [operating.table], -0.24, 0.82, true);
+    inspect('opTable', [operating.table], -0.24, 0.82);
     inspect('wimmelbild', [operating.cart], -0.10, 0.40);
     const desk = practiceCorner(g, L, projectPicks);
-    inspect('practiceDesk', [desk], 0.06, 0.64, true);
+    inspect('practiceDesk', [desk], 0.06, 0.64);
     inspect('rack', projectPicks.filter(o => o.userData.project === 'rack'), 0, 0.26);
     return { projectPicks };
   }

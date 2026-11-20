@@ -13,13 +13,17 @@
         "orientation": "upright",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9781473637467",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781473637467-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL27755791M/Factfulness",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "thinking-fast-and-slow",
@@ -32,13 +36,17 @@
         "orientation": "upright",
         "order": 2
       },
-      "isbn13": null,
+      "isbn13": "9780141033570",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141033570-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "sapiens",
@@ -51,13 +59,17 @@
         "orientation": "upright",
         "order": 3
       },
-      "isbn13": null,
+      "isbn13": "9780062316110",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780062316110-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-weirdest-people",
@@ -70,13 +82,17 @@
         "orientation": "upright",
         "order": 4
       },
-      "isbn13": null,
+      "isbn13": "9780374173227",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780374173227-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "eve",
@@ -89,13 +105,17 @@
         "orientation": "horizontal",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9781529156171",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781529156171-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "everything-is-tuberculosis",
@@ -108,13 +128,17 @@
         "orientation": "horizontal",
         "order": 2
       },
-      "isbn13": null,
+      "isbn13": "9780525556572",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780525556572-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-hard-sell",
@@ -127,13 +151,17 @@
         "orientation": "horizontal",
         "order": 3
       },
-      "isbn13": null,
+      "isbn13": "9780385544900",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780385544900-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www2.publishersweekly.com/978-0-385-54490-0",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-fortress",
@@ -146,13 +174,17 @@
         "orientation": "upright",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9780141986333",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141986333-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "prisoners-of-geography",
@@ -165,13 +197,17 @@
         "orientation": "upright",
         "order": 2
       },
-      "isbn13": null,
+      "isbn13": "9781783962433",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781783962433-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "autocracy-inc",
@@ -184,13 +220,17 @@
         "orientation": "upright",
         "order": 3
       },
-      "isbn13": null,
+      "isbn13": "9781802062137",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781802062137-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-last-unicorn",
@@ -203,13 +243,17 @@
         "orientation": "upright",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9781399606981",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781399606981-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.hugendubel.info/fachbuecher/kunst/darstellende-kunst/detail/ISBN-9781399606981/Beagle-Peter-S./The-Last-Unicorn",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-moral-animal",
@@ -222,13 +266,17 @@
         "orientation": "upright",
         "order": 2
       },
-      "isbn13": null,
+      "isbn13": "9780679763994",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780679763994-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-body",
@@ -241,13 +289,17 @@
         "orientation": "upright",
         "order": 3
       },
-      "isbn13": null,
+      "isbn13": "9780857522405",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780857522405-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL28720778M/The_Body",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "red-plenty",
@@ -260,13 +312,17 @@
         "orientation": "horizontal",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9780571225248",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780571225248-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL27642979M/Red_Plenty",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "a-very-short-history-of-life-on-earth",
@@ -279,13 +335,17 @@
         "orientation": "horizontal",
         "order": 2
       },
-      "isbn13": null,
+      "isbn13": "9781529060560",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781529060560-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-wandering-earth",
@@ -298,13 +358,17 @@
         "orientation": "horizontal",
         "order": 3
       },
-      "isbn13": null,
+      "isbn13": "9781784978518",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781784978518-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.bloomsbury.com/uk/wandering-earth-9781784978518/",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-master-and-margarita",
@@ -317,13 +381,17 @@
         "orientation": "upright",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9780141180144",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141180144-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "fathers-and-sons",
@@ -336,13 +404,17 @@
         "orientation": "upright",
         "order": 2
       },
-      "isbn13": null,
+      "isbn13": "9780141441337",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141441337-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "we-are-legion-we-are-bob",
@@ -355,13 +427,17 @@
         "orientation": "upright",
         "order": 3
       },
-      "isbn13": null,
+      "isbn13": "9781668221570",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781668221570-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "project-hail-mary",
@@ -374,13 +450,17 @@
         "orientation": "leaning",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9781529157468",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781529157468-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL35577396M/Project_Hail_Mary",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     },
     {
       "id": "the-wright-brothers",
@@ -393,13 +473,17 @@
         "orientation": "horizontal",
         "order": 1
       },
-      "isbn13": null,
+      "isbn13": "9781476728742",
       "amazonUrl": null,
-      "coverImage": null,
+      "coverImage": "https://covers.openlibrary.org/b/isbn/9781476728742-M.jpg?default=false",
       "personalNote": {
         "en": null,
         "de": null
-      }
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL25647222M/The_Wright_Brothers",
+      "coverImageStatus": "unverified",
+      "backSurface": "generated",
+      "spineSurface": "generated"
     }
   ]
 }

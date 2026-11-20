@@ -2,6 +2,7 @@ import { enterpriseCopy, labelShipAction } from './enterprise-copy.js';
 import { loadEnterpriseGlb, createRoomWarp } from './enterprise.js';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
+import { loadBookCoversForRoom } from './book-jackets.js';
 import { t } from './i18n.js';
 import { createEgg } from './egg.js';
 import { PATHS } from './icons.js';
@@ -1399,6 +1400,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       if (id !== openId) closeAlbum(false);
       if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
       openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
+      if (id === 'about' || id === 'writing') loadBookCoversForRoom(id);
       if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
       if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
       if (id !== 'about') closeAlbum(false);

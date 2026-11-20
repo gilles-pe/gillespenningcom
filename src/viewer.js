@@ -733,7 +733,25 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!mesh) return;
     if (bookUI.isFocused(id)) {
       if (bookUI.isExtracted()) bookUI.nextFace();
-      else bookUI.extract();
+      else if (bookUI.extract()) {
+        // Reframe the extracted book rather than the old shelf slot. A little
+        // breathing room is essential: at the original close-up distance the
+        // cover could be clipped by the camera or remain behind the cabinet.
+        const presentation = bookUI.getPresentationPoint();
+        if (presentation) {
+          const screenUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+          goal.t.copy(presentation).addScaledVector(screenUp, -0.09);
+          goal.dist = Math.max(goal.dist, 1.28);
+          custom = true;
+          zoom = clampZoom(goal.dist / home.dist);
+          panOffset.copy(goal.t).sub(home.t);
+          if (reduced) {
+            view.az = goal.az; view.el = goal.el;
+            view.dist = goal.dist; view.t.copy(goal.t);
+          }
+          checkAway();
+        }
+      }
       markDirty();
       return;
     }

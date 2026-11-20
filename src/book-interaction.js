@@ -2,6 +2,7 @@
 // first click frames it, second lifts and turns it; closing returns it to its shelf.
 import * as THREE from 'three';
 import catalog from './data/books.json';
+import { showLargeBookCover, releaseLargeBookCover } from './book-jackets.js';
 
 const byId = new Map(catalog.books.map(book => [book.id, book]));
 const VERTICAL = new THREE.Vector3(0, 1, 0);
@@ -145,6 +146,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     s.presentation = s.originWorld.clone().add(s.pull);
     s.extracted = true;
     s.face = 'front';
+    showLargeBookCover(s.id);
     ensureCard();
     fillCard();
     card.hidden = false; card.inert = false;
@@ -205,6 +207,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   function close(immediate = true) {
     if (!selected) { hideCard(); return false; }
     const s = selected;
+    releaseLargeBookCover(s.id);
     hideCard();
     if (immediate || reduced || !s.extracted) {
       s.mesh.position.copy(s.originPosition);

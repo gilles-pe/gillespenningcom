@@ -198,3 +198,6 @@ The lower right compartment of the About Me cabinet holds a turned walnut stand,
 
 ### Projects exhibition displays (D-083, 2026-11-19)
 All five projects share a rounded pale-oak plinth on a recessed dark foot, a slim cream cap with a brass edge, and a framed image on brass supports. A small brass nameplate on the front carries the project title. The images remain in their existing slots. Selecting a project raises its frame by 0.035 model units and gently warms the brass rails. The frame returns when the card closes or the visitor leaves Projects. Reduced motion applies the final state immediately. All physical parts retain the project's first-click preview and second-click destination behavior.
+
+### Book covers (D-100)
+Keep the existing tactile book presentation and translucent inspector card. Fronts use faithful English-edition artwork where approved and a legible generated jacket otherwise; AI-retouched images are documented as altered. Preserve the exact aspect ratio during asset resizing. Small room-only and large on-extraction textures avoid initial mobile transfers and empty books. Back and spine remain generated. Do not alter scene transparency, camera framing or book-click choreography.

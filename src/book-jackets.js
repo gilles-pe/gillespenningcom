@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import catalog from './data/books.json';
 
-// Real English-edition front-cover previews are loaded from Open Library when available.
+// Local English-edition front covers load progressively when available.
 // Back panels and spines are original typographic reconstructions, NOT publisher artwork.
 // A missing or blocked image always leaves a legible local CanvasTexture fallback.
 const COLORS = [
@@ -110,33 +110,58 @@ function spineReconstruction(book, colors) {
   });
 }
 const materialCache = new Map();
-const pendingByRoom = new Map();
-const requestedRooms = new Set();
+const jackets = new Map();
+const MAX_LARGE_TEXTURES = 2;
+let useCounter = 0;
 
-// Defer network requests until somebody enters the relevant room. The overview
-// uses local fallback textures, so visiting the home page does not contact Open Library.
-function queueJacketImage(book, url, material) {
-  if (!url) return;
-  if (!pendingByRoom.has(book.room)) pendingByRoom.set(book.room, []);
-  pendingByRoom.get(book.room).push(() => {
-    const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
-    loader.load(url, image => {
-      if (!image.image || image.image.width < 24 || image.image.height < 24) { image.dispose(); return; }
-      image.colorSpace = THREE.SRGBColorSpace;
-      image.anisotropy = 4;
-      material.map.dispose();
-      material.map = image;
-      material.needsUpdate = true;
-      window.dispatchEvent(new Event('book-cover-loaded'));
-    }, undefined, () => { /* Retain the locally generated fallback. */ });
-  });
+function display(record) {
+  const image = (record.active && record.large) || record.small || record.fallback;
+  if (record.material.map === image) return;
+  record.material.map = image;
+  record.material.needsUpdate = true;
+  window.dispatchEvent(new Event('book-cover-loaded'));
+}
+function pruneLarge() {
+  const available = [...jackets.values()].filter(r => r.large && !r.active).sort((a, b) => a.used - b.used);
+  while ([...jackets.values()].filter(r => r.large).length > MAX_LARGE_TEXTURES && available.length) {
+    const r = available.shift();
+    r.large.dispose(); r.large = null;
+  }
+}
+function load(record, size) {
+  const url = record.book.coverImages?.[size];
+  if (!url || record[size] || record[`${size}Pending`] || record[`${size}Failed`]) return;
+  record[`${size}Pending`] = true;
+  const loader = new THREE.TextureLoader();
+  // Resolve paths against Vite's deployment base, including project Pages paths.
+  loader.load(`${import.meta.env.BASE_URL}${url.replace(/^\//, '')}`, image => {
+    record[`${size}Pending`] = false;
+    if (!image.image || image.image.width < 24 || image.image.height < 24) {
+      image.dispose(); record[`${size}Failed`] = true; return;
+    }
+    image.colorSpace = THREE.SRGBColorSpace;
+    image.anisotropy = 4;
+    record[size] = image;
+    record.used = ++useCounter;
+    display(record);
+    if (size === 'large') pruneLarge();
+  }, undefined, () => { record[`${size}Pending`] = false; record[`${size}Failed`] = true; });
 }
 export function loadBookCoversForRoom(room) {
-  if (requestedRooms.has(room)) return;
-  requestedRooms.add(room);
-  for (const request of pendingByRoom.get(room) || []) request();
-  pendingByRoom.delete(room);
+  for (const record of jackets.values()) if (record.book.room === room) load(record, 'small');
+}
+export function showLargeBookCover(id) {
+  const record = jackets.get(id);
+  if (!record) return;
+  record.active = true; record.used = ++useCounter;
+  display(record);
+  load(record, 'large');
+}
+export function releaseLargeBookCover(id) {
+  const record = jackets.get(id);
+  if (!record) return;
+  record.active = false; record.used = ++useCounter;
+  display(record); pruneLarge();
 }
 
 function makeMaterials(book, orientation) {
@@ -154,9 +179,7 @@ function makeMaterials(book, orientation) {
     ? [front, back, paper, paper, spine, paper]
     : [paper, paper, front, back, spine, paper];
   materialCache.set(cacheKey, materials);
-  queueJacketImage(book, book.coverImage, front);
-  queueJacketImage(book, book.backImage, back);
-  queueJacketImage(book, book.spineImage, spine);
+  jackets.set(book.id, { book, material: front, fallback: front.map, small: null, large: null, active: false, used: 0 });
   return materials;
 }
 

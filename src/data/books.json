@@ -15,13 +15,13 @@
       },
       "isbn13": "9781473637467",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781473637467-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL27755791M/Factfulness",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -29,7 +29,15 @@
       "summary": {
         "en": "Rosling shows how instincts skew our view of progress. The numbers differ."
       },
-      "summarySourceUrl": "https://www.gapminder.org/factfulness-book/"
+      "summarySourceUrl": "https://www.gapminder.org/factfulness-book/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.hachette.co.uk/titles/hans-rosling/factfulness/9781473637467/",
+        "imageSourceUrl": "https://www.hachette.co.uk/wp-content/uploads/2025/02/hbg-title-factfulness-2-156.jpg?resize=436,675",
+        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "thinking-fast-and-slow",
@@ -44,13 +52,13 @@
       },
       "isbn13": "9780141033570",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141033570-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -58,7 +66,15 @@
       "summary": {
         "en": "Fast intuition meets slower reasoning. Kahneman shows where both lead us wrong."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/89308/thinking-fast-and-slow-by-daniel-kahneman/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/89308/thinking-fast-and-slow-by-daniel-kahneman/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "sapiens",
@@ -73,13 +89,13 @@
       },
       "isbn13": "9780062316110",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780062316110-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -87,7 +103,15 @@
       "summary": {
         "en": "How Homo sapiens shaped the planet - from myths to empires and science."
       },
-      "summarySourceUrl": "https://www.ynharari.com/book/sapiens-2/"
+      "summarySourceUrl": "https://www.ynharari.com/book/sapiens-2/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-weirdest-people",
@@ -102,13 +126,13 @@
       },
       "isbn13": "9780374173227",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780374173227-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -116,7 +140,15 @@
       "summary": {
         "en": "Why Western societies think differently. Henrich follows culture and norms."
       },
-      "summarySourceUrl": "https://us.macmillan.com/books/9780374710453/theweirdestpeopleintheworld/"
+      "summarySourceUrl": "https://us.macmillan.com/books/9780374710453/theweirdestpeopleintheworld/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "eve",
@@ -131,13 +163,13 @@
       },
       "isbn13": "9781529156171",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781529156171-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -145,7 +177,15 @@
       "summary": {
         "en": "200 million years of female evolution - and a different human history."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/227568/eve-by-cat-bohannon/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/227568/eve-by-cat-bohannon/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "everything-is-tuberculosis",
@@ -160,13 +200,13 @@
       },
       "isbn13": "9780525556572",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780525556572-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -174,7 +214,15 @@
       "summary": {
         "en": "A patient's story shows why tuberculosis still kills despite good treatments."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/312472/everything-is-tuberculosis-by-john-green/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/312472/everything-is-tuberculosis-by-john-green/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-hard-sell",
@@ -189,13 +237,13 @@
       },
       "isbn13": "9780385544900",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780385544900-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www2.publishersweekly.com/978-0-385-54490-0",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -203,7 +251,15 @@
       "summary": {
         "en": "Insys, fentanyl and the sales tactics behind part of the US opioid crisis."
       },
-      "summarySourceUrl": "https://www.panmacmillan.com/authors/evan-hughes/the-hard-sell/9781035017898"
+      "summarySourceUrl": "https://www.panmacmillan.com/authors/evan-hughes/the-hard-sell/9781035017898",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www2.publishersweekly.com/978-0-385-54490-0",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-fortress",
@@ -218,13 +274,13 @@
       },
       "isbn13": "9780141986333",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141986333-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -232,7 +288,15 @@
       "summary": {
         "en": "The siege of Przemyśl in World War I, seen through soldiers and civilians."
       },
-      "summarySourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780241309070"
+      "summarySourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780241309070",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "prisoners-of-geography",
@@ -247,13 +311,13 @@
       },
       "isbn13": "9781783962433",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781783962433-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -261,7 +325,15 @@
       "summary": {
         "en": "Ten maps explain how terrain, borders and seas still shape political choices."
       },
-      "summarySourceUrl": "https://eandtbooks.com/books/prisoners-of-geography/"
+      "summarySourceUrl": "https://eandtbooks.com/books/prisoners-of-geography/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "autocracy-inc",
@@ -276,13 +348,13 @@
       },
       "isbn13": "9781802062137",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781802062137-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -290,7 +362,15 @@
       "summary": {
         "en": "How dictators share money, technology and political support to keep power."
       },
-      "summarySourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137"
+      "summarySourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-last-unicorn",
@@ -305,13 +385,13 @@
       },
       "isbn13": "9781399606981",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781399606981-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.hugendubel.info/fachbuecher/kunst/darstellende-kunst/detail/ISBN-9781399606981/Beagle-Peter-S./The-Last-Unicorn",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -319,7 +399,15 @@
       "summary": {
         "en": "A unicorn searches for her lost kind, helped by an unlikely group of companions."
       },
-      "summarySourceUrl": "https://www.foliosociety.com/uk/the-last-unicorn"
+      "summarySourceUrl": "https://www.foliosociety.com/uk/the-last-unicorn",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://store.gollancz.co.uk/products/the-last-unicorn",
+        "imageSourceUrl": "https://store.gollancz.co.uk/cdn/shop/products/9781399606981-original.jpg?v=1707155644&width=493",
+        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-moral-animal",
@@ -334,13 +422,13 @@
       },
       "isbn13": "9780679763994",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780679763994-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -348,7 +436,15 @@
       "summary": {
         "en": "Why we love, compete and cooperate - explored through evolutionary psychology."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/194294/the-moral-animal-by-robert-wright/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/194294/the-moral-animal-by-robert-wright/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-body",
@@ -363,13 +459,13 @@
       },
       "isbn13": "9780857522405",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780857522405-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28720778M/The_Body",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -377,7 +473,15 @@
       "summary": {
         "en": "An accessible tour of the body: how it works, heals and sometimes fails."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/239783/the-body-by-bill-bryson/9780385539319/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/239783/the-body-by-bill-bryson/9780385539319/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL28720778M/The_Body",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "red-plenty",
@@ -392,13 +496,13 @@
       },
       "isbn13": "9780571225248",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780571225248-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL27642979M/Red_Plenty",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -406,7 +510,15 @@
       "summary": {
         "en": "The Soviet dream of beating markets with computer-assisted central planning."
       },
-      "summarySourceUrl": "https://redplenty.com/"
+      "summarySourceUrl": "https://redplenty.com/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.bol.com/be/fr/p/red-plenty/1001004010495221/",
+        "imageSourceUrl": null,
+        "visualReview": "user-supplied screenshot, AI removal of overlays; lettering and art reconstructed in covered areas, not an untouched cover; image not included pending rights clarification",
+        "usageRights": "user-provided-image; underlying cover artwork rights not independently established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "a-very-short-history-of-life-on-earth",
@@ -421,13 +533,13 @@
       },
       "isbn13": "9781529060560",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781529060560-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -435,7 +547,15 @@
       "summary": {
         "en": "4.6 billion years of evolution, extinction and the accidents that shaped life."
       },
-      "summarySourceUrl": "https://www.panmacmillan.com/authors/henry-gee/a-very-short-history-of-life-on-earth/9781529060591"
+      "summarySourceUrl": "https://www.panmacmillan.com/authors/henry-gee/a-very-short-history-of-life-on-earth/9781529060591",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-wandering-earth",
@@ -450,13 +570,13 @@
       },
       "isbn13": "9781784978518",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781784978518-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.bloomsbury.com/uk/wandering-earth-9781784978518/",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -464,7 +584,15 @@
       "summary": {
         "en": "Science-fiction stories about survival in space - including moving Earth itself."
       },
-      "summarySourceUrl": "https://us.macmillan.com/books/9781250796820/thewanderingearth/"
+      "summarySourceUrl": "https://us.macmillan.com/books/9781250796820/thewanderingearth/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.bloomsbury.com/uk/wandering-earth-9781784978518/",
+        "imageSourceUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_360,c_scale,dpr_1.5/jackets/9781784978518.jpg",
+        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-master-and-margarita",
@@ -479,13 +607,13 @@
       },
       "isbn13": "9780141180144",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141180144-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -493,7 +621,15 @@
       "summary": {
         "en": "The devil arrives in Soviet Moscow. Satire, love and fantasy collide."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "fathers-and-sons",
@@ -508,13 +644,13 @@
       },
       "isbn13": "9780141441337",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9780141441337-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -522,7 +658,15 @@
       "summary": {
         "en": "A young radical returns home and unsettles his family in a changing Russia."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/306002/fathers-and-sons-by-ivan-turgenev/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/306002/fathers-and-sons-by-ivan-turgenev/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "we-are-legion-we-are-bob",
@@ -537,13 +681,13 @@
       },
       "isbn13": "9781668221570",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781668221570-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -551,7 +695,15 @@
       "summary": {
         "en": "Bob wakes as an AI and heads into space. A funny story about identity."
       },
-      "summarySourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570"
+      "summarySourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
+        "imageSourceUrl": "https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781668221570/we-are-legion-we-are-bob-9781668221570_lg.jpg",
+        "visualReview": "Publisher image depicts a perspective rendering of a book, not an undistorted front cover; rejected.",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "project-hail-mary",
@@ -566,13 +718,13 @@
       },
       "isbn13": "9781529157468",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781529157468-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL35577396M/Project_Hail_Mary",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -580,7 +732,15 @@
       "summary": {
         "en": "An astronaut wakes far from Earth without his memory. He must find out why."
       },
-      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/611315/project-hail-mary-by-andy-weir/"
+      "summarySourceUrl": "https://www.penguinrandomhouse.com/books/611315/project-hail-mary-by-andy-weir/",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL35577396M/Project_Hail_Mary",
+        "imageSourceUrl": null,
+        "visualReview": "pending",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     },
     {
       "id": "the-wright-brothers",
@@ -595,13 +755,13 @@
       },
       "isbn13": "9781476728742",
       "amazonUrl": null,
-      "coverImage": "https://covers.openlibrary.org/b/isbn/9781476728742-M.jpg?default=false",
+      "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL25647222M/The_Wright_Brothers",
-      "coverImageStatus": "unverified",
+      "coverImageStatus": "generated-fallback-pending-review",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -609,7 +769,15 @@
       "summary": {
         "en": "The Wright brothers test, fail and try again - until powered flight becomes real."
       },
-      "summarySourceUrl": "https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742"
+      "summarySourceUrl": "https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742",
+      "coverImages": null,
+      "coverResearch": {
+        "editionSourceUrl": "https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742",
+        "imageSourceUrl": "https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781476728742/the-wright-brothers-9781476728742_lg.jpg",
+        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "usageRights": "not-independently-established",
+        "checkedAt": "2026-11-20"
+      }
     }
   ]
 }

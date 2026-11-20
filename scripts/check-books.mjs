@@ -1,5 +1,7 @@
 // Verify book metadata and scene-placement invariants before publishing.
 import { readFileSync } from 'node:fs';
+import { stat } from 'node:fs/promises';
+import sharp from 'sharp';
 
 const file = new URL('../src/data/books.json', import.meta.url);
 const { books, catalogLanguage } = JSON.parse(readFileSync(file, 'utf8'));
@@ -40,7 +42,23 @@ for (const b of books) {
   if (slots.has(key)) fail('Duplicate shelf position: ' + key);
   slots.add(key); placed[anchor].push(order);
   if (anchor.startsWith('writing-') !== (b.room === 'writing')) fail('Wrong room for anchor: ' + b.id);
-  if (b.coverImage && !/^https:\/\//.test(b.coverImage) && !b.coverImage.startsWith('/')) fail('Invalid cover path: ' + b.id);
+  if (b.coverImage !== null) fail('Legacy remote cover must not load: ' + b.id);
+  if (!b.coverResearch?.editionSourceUrl || !b.coverResearch?.visualReview || !b.coverResearch?.usageRights) fail('Cover research incomplete: ' + b.id);
+  if (b.coverImages) {
+    for (const [size, maxWidth, maxHeight] of [['small', 256, 384], ['large', 512, 768]]) {
+      const path = b.coverImages[size];
+      const expected = `/books/${b.id}/cover-${size === 'small' ? 'sm' : 'lg'}.webp`;
+      if (path !== expected) fail(`Unexpected ${size} path for ${b.id}`);
+      const asset = new URL('../public' + path, import.meta.url);
+      let meta, info;
+      try { [meta, info] = await Promise.all([sharp(asset.pathname).metadata(), stat(asset)]); }
+      catch { fail(`Missing or invalid ${size} cover for ${b.id}`); }
+      if (meta.format !== 'webp' || meta.width < 24 || meta.height < 24 || meta.width > maxWidth || meta.height > maxHeight || info.size < 100) fail(`Implausible ${size} cover for ${b.id}`);
+    }
+    const small = await sharp(new URL('../public' + b.coverImages.small, import.meta.url).pathname).metadata();
+    const large = await sharp(new URL('../public' + b.coverImages.large, import.meta.url).pathname).metadata();
+    if (Math.abs(small.width / small.height - large.width / large.height) > .01) fail('Cover aspect ratio differs: ' + b.id);
+  } else if (b.coverImageStatus !== 'generated-fallback-pending-review') fail('Missing fallback status: ' + b.id);
   if (b.amazonUrl && !/^https:\/\//.test(b.amazonUrl)) fail('Invalid Amazon URL: ' + b.id);
 }
 if (roomCounts.about !== 14 || roomCounts.writing !== 7) fail('Room counts mismatch');

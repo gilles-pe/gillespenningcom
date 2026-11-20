@@ -1,114 +1,47 @@
-# Book collection - data, jackets, placements and maintenance
+# Books: source, interactions and maintenance
 
-Updated 2026-11-20. The scene uses **21 selected English-language editions** (7 Writing & Speaking, 14 About Me).
+Status: work in progress, 2026-11-20. The catalog contains 21 selected English editions: 14 in About Me, 7 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
 
-## Where things live
+## Cover provenance and remaining work
 
-- [`src/data/books.json`](../src/data/books.json) is the **single source of truth** for title, author, ISBN, room, placement, external cover preview, prospective Amazon link and personal note.
-- [`src/book-jackets.js`](../src/book-jackets.js) renders three textured surfaces for every book: front, back, spine.
-- [`src/scene.js`](../src/scene.js) places those meshes in the shelves; [`src/viewer.js`](../src/viewer.js) triggers cover preview loading **only after entering About Me or Writing & Speaking**.
-- The photo album (`src/book-album.js`) is a separate interactive object and is not one of the 21 books.
+This branch deliberately contains no cover artwork while rights and the remaining sources are being checked. The table records research status, not a guarantee of permission. `publisher-image-edition-matched` means the pictured cover was checked against a publisher page for the recorded ISBN; reuse rights are not established. `user-image-ai-retouched` is an explicitly altered reconstruction from Gilles's screenshot, not an untouched original; obscured areas and small lettering may differ. `generated-fallback-pending-review` means the visible front is generated locally while edition-correct artwork and its use remain unresolved. All backs and spines remain generated.
 
-## What is real and what is reconstructed
+The source is not a licence. Hachette asks for permission for book-cover reproduction; Simon & Schuster's website terms restrict copying and redistribution. Check the specific rights for intended use before committing or publishing third-party images. Sources: https://www.hachette.co.uk/landing-page/hachette/contact-us-huk-v2/ and https://www.simonandschuster.com/p/terms-of-use. The cover of We Are Legion offered by the publisher was rejected because it shows a perspective 3D book, not a front-cover image. Open Library required human verification in this browser session; the existing ISBN URLs were not verified.
 
-| Surface | Current implementation | Next step for genuine wraparound artwork |
-| --- | --- | --- |
-| Front | English-edition ISBN-based **Open Library preview** (`coverImage`), with title/author fallback; not all remote image URLs were independently checked for a successful image response | Inspect each book in the browser; replace unavailable or mismatched previews with an approved, edition-correct source |
-| Back | Locally generated typographic panel (`backSurface: "generated"`), **not an original jacket scan** | If rights and genuine book-jacket imagery can be confirmed, set `backImage` to the approved image URL |
-| Spine | Locally generated vertical title/author (`spineSurface: "generated"`), **not an original publisher spine** | If rights and genuine spine artwork can be confirmed, set `spineImage` to the approved image URL |
+| Book | ISBN-13 | Room | Cover status | Source | Rights status |
+| --- | --- | --- | --- | --- | --- |
+| Factfulness | 9781473637467 | writing | generated-fallback-pending-review | [edition](https://www.hachette.co.uk/titles/hans-rosling/factfulness/9781473637467/) · [image](https://www.hachette.co.uk/wp-content/uploads/2025/02/hbg-title-factfulness-2-156.jpg?resize=436,675) | not-independently-established |
+| Thinking, Fast and Slow | 9780141033570 | writing | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow) | not-independently-established |
+| Sapiens: A Brief History of Humankind | 9780062316110 | writing | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind) | not-independently-established |
+| The WEIRDest People in the World | 9780374173227 | writing | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World) | not-independently-established |
+| Eve: How the Female Body Drove 200 Million Years of Human Evolution | 9781529156171 | writing | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL50620709M/Eve) | not-independently-established |
+| Everything Is Tuberculosis | 9780525556572 | writing | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis) | not-independently-established |
+| The Hard Sell | 9780385544900 | writing | generated-fallback-pending-review | [edition](https://www2.publishersweekly.com/978-0-385-54490-0) | not-independently-established |
+| The Fortress: The Great Siege of Przemyśl | 9780141986333 | about | generated-fallback-pending-review | [edition](https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333) | not-independently-established |
+| Prisoners of Geography | 9781783962433 | about | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography) | not-independently-established |
+| Autocracy, Inc. | 9781802062137 | about | generated-fallback-pending-review | [edition](https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137) | not-independently-established |
+| The Last Unicorn | 9781399606981 | about | generated-fallback-pending-review | [edition](https://store.gollancz.co.uk/products/the-last-unicorn) · [image](https://store.gollancz.co.uk/cdn/shop/products/9781399606981-original.jpg?v=1707155644&width=493) | not-independently-established |
+| The Moral Animal | 9780679763994 | about | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are) | not-independently-established |
+| The Body: A Guide for Occupants | 9780857522405 | about | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL28720778M/The_Body) | not-independently-established |
+| Red Plenty | 9780571225248 | about | generated-fallback-pending-review | [edition](https://www.bol.com/be/fr/p/red-plenty/1001004010495221/) | user-provided-image; underlying cover artwork rights not independently established |
+| A (Very) Short History of Life on Earth | 9781529060560 | about | generated-fallback-pending-review | [edition](https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf) | not-independently-established |
+| The Wandering Earth | 9781784978518 | about | generated-fallback-pending-review | [edition](https://www.bloomsbury.com/uk/wandering-earth-9781784978518/) · [image](https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_360,c_scale,dpr_1.5/jackets/9781784978518.jpg) | not-independently-established |
+| The Master and Margarita | 9780141180144 | about | generated-fallback-pending-review | [edition](https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/) | not-independently-established |
+| Fathers and Sons | 9780141441337 | about | generated-fallback-pending-review | [edition](https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337) | not-independently-established |
+| We Are Legion (We Are Bob) | 9781668221570 | about | generated-fallback-pending-review | [edition](https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570) · [image](https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781668221570/we-are-legion-we-are-bob-9781668221570_lg.jpg) | not-independently-established |
+| Project Hail Mary | 9781529157468 | about | generated-fallback-pending-review | [edition](https://openlibrary.org/books/OL35577396M/Project_Hail_Mary) | not-independently-established |
+| The Wright Brothers | 9781476728742 | about | generated-fallback-pending-review | [edition](https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742) · [image](https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781476728742/the-wright-brothers-9781476728742_lg.jpg) | not-independently-established |
 
-This is deliberately not a claim that the original back and spine are already available. The front previews are looked up using ISBNs of researched English editions, but covers can differ across variants and the Open Library API can return an unavailable image. A failed image load does **not** hide the book.
+## Assets and loading
 
-The Open Library Covers API is designed for displaying book covers and discourages bulk downloading. The site loads previews on user entry into a room, not on page arrival. Displaying remote book images makes requests to an external host; check the privacy notice before publication. Do not bulk-copy cover art into this Git repository without verifying image rights.
+Where a usable cover exists, add `public/books/<id>/cover-sm.webp` (maximum 256 × 384 px) and `cover-lg.webp` (maximum 512 × 768 px). Preserve aspect ratio; aim for 15–30 KB and 50–100 KB, respectively, without inflating low-detail or low-resolution originals. Record the source and distinguish a retouch from an original. Do not store source originals unnecessarily. Set `coverImages.small` and `coverImages.large` together; for an unavailable or unverified cover leave both absent and use the generated fallback. Front text and all back/spine surfaces must never be invented or presented as publisher artwork.
 
-Source: https://openlibrary.org/dev/docs/api/covers
+`src/book-jackets.js` creates a legible generated canvas immediately. The overview makes no book-cover network requests. Entering a room loads only the small files belonging to that room; extracting a book requests only its large file. A pending or failed large file leaves the small/fallback visible; late small responses cannot overwrite a visible large one. Up to two unused large textures are retained for reuse; older ones are disposed. Local paths resolve relative to Vite's base URL. `scripts/check-books.mjs` validates referenced WebP paths, dimensions, aspect ratios, metadata and placements.
 
-## Two-line descriptions and writing style
+## Interaction contract
 
-- `summary.en` is short, factual, in English and limited to roughly two lines by the CSS `-webkit-line-clamp`. It is a fresh paraphrase of publicly available publisher/product descriptions; it is not a verbatim Amazon sales blurb and not a personal recommendation.
-- `summarySourceUrl` records the relevant publisher or book-description page used for research. Prefer an edition-correct publisher page; Amazon is not required.
-- Style guide: concise, restrained and specific; no hype, no canned phrases, no claims about Gilles having read or endorsed the book. References: his Google Drive `writing_style_substack.md` and `gilles-wortliste-substack-2026.md`, read on 2026-11-20.
-- `personalNote` is retained as a reserved field but **not displayed** until Gilles supplies his own words.
-
-## CSS and interaction design
-
-- `src/style.css`: `.book-inspector-card` uses `color-mix(in srgb, var(--paper) 86%, transparent)`, backdrop blur 10px, 1px hairline and `var(--r1)` (6px). These follow the existing `.pop-card` design and `DESIGN.md` instead of creating a second visual system.
-- Font: Source Serif 4 for the title, Source Sans 3 for other text; font sizes, spacing, radius and control heights are existing tokens. Buttons have 48px hit targets on mobile. Reduced-motion removes card animations and book snapping honours the viewer preference.
-- Interaction code: `src/book-interaction.js`, connected from `src/viewer.js`. 3D cards do not change the separate album, photo, project, ship and globe interactions.
-- No personal description, rating, purchase prompt or external link appears until actually supplied and verified.
-
-## Natural extraction and cover visibility (2026-11-20)
-
-- Book removal is a staged movement, not an in-place spin: on the second click, move the mesh approximately 0.30 model units along the physical shelf's local outward (+Z) axis, another 0.12 toward the visitor, and rise 0.09. Pull-out and lift ease independently.
-- Delay turning until the book is clear of its neighbouring books and cabinet front. On return, reverse that sequence so it rotates back and then slides into its exact original pose.
-- Once extraction starts, the viewing direction is fixed for that gesture so rotating the camera does not drag the book around. The existing Cover/Spine/Back controls still rotate the lifted mesh. Repeated clicks on the presented book follow **Cover → Spine → Back → Return to shelf**; the fourth interaction after framing returns it instead of cycling back to Cover.
-- Reframe the inspection camera around the extracted book, with at least 1.28 model units of camera distance and a slight upward screen composition. This keeps the cover visible instead of clipping it at the old shelf close-up.
-- No CSS or new design tokens are required. Preserve reduced-motion snapping and BACK/Escape/Reset/room-change restoration.
-- Test coverage in `scripts/verify-viewer.mjs` checks horizontal, upright and leaning positions, front-of-shelf clearance, camera framing, and exact restoration. An automated 3D test is not a substitute for a final desktop/mobile visual inspection.
-
-## Editing fields
-
-| Field | Rule |
-| --- | --- |
-| `id` | Stable and unique. Do not rename once used by the renderer. |
-| `title`, `author` | Always show **English-language edition** title and author(s). Never switch to German or another translation in the book model. |
-| `editionLanguage` | Always `"en"`. |
-| `isbn13` | 13-digit ISBN of the selected English-language edition. Research publisher/edition before changing. |
-| `editionSourceUrl` | Public page used to support the edition and ISBN. |
-| `room` | `"about"` or `"writing"`. |
-| `placement.anchor` | Stable semantic shelf group, mapped to actual geometry in `scene.js`. |
-| `placement.orientation` | `"upright"`, `"horizontal"`, `"leaning"`. |
-| `placement.order` | Unique, 1-based integer per anchor; 1 is lowest in a stack. |
-| `coverImage` | Front-cover image URL. Currently Open Library ISBN lookup. Can be a reviewed local asset in the future. |
-| `coverImageStatus` | `"unverified"` until image content and edition match have been checked; do not change merely because the URL looks valid. |
-| `backImage`, `spineImage` | `null` until actual, licensed/approved images are provided; renderer uses reconstructed text if empty. |
-| `backSurface`, `spineSurface` | `"generated"` means typography, not publisher artwork. |
-| `amazonUrl` | Exact edition-specific URL when verified; do not fill from title or fabricate an affiliate tag. |
-| `summary.en` | Neutral two-line English synopsis, based on publisher descriptions, never an owner's opinion. |\n| `summarySourceUrl` | Public research source for that synopsis. |\n| `personalNote.en`, `personalNote.de` | Reserved owner-authored note, both `null` and currently NOT displayed. Never fabricate first-person recommendations. |
-
-Example:
-
-```json
-{
-  "id": "the-wright-brothers",
-  "title": "The Wright Brothers",
-  "author": "David McCullough",
-  "editionLanguage": "en",
-  "room": "about",
-  "placement": { "anchor": "about-globe-adjacent", "orientation": "horizontal", "order": 1 },
-  "isbn13": "9781476728742",
-  "amazonUrl": null,
-  "coverImage": "https://covers.openlibrary.org/b/isbn/9781476728742-M.jpg?default=false",
-  "backImage": null,
-  "spineImage": null,
-  "personalNote": { "en": null, "de": null }
-}
-```
-
-## Book positions
-
-| Anchor | Position | Count |
-| --- | --- | ---: |
-| `writing-shelf-display-left` | Writing & Speaking - 4 standing books | 4 |
-| `writing-shelf-display-right-stack` | Writing & Speaking - 3 lying books | 3 |
-| `about-cabinet-upper-left` | About Me - 3 standing books on the upper open shelf | 3 |
-| `about-cabinet-lower-left` | About Me - 3 standing books on the lower open shelf | 3 |
-| `about-cabinet-lower-right-stack` | About Me - 3 lying books on the lower open shelf | 3 |
-| `about-cabinet-top-upright` | About Me - 3 standing books on top of cabinet | 3 |
-| `about-cabinet-top-leaning` | About Me - one leaning book on cabinet | 1 |
-| `about-globe-adjacent` | About Me - **The Wright Brothers lying beside the globe** | 1 |
-
-The globe is **inside the lower open shelf**, not on the top of the cabinet. `The Wright Brothers` is therefore added on the same shelf, next to the globe, while the album, ship and trophies stay in place.
-
-## Still open
-
-1. Check every front preview in a desktop and mobile browser for correct edition, readable artwork and correct image orientation. ISBNs were researched; external image responses have not been batch-verified.
-2. Find and review authentic back-jacket and spine images if desired, case by case. Leave the generated back/spine in place where there is no suitable image.
-3. **Implemented**: Every book mesh has stable `userData.bookId`. First click frames the real book; second lifts it out of the shelf and turns its cover toward the visitor. An HTML card appears with English title, author and a publisher-based, two-line neutral synopsis. The card provides Cover / Spine / Back view controls and Return to shelf. After the initial framing click, clicks on the same book follow: **1. pull out/show Cover, 2. show Spine, 3. show Back, 4. return to shelf**. In other words, the fifth physical click including the initial camera-framing click is the return action. The cycle does **not** loop from Back to Cover. The individual Cover/Spine/Back card buttons remain usable; the next click on the physical book continues from the displayed face. Return button, Escape, BACK, Reset and room changes still restore the original geometry. Reduced motion snaps instead of animating. Personal opinions remain absent, and no empty Amazon link appears.
-4. Verify 3D bookshelf spacing (particularly the book beside the globe), surfaces, lighting and performance on phone and desktop.
-5. Run `npm run check:books`, `npm run check`, `npm run test:inspection`, and `npm run build`. These are now GitHub Pages build gates, including an automated 21-mesh book lift/return test.
-6. Review the site's privacy notice for third-party Open Library image requests before wider publication.
-
-## Excluded titles
-
-Do not re-add `Aftershocks`, `Nexus`, `Civilization: The West and the Rest` or `Dungeon Crawler Carl` unless the owner asks.
+- The first scene click frames the real book without extracting it. The next four clicks are Cover/pull out, Spine, Back, Return to shelf. The separate Cover/Spine/Back and Return controls still work.
+- BACK, Escape, Reset, room changes, camera restoration, reduced motion and the existing extraction animation must remain intact.
+- Test with `npm run check:books`, `npm run check`, `npm run test:inspection`, and `npm run build`. The harness tests request timing, failure fallback, late-arriving images and existing interactions; it does not replace visual desktop/mobile checks.
+- Personal notes remain hidden until supplied by Gilles. Summaries stay concise, neutral, in English, and attributable to publisher descriptions; no fabricated endorsements.
+- Do not add Aftershocks, Nexus, Civilization or Dungeon Crawler Carl unless the owner asks.

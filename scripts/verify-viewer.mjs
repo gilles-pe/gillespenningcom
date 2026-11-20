@@ -25,29 +25,50 @@ const canvas=new Element('canvas'),spotsEl=new Element();stage.append(canvas,spo
 const globalListeners={};let frame,resize;
 const document={createElement:tag=>new Element(tag),createElementNS:(_,tag)=>new Element(tag),get activeElement(){return active;},hidden:false,documentElement:{scrollHeight:1800}};
 class Renderer{constructor(){this.shadowMap={};}getPixelRatio(){return 1;}setPixelRatio(){}setSize(){}render(scene){scene.updateMatrixWorld(true);}}
-class TextureLoader {setCrossOrigin(){return this;}load(){return new Three.Texture();}}
+const textureRequests=[];
+class TextureLoader {setCrossOrigin(){return this;}load(url,onLoad,onProgress,onError){textureRequests.push({url,onLoad,onError});return new Three.Texture();}}
 let openedTabs=[];
 const window={addEventListener(){},dispatchEvent(){},open(url,target){const tab={url,target,focused:false,opener:{},focus(){this.focused=true;}};openedTabs.push(tab);return tab;}};
-const globals={console,document,window,Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
+const globals={console,document,window,Event:class{constructor(type){this.type=type;}},Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
 const ctx=vm.createContext(globals);const cache=new Map();
+// Synthetic paths exercise the loader independently of which covers are rights-cleared.
+function testCatalog() {
+  const data=JSON.parse(readFileSync('src/data/books.json','utf8'));
+  for(const b of data.books) if(['the-wright-brothers','the-last-unicorn','the-wandering-earth','red-plenty','factfulness'].includes(b.id)) b.coverImages={small:`/books/${b.id}/cover-sm.webp`,large:`/books/${b.id}/cover-lg.webp`};
+  return data;
+}
 async function external(name){const ns=name==='three'?{...Three,WebGLRenderer:Renderer,TextureLoader}:await import(name);return new vm.SyntheticModule(Object.keys(ns),function(){for(const [key,val]of Object.entries(ns))this.setExport(key,val);},{context:ctx,identifier:name});}
-async function getModule(file){if(cache.has(file))return cache.get(file);if(file.endsWith('.json')){const data=JSON.parse(readFileSync(file,'utf8'));const mod=new vm.SyntheticModule(['default'],function(){this.setExport('default',data);},{context:ctx,identifier:file});cache.set(file,mod);return mod;}const mod=new vm.SourceTextModule(readFileSync(file,'utf8'),{context:ctx,identifier:file,initializeImportMeta:meta=>{meta.env={BASE_URL:'/',DEV:true};}});cache.set(file,mod);return mod;}
+async function getModule(file){if(cache.has(file))return cache.get(file);if(file.endsWith('.json')){const data=file.endsWith('/data/books.json')?testCatalog():JSON.parse(readFileSync(file,'utf8'));const mod=new vm.SyntheticModule(['default'],function(){this.setExport('default',data);},{context:ctx,identifier:file});cache.set(file,mod);return mod;}const mod=new vm.SourceTextModule(readFileSync(file,'utf8'),{context:ctx,identifier:file,initializeImportMeta:meta=>{meta.env={BASE_URL:'/',DEV:true};}});cache.set(file,mod);return mod;}
 const module=await getModule(resolve('src/viewer.js'));
 await module.link(async(spec,mod)=>{if(spec.startsWith('.'))return getModule(resolve(dirname(mod.identifier),spec));if(!cache.has(spec))cache.set(spec,await external(spec));return cache.get(spec);});await module.evaluate();
 const labels=Object.fromEntries(['projects','about','ai','writing'].map(key=>[key,new Element('button')]));
 let api,zoomEvents=0;
 api=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick:id=>api.open(id),onAway(){},onZoom:()=>zoomEvents++});assert(api);
 function draw(){frame(performance.now()+1000);}
+const covers = () => textureRequests.filter(r => r.url.includes('/books/'));
+const finishCover = suffix => { const request = covers().find(r => r.url.endsWith(suffix)); assert(request, `missing cover request ${suffix}`); const t = new Three.Texture({width:256,height:384}); request.onLoad(t); return t; };
+const catalog=testCatalog().books;
+assert.equal(covers().length, 0, 'Overview must not request any book covers');
 // The physical book catalog is resolved from the scene, not decorative proxies.
 assert.equal(api.debug.bookUI.bookCount,21);
 const wright=api.debug.bookUI.getMesh('the-wright-brothers');
 assert(wright && wright.isMesh);
 const initialWright=wright.position.clone();
 api.open('about');draw();
+const aboutCovers=catalog.filter(b=>b.room==='about'&&b.coverImages?.small);
+assert.equal(covers().filter(r=>r.url.includes('cover-sm')).length, aboutCovers.length, 'Only local small covers for this room should load');
+assert(covers().every(r=>aboutCovers.some(book=>r.url.includes(`/books/${book.id}/`))));
 api.debug.tapShelfBook('the-wright-brothers');draw();
+assert(!covers().some(r=>r.url.includes('cover-lg')), 'Framing must not load the large cover');
 assert(api.debug.bookUI.isFocused('the-wright-brothers'));
 assert(!api.debug.bookUI.isExtracted());
 api.debug.tapShelfBook('the-wright-brothers');draw();
+assert.equal(covers().filter(r=>r.url.includes('cover-lg')).length, 1, 'Extracting must request only the selected large cover');
+const wrightFront=wright.material[2];
+const largeWright=finishCover('the-wright-brothers/cover-lg.webp');
+assert.equal(wrightFront.map,largeWright,'Large cover should appear once loaded');
+const smallWright=finishCover('the-wright-brothers/cover-sm.webp');
+assert.equal(wrightFront.map,largeWright,'A late small image must not replace the large image');
 assert(api.debug.bookUI.isExtracted());
 assert(wright.position.distanceTo(initialWright)>0.30, 'Flat book must clear the cabinet before turning');
 assert(wright.position.z-initialWright.z>0.25, 'Flat book must move towards the front of the shelf');
@@ -57,10 +78,20 @@ assert(Math.abs(pulledWright.x)<0.8 && Math.abs(pulledWright.y)<0.8, 'Lifted cov
 api.debug.bookUI.showFace('back');draw();
 assert(api.debug.bookUI.isExtracted());
 assert(api.back());draw();
+assert.equal(wrightFront.map,smallWright,'Returning to shelf restores small cover');
+const unicorn=api.debug.bookUI.getMesh('the-last-unicorn');
+const unicornSmall=finishCover('the-last-unicorn/cover-sm.webp');
+api.debug.tapShelfBook('the-last-unicorn');draw();
+api.debug.tapShelfBook('the-last-unicorn');draw();
+const unicornRequest=covers().find(r=>r.url.endsWith('the-last-unicorn/cover-lg.webp'));
+assert(unicornRequest);unicornRequest.onError(new Error('simulated image failure'));
+assert.equal(unicorn.material[0].map,unicornSmall,'A failed large cover must leave the small one visible');
+assert(api.back());draw();
 assert(!api.debug.bookUI.isActive());
 assert(wright.position.distanceTo(initialWright)<1e-8);
 console.log('books: 21 real meshes, zoom-first, lift, face, BACK: passed');
 api.open('writing');draw();
+assert.equal(covers().filter(r=>r.url.includes('factfulness/cover-sm')).length,1,'Only small covers for newly entered room load');
 const standing=api.debug.bookUI.getMesh('factfulness');
 const standingStart=standing.position.clone();
 api.debug.tapShelfBook('factfulness');draw();

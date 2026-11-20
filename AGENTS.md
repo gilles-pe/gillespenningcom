@@ -148,3 +148,6 @@ External HTTP(S) destinations open in a new tab with a focus request; browsers m
 - Synopses are short, neutral, in English, sourced from published book descriptions. No invented owner endorsements. The reserved personalNote stays hidden until owner text is supplied.
 - Reuse the existing pop-card styling: 86% paper, 10px backdrop blur, --r1 = 6px, 1px border, token font scales and 48px mobile touch targets. No new UI design system.
 - Run npm run check:books, npm run check, npm run test:inspection, and npm run build. Keep the album, globe, photo and Enterprise interactions intact.
+
+## Progressive book covers (owner request 2026-11-20; D-100)
+Read docs/books.md before changing jackets. Use edition-correct English front art only when its provenance and intended reuse are recorded; identify AI-retouched user images as altered. Overview loads no cover files; entering a room loads only its small local WebP files, and extracting one book loads only its large version. Preserve the generated fallback, small-to-large race handling, bounded GPU cache, the D-097–D-099 interaction contract and all exit paths. Validate the cover files and run all four book/viewer/build checks; the harness does not replace desktop/mobile visual verification. Do not present unresolved source rights as verified.

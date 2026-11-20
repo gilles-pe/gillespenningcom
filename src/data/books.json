@@ -1,0 +1,405 @@
+{
+  "schemaVersion": 1,
+  "catalogLanguage": "en",
+  "books": [
+    {
+      "id": "factfulness",
+      "title": "Factfulness",
+      "author": "Hans Rosling, Ola Rosling, Anna Rosling Rönnlund",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-left",
+        "orientation": "upright",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "thinking-fast-and-slow",
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-left",
+        "orientation": "upright",
+        "order": 2
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "sapiens",
+      "title": "Sapiens: A Brief History of Humankind",
+      "author": "Yuval Noah Harari",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-left",
+        "orientation": "upright",
+        "order": 3
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-weirdest-people",
+      "title": "The WEIRDest People in the World",
+      "author": "Joseph Henrich",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-left",
+        "orientation": "upright",
+        "order": 4
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "eve",
+      "title": "Eve: How the Female Body Drove 200 Million Years of Human Evolution",
+      "author": "Cat Bohannon",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-right-stack",
+        "orientation": "horizontal",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "everything-is-tuberculosis",
+      "title": "Everything Is Tuberculosis",
+      "author": "John Green",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-right-stack",
+        "orientation": "horizontal",
+        "order": 2
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-hard-sell",
+      "title": "The Hard Sell",
+      "author": "Evan Hughes",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-right-stack",
+        "orientation": "horizontal",
+        "order": 3
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-fortress",
+      "title": "The Fortress: The Great Siege of Przemyśl",
+      "author": "Alexander Watson",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-upper-left",
+        "orientation": "upright",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "prisoners-of-geography",
+      "title": "Prisoners of Geography",
+      "author": "Tim Marshall",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-upper-left",
+        "orientation": "upright",
+        "order": 2
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "autocracy-inc",
+      "title": "Autocracy, Inc.",
+      "author": "Anne Applebaum",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-upper-left",
+        "orientation": "upright",
+        "order": 3
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-last-unicorn",
+      "title": "The Last Unicorn",
+      "author": "Peter S. Beagle",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-left",
+        "orientation": "upright",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-moral-animal",
+      "title": "The Moral Animal",
+      "author": "Robert Wright",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-left",
+        "orientation": "upright",
+        "order": 2
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-body",
+      "title": "The Body: A Guide for Occupants",
+      "author": "Bill Bryson",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-left",
+        "orientation": "upright",
+        "order": 3
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "red-plenty",
+      "title": "Red Plenty",
+      "author": "Francis Spufford",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-right-stack",
+        "orientation": "horizontal",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "a-very-short-history-of-life-on-earth",
+      "title": "A (Very) Short History of Life on Earth",
+      "author": "Henry Gee",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-right-stack",
+        "orientation": "horizontal",
+        "order": 2
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-wandering-earth",
+      "title": "The Wandering Earth",
+      "author": "Cixin Liu",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-right-stack",
+        "orientation": "horizontal",
+        "order": 3
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-master-and-margarita",
+      "title": "The Master and Margarita",
+      "author": "Mikhail Bulgakov",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-top-upright",
+        "orientation": "upright",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "fathers-and-sons",
+      "title": "Fathers and Sons",
+      "author": "Ivan Turgenev",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-top-upright",
+        "orientation": "upright",
+        "order": 2
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "we-are-legion-we-are-bob",
+      "title": "We Are Legion (We Are Bob)",
+      "author": "Dennis E. Taylor",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-top-upright",
+        "orientation": "upright",
+        "order": 3
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "project-hail-mary",
+      "title": "Project Hail Mary",
+      "author": "Andy Weir",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-top-leaning",
+        "orientation": "leaning",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    },
+    {
+      "id": "the-wright-brothers",
+      "title": "The Wright Brothers",
+      "author": "David McCullough",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-globe-adjacent",
+        "orientation": "horizontal",
+        "order": 1
+      },
+      "isbn13": null,
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      }
+    }
+  ]
+}

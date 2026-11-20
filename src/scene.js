@@ -475,7 +475,8 @@ function bookStack(parent, x, y, z, count, imperfect, rand, books = []) {
   const palette = [0xebe3d3, 0xd8cbb4, 0xe4dac7, 0xc9d0bd, 0xcebda0];
   let cy = y;
   for (let i = 0; i < count; i++) {
-    const bw = 0.16 + rand() * 0.04, bh = 0.036 + rand() * 0.014, bd = 0.13 + rand() * 0.03;
+    // Real paperback footprint: cover width about two-thirds of its length.
+    const bw = 0.12 + rand() * 0.018, bh = 0.036 + rand() * 0.014, bd = 0.185 + rand() * 0.015;
     const bx = x + (imperfect ? (rand() - 0.5) * 0.025 : 0), bz = z + (imperfect ? (rand() - 0.5) * 0.02 : 0);
     const b = books[i]
       ? placeCatalogBook(parent, books[i], bw, bh, bd, bx, cy, bz, 'horizontal')
@@ -630,7 +631,7 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
       bx += bw + 0.012;
     }
     // Right cluster: horizontal stacked books (skipped when trophies occupy upper-right)
-    if (!(skipUpperRight && si === 1)) bookStack(g, innerW * 0.2, sy, 0.04, si === 0 ? 3 : 2, imperfect, rand, stackedBooks);
+    if (!(skipUpperRight && si === 1)) bookStack(g, innerW * (skipUpperRight ? 0.11 : 0.2), sy, 0.04, si === 0 ? 3 : 2, imperfect, rand, stackedBooks);
   }
   if (skipUpperRight) g.userData.globe = antiqueGlobe(g, innerW * 0.40, cabH, 0.05);
   g.userData.upperY = midY + 0.028;
@@ -653,7 +654,7 @@ function writingDisplayShelf(parent, x, z, w) {
   const stack = booksByAnchor['writing-shelf-display-right-stack'];
   for (let i = 0; i < 4; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
     -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, 'upright');
-  for (let i = 0; i < 3; i++) placeCatalogBook(g, stack[i], 0.17 - i * 0.015, 0.028, 0.19,
+  for (let i = 0; i < 3; i++) placeCatalogBook(g, stack[i], 0.13 - i * 0.006, 0.028, 0.19,
     w / 2 - 0.21, 0.365 + i * 0.032, 0.02, 'horizontal');
   // One concealed base shelf, not another pair of prominent cupboard doors.
   box(g, w - 2 * side, 0.18, 0.26, 0, 0.04, -0.02, wood(C.woodDark));
@@ -1857,10 +1858,10 @@ function furnish(id, g, r, inspectionTargets) {
     // Cabinet bookshelf with imperfect books and Substack / Bluesky / LinkedIn trophies
     const shelfH = 1.18, trophyPicks = [];
     const sh = cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], shelfH, 0, { imperfect: true, skipUpperRight: true });
-    // A flat copy of The Wright Brothers shares the globe's open shelf, directly behind its brass stand.
-    // This is intentionally at the globe's actual shelf level, not on the top shelf.
-    placeCatalogBook(sh, booksByAnchor['about-globe-adjacent'][0], 0.15, 0.028, 0.10,
-      (L.shelf[2] - 0.07) * 0.40, Math.min(0.42, shelfH * 0.36), -0.082, 'horizontal');
+    // The Wright Brothers lies next to the globe on the same open shelf. Keep the
+    // paperback footprint (~2:3) and a clear gap to the lower stack and globe stand.
+    placeCatalogBook(sh, booksByAnchor['about-globe-adjacent'][0], 0.11, 0.028, 0.17,
+      (L.shelf[2] - 0.07) * 0.26, Math.min(0.42, shelfH * 0.36), 0.045, 'horizontal');
     inspect('globe', [sh.userData.globe], GLOBE_VIEW.az, GLOBE_VIEW.el);   // the globe plays the theme once framed (D-087)
     for (const [key, project, tx] of [['substack', 'substack', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
       trophyPicks.push(...trophyPlaque(sh, key, project, tx, sh.userData.upperY, 0.05));

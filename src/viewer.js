@@ -29,6 +29,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   let dirty = true;
   const markDirty = () => { dirty = true; };
+  // The book jacket materials resolve asynchronously; render again when a front cover arrives.
+  window.addEventListener('book-cover-loaded', markDirty);
 
   setModelLanguage(lang);
   const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets, projectDisplays } = buildScene();

@@ -1,5 +1,6 @@
 import { createEnterprise } from './enterprise.js';
 import { createBookAlbum } from './book-album.js';
+import { booksByAnchor, placeCatalogBook } from './book-jackets.js';
 // The four-room model, built from plain Three.js geometry and canvas textures.
 // No external assets: wood, plaster, lettering and picture placeholders are drawn here.
 import * as THREE from 'three';
@@ -470,12 +471,15 @@ function studyLamp(parent, x, y, z) {
 }
 
 // Two-door cabinet below + two open bookshelves above, with standing and stacked books.
-function bookStack(parent, x, y, z, count, imperfect, rand) {
+function bookStack(parent, x, y, z, count, imperfect, rand, books = []) {
   const palette = [0xebe3d3, 0xd8cbb4, 0xe4dac7, 0xc9d0bd, 0xcebda0];
   let cy = y;
   for (let i = 0; i < count; i++) {
     const bw = 0.16 + rand() * 0.04, bh = 0.036 + rand() * 0.014, bd = 0.13 + rand() * 0.03;
-    const b = box(parent, bw, bh, bd, x + (imperfect ? (rand() - 0.5) * 0.025 : 0), cy, z + (imperfect ? (rand() - 0.5) * 0.02 : 0), mat(palette[(i + 1) % palette.length]));
+    const bx = x + (imperfect ? (rand() - 0.5) * 0.025 : 0), bz = z + (imperfect ? (rand() - 0.5) * 0.02 : 0);
+    const b = books[i]
+      ? placeCatalogBook(parent, books[i], bw, bh, bd, bx, cy, bz, 'horizontal')
+      : box(parent, bw, bh, bd, bx, cy, bz, mat(palette[(i + 1) % palette.length]));
     b.rotation.y = (rand() - 0.5) * (imperfect ? 0.18 : 0.05);
     cy += bh;
   }
@@ -607,6 +611,8 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
   }
   const palette = [0xebe3d3, 0x8fa395, 0xd8cbb4, 0x5c7672, 0xcbb693];
   for (const [si, sy] of [[0, cabH], [1, midY + 0.028]]) {
+    const standingBooks = skipUpperRight ? booksByAnchor[si === 0 ? 'about-cabinet-lower-left' : 'about-cabinet-upper-left'] : [];
+    const stackedBooks = skipUpperRight && si === 0 ? booksByAnchor['about-cabinet-lower-right-stack'] : [];
     const availH = (si === 0 ? midY - cabH : h - topT - (midY + 0.028));
     // Left cluster: upright books, slightly imperfect heights and tilt when requested
     let bx = -innerW / 2 + 0.08;
@@ -615,13 +621,16 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
       const bw = 0.042 + rand() * 0.018;
       const bh = Math.min(availH * 0.84, 0.21 + rand() * 0.06);
       const bd = 0.16 + rand() * 0.03;
-      const bk = box(g, bw, bh, bd, bx, sy, 0.05 + (rand() - 0.5) * 0.018, mat(palette[(i + si * 2) % palette.length]));
+      const bz = 0.05 + (rand() - 0.5) * 0.018;
+      const bk = standingBooks?.[i]
+        ? placeCatalogBook(g, standingBooks[i], bw, bh, bd, bx, sy, bz, 'upright')
+        : box(g, bw, bh, bd, bx, sy, bz, mat(palette[(i + si * 2) % palette.length]));
       if (imperfect && i === nStand - 1 && !skipUpperRight) { bk.rotation.z = -0.14; bk.position.x += 0.022; }
       else if (imperfect && !skipUpperRight && rand() > 0.55) { bk.rotation.z = (rand() - 0.5) * 0.06; }
       bx += bw + 0.012;
     }
     // Right cluster: horizontal stacked books (skipped when trophies occupy upper-right)
-    if (!(skipUpperRight && si === 1)) bookStack(g, innerW * 0.2, sy, 0.04, si === 0 ? 3 : 2, imperfect, rand);
+    if (!(skipUpperRight && si === 1)) bookStack(g, innerW * 0.2, sy, 0.04, si === 0 ? 3 : 2, imperfect, rand, stackedBooks);
   }
   if (skipUpperRight) g.userData.globe = antiqueGlobe(g, innerW * 0.40, cabH, 0.05);
   g.userData.upperY = midY + 0.028;
@@ -640,10 +649,12 @@ function writingDisplayShelf(parent, x, z, w) {
   box(g, w - 2 * side, 0.67, 0.012, 0, 0.34, -depth / 2 + 0.006, dark);
   // The upper bay is intentionally open around the photo.
   const palette = [0xebe3d3, 0xc9d0bd, 0x5c7672, 0xd8cbb4];
-  for (let i = 0; i < 4; i++) box(g, 0.047, 0.23 - (i % 2) * 0.025, 0.18,
-    -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, mat(palette[i]));
-  for (let i = 0; i < 3; i++) box(g, 0.17 - i * 0.015, 0.028, 0.19,
-    w / 2 - 0.21, 0.365 + i * 0.032, 0.02, mat(palette[(i + 1) % palette.length]));
+  const standing = booksByAnchor['writing-shelf-display-left'];
+  const stack = booksByAnchor['writing-shelf-display-right-stack'];
+  for (let i = 0; i < 4; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
+    -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, 'upright');
+  for (let i = 0; i < 3; i++) placeCatalogBook(g, stack[i], 0.17 - i * 0.015, 0.028, 0.19,
+    w / 2 - 0.21, 0.365 + i * 0.032, 0.02, 'horizontal');
   // One concealed base shelf, not another pair of prominent cupboard doors.
   box(g, w - 2 * side, 0.18, 0.26, 0, 0.04, -0.02, wood(C.woodDark));
   return g;
@@ -1846,14 +1857,20 @@ function furnish(id, g, r, inspectionTargets) {
     // Cabinet bookshelf with imperfect books and Substack / Bluesky / LinkedIn trophies
     const shelfH = 1.18, trophyPicks = [];
     const sh = cabinetShelf(g, L.shelf[0], L.shelf[1], L.shelf[2], shelfH, 0, { imperfect: true, skipUpperRight: true });
+    // A flat copy of The Wright Brothers shares the globe's open shelf, directly behind its brass stand.
+    // This is intentionally at the globe's actual shelf level, not on the top shelf.
+    placeCatalogBook(sh, booksByAnchor['about-globe-adjacent'][0], 0.15, 0.028, 0.10,
+      (L.shelf[2] - 0.07) * 0.40, Math.min(0.42, shelfH * 0.36), -0.082, 'horizontal');
     inspect('globe', [sh.userData.globe], GLOBE_VIEW.az, GLOBE_VIEW.el);   // the globe plays the theme once framed (D-087)
     for (const [key, project, tx] of [['substack', 'substack', 0.06], ['bluesky', 'bluesky', 0.25], ['linkedin', 'linkedin', 0.44]]) {
       trophyPicks.push(...trophyPlaque(sh, key, project, tx, sh.userData.upperY, 0.05));
     }
     // On top of the About Me shelf: books with leaning end book, brass lamp, and the classic TOS Enterprise
     const topPal = [0xebe3d3, 0xd8cbb4, 0xc9d0bd];
-    for (let i = 0; i < 3; i++) box(sh, 0.048, 0.23, 0.16, -0.44 + i * 0.056, shelfH, 0.03, mat(topPal[i]));
-    const lean = box(sh, 0.044, 0.22, 0.15, -0.22, shelfH, 0.03, mat(0xd8cbb4));
+    for (let i = 0; i < 3; i++) placeCatalogBook(sh, booksByAnchor['about-cabinet-top-upright'][i], 0.048, 0.23, 0.16,
+      -0.44 + i * 0.056, shelfH, 0.03, 'upright');
+    const lean = placeCatalogBook(sh, booksByAnchor['about-cabinet-top-leaning'][0], 0.044, 0.22, 0.15,
+      -0.22, shelfH, 0.03, 'leaning');
     lean.rotation.z = -0.25;
     studyLamp(sh, 0.005, shelfH, -0.045);
     const enterprise = enterpriseModel(sh, 0.34, shelfH, 0.02, -0.95);

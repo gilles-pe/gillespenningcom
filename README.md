@@ -6,6 +6,7 @@ Personal landing page and portfolio of Gilles Penning. Vite and Three.js, Englis
 - Decisions and open questions: [`docs/decisions.md`](docs/decisions.md)
 - Visual system and image slots: [`DESIGN.md`](DESIGN.md)
 - Backlog: [`TODO.md`](TODO.md)
+- Curated book catalog and integration instructions: [`docs/books.md`](docs/books.md)
 
 ## Commands
 
@@ -21,6 +22,8 @@ The publish folder is `dist/`. It contains the page, `CNAME`, `robots.txt`, `sit
 pictures in `slots/`. `.github/workflows/pages.yml` builds and deploys it to GitHub Pages on every push to `main`.
 
 ## Change the content
+
+- **Books in the 3D rooms:** edit `src/data/books.json` (English editions only). The 21-book catalog includes semantic shelf positions, optional ISBN/Amazon link/cover, and future owner-written notes. See [`docs/books.md`](docs/books.md). The scene is not yet connected to this catalog.
 
 - **Texts (English and German):** edit `src/content.js`. Keep both languages in step. The static English text in
   `index.html` must equal the English values. Proofreading list for German: `docs/german-copy-review.md`.

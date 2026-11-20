@@ -27,17 +27,35 @@ const document={createElement:tag=>new Element(tag),createElementNS:(_,tag)=>new
 class Renderer{constructor(){this.shadowMap={};}getPixelRatio(){return 1;}setPixelRatio(){}setSize(){}render(scene){scene.updateMatrixWorld(true);}}
 class TextureLoader {load(){return new Three.Texture();}}
 let openedTabs=[];
-const window={open(url,target){const tab={url,target,focused:false,opener:{},focus(){this.focused=true;}};openedTabs.push(tab);return tab;}};
+const window={addEventListener(){},dispatchEvent(){},open(url,target){const tab={url,target,focused:false,opener:{},focus(){this.focused=true;}};openedTabs.push(tab);return tab;}};
 const globals={console,document,window,Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
 const ctx=vm.createContext(globals);const cache=new Map();
 async function external(name){const ns=name==='three'?{...Three,WebGLRenderer:Renderer,TextureLoader}:await import(name);return new vm.SyntheticModule(Object.keys(ns),function(){for(const [key,val]of Object.entries(ns))this.setExport(key,val);},{context:ctx,identifier:name});}
-async function getModule(file){if(cache.has(file))return cache.get(file);const mod=new vm.SourceTextModule(readFileSync(file,'utf8'),{context:ctx,identifier:file,initializeImportMeta:meta=>{meta.env={BASE_URL:'/',DEV:true};}});cache.set(file,mod);return mod;}
+async function getModule(file){if(cache.has(file))return cache.get(file);if(file.endsWith('.json')){const data=JSON.parse(readFileSync(file,'utf8'));const mod=new vm.SyntheticModule(['default'],function(){this.setExport('default',data);},{context:ctx,identifier:file});cache.set(file,mod);return mod;}const mod=new vm.SourceTextModule(readFileSync(file,'utf8'),{context:ctx,identifier:file,initializeImportMeta:meta=>{meta.env={BASE_URL:'/',DEV:true};}});cache.set(file,mod);return mod;}
 const module=await getModule(resolve('src/viewer.js'));
 await module.link(async(spec,mod)=>{if(spec.startsWith('.'))return getModule(resolve(dirname(mod.identifier),spec));if(!cache.has(spec))cache.set(spec,await external(spec));return cache.get(spec);});await module.evaluate();
 const labels=Object.fromEntries(['projects','about','ai','writing'].map(key=>[key,new Element('button')]));
 let api,zoomEvents=0;
 api=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick:id=>api.open(id),onAway(){},onZoom:()=>zoomEvents++});assert(api);
 function draw(){frame(performance.now()+1000);}
+// The physical book catalog is resolved from the scene, not decorative proxies.
+assert.equal(api.debug.bookUI.bookCount,21);
+const wright=api.debug.bookUI.getMesh('the-wright-brothers');
+assert(wright && wright.isMesh);
+const initialWright=wright.position.clone();
+api.open('about');draw();
+api.debug.tapShelfBook('the-wright-brothers');draw();
+assert(api.debug.bookUI.isFocused('the-wright-brothers'));
+assert(!api.debug.bookUI.isExtracted());
+api.debug.tapShelfBook('the-wright-brothers');draw();
+assert(api.debug.bookUI.isExtracted());
+assert(wright.position.distanceTo(initialWright)>0.005);
+api.debug.bookUI.showFace('back');draw();
+assert(api.debug.bookUI.isExtracted());
+assert(api.back());draw();
+assert(!api.debug.bookUI.isActive());
+assert(wright.position.distanceTo(initialWright)<1e-8);
+console.log('books: 21 real meshes, zoom-first, lift, face, BACK: passed');
 for(const [width,height]of [[740,580],[390,420],[320,295]]){
  viewport={width,height};resize();
  for(const room of ['projects','about','ai','writing']){

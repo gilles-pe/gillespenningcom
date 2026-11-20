@@ -73,7 +73,9 @@
         "imageSourceUrl": null,
         "visualReview": "pending",
         "usageRights": "not-independently-established",
-        "checkedAt": "2026-11-20"
+        "checkedAt": "2026-11-20",
+        "ownerVisualConfirmation": "2026-11-20: owner confirms the previously displayed live cover was correct; the image bytes and exact edition remain to be retrieved and checked.",
+        "previousLiveImageUrl": "https://covers.openlibrary.org/b/isbn/9780141033570-M.jpg?default=false"
       }
     },
     {
@@ -110,7 +112,9 @@
         "imageSourceUrl": null,
         "visualReview": "pending",
         "usageRights": "not-independently-established",
-        "checkedAt": "2026-11-20"
+        "checkedAt": "2026-11-20",
+        "ownerVisualConfirmation": "2026-11-20: owner confirms the previously displayed live cover was correct; the image bytes and exact edition remain to be retrieved and checked.",
+        "previousLiveImageUrl": "https://covers.openlibrary.org/b/isbn/9780062316110-M.jpg?default=false"
       }
     },
     {

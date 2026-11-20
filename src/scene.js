@@ -652,10 +652,13 @@ function writingDisplayShelf(parent, x, z, w) {
   const palette = [0xebe3d3, 0xc9d0bd, 0x5c7672, 0xd8cbb4];
   const standing = booksByAnchor['writing-shelf-display-left'];
   const stack = booksByAnchor['writing-shelf-display-right-stack'];
+  const separate = booksByAnchor['writing-shelf-display-right-separate'];
   for (let i = 0; i < 4; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
     -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, 'upright');
-  for (let i = 0; i < 3; i++) placeCatalogBook(g, stack[i], 0.13 - i * 0.006, 0.028, 0.19,
+  for (let i = 0; i < 2; i++) placeCatalogBook(g, stack[i], 0.13 - i * 0.006, 0.028, 0.19,
     w / 2 - 0.21, 0.365 + i * 0.032, 0.02, 'horizontal');
+  placeCatalogBook(g, separate[0], 0.13, 0.028, 0.19,
+    w / 2 - 0.43, 0.365, 0.02, 'horizontal');
   // One concealed base shelf, not another pair of prominent cupboard doors.
   box(g, w - 2 * side, 0.18, 0.26, 0, 0.04, -0.02, wood(C.woodDark));
   return g;

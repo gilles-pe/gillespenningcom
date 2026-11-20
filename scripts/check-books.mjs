@@ -7,7 +7,8 @@ const file = new URL('../src/data/books.json', import.meta.url);
 const { books, catalogLanguage } = JSON.parse(readFileSync(file, 'utf8'));
 const capacity = {
   'writing-shelf-display-left': 4,
-  'writing-shelf-display-right-stack': 3,
+  'writing-shelf-display-right-stack': 2,
+  'writing-shelf-display-right-separate': 1,
   'about-cabinet-upper-left': 3,
   'about-cabinet-lower-left': 3,
   'about-cabinet-lower-right-stack': 3,

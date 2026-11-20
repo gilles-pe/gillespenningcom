@@ -213,9 +213,9 @@
       "editionLanguage": "en",
       "room": "writing",
       "placement": {
-        "anchor": "writing-shelf-display-right-stack",
+        "anchor": "writing-shelf-display-right-separate",
         "orientation": "horizontal",
-        "order": 2
+        "order": 1
       },
       "isbn13": "9780525556572",
       "amazonUrl": null,
@@ -255,7 +255,7 @@
       "placement": {
         "anchor": "writing-shelf-display-right-stack",
         "orientation": "horizontal",
-        "order": 3
+        "order": 2
       },
       "isbn13": "9780385544900",
       "amazonUrl": null,

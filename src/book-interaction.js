@@ -120,7 +120,9 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     if (face === 'spine') return { normal: FORWARD.clone(), up: flat ? FRONT.clone() : VERTICAL.clone() };
     const normal = flat ? VERTICAL.clone() : FRONT.clone();
     if (face === 'back') normal.negate();
-    return { normal, up: flat ? FORWARD.clone().negate() : VERTICAL.clone() };
+    // BoxGeometry maps the underside's texture in the opposite direction.
+    const up = flat && face === 'back' ? FORWARD.clone() : flat ? FORWARD.clone().negate() : VERTICAL.clone();
+    return { normal, up };
   }
   function showFace(face) {
     if (!selected || !selected.extracted || !['front', 'spine', 'back'].includes(face)) return;

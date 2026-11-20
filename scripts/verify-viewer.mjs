@@ -25,7 +25,7 @@ const canvas=new Element('canvas'),spotsEl=new Element();stage.append(canvas,spo
 const globalListeners={};let frame,resize;
 const document={createElement:tag=>new Element(tag),createElementNS:(_,tag)=>new Element(tag),get activeElement(){return active;},hidden:false,documentElement:{scrollHeight:1800}};
 class Renderer{constructor(){this.shadowMap={};}getPixelRatio(){return 1;}setPixelRatio(){}setSize(){}render(scene){scene.updateMatrixWorld(true);}}
-class TextureLoader {load(){return new Three.Texture();}}
+class TextureLoader {setCrossOrigin(){return this;}load(){return new Three.Texture();}}
 let openedTabs=[];
 const window={addEventListener(){},dispatchEvent(){},open(url,target){const tab={url,target,focused:false,opener:{},focus(){this.focused=true;}};openedTabs.push(tab);return tab;}};
 const globals={console,document,window,Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};

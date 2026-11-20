@@ -23,6 +23,20 @@ The Open Library Covers API is designed for displaying book covers and discourag
 
 Source: https://openlibrary.org/dev/docs/api/covers
 
+## Two-line descriptions and writing style
+
+- `summary.en` is short, factual, in English and limited to roughly two lines by the CSS `-webkit-line-clamp`. It is a fresh paraphrase of publicly available publisher/product descriptions; it is not a verbatim Amazon sales blurb and not a personal recommendation.
+- `summarySourceUrl` records the relevant publisher or book-description page used for research. Prefer an edition-correct publisher page; Amazon is not required.
+- Style guide: concise, restrained and specific; no hype, no canned phrases, no claims about Gilles having read or endorsed the book. References: his Google Drive `writing_style_substack.md` and `gilles-wortliste-substack-2026.md`, read on 2026-11-20.
+- `personalNote` is retained as a reserved field but **not displayed** until Gilles supplies his own words.
+
+## CSS and interaction design
+
+- `src/style.css`: `.book-inspector-card` uses `color-mix(in srgb, var(--paper) 86%, transparent)`, backdrop blur 10px, 1px hairline and `var(--r1)` (6px). These follow the existing `.pop-card` design and `DESIGN.md` instead of creating a second visual system.
+- Font: Source Serif 4 for the title, Source Sans 3 for other text; font sizes, spacing, radius and control heights are existing tokens. Buttons have 48px hit targets on mobile. Reduced-motion removes card animations and book snapping honours the viewer preference.
+- Interaction code: `src/book-interaction.js`, connected from `src/viewer.js`. 3D cards do not change the separate album, photo, project, ship and globe interactions.
+- No personal description, rating, purchase prompt or external link appears until actually supplied and verified.
+
 ## Editing fields
 
 | Field | Rule |
@@ -41,7 +55,7 @@ Source: https://openlibrary.org/dev/docs/api/covers
 | `backImage`, `spineImage` | `null` until actual, licensed/approved images are provided; renderer uses reconstructed text if empty. |
 | `backSurface`, `spineSurface` | `"generated"` means typography, not publisher artwork. |
 | `amazonUrl` | Exact edition-specific URL when verified; do not fill from title or fabricate an affiliate tag. |
-| `personalNote.en`, `personalNote.de` | Owner-authored one- or two-sentence remark, both initially `null`. Never fabricate first-person recommendations. |
+| `summary.en` | Neutral two-line English synopsis, based on publisher descriptions, never an owner's opinion. |\n| `summarySourceUrl` | Public research source for that synopsis. |\n| `personalNote.en`, `personalNote.de` | Reserved owner-authored note, both `null` and currently NOT displayed. Never fabricate first-person recommendations. |
 
 Example:
 
@@ -81,9 +95,9 @@ The globe is **inside the lower open shelf**, not on the top of the cabinet. `Th
 
 1. Check every front preview in a desktop and mobile browser for correct edition, readable artwork and correct image orientation. ISBNs were researched; external image responses have not been batch-verified.
 2. Find and review authentic back-jacket and spine images if desired, case by case. Leave the generated back/spine in place where there is no suitable image.
-3. The book meshes now have stable `userData.bookId`, but **per-book click cards are not yet implemented**. When implementing, follow the existing zoom-first/second-click rule from `AGENTS.md`, show optional owner notes only when provided, and put external Amazon navigation behind a deliberate card action.
+3. **Implemented**: Every book mesh has stable `userData.bookId`. First click frames the real book; second lifts it out of the shelf and turns its cover toward the visitor. An HTML card appears with English title, author and a publisher-based, two-line neutral synopsis. The card provides Cover / Spine / Back view controls and Return to shelf. Repeated clicks on the lifted book cycle faces. Returning, Escape, BACK, Reset and room changes restore the original geometry. Reduced motion snaps instead of animating. Personal opinions remain absent, and no empty Amazon link appears.
 4. Verify 3D bookshelf spacing (particularly the book beside the globe), surfaces, lighting and performance on phone and desktop.
-5. Run `npm run check`, `npm run test:inspection`, and `npm run build` when checking local changes. Ensure live deployment succeeds.
+5. Run `npm run check:books`, `npm run check`, `npm run test:inspection`, and `npm run build`. These are now GitHub Pages build gates, including an automated 21-mesh book lift/return test.
 6. Review the site's privacy notice for third-party Open Library image requests before wider publication.
 
 ## Excluded titles

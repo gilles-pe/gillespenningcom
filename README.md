@@ -23,7 +23,7 @@ pictures in `slots/`. `.github/workflows/pages.yml` builds and deploys it to Git
 
 ## Change the content
 
-- **Books in the 3D rooms:** edit `src/data/books.json` (21 English editions, ISBNs, shelf positions and preview cover URLs). `src/book-jackets.js` renders front, back and spine; original front-cover previews load from Open Library after entering a room, while backs/spines are typographic reconstructions. Amazon links and owner-written notes are still empty. See [`docs/books.md`](docs/books.md).
+- **Books in the 3D rooms:** edit `src/data/books.json` (21 English editions, ISBNs, shelf positions, short publisher-based English summaries and preview covers). `src/book-jackets.js` renders front, back and spine; front-cover previews load after entering a room and backs/spines are typographic reconstructions. `src/book-interaction.js` supports first-click zoom, second-click book removal, face rotation and return to shelf with a restrained two-line card. Amazon links and personal notes are not shown. See [`docs/books.md`](docs/books.md).
 
 - **Texts (English and German):** edit `src/content.js`. Keep both languages in step. The static English text in
   `index.html` must equal the English values. Proofreading list for German: `docs/german-copy-review.md`.
@@ -40,7 +40,7 @@ pictures in `slots/`. `.github/workflows/pages.yml` builds and deploys it to Git
 
   The script keeps approved items only, newest first, with id, date, title, summary and sources. Texts are never changed.
 
-## Privacy
+Book checks: `npm run check:books` validates the curated English editions and positions. The deployment also runs `npm run test:inspection`, which tests book lift/return and existing object interactions.\n\n## Privacy
 
 No cookies and no analytics. The page stores only the language choice in `localStorage` and loads the news list from
 `ai.gillespenning.com`. No legal imprint or privacy policy is included yet; the owner has to supply them.

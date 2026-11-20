@@ -721,7 +721,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -730,12 +730,15 @@
         "en": "Bob wakes as an AI and heads into space. A funny story about identity."
       },
       "summarySourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/we-are-legion-we-are-bob/cover-sm.webp",
+        "large": "/books/we-are-legion-we-are-bob/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
         "imageSourceUrl": "https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781668221570/we-are-legion-we-are-bob-9781668221570_lg.jpg",
-        "visualReview": "Publisher image depicts a perspective rendering of a book, not an undistorted front cover; rejected.",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed user screenshot, English title and author checked; screenshot is a different design from the ISBN's publisher image, edition match not established.",
+        "usageRights": "User supplied screenshot and requested retouch; artwork rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },

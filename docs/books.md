@@ -1,35 +1,49 @@
-# Books in the four-room site
+# Book collection - data, jackets, placements and maintenance
 
-This file is the maintenance and integration guide for the personal book collection on `gillespenning.com`.
+Updated 2026-11-20. The scene uses **21 selected English-language editions** (7 Writing & Speaking, 14 About Me).
 
-## Source of truth
+## Where things live
 
-- **Catalog:** [`src/data/books.json`](../src/data/books.json) - 21 curated books, 7 in **Writing & Speaking**, 14 in **About Me** (13 existing decorative positions plus **The Wright Brothers**).
-- Use English-language **editions and titles only** for every book, including originally German- or Russian-language works. For example: `Project Hail Mary`, `The Master and Margarita`, `Fathers and Sons`.
-- The existing 3D scene currently uses decorative geometry defined in [`src/scene.js`](../src/scene.js). **The JSON is catalog data and is not wired into the scene yet.** Adding the data does not make titles, covers or links appear on the website.
-- The existing photo album (`src/book-album.js`) is **not a catalog book** and must stay untouched.
+- [`src/data/books.json`](../src/data/books.json) is the **single source of truth** for title, author, ISBN, room, placement, external cover preview, prospective Amazon link and personal note.
+- [`src/book-jackets.js`](../src/book-jackets.js) renders three textured surfaces for every book: front, back, spine.
+- [`src/scene.js`](../src/scene.js) places those meshes in the shelves; [`src/viewer.js`](../src/viewer.js) triggers cover preview loading **only after entering About Me or Writing & Speaking**.
+- The photo album (`src/book-album.js`) is a separate interactive object and is not one of the 21 books.
 
-## Editing a book
+## What is real and what is reconstructed
 
-Find the object with its stable `id` and edit:
+| Surface | Current implementation | Next step for genuine wraparound artwork |
+| --- | --- | --- |
+| Front | English-edition ISBN-based **Open Library preview** (`coverImage`), with title/author fallback; not all remote image URLs were independently checked for a successful image response | Inspect each book in the browser; replace unavailable or mismatched previews with an approved, edition-correct source |
+| Back | Locally generated typographic panel (`backSurface: "generated"`), **not an original jacket scan** | If rights and genuine book-jacket imagery can be confirmed, set `backImage` to the approved image URL |
+| Spine | Locally generated vertical title/author (`spineSurface: "generated"`), **not an original publisher spine** | If rights and genuine spine artwork can be confirmed, set `spineImage` to the approved image URL |
 
-| Field | Purpose |
+This is deliberately not a claim that the original back and spine are already available. The front previews are looked up using ISBNs of researched English editions, but covers can differ across variants and the Open Library API can return an unavailable image. A failed image load does **not** hide the book.
+
+The Open Library Covers API is designed for displaying book covers and discourages bulk downloading. The site loads previews on user entry into a room, not on page arrival. Displaying remote book images makes requests to an external host; check the privacy notice before publication. Do not bulk-copy cover art into this Git repository without verifying image rights.
+
+Source: https://openlibrary.org/dev/docs/api/covers
+
+## Editing fields
+
+| Field | Rule |
 | --- | --- |
-| `id` | Stable unique identifier. Never change after it is used in the UI. |
-| `title`, `author` | English edition's title, credited authors. |
-| `editionLanguage` | Always `en`. |
-| `room` | `about` or `writing`. |
-| `placement.anchor` | Named 3D group/slot (see below), not hardcoded world coordinates. |
-| `placement.orientation` | `upright`, `horizontal`, or `leaning`. |
-| `placement.order` | 1-based ordering within a named anchor; for a stack, 1 means bottom. |
-| `isbn13` | Exact ISBN-13 of the **chosen English edition**, initially `null`. Do not guess. |
-| `amazonUrl` | Exact verified URL for that edition, initially `null`. Do not generate from title alone. |
-| `coverImage` | Approved local cover path (e.g. `/covers/example.webp`), initially `null`. Never assume online cover artwork is licensed for reuse. |
-| `personalNote.en`, `personalNote.de` | Owner-authored one- or two-sentence personal note in the corresponding UI language, initially `null`. Do not fabricate first-person commentary. The book itself remains an English edition. |
+| `id` | Stable and unique. Do not rename once used by the renderer. |
+| `title`, `author` | Always show **English-language edition** title and author(s). Never switch to German or another translation in the book model. |
+| `editionLanguage` | Always `"en"`. |
+| `isbn13` | 13-digit ISBN of the selected English-language edition. Research publisher/edition before changing. |
+| `editionSourceUrl` | Public page used to support the edition and ISBN. |
+| `room` | `"about"` or `"writing"`. |
+| `placement.anchor` | Stable semantic shelf group, mapped to actual geometry in `scene.js`. |
+| `placement.orientation` | `"upright"`, `"horizontal"`, `"leaning"`. |
+| `placement.order` | Unique, 1-based integer per anchor; 1 is lowest in a stack. |
+| `coverImage` | Front-cover image URL. Currently Open Library ISBN lookup. Can be a reviewed local asset in the future. |
+| `coverImageStatus` | `"unverified"` until image content and edition match have been checked; do not change merely because the URL looks valid. |
+| `backImage`, `spineImage` | `null` until actual, licensed/approved images are provided; renderer uses reconstructed text if empty. |
+| `backSurface`, `spineSurface` | `"generated"` means typography, not publisher artwork. |
+| `amazonUrl` | Exact edition-specific URL when verified; do not fill from title or fabricate an affiliate tag. |
+| `personalNote.en`, `personalNote.de` | Owner-authored one- or two-sentence remark, both initially `null`. Never fabricate first-person recommendations. |
 
-For a book without a note or link, keep `null`. Avoid filler text on the live site. Do not invent reviews, endorsements, personal notes or editorial descriptions in the owner's voice.
-
-### Example: The Wright Brothers
+Example:
 
 ```json
 {
@@ -38,55 +52,40 @@ For a book without a note or link, keep `null`. Avoid filler text on the live si
   "author": "David McCullough",
   "editionLanguage": "en",
   "room": "about",
-  "placement": {
-    "anchor": "about-globe-adjacent",
-    "orientation": "horizontal",
-    "order": 1
-  },
-  "isbn13": null,
+  "placement": { "anchor": "about-globe-adjacent", "orientation": "horizontal", "order": 1 },
+  "isbn13": "9781476728742",
   "amazonUrl": null,
-  "coverImage": null,
+  "coverImage": "https://covers.openlibrary.org/b/isbn/9781476728742-M.jpg?default=false",
+  "backImage": null,
+  "spineImage": null,
   "personalNote": { "en": null, "de": null }
 }
 ```
 
-## Placement anchors
+## Book positions
 
-These are **semantic placements** for the future mapping of catalog entries onto scene geometry. The other 20 placements correspond to the existing visual arrangement (not yet individual named book meshes).
-
-| Anchor | Existing/planned position | Capacity |
+| Anchor | Position | Count |
 | --- | --- | ---: |
-| `writing-shelf-display-left` | Writing & Speaking, four standing books | 4 |
-| `writing-shelf-display-right-stack` | Writing & Speaking, three-book horizontal stack | 3 |
-| `about-cabinet-upper-left` | About Me, three standing books in upper open shelf | 3 |
-| `about-cabinet-lower-left` | About Me, three standing books in lower open shelf | 3 |
-| `about-cabinet-lower-right-stack` | About Me, three-book horizontal stack | 3 |
-| `about-cabinet-top-upright` | About Me, three standing books on top | 3 |
-| `about-cabinet-top-leaning` | About Me, the additional leaning book on top | 1 |
-| `about-globe-adjacent` | **New position** for `The Wright Brothers`: lying flat beside the antique globe | 1 |
+| `writing-shelf-display-left` | Writing & Speaking - 4 standing books | 4 |
+| `writing-shelf-display-right-stack` | Writing & Speaking - 3 lying books | 3 |
+| `about-cabinet-upper-left` | About Me - 3 standing books on the upper open shelf | 3 |
+| `about-cabinet-lower-left` | About Me - 3 standing books on the lower open shelf | 3 |
+| `about-cabinet-lower-right-stack` | About Me - 3 lying books on the lower open shelf | 3 |
+| `about-cabinet-top-upright` | About Me - 3 standing books on top of cabinet | 3 |
+| `about-cabinet-top-leaning` | About Me - one leaning book on cabinet | 1 |
+| `about-globe-adjacent` | About Me - **The Wright Brothers lying beside the globe** | 1 |
 
-**Important positioning detail:** the live code currently places the antique globe in the open shelf at the top of the lower cabinet, **not on top of the whole bookshelf**. The owner wants `The Wright Brothers` beside the globe. Implement the book *with the globe*, or explicitly agree a new shared top position before changing the scene. Do not place it remotely from the globe merely to satisfy an outdated label.
+The globe is **inside the lower open shelf**, not on the top of the cabinet. `The Wright Brothers` is therefore added on the same shelf, next to the globe, while the album, ship and trophies stay in place.
 
-## Future 3D implementation instructions
+## Still open
 
-1. Load `src/data/books.json` into the rendering code; preserve the catalog as the sole source of title, author, room, personal note and shop link. Do not duplicate this information in `scene.js` or `content.js`.
-2. Map each `placement.anchor` to a specific real shelf group/geometry in `src/scene.js`. Preserve the existing 20 book positions; add the extra `about-globe-adjacent` placement as a new mesh. Respect orientation and order. Reserve enough physical width to keep titles legible under close inspection.
-3. Use the established **zoom-first, second-click action** rules in `AGENTS.md`: first click frames the real book, second click reveals its detail card; only a deliberate action in the card opens an external Amazon URL. Do not auto-open shopping sites.
-4. Detail card should show English title, author, optional approved cover, owner note (EN/DE when present) and the verified Amazon link if set. Do not show broken buttons or empty notes when values are `null`.
-5. Use stable `id` for interactions. Avoid using array index as the identity, so changing shelf order does not break cards or anchors.
-6. Respect image rights, site privacy and existing brand/design rules. Keep the album interaction unchanged.
-7. When changing the visual model, run `npm run check`, `npm run test:inspection` and `npm run build`, followed by desktop/mobile visual checks.
+1. Check every front preview in a desktop and mobile browser for correct edition, readable artwork and correct image orientation. ISBNs were researched; external image responses have not been batch-verified.
+2. Find and review authentic back-jacket and spine images if desired, case by case. Leave the generated back/spine in place where there is no suitable image.
+3. The book meshes now have stable `userData.bookId`, but **per-book click cards are not yet implemented**. When implementing, follow the existing zoom-first/second-click rule from `AGENTS.md`, show optional owner notes only when provided, and put external Amazon navigation behind a deliberate card action.
+4. Verify 3D bookshelf spacing (particularly the book beside the globe), surfaces, lighting and performance on phone and desktop.
+5. Run `npm run check`, `npm run test:inspection`, and `npm run build` when checking local changes. Ensure live deployment succeeds.
+6. Review the site's privacy notice for third-party Open Library image requests before wider publication.
 
-## Adding or moving books
+## Excluded titles
 
-1. Edit `src/data/books.json` (one entry per book), with a unique `id`.
-2. Keep English titles/editions. When an exact edition is selected, add its ISBN-13 and the correct Amazon product URL. Affiliate links only after explicit approval and applicable disclosure.
-3. Choose a semantic `placement.anchor` and a unique `order` within it; if the shelf needs more capacity, update the 3D model in a separate, reviewed change.
-4. Personal notes are owner-written; `null` is valid.
-5. Verify JSON parses and check the shelf capacity/order. Change the render integration separately if needed.
-
-### Explicit exclusions
-
-Do **not** re-add `Aftershocks`, `Nexus`, `Civilization: The West and the Rest` or `Dungeon Crawler Carl` unless the owner asks. These were removed during curation.
-
-_Last curated: 2026-11-20._
+Do not re-add `Aftershocks`, `Nexus`, `Civilization: The West and the Rest` or `Dungeon Crawler Carl` unless the owner asks.

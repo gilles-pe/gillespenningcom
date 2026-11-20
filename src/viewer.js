@@ -1243,6 +1243,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         const eggKind = egg.pick(ndc(e));
         if (eggKind) eggClick(eggKind);
         else if (object) {
+          if (object.type !== 'book' && bookUI.isActive()) { bookUI.close(true); restoreObjectView(); }
           if (object.room !== openId) onPick(object.room);
           if (object.type === 'book') tapShelfBook(object.key);
           else if (object.type === 'album') toggleAlbum();
@@ -1453,10 +1454,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
       const faxFocused = objectFocus?.target === faxTarget || objectFocus?.target === sheetTarget;
+      const bookFocused = objectFocus?.target?.bookId;
       const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || bookUI.isActive() || Boolean(roomWarp?.isActive());
       bookUI.close(true);
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); cancelWarp();
-      if (faxFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
+      if (faxFocused || bookFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
       markDirty();
       return had;
     },
@@ -1476,7 +1478,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     },
     ...(import.meta.env.DEV ? {
       debug: {
-        scene, camera, view, goal, egg, cellar, albumBook, bookUI,
+        scene, camera, view, goal, egg, cellar, albumBook, bookUI, tapShelfBook,
         get music() { return music.state; },
         get custom() { return custom; },
         get zoom() { return zoom; },

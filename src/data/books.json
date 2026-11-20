@@ -21,7 +21,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL27755791M/Factfulness",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -30,11 +30,14 @@
         "en": "Rosling shows how instincts skew our view of progress. The numbers differ."
       },
       "summarySourceUrl": "https://www.gapminder.org/factfulness-book/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/factfulness/cover-sm.webp",
+        "large": "/books/factfulness/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.hachette.co.uk/titles/hans-rosling/factfulness/9781473637467/",
         "imageSourceUrl": "https://www.hachette.co.uk/wp-content/uploads/2025/02/hbg-title-factfulness-2-156.jpg?resize=436,675",
-        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "visualReview": "publisher-image-reviewed",
         "usageRights": "not-independently-established",
         "checkedAt": "2026-11-20"
       }
@@ -136,7 +139,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -145,12 +148,15 @@
         "en": "Why Western societies think differently. Henrich follows culture and norms."
       },
       "summarySourceUrl": "https://us.macmillan.com/books/9780374710453/theweirdestpeopleintheworld/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-weirdest-people/cover-sm.webp",
+        "large": "/books/the-weirdest-people/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
         "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed from user screenshot; title and author visually checked; original ISBN-specific artwork not confirmed.",
+        "usageRights": "User supplied image and requested edit; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -247,7 +253,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www2.publishersweekly.com/978-0-385-54490-0",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -256,12 +262,15 @@
         "en": "Insys, fentanyl and the sales tactics behind part of the US opioid crisis."
       },
       "summarySourceUrl": "https://www.panmacmillan.com/authors/evan-hughes/the-hard-sell/9781035017898",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-hard-sell/cover-sm.webp",
+        "large": "/books/the-hard-sell/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www2.publishersweekly.com/978-0-385-54490-0",
         "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed from user screenshot; title and author visually checked; original ISBN-specific artwork not confirmed.",
+        "usageRights": "User supplied image and requested edit; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -284,7 +293,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -293,12 +302,15 @@
         "en": "The siege of Przemyśl in World War I, seen through soldiers and civilians."
       },
       "summarySourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780241309070",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-fortress/cover-sm.webp",
+        "large": "/books/the-fortress/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333",
         "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed from user screenshot; title and author visually checked; original ISBN-specific artwork not confirmed.",
+        "usageRights": "User supplied image and requested edit; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -395,7 +407,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.hugendubel.info/fachbuecher/kunst/darstellende-kunst/detail/ISBN-9781399606981/Beagle-Peter-S./The-Last-Unicorn",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -404,11 +416,14 @@
         "en": "A unicorn searches for her lost kind, helped by an unlikely group of companions."
       },
       "summarySourceUrl": "https://www.foliosociety.com/uk/the-last-unicorn",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-last-unicorn/cover-sm.webp",
+        "large": "/books/the-last-unicorn/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://store.gollancz.co.uk/products/the-last-unicorn",
         "imageSourceUrl": "https://store.gollancz.co.uk/cdn/shop/products/9781399606981-original.jpg?v=1707155644&width=493",
-        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "visualReview": "publisher-image-reviewed",
         "usageRights": "not-independently-established",
         "checkedAt": "2026-11-20"
       }
@@ -432,7 +447,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -441,12 +456,15 @@
         "en": "Why we love, compete and cooperate - explored through evolutionary psychology."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/194294/the-moral-animal-by-robert-wright/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-moral-animal/cover-sm.webp",
+        "large": "/books/the-moral-animal/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are",
         "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed from user screenshot; title and author visually checked; original ISBN-specific artwork not confirmed.",
+        "usageRights": "User supplied image and requested edit; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -469,7 +487,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28720778M/The_Body",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -478,12 +496,15 @@
         "en": "An accessible tour of the body: how it works, heals and sometimes fails."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/239783/the-body-by-bill-bryson/9780385539319/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-body/cover-sm.webp",
+        "large": "/books/the-body/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://openlibrary.org/books/OL28720778M/The_Body",
         "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed from user screenshot; title and author visually checked; original ISBN-specific artwork not confirmed.",
+        "usageRights": "User supplied image and requested edit; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -506,7 +527,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL27642979M/Red_Plenty",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -515,11 +536,14 @@
         "en": "The Soviet dream of beating markets with computer-assisted central planning."
       },
       "summarySourceUrl": "https://redplenty.com/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/red-plenty/cover-sm.webp",
+        "large": "/books/red-plenty/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.bol.com/be/fr/p/red-plenty/1001004010495221/",
         "imageSourceUrl": null,
-        "visualReview": "user-supplied screenshot, AI removal of overlays; lettering and art reconstructed in covered areas, not an untouched cover; image not included pending rights clarification",
+        "visualReview": "user-supplied screenshot, AI removal of overlays; lettering and art reconstructed in covered areas, not an untouched cover",
         "usageRights": "user-provided-image; underlying cover artwork rights not independently established",
         "checkedAt": "2026-11-20"
       }
@@ -543,7 +567,7 @@
         "de": null
       },
       "editionSourceUrl": "https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "user-image-ai-retouched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -552,12 +576,15 @@
         "en": "4.6 billion years of evolution, extinction and the accidents that shaped life."
       },
       "summarySourceUrl": "https://www.panmacmillan.com/authors/henry-gee/a-very-short-history-of-life-on-earth/9781529060591",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/a-very-short-history-of-life-on-earth/cover-sm.webp",
+        "large": "/books/a-very-short-history-of-life-on-earth/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf",
         "imageSourceUrl": null,
-        "visualReview": "pending",
-        "usageRights": "not-independently-established",
+        "visualReview": "AI-reconstructed from user screenshot; title and author visually checked; original ISBN-specific artwork not confirmed.",
+        "usageRights": "User supplied image and requested edit; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -580,7 +607,7 @@
         "de": null
       },
       "editionSourceUrl": "https://www.bloomsbury.com/uk/wandering-earth-9781784978518/",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -589,11 +616,14 @@
         "en": "Science-fiction stories about survival in space - including moving Earth itself."
       },
       "summarySourceUrl": "https://us.macmillan.com/books/9781250796820/thewanderingearth/",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-wandering-earth/cover-sm.webp",
+        "large": "/books/the-wandering-earth/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.bloomsbury.com/uk/wandering-earth-9781784978518/",
         "imageSourceUrl": "https://res.cloudinary.com/bloomsbury-atlas/image/upload/w_360,c_scale,dpr_1.5/jackets/9781784978518.jpg",
-        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "visualReview": "publisher-image-reviewed",
         "usageRights": "not-independently-established",
         "checkedAt": "2026-11-20"
       }
@@ -765,7 +795,7 @@
         "de": null
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL25647222M/The_Wright_Brothers",
-      "coverImageStatus": "generated-fallback-pending-review",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -774,11 +804,14 @@
         "en": "The Wright brothers test, fail and try again - until powered flight becomes real."
       },
       "summarySourceUrl": "https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742",
-      "coverImages": null,
+      "coverImages": {
+        "small": "/books/the-wright-brothers/cover-sm.webp",
+        "large": "/books/the-wright-brothers/cover-lg.webp"
+      },
       "coverResearch": {
         "editionSourceUrl": "https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742",
         "imageSourceUrl": "https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781476728742/the-wright-brothers-9781476728742_lg.jpg",
-        "visualReview": "publisher-image-reviewed; image not included pending rights clarification",
+        "visualReview": "publisher-image-reviewed",
         "usageRights": "not-independently-established",
         "checkedAt": "2026-11-20"
       }

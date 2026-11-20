@@ -7,6 +7,12 @@ const byId = new Map(catalog.books.map(book => [book.id, book]));
 const VERTICAL = new THREE.Vector3(0, 1, 0);
 const FORWARD = new THREE.Vector3(0, 0, 1);
 const FRONT = new THREE.Vector3(1, 0, 0);
+// Pull clear of the cabinet front before turning the cover: metres in scene units.
+const SHELF_PULL = 0.30;
+const HAND_PULL = 0.12;
+const HAND_RISE = 0.09;
+const easeOut = progress => 1 - (1 - progress) ** 3;
+const smoothStep = progress => { const x = THREE.MathUtils.clamp(progress, 0, 1); return x * x * (3 - 2 * x); };
 
 const labels = {
   en: { shelf: 'From the bookshelf', close: 'Return book', front: 'Cover', spine: 'Spine', back: 'Back', return: 'Return to shelf', shop: 'View edition' },
@@ -102,7 +108,8 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     selected = {
       id, book: byId.get(id), mesh, face: 'front', extracted: false, returning: false,
       originPosition: mesh.position.clone(), originQuaternion: mesh.quaternion.clone(),
-      originWorld: mesh.getWorldPosition(new THREE.Vector3()), elapsed: 0,
+      originWorld: mesh.getWorldPosition(new THREE.Vector3()), progress: 0,
+      pull: null, presentation: null, faceDirection: null, cameraUp: null,
     };
     markDirty();
     return mesh;
@@ -121,8 +128,23 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   }
   function extract() {
     if (!selected || selected.returning) return false;
-    selected.extracted = true;
-    selected.face = 'front';
+    // First slide the book forwards beyond the shelf's front edge, THEN turn
+    // it towards the visitor. Store the direction once so orbiting the camera
+    // does not make an extracted book chase it through the room.
+    const s = selected;
+    s.mesh.parent.updateWorldMatrix(true, false);
+    const parentQ = s.mesh.parent.getWorldQuaternion(new THREE.Quaternion());
+    const outward = FORWARD.clone().applyQuaternion(parentQ).normalize();
+    const toEye = camera.position.clone().sub(s.originWorld).normalize();
+    const cameraUp = VERTICAL.clone().applyQuaternion(camera.quaternion).normalize();
+    s.faceDirection = toEye;
+    s.cameraUp = cameraUp;
+    s.pull = outward.multiplyScalar(SHELF_PULL)
+      .addScaledVector(toEye, HAND_PULL)
+      .addScaledVector(cameraUp, HAND_RISE);
+    s.presentation = s.originWorld.clone().add(s.pull);
+    s.extracted = true;
+    s.face = 'front';
     ensureCard();
     fillCard();
     card.hidden = false; card.inert = false;
@@ -138,30 +160,42 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   function update(dt) {
     if (!selected) return false;
     const s = selected, mesh = s.mesh;
-    const t = reduced ? 1 : 1 - Math.exp(-Math.min(dt, 0.05) * 10);
-    const localPos = s.originPosition.clone();
-    const localQ = s.originQuaternion.clone();
-    if (s.extracted && !s.returning) {
-      mesh.parent.updateWorldMatrix(true, false);
-      const towardsCamera = camera.position.clone().sub(s.originWorld).normalize();
-      const cameraUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-      const lifted = s.originWorld.clone().addScaledVector(towardsCamera, 0.12).addScaledVector(cameraUp, 0.06);
-      localPos.copy(mesh.parent.worldToLocal(lifted));
-      const { normal, up } = normalAndUp(s.face, s.book.placement.orientation);
-      const worldQ = targetOrientation(normal, up, towardsCamera, cameraUp);
-      const parentQ = mesh.parent.getWorldQuaternion(new THREE.Quaternion());
-      localQ.copy(parentQ.invert().multiply(worldQ));
+    const targetProgress = s.extracted ? 1 : 0;
+    const k = reduced ? 1 : 1 - Math.exp(-Math.min(dt, 0.05) * 8);
+    s.progress = reduced ? targetProgress : THREE.MathUtils.lerp(s.progress, targetProgress, k);
+    if (Math.abs(s.progress - targetProgress) < 0.0005) s.progress = targetProgress;
+
+    // The book slides out almost fully before turning - no cover intersects
+    // the neighbouring books or the shelf uprights during that motion.
+    const pullAmount = easeOut(s.progress);
+    const riseAmount = smoothStep(s.progress);
+    const turnAmount = smoothStep((s.progress - 0.38) / 0.62);
+    const worldTarget = s.originWorld.clone();
+    if (s.pull) {
+      const horizontal = s.pull.clone().addScaledVector(s.cameraUp, -HAND_RISE);
+      worldTarget.addScaledVector(horizontal, pullAmount);
+      worldTarget.addScaledVector(s.cameraUp, HAND_RISE * riseAmount);
     }
-    mesh.position.lerp(localPos, t);
-    mesh.quaternion.slerp(localQ, t);
-    const moving = mesh.position.distanceToSquared(localPos) > 0.0000001 ||
-      1 - Math.abs(mesh.quaternion.dot(localQ)) > 0.00001;
-    if (!moving && s.returning) {
+    mesh.parent.updateWorldMatrix(true, false);
+    mesh.position.copy(mesh.parent.worldToLocal(worldTarget));
+
+    const localQ = s.originQuaternion.clone();
+    if (s.pull && s.progress > 0) {
+      const { normal, up } = normalAndUp(s.face, s.book.placement.orientation);
+      const worldQ = targetOrientation(normal, up, s.faceDirection, s.cameraUp);
+      const parentQ = mesh.parent.getWorldQuaternion(new THREE.Quaternion());
+      const faceQ = parentQ.invert().multiply(worldQ);
+      localQ.slerp(faceQ, turnAmount);
+    }
+    mesh.quaternion.slerp(localQ, reduced ? 1 : 1 - Math.exp(-Math.min(dt, 0.05) * 14));
+    const turning = 1 - Math.abs(mesh.quaternion.dot(localQ)) > 0.00001;
+    const travelling = Math.abs(s.progress - targetProgress) > 0.0005;
+    if (!travelling && !turning && s.returning) {
       mesh.position.copy(s.originPosition);
       mesh.quaternion.copy(s.originQuaternion);
       selected = null;
     }
-    return moving;
+    return travelling || turning;
   }
   function close(immediate = true) {
     if (!selected) { hideCard(); return false; }
@@ -184,6 +218,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   }
   return {
     getMesh: id => meshes.get(id),
+    getPresentationPoint: () => selected?.presentation?.clone() || null,
     start, extract, nextFace, showFace, update, close, setLanguage,
     isActive: () => !!selected && !selected.returning,
     isFocused: id => !!selected && selected.id === id && !selected.returning,

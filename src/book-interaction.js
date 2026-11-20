@@ -145,7 +145,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
       mesh.parent.updateWorldMatrix(true, false);
       const towardsCamera = camera.position.clone().sub(s.originWorld).normalize();
       const cameraUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-      const lifted = s.originWorld.clone().addScaledVector(towardsCamera, 0.24).addScaledVector(cameraUp, 0.095);
+      const lifted = s.originWorld.clone().addScaledVector(towardsCamera, 0.12).addScaledVector(cameraUp, 0.06);
       localPos.copy(mesh.parent.worldToLocal(lifted));
       const { normal, up } = normalAndUp(s.face, s.book.placement.orientation);
       const worldQ = targetOrientation(normal, up, towardsCamera, cameraUp);

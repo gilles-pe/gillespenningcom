@@ -1378,13 +1378,69 @@ function operatingRoom(g, L, projectPicks) {
 
   // 1. Operating Table + 10 mm Rigid Endoscope with Camera Head
   const op = new THREE.Group(); op.position.set(L.table[0], 0.06, L.table[1]); op.rotation.y = 0.36; g.add(op);
-  box(op, 0.78, 0.045, 0.48, 0, 0, 0, putty);
-  box(op, 0.22, 0.42, 0.22, 0, 0.045, 0, putty);
-  box(op, 1.32, 0.036, 0.38, 0, 0.465, 0, steel);
-  box(op, 0.56, 0.075, 0.50, 0, 0.50, 0, cream);                        // center torso cushion
-  const headSec = new THREE.Group(); headSec.position.set(-0.28, 0.50, 0); headSec.rotation.z = -0.18; op.add(headSec);
-  box(headSec, 0.46, 0.075, 0.50, -0.23, 0, 0, cream);                   // slightly elevated head/back section
-  box(op, 0.48, 0.075, 0.48, 0.52, 0.495, 0, cream);                     // leg section
+  // Universal surgical table: a covered base with a three-stage column, a frame with guide rails, and separate head, back,
+  // seat/torso, leg and foot sections on trays with hinges and accessory side rails. The torso top stays at y 0.575 so the
+  // scope and the drape on it do not move. Head end is -x, foot end +x.
+  const padM = mat(0x3d6769, { roughness: 0.62 });
+  const railM = mat(0xdfe4e3, { roughness: 0.22, metalness: 0.8 });
+  const trayM = mat(0xaab2b3, { roughness: 0.4, metalness: 0.6 });
+  const rubber = mat(0x2a302f, { roughness: 0.9 });
+  const rbox = (parent, w, h, d, x, y, z, m, r = 0.016) => {
+    const mesh = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, Math.min(r, h * 0.45, w * 0.45, d * 0.45)), m);
+    mesh.position.set(x, y + h / 2, z); mesh.castShadow = mesh.receiveShadow = true; parent.add(mesh); return mesh;
+  };
+  // Base housing on four rubber pads, with a foot pedal bar.
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(op, 0.03, 0.034, 0.012, sx * 0.33, 0, sz * 0.17, rubber, 16);
+  rbox(op, 0.80, 0.046, 0.46, 0, 0.012, 0, putty, 0.02);
+  rbox(op, 0.44, 0.026, 0.30, 0, 0.058, 0, putty, 0.012);
+  box(op, 0.30, 0.012, 0.030, 0.06, 0.058, 0.19, trayM);
+  // Column: three telescoping stages, collars and bellows rings.
+  cyl(op, 0.085, 0.088, 0.13, 0, 0.084, 0, putty, 28);
+  for (let i = 0; i < 5; i++) cyl(op, 0.091, 0.091, 0.005, 0, 0.098 + i * 0.024, 0, trayM, 28);
+  cyl(op, 0.070, 0.070, 0.13, 0, 0.214, 0, railM, 28);
+  cyl(op, 0.056, 0.056, 0.12, 0, 0.344, 0, railM, 28);
+  cyl(op, 0.092, 0.092, 0.008, 0, 0.210, 0, trayM, 28);
+  cyl(op, 0.076, 0.076, 0.008, 0, 0.340, 0, trayM, 28);
+  // Frame under the torso: housing plus two longitudinal guide rails the sections hang from.
+  rbox(op, 0.46, 0.05, 0.30, 0, 0.44, 0, putty, 0.012);
+  for (const sz of [-1, 1]) box(op, 0.62, 0.008, 0.012, 0, 0.484, sz * 0.10, railM);
+  // One section: padded top, steel tray, hinge pin and accessory side rails (sides: -1 / +1 for the z sides that carry a rail).
+  const part = (parent, dir, len, w, zc, sides) => {
+    const g = new THREE.Group(); parent.add(g);
+    const cx = dir * len / 2;
+    rbox(g, len - 0.008, 0.075, w, cx, 0, zc, padM, 0.02);
+    box(g, len - 0.02, 0.012, w - 0.05, cx, -0.012, zc, trayM);
+    for (const sd of sides) box(g, len - 0.006, 0.016, 0.007, cx, 0.012, zc + sd * (w / 2 + 0.0045), railM);
+    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, w * 0.92, 14), railM);
+    pin.rotation.x = Math.PI / 2; pin.position.set(0, -0.004, zc); g.add(pin);
+    return g;
+  };
+  const center = part(op, 1, 0.56, 0.50, 0, [-1, 1]); center.position.set(-0.28, 0.50, 0);
+  // Back section (raised a little) and headrest (tilted further), with an anaesthesia screen on the back rails.
+  const back = part(op, -1, 0.26, 0.50, 0, [-1, 1]); back.position.set(-0.28, 0.50, 0); back.rotation.z = -0.12;
+  const head = part(back, -1, 0.20, 0.30, 0, []); head.position.set(-0.26, 0, 0); head.rotation.z = -0.28;
+  for (const sd of [-1, 1]) {
+    const post = cyl(back, 0.006, 0.006, 0.21, -0.13, 0.012, sd * 0.2545, railM, 10); post.castShadow = false;
+  }
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.51, 10), railM); bar.rotation.x = Math.PI / 2; bar.position.set(-0.13, 0.222, 0); back.add(bar);
+  // Two leg boards (a gap between them) and two foot pieces, each with an outer rail and a guide rail with a locking carriage under it.
+  for (const sd of [-1, 1]) {
+    const leg = part(op, 1, 0.27, 0.235, sd * 0.1325, [sd]); leg.position.set(0.28, 0.50, 0); leg.rotation.z = -0.10;
+    const foot = part(leg, 1, 0.20, 0.235, sd * 0.1325, [sd]); foot.position.set(0.27, 0, 0); foot.rotation.z = -0.12;
+    box(leg, 0.22, 0.008, 0.012, 0.13, -0.030, sd * 0.1325, railM);
+    box(leg, 0.06, 0.016, 0.034, 0.20, -0.038, sd * 0.1325, trayM);
+    cyl(leg, 0.008, 0.008, 0.016, 0.20, -0.054, sd * 0.1325, rubber, 10);
+  }
+  // Arm board clamped to the rail on the +z side.
+  rbox(op, 0.05, 0.034, 0.026, -0.05, 0.50, 0.272, trayM, 0.004);
+  rbox(op, 0.085, 0.016, 0.26, -0.05, 0.532, 0.40, padM, 0.006);
+  // Hand control hanging from the rail, with a coiled-looking cord down to the base.
+  const pend = new THREE.Group(); pend.position.set(-0.20, 0.43, 0.292); op.add(pend);
+  rbox(pend, 0.036, 0.074, 0.016, 0, 0, 0, rubber, 0.006);
+  box(op, 0.006, 0.026, 0.006, -0.20, 0.498, 0.275, railM);
+  for (let i = 0; i < 3; i++) box(pend, 0.012, 0.007, 0.003, 0, 0.012 + i * 0.018, 0.016, mat(i === 1 ? 0xb85c4a : 0xdfe4e3, { roughness: 0.5 }));
+  const cord = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.20, 0.43, 0.30), new THREE.Vector3(-0.23, 0.30, 0.31), new THREE.Vector3(-0.17, 0.17, 0.27), new THREE.Vector3(-0.12, 0.084, 0.20)]);
+  op.add(new THREE.Mesh(new THREE.TubeGeometry(cord, 24, 0.0035, 6), rubber));
   // Sterile drape & 10 mm rigid endoscope + camera head lying on the middle cushion
   box(op, 0.51, 0.006, 0.35, 0.006, 0.575, 0.012, drape);
   const scope = new THREE.Group();

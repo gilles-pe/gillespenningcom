@@ -23,7 +23,7 @@ pictures in `slots/`. `.github/workflows/pages.yml` builds and deploys it to Git
 
 ## Change the content
 
-- **Books in the 3D rooms:** edit `src/data/books.json` (English editions only). The 21-book catalog includes semantic shelf positions, optional ISBN/Amazon link/cover, and future owner-written notes. See [`docs/books.md`](docs/books.md). The scene is not yet connected to this catalog.
+- **Books in the 3D rooms:** edit `src/data/books.json` (21 English editions, ISBNs, shelf positions and preview cover URLs). `src/book-jackets.js` renders front, back and spine; original front-cover previews load from Open Library after entering a room, while backs/spines are typographic reconstructions. Amazon links and owner-written notes are still empty. See [`docs/books.md`](docs/books.md).
 
 - **Texts (English and German):** edit `src/content.js`. Keep both languages in step. The static English text in
   `index.html` must equal the English values. Proofreading list for German: `docs/german-copy-review.md`.

@@ -845,6 +845,166 @@
         "usageRights": "not-independently-established",
         "checkedAt": "2026-11-20"
       }
+    },
+    {
+      "id": "bloodlands",
+      "title": "Bloodlands: Europe Between Hitler and Stalin",
+      "author": "Timothy Snyder",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-top-upright",
+        "orientation": "upright",
+        "order": 4
+      },
+      "isbn13": "9781541600065",
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      },
+      "editionSourceUrl": "https://www.hachettebookgroup.com/titles/timothy-snyder/bloodlands/9781541600065/",
+      "coverImageStatus": "open-library-image-edition-matched",
+      "backSurface": "generated",
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null,
+      "summary": {
+        "en": "An account of mass killing in the lands between Nazi Germany and the Soviet Union."
+      },
+      "summarySourceUrl": "https://www.hachettebookgroup.com/titles/timothy-snyder/bloodlands/9781541600065/",
+      "coverImages": {
+        "small": "/books/bloodlands/cover-sm.webp",
+        "large": "/books/bloodlands/cover-lg.webp"
+      },
+      "coverResearch": {
+        "editionSourceUrl": "https://www.hachettebookgroup.com/titles/timothy-snyder/bloodlands/9781541600065/",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9781541600065-L.jpg?default=false",
+        "visualReview": "English cover image checked for title and author against edition record; exact owner copy not confirmed.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "checkedAt": "2026-11-20"
+      }
+    },
+    {
+      "id": "guns-germs-and-steel",
+      "title": "Guns, Germs, and Steel",
+      "author": "Jared Diamond",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-middle",
+        "orientation": "upright",
+        "order": 1
+      },
+      "isbn13": "9780393317558",
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      },
+      "editionSourceUrl": "https://openlibrary.org/books/OL24732786M/Guns_Germs_and_Steel",
+      "coverImageStatus": "open-library-image-edition-matched",
+      "backSurface": "generated",
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null,
+      "summary": {
+        "en": "How geography and the environment shaped the unequal development of human societies."
+      },
+      "summarySourceUrl": "https://openlibrary.org/books/OL24732786M/Guns_Germs_and_Steel",
+      "coverImages": {
+        "small": "/books/guns-germs-and-steel/cover-sm.webp",
+        "large": "/books/guns-germs-and-steel/cover-lg.webp"
+      },
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/books/OL24732786M/Guns_Germs_and_Steel",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9780393317558-L.jpg?default=false",
+        "visualReview": "English cover image checked for title and author against edition record; exact owner copy not confirmed.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "checkedAt": "2026-11-20"
+      }
+    },
+    {
+      "id": "predictably-irrational",
+      "title": "Predictably Irrational",
+      "author": "Dan Ariely",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-middle",
+        "orientation": "upright",
+        "order": 2
+      },
+      "isbn13": "9780061353246",
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      },
+      "editionSourceUrl": "https://books.google.com/books?vid=ISBN9780061353246",
+      "coverImageStatus": "open-library-image-edition-matched",
+      "backSurface": "generated",
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null,
+      "summary": {
+        "en": "Why our decisions often follow predictable patterns that depart from rational choice."
+      },
+      "summarySourceUrl": "https://books.google.com/books?vid=ISBN9780061353246",
+      "coverImages": {
+        "small": "/books/predictably-irrational/cover-sm.webp",
+        "large": "/books/predictably-irrational/cover-lg.webp"
+      },
+      "coverResearch": {
+        "editionSourceUrl": "https://books.google.com/books?vid=ISBN9780061353246",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9780061353246-L.jpg?default=false",
+        "visualReview": "English cover image checked for title and author against edition record; exact owner copy not confirmed.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "checkedAt": "2026-11-20"
+      }
+    },
+    {
+      "id": "the-innovators-dilemma",
+      "title": "The Innovator’s Dilemma",
+      "author": "Clayton M. Christensen",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-middle",
+        "orientation": "upright",
+        "order": 3
+      },
+      "isbn13": "9781633691780",
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      },
+      "editionSourceUrl": "https://store.hbr.org/product/the-innovator-s-dilemma-with-a-new-foreword-when-new-technologies-cause-great-firms-to-fail/10706",
+      "coverImageStatus": "open-library-image-edition-matched",
+      "backSurface": "generated",
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null,
+      "summary": {
+        "en": "How disruptive technologies can challenge established companies, even when they are well managed."
+      },
+      "summarySourceUrl": "https://store.hbr.org/product/the-innovator-s-dilemma-with-a-new-foreword-when-new-technologies-cause-great-firms-to-fail/10706",
+      "coverImages": {
+        "small": "/books/the-innovators-dilemma/cover-sm.webp",
+        "large": "/books/the-innovators-dilemma/cover-lg.webp"
+      },
+      "coverResearch": {
+        "editionSourceUrl": "https://store.hbr.org/product/the-innovator-s-dilemma-with-a-new-foreword-when-new-technologies-cause-great-firms-to-fail/10706",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9781633691780-L.jpg?default=false",
+        "visualReview": "English cover image checked for title and author against edition record; exact owner copy not confirmed.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "checkedAt": "2026-11-20"
+      }
     }
   ]
 }

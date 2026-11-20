@@ -1,6 +1,6 @@
 # Books: source, interactions and maintenance
 
-Status: local cover implementation, 2026-11-20. The catalog contains 21 selected English editions: 14 in About Me, 7 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
+Status: local cover implementation, 2026-11-20. The catalog contains 25 selected English editions: 15 in About Me, 10 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
 
 ## Cover provenance and remaining work
 
@@ -48,4 +48,8 @@ Where a usable cover exists, add `public/books/<id>/cover-sm.webp` (maximum 256 
 
 ## Review notes (2026-11-20)
 
-All 21 books have local small and large WebP files. Thirteen use an edition-matched source image; eight use AI-retouched user screenshots and are not represented as untouched originals. We Are Legion's edited image differs from the publisher image for the catalog ISBN, so its edition match remains unresolved. Sapiens, Autocracy, Inc. and Everything Is Tuberculosis were upgraded using original front images matching the owner’s screenshots, at 416 × 640, 292 × 450 and 298 × 450 pixels respectively. Sapiens and Autocracy use different ISBNs from the formerly listed editions, now updated in the catalog. The owner previously confirmed the live Sapiens and Thinking, Fast and Slow covers; the replacements were independently inspected; the Sapiens cover now matches the owner’s uploaded edition. Source rights are recorded as not independently established and must not be labelled verified.
+The original 21 books have local small and large WebP files. Thirteen use an edition-matched source image; eight use AI-retouched user screenshots and are not represented as untouched originals. We Are Legion's edited image differs from the publisher image for the catalog ISBN, so its edition match remains unresolved. Sapiens, Autocracy, Inc. and Everything Is Tuberculosis were upgraded using original front images matching the owner’s screenshots, at 416 × 640, 292 × 450 and 298 × 450 pixels respectively. Sapiens and Autocracy use different ISBNs from the formerly listed editions, now updated in the catalog. The owner previously confirmed the live Sapiens and Thinking, Fast and Slow covers; the replacements were independently inspected; the Sapiens cover now matches the owner’s uploaded edition. Source rights are recorded as not independently established and must not be labelled verified.
+
+## Added titles (2026-11-20)
+
+Bloodlands (About Me), Guns, Germs, and Steel, Predictably Irrational and The Innovator’s Dilemma (Writing & Speaking) use the English editions and sources recorded in the catalog. Project Hail Mary leans against its neighbors. The four new English cover images were checked for title and author, then stored locally; the owner’s exact editions have not been confirmed. Sources and rights status are recorded in each catalog entry.

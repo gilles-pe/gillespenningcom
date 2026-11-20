@@ -7,12 +7,13 @@ const file = new URL('../src/data/books.json', import.meta.url);
 const { books, catalogLanguage } = JSON.parse(readFileSync(file, 'utf8'));
 const capacity = {
   'writing-shelf-display-left': 4,
+  'writing-shelf-display-middle': 3,
   'writing-shelf-display-right-stack': 2,
   'writing-shelf-display-right-separate': 1,
   'about-cabinet-upper-left': 3,
   'about-cabinet-lower-left': 3,
   'about-cabinet-lower-right-stack': 3,
-  'about-cabinet-top-upright': 3,
+  'about-cabinet-top-upright': 4,
   'about-cabinet-top-leaning': 1,
   'about-globe-adjacent': 1,
 };
@@ -25,7 +26,7 @@ const isbnValid = isbn => {
 };
 
 if (catalogLanguage !== 'en') fail('catalogLanguage must be en');
-if (!Array.isArray(books) || books.length !== 21) fail('Expected 21 books');
+if (!Array.isArray(books) || books.length !== 25) fail('Expected 25 books');
 const ids = new Set(), slots = new Set(), roomCounts = { about: 0, writing: 0 };
 const placed = Object.fromEntries(Object.keys(capacity).map(k => [k, []]));
 for (const b of books) {
@@ -62,10 +63,10 @@ for (const b of books) {
   } else if (b.coverImageStatus !== 'generated-fallback-pending-review') fail('Missing fallback status: ' + b.id);
   if (b.amazonUrl && !/^https:\/\//.test(b.amazonUrl)) fail('Invalid Amazon URL: ' + b.id);
 }
-if (roomCounts.about !== 14 || roomCounts.writing !== 7) fail('Room counts mismatch');
+if (roomCounts.about !== 15 || roomCounts.writing !== 10) fail('Room counts mismatch');
 for (const [anchor, count] of Object.entries(capacity)) {
   if (placed[anchor].length !== count) fail('Missing shelf positions: ' + anchor);
 }
 if (books.find(b => b.id === 'the-wright-brothers')?.placement.anchor !== 'about-globe-adjacent')
   fail('The Wright Brothers must remain by the globe');
-console.log('Books checked: 21 English editions, 14 About Me / 7 Writing, ISBNs and slots valid.');
+console.log('Books checked: 25 English editions, 15 About Me / 10 Writing, ISBNs and slots valid.');

@@ -651,10 +651,13 @@ function writingDisplayShelf(parent, x, z, w) {
   // The upper bay is intentionally open around the photo.
   const palette = [0xebe3d3, 0xc9d0bd, 0x5c7672, 0xd8cbb4];
   const standing = booksByAnchor['writing-shelf-display-left'];
+  const middle = booksByAnchor['writing-shelf-display-middle'];
   const stack = booksByAnchor['writing-shelf-display-right-stack'];
   const separate = booksByAnchor['writing-shelf-display-right-separate'];
   for (let i = 0; i < 4; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
     -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, 'upright');
+  for (let i = 0; i < 3; i++) placeCatalogBook(g, middle[i], 0.047, 0.22 - (i % 2) * 0.015, 0.18,
+    -0.36 + i * 0.055, 0.365, 0.015, 'upright');
   for (let i = 0; i < 2; i++) placeCatalogBook(g, stack[i], 0.13 - i * 0.006, 0.028, 0.19,
     w / 2 - 0.21, 0.365 + i * 0.032, 0.02, 'horizontal');
   placeCatalogBook(g, separate[0], 0.13, 0.028, 0.19,
@@ -1871,11 +1874,13 @@ function furnish(id, g, r, inspectionTargets) {
     }
     // On top of the About Me shelf: books with leaning end book, brass lamp, and the classic TOS Enterprise
     const topPal = [0xebe3d3, 0xd8cbb4, 0xc9d0bd];
-    for (let i = 0; i < 3; i++) placeCatalogBook(sh, booksByAnchor['about-cabinet-top-upright'][i], 0.048, 0.23, 0.16,
+    for (let i = 0; i < 4; i++) placeCatalogBook(sh, booksByAnchor['about-cabinet-top-upright'][i], 0.048, 0.23, 0.16,
       -0.44 + i * 0.056, shelfH, 0.03, 'upright');
     const lean = placeCatalogBook(sh, booksByAnchor['about-cabinet-top-leaning'][0], 0.044, 0.22, 0.15,
-      -0.22, shelfH, 0.03, 'leaning');
-    lean.rotation.z = -0.25;
+      -0.20, shelfH, 0.03, 'leaning');
+    lean.rotation.z = 0.25;
+    // Raise the rotated lower corner onto the cabinet surface.
+    lean.position.y = shelfH + (0.22 * Math.cos(0.25) + 0.044 * Math.sin(0.25)) / 2;
     studyLamp(sh, 0.005, shelfH, -0.045);
     const enterprise = enterpriseModel(sh, 0.34, shelfH, 0.02, -0.95);
     trophyPicks.push(...enterprise.picks);

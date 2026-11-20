@@ -95,15 +95,15 @@
         "orientation": "upright",
         "order": 3
       },
-      "isbn13": "9780062316110",
+      "isbn13": "9780099590088",
       "amazonUrl": null,
       "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
-      "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
-      "coverImageStatus": "google-books-image-edition-matched",
+      "editionSourceUrl": "https://www.penguin.co.uk/books/419795/sapiens-by-harari-yuval-noah/9780099590088",
+      "coverImageStatus": "bookseller-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -117,10 +117,10 @@
         "large": "/books/sapiens/cover-lg.webp"
       },
       "coverResearch": {
-        "editionSourceUrl": "https://books.google.com/books/about/Sapiens.html?id=FILmrQEACAAJ",
-        "imageSourceUrl": "https://books.google.com/books/about/Sapiens.html?id=FILmrQEACAAJ",
-        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 128 x 192 pixels.",
-        "usageRights": "Google Books image; underlying cover rights not independently established.",
+        "editionSourceUrl": "https://www.penguin.co.uk/books/419795/sapiens-by-harari-yuval-noah/9780099590088",
+        "imageSourceUrl": "https://covers.shakespeareandcompany.com/97800995/9780099590088.jpg",
+        "visualReview": "Visually matches the design in Gilles's uploaded reader screenshot; English Vintage edition; bookstore front-cover image. Source 416 × 640 px. No AI reconstruction.",
+        "usageRights": "Source image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20",
         "ownerVisualConfirmation": "2026-11-20: owner confirms the previously displayed live cover was correct; the image bytes and exact edition remain to be retrieved and checked.",
         "previousLiveImageUrl": "https://covers.openlibrary.org/b/isbn/9780062316110-M.jpg?default=false"
@@ -224,8 +224,8 @@
         "en": null,
         "de": null
       },
-      "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
-      "coverImageStatus": "open-library-image-edition-matched",
+      "editionSourceUrl": "https://penguinrandomhousehighereducation.com/book/?isbn=9780525556572",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -239,10 +239,10 @@
         "large": "/books/everything-is-tuberculosis/cover-lg.webp"
       },
       "coverResearch": {
-        "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
-        "imageSourceUrl": "https://covers.openlibrary.org/b/id/14853332-L.jpg",
-        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 145 x 219 pixels.",
-        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "editionSourceUrl": "https://penguinrandomhousehighereducation.com/book/?isbn=9780525556572",
+        "imageSourceUrl": "https://images.penguinrandomhouse.com/cover/9780525556572",
+        "visualReview": "Visually matches the design in Gilles's uploaded reader screenshot; English edition; publisher front-cover image. Source 298 × 450 px. No AI reconstruction.",
+        "usageRights": "Source image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },
@@ -377,15 +377,15 @@
         "orientation": "upright",
         "order": 3
       },
-      "isbn13": "9781802062137",
+      "isbn13": "9780593471203",
       "amazonUrl": null,
       "coverImage": null,
       "personalNote": {
         "en": null,
         "de": null
       },
-      "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
-      "coverImageStatus": "google-books-image-edition-matched",
+      "editionSourceUrl": "https://www.penguinrandomhouse.com/books/725302/autocracy-inc-by-anne-applebaum/",
+      "coverImageStatus": "publisher-image-edition-matched",
       "backSurface": "generated",
       "spineSurface": "generated",
       "backImage": null,
@@ -399,10 +399,10 @@
         "large": "/books/autocracy-inc/cover-lg.webp"
       },
       "coverResearch": {
-        "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
-        "imageSourceUrl": "https://books.google.com/books/about/Autocracy_Inc.html?id=2Z7JEAAAQBAJ",
-        "visualReview": "English front cover visually checked against title, author and ISBN edition record. Source image 128 x 196 pixels.",
-        "usageRights": "Google Books image; underlying cover rights not independently established.",
+        "editionSourceUrl": "https://www.penguinrandomhouse.com/books/725302/autocracy-inc-by-anne-applebaum/",
+        "imageSourceUrl": "https://images1.penguinrandomhouse.com/cover/9780593471203",
+        "visualReview": "Visually matches the design in Gilles's uploaded reader screenshot; English American paperback with new preface; publisher front-cover image. Source 292 × 450 px. No AI reconstruction.",
+        "usageRights": "Source image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
     },

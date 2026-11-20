@@ -332,3 +332,5 @@ until a later entry replaces it.
 
 
 - **D-101 (2026-11-20) Local coverage for all 21 books.** Store 13 edition-matched front images and eight explicitly labelled AI-retouched user-supplied reconstructions as local WebP pairs. Preserve original dimensions when sources are small; review provenance, quality and underlying usage rights separately. The We Are Legion image differs from the listed ISBN edition and remains marked unverified. No remote image fallback is used.
+
+- **D-102 (2026-11-20) Higher-resolution owner-selected cover editions.** Replace the low-resolution Sapiens, Autocracy, Inc. and Everything Is Tuberculosis fronts with unaltered higher-resolution originals visually matching Gilles’s screenshots. Record actual sources and update the Sapiens and Autocracy ISBNs to their matching English editions. Preserve local WebP loading and source aspect ratios.

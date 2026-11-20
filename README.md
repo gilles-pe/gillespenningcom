@@ -23,7 +23,7 @@ pictures in `slots/`. `.github/workflows/pages.yml` builds and deploys it to Git
 
 ## Change the content
 
-- **Books in the 3D rooms:** edit `src/data/books.json` (21 English editions, ISBNs, shelf positions, short publisher-based English summaries and preview covers). `src/book-jackets.js` renders front, back and spine; front-cover previews load after entering a room and backs/spines are typographic reconstructions. `src/book-interaction.js` supports first-click zoom, second-click book removal, face rotation and return to shelf with a restrained two-line card. Amazon links and personal notes are not shown. See [`docs/books.md`](docs/books.md).
+- **Books in the 3D rooms:** edit `src/data/books.json` (21 English editions, ISBNs, shelf positions, short publisher-based English summaries and preview covers). `src/book-jackets.js` renders front, back and spine; front-cover previews load after entering a room and backs/spines are typographic reconstructions. `src/book-interaction.js` supports initial zoom, then four clicks on the framed book: Cover (pull out), Spine, Back, Return to shelf; the restrained card still offers direct face and return controls. Amazon links and personal notes are not shown. See [`docs/books.md`](docs/books.md).
 
 - **Texts (English and German):** edit `src/content.js`. Keep both languages in step. The static English text in
   `index.html` must equal the English values. Proofreading list for German: `docs/german-copy-review.md`.

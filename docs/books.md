@@ -37,6 +37,15 @@ Source: https://openlibrary.org/dev/docs/api/covers
 - Interaction code: `src/book-interaction.js`, connected from `src/viewer.js`. 3D cards do not change the separate album, photo, project, ship and globe interactions.
 - No personal description, rating, purchase prompt or external link appears until actually supplied and verified.
 
+## Natural extraction and cover visibility (2026-11-20)
+
+- Book removal is a staged movement, not an in-place spin: on the second click, move the mesh approximately 0.30 model units along the physical shelf's local outward (+Z) axis, another 0.12 toward the visitor, and rise 0.09. Pull-out and lift ease independently.
+- Delay turning until the book is clear of its neighbouring books and cabinet front. On return, reverse that sequence so it rotates back and then slides into its exact original pose.
+- Once extraction starts, the viewing direction is fixed for that gesture so rotating the camera does not drag the book around. The existing Cover/Spine/Back controls still rotate the lifted mesh.
+- Reframe the inspection camera around the extracted book, with at least 1.28 model units of camera distance and a slight upward screen composition. This keeps the cover visible instead of clipping it at the old shelf close-up.
+- No CSS or new design tokens are required. Preserve reduced-motion snapping and BACK/Escape/Reset/room-change restoration.
+- Test coverage in `scripts/verify-viewer.mjs` checks horizontal, upright and leaning positions, front-of-shelf clearance, camera framing, and exact restoration. An automated 3D test is not a substitute for a final desktop/mobile visual inspection.
+
 ## Editing fields
 
 | Field | Rule |

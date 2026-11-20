@@ -27,7 +27,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "Rosling tests the instincts that skew how we see global progress. The data often disagrees."
+        "en": "Rosling shows how instincts skew our view of progress. The numbers differ."
       },
       "summarySourceUrl": "https://www.gapminder.org/factfulness-book/"
     },
@@ -85,7 +85,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "How Homo sapiens became dominant - from early myths to agriculture, empires and science."
+        "en": "How Homo sapiens shaped the planet - from myths to empires and science."
       },
       "summarySourceUrl": "https://www.ynharari.com/book/sapiens-2/"
     },
@@ -114,7 +114,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "Why Western societies think differently. Henrich traces culture and institutions."
+        "en": "Why Western societies think differently. Henrich follows culture and norms."
       },
       "summarySourceUrl": "https://us.macmillan.com/books/9780374710453/theweirdestpeopleintheworld/"
     },
@@ -143,7 +143,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "200 million years of female evolution - and the biology left out of human history."
+        "en": "200 million years of female evolution - and a different human history."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/227568/eve-by-cat-bohannon/"
     },
@@ -172,7 +172,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "A patient's story shows why tuberculosis still kills, despite treatments that work."
+        "en": "A patient's story shows why tuberculosis still kills despite good treatments."
       },
       "summarySourceUrl": "https://www.penguinrandomhouse.com/books/312472/everything-is-tuberculosis-by-john-green/"
     },
@@ -549,7 +549,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "Bob wakes as an AI and heads into space. Funny, and full of questions about identity."
+        "en": "Bob wakes as an AI and heads into space. A funny story about identity."
       },
       "summarySourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570"
     },
@@ -607,7 +607,7 @@
       "backImage": null,
       "spineImage": null,
       "summary": {
-        "en": "Two brothers, countless experiments and the first powered flight - with a family story behind it."
+        "en": "The Wright brothers test, fail and try again - until powered flight becomes real."
       },
       "summarySourceUrl": "https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742"
     }

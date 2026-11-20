@@ -153,9 +153,14 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     return true;
   }
   function nextFace() {
-    if (!selected?.extracted) return;
-    const next = { front: 'spine', spine: 'back', back: 'front' };
-    showFace(next[selected.face]);
+    if (!selected?.extracted || selected.returning) return;
+    // Four deliberate clicks on the presented book: front, spine, back,
+    // then return to its shelf. The initial framing click is separate.
+    if (selected.face === 'back') {
+      onReturn?.();
+      return;
+    }
+    showFace(selected.face === 'front' ? 'spine' : 'back');
   }
   function update(dt) {
     if (!selected) return false;
@@ -224,6 +229,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     isFocused: id => !!selected && selected.id === id && !selected.returning,
     isExtracted: () => !!selected?.extracted,
     get activeId() { return selected?.id ?? null; },
+    get activeFace() { return selected?.face ?? null; },
     get bookCount() { return meshes.size; },
   };
 }

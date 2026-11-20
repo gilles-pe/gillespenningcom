@@ -140,3 +140,11 @@ The initial album click must frame the physical album before opening the book; o
 
 ## External links and projects (D-076)
 External HTTP(S) destinations open in a new tab with a focus request; browsers may control focus. Internal navigation remains in-page. A project object first opens its card; another click on that same project opens its external destination. A destination-less project never navigates and instead displays the Coming Soon badge over the image. Do not apply this two-click rule to furniture or social plaques.
+
+
+## Curated book interaction (D-097)
+- The 21 English-edition books live in src/data/books.json; keep titles, synopsis sources and placements in data.
+- Book meshes use src/book-jackets.js; src/book-interaction.js animates removal and rotation. First click frames the actual mesh, second lifts it, the Cover / Spine / Back buttons rotate it, and Return / BACK / Escape / Reset / room changes restore it.
+- Synopses are short, neutral, in English, sourced from published book descriptions. No invented owner endorsements. The reserved personalNote stays hidden until owner text is supplied.
+- Reuse the existing pop-card styling: 86% paper, 10px backdrop blur, --r1 = 6px, 1px border, token font scales and 48px mobile touch targets. No new UI design system.
+- Run npm run check:books, npm run check, npm run test:inspection, and npm run build. Keep the album, globe, photo and Enterprise interactions intact.

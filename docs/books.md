@@ -65,3 +65,7 @@ Indexed edition pages found by ISBN; a search result's image marker is not proof
 | 9781529157468 | [Project Hail Mary](https://openlibrary.org/books/OL35577396M/Project_Hail_Mary) | yes, unverified |
 
 No exact ISBN edition was found through indexed search for The Hard Sell (9780385544900), The Fortress (9780141986333), Autocracy, Inc. (9781802062137), A (Very) Short History of Life on Earth (9781529060560), or We Are Legion (9781668221570). This is a search limitation, not proof that Open Library lacks the editions or images.
+
+## Owner confirmation of existing covers (2026-11-20)
+
+Gilles confirmed that covers previously displayed on the live site were correct, specifically Sapiens and Thinking, Fast and Slow. Their prior ISBN-based image URLs are recorded in `coverResearch.previousLiveImageUrl`, and this confirmation is recorded separately from verification of the retrieved image bytes, edition metadata and reuse rights. Other previously displayed covers may also be correct; do not infer individual confirmation from the examples. No cover files have yet been added to this branch.

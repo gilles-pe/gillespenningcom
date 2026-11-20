@@ -3,6 +3,7 @@ import { loadEnterpriseGlb, createRoomWarp } from './enterprise.js';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
+import { createBookInteraction } from './book-interaction.js';
 import { t } from './i18n.js';
 import { createEgg } from './egg.js';
 import { PATHS } from './icons.js';
@@ -106,6 +107,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const panOffset = new THREE.Vector3();
   let stageW = 1, stageH = 1, openId = null, hoverId = null;
   let objectFocus = null;
+  const bookUI = createBookInteraction({
+    stage, scene, camera, reduced, language: lang, markDirty,
+    onReturn: () => { bookUI.close(false); if (objectFocus?.target?.bookId) restoreObjectView(); markDirty(); },
+  });
   // Globe theme: the click that frames the globe creates the AudioContext (browser rule) and loads the player;
   // it plays as soon as it is loaded and stops when the view leaves the globe.
   let music = { state: 'idle', ctx: null, play: null, player: null };
@@ -171,6 +176,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     navigationGroup = null;
     markDirty();
     if (roomWarp?.isActive()) { cancelWarp(); return true; }
+    if (bookUI.isActive()) { bookUI.close(false); restoreObjectView(); return true; }
     if (albumLightbox && !albumLightbox.hidden) { closeAlbumPhoto(); return true; }
     if (albumOpen) { closeAlbumBook(true); return true; }
     if (!viewHistory.length) return false;
@@ -287,7 +293,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function resetView() {
     markDirty();
     cancelWarp();
-    rememberView('reset'); closeAlbum(false); closePop(false); restoreObjectView(); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
+    rememberView('reset'); bookUI.close(true); closeAlbum(false); closePop(false); restoreObjectView(); custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); closePhoto(false); setGoal();
     if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
   }
   // Turning: signs are for a drag; when the model is upside down (cos el < 0) the horizontal sense is mirrored.
@@ -722,6 +728,27 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     popClose.focus({ preventScroll: true });
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
+  function tapShelfBook(id) {
+    const mesh = bookUI.getMesh(id);
+    if (!mesh) return;
+    if (bookUI.isFocused(id)) {
+      if (bookUI.isExtracted()) bookUI.nextFace();
+      else bookUI.extract();
+      markDirty();
+      return;
+    }
+    bookUI.close(true);
+    if (objectFocus) restoreObjectView();
+    closeAlbum(false); closePhoto(false); closePop(false);
+    rememberView('book');
+    bookUI.start(id);
+    stage.classList.add('object-focused');
+    focusObject({
+      id: `book:${id}`, key: `book:${id}`, bookId: id, room: openId,
+      objects: [mesh], az: goal.az, el: Math.max(.25, Math.min(.75, goal.el)),
+      margin: 1.16, captionHeight: 0,
+    });
+  }
   function togglePop(key) {
     // The Writing room's MedTech Signal document opens its destination on a
     // second deliberate click after inspection, just like a project object.
@@ -1038,6 +1065,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   for (const object of albumPicks) objectParts.set(object, { key: 'album', type: 'album', anchor: object.userData.anchor });
   for (const object of photo?.pick || []) objectParts.set(object, { key: 'photo', type: 'photo', anchor: photo.anchor });
   for (const object of speakingPhoto?.pick || []) objectParts.set(object, { key: 'speaking', type: 'photo', anchor: speakingPhoto.anchor });
+  // Book meshes take precedence over their containing furniture-inspection surfaces.
+  scene.traverse(object => {
+    if (object.isMesh && object.userData.bookId) objectParts.set(object, {
+      key: object.userData.bookId, type: 'book', anchor: object, customLabel: object.userData.bookTitle,
+    });
+  });
   const surfaceMeshes = [];
   scene.traverse(object => {
     if (!object.isMesh) return;
@@ -1211,7 +1244,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (eggKind) eggClick(eggKind);
         else if (object) {
           if (object.room !== openId) onPick(object.room);
-          if (object.type === 'album') toggleAlbum();
+          if (object.type === 'book') tapShelfBook(object.key);
+          else if (object.type === 'album') toggleAlbum();
           else if (object.type === 'photo') togglePhoto(object.key);
           else togglePop(object.key);
         } else if (!albumOpen && !albumFramed) onPick(pick(e));
@@ -1311,6 +1345,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!visible || document.hidden) { last = now; return; }
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const bookMoving = albumBook ? albumBook.update(dt) : false;
+    const shelfBookMoving = bookUI.update(dt);
     const warpMoving = roomWarp ? roomWarp.update(now) : false;
     let displaysMoving = false;
     for (const display of projectDisplays) {
@@ -1340,7 +1375,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         break;
       }
     }
-    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !warpMoving && !displaysMoving && !egg.isAnimating) return;
+    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !shelfBookMoving && !warpMoving && !displaysMoving && !egg.isAnimating) return;
     dirty = false;
 
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));
@@ -1396,6 +1431,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       markDirty();
       cancelWarp();
       if (id === 'about') ensureEnterpriseGlb();
+      bookUI.close(true);
       if (!keepView && (id !== openId || custom)) rememberView('room');
       if (id !== openId) closeAlbum(false);
       if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
@@ -1417,7 +1453,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     setZoom(value) { if (Number.isFinite(value)) zoomBy(value / zoom, true); },
     closeNote() {
       const faxFocused = objectFocus?.target === faxTarget || objectFocus?.target === sheetTarget;
-      const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || Boolean(roomWarp?.isActive());
+      const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || bookUI.isActive() || Boolean(roomWarp?.isActive());
+      bookUI.close(true);
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); cancelWarp();
       if (faxFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
       markDirty();
@@ -1431,6 +1468,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       labelPhoto();
       fillPop();
       albumBook?.refreshLanguage();
+      bookUI.setLanguage(l);
       updateAlbumHud();
       if (objectFocus) focusObject(objectFocus.target, false);
       updateHoverTip();
@@ -1438,7 +1476,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     },
     ...(import.meta.env.DEV ? {
       debug: {
-        scene, camera, view, goal, egg, cellar, albumBook,
+        scene, camera, view, goal, egg, cellar, albumBook, bookUI,
         get music() { return music.state; },
         get custom() { return custom; },
         get zoom() { return zoom; },

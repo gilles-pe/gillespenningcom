@@ -23,7 +23,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL27755791M/Factfulness",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "thinking-fast-and-slow",
@@ -46,7 +48,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "sapiens",
@@ -69,7 +73,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL26631792M/Sapiens_A_Brief_History_of_Humankind",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-weirdest-people",
@@ -92,7 +98,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "eve",
@@ -115,7 +123,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "everything-is-tuberculosis",
@@ -138,7 +148,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL57592161M/Everything_Is_Tuberculosis",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-hard-sell",
@@ -161,7 +173,9 @@
       "editionSourceUrl": "https://www2.publishersweekly.com/978-0-385-54490-0",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-fortress",
@@ -184,7 +198,9 @@
       "editionSourceUrl": "https://www.penguin.co.uk/books/305803/the-fortress-by-watson-alexander/9780141986333",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "prisoners-of-geography",
@@ -207,7 +223,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "autocracy-inc",
@@ -230,7 +248,9 @@
       "editionSourceUrl": "https://www.penguin.co.uk/books/455382/autocracy-inc-by-applebaum-anne/9781802062137",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-last-unicorn",
@@ -253,7 +273,9 @@
       "editionSourceUrl": "https://www.hugendubel.info/fachbuecher/kunst/darstellende-kunst/detail/ISBN-9781399606981/Beagle-Peter-S./The-Last-Unicorn",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-moral-animal",
@@ -276,7 +298,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-body",
@@ -299,7 +323,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL28720778M/The_Body",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "red-plenty",
@@ -322,7 +348,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL27642979M/Red_Plenty",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "a-very-short-history-of-life-on-earth",
@@ -345,7 +373,9 @@
       "editionSourceUrl": "https://assets-eu-01.kc-usercontent.com/d554c971-bcd0-014b-bb17-d2b96b437da4/fa85628c-14b6-43d1-a212-92e65b83c2ac/Pan%20Macmillan%20Rights%20Guide_FBF21_%20Guide_FINAL_Translation%20US.pdf",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-wandering-earth",
@@ -368,7 +398,9 @@
       "editionSourceUrl": "https://www.bloomsbury.com/uk/wandering-earth-9781784978518/",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-master-and-margarita",
@@ -391,7 +423,9 @@
       "editionSourceUrl": "https://www.penguinrandomhouse.com/books/531360/the-master-and-margarita-by-mikhail-bulgakov-a-newly-revised-translation-by-richard-pevear-and-larissa-volokhonsky-introduction-by-richard-pevear-foreword-by-boris-fishman/9780141180144/",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "fathers-and-sons",
@@ -414,7 +448,9 @@
       "editionSourceUrl": "https://www.penguin.co.uk/books/60384/fathers-and-sons-by-turgenev-ivan-trans--peter-carson-intro--rosamund-bartlett-afterword--tatyana-tolstaya/9780141441337",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "we-are-legion-we-are-bob",
@@ -437,7 +473,9 @@
       "editionSourceUrl": "https://www.simonandschuster.com/books/We-Are-Legion-%28We-Are-Bob%29/Dennis-E-Taylor/Bobiverse/9781668221570",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "project-hail-mary",
@@ -460,7 +498,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL35577396M/Project_Hail_Mary",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     },
     {
       "id": "the-wright-brothers",
@@ -483,7 +523,9 @@
       "editionSourceUrl": "https://openlibrary.org/books/OL25647222M/The_Wright_Brothers",
       "coverImageStatus": "unverified",
       "backSurface": "generated",
-      "spineSurface": "generated"
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null
     }
   ]
 }

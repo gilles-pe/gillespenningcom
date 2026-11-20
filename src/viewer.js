@@ -64,7 +64,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     el.dataset.room = id;
     if (href && !project) el.href = href;
     const pos = new THREE.Vector3(x, y, z).add(rooms[id].group.position);
-    const sp = { key, el, project };
+    const sp = { key, el, project, above: id === 'projects' };
     if (project === 'photo') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('photo'); });
     else if (project === 'speaking') el.addEventListener('click', e => { e.preventDefault(); togglePhoto('speaking'); });
     else if (project === 'album') el.addEventListener('click', e => { e.preventDefault(); toggleAlbum(); });
@@ -75,7 +75,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const link = document.createElementNS(SVGNS, 'line'), dot = document.createElementNS(SVGNS, 'circle'); dot.setAttribute('r', '3');
     deco.append(link, dot);
     spotsEl.append(el);
-    spots.push({ id, el, sp, w: 0, h: 0, px: 0, py: 0, pos, deco, link, dot, mark: '' });
+    spots.push({ id, el, sp, above: sp.above, w: 0, h: 0, px: 0, py: 0, pos, deco, link, dot, mark: '' });
   }
 
   let curLang = lang;
@@ -1270,11 +1270,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     live.sort((a, b) => a.px - b.px);
     const placed = [];
+    let aboveIndex = 0;
     for (const s of live) {
       // Prefer a spot just above the anchor; if that is taken, try the rows above and below and slightly to the side,
       // so labels dodge each other and stay close to their object instead of drifting away in a staircase.
       const row = s.h + GAP, side = s.w * 0.55 + GAP, tries = [];
-      for (const dy of [-LIFT, -LIFT - row, LIFT + s.h, -LIFT - 2 * row]) for (const dx of [0, side, -side]) tries.push([dx, dy]);
+      // Project labels stand above their frame (never below, that would cover the picture). Neighbours alternate between two rows, so no line runs through another label.
+      const lift = s.above ? LIFT + 10 : LIFT, stagger = s.above ? (aboveIndex++ % 2) * row : 0, dys = s.above ? [-lift - stagger, -lift - (stagger ? 0 : row), -lift - 2 * row, -lift - row] : [-lift, -lift - row, lift + s.h, -lift - 2 * row];
+      for (const dy of dys) for (const dx of [0, side, -side]) tries.push([dx, dy]);
       let pick = null;
       for (const [dx, dy] of tries) {
         const l = s.px - s.w / 2 + dx, b = s.py + dy;
@@ -1282,7 +1285,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (placed.some(p => l < p.l + p.w + GAP && p.l < l + s.w + GAP && b - s.h < p.b + GAP && p.b - p.h < b + GAP)) continue;
         pick = { l, b }; break;
       }
-      if (!pick) pick = { l: Math.min(Math.max(s.px - s.w / 2, GAP), stageW - s.w - GAP), b: Math.min(Math.max(s.py - LIFT, s.h + GAP), stageH - 8) };
+      if (!pick) pick = { l: Math.min(Math.max(s.px - s.w / 2, GAP), stageW - s.w - GAP), b: Math.min(Math.max(s.py - (s.above ? LIFT + 10 : LIFT), s.h + GAP), stageH - 8) };
       const { l, b } = pick;
       placed.push({ l, b, w: s.w, h: s.h });
       s.el.style.left = `${l + s.w / 2}px`; s.el.style.top = `${b}px`;

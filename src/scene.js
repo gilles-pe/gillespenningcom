@@ -957,7 +957,8 @@ function layout(id) {
   const { w, d } = ROOMS[id], back = -d / 2;
   if (id === 'projects') {
     const pitch = 0.85, z = back + 0.42, xs = [0, 1, 2, 3, 4].map(n => (n - 2) * pitch);
-    return { xs, z, spotZ: z + 0.6 };
+    // Label anchor: centre of the frame's top edge (board rests at y .843, 0.522 high, tilted back by .14 rad).
+    return { xs, z, frameTop: [1.10, z - 0.04] };
   }
   if (id === 'about') {
     const shelfW = 1.2;
@@ -1908,13 +1909,13 @@ export const HOTSPOTS = {
     ['monitor', 'https://ai.gillespenning.com/', LAY.ai.desk[0] + 0.20, 1.16, LAY.ai.desk[1] - 0.06, 'monitor'],
     ['rack', null, LAY.ai.rack[0], 0.9, LAY.ai.rack[1], 'rack'],
   ],
-  // Under the plinths, so the pictures on the boards stay visible.
+  // Above the frames, pointing at the middle of each frame's top edge, so the pictures stay visible.
   projects: [
-    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.projects.xs[0], 0.1, LAY.projects.spotZ, 'wimmelbild'],
-    ['monitorShort', 'https://ai.gillespenning.com/', LAY.projects.xs[1], 0.1, LAY.projects.spotZ, 'monitor'],
-    ['praxisfaden', null, LAY.projects.xs[2], 0.1, LAY.projects.spotZ, 'praxisfaden'],
-    ['hdrg', 'https://www.hdrg-kompass.de/', LAY.projects.xs[3], 0.1, LAY.projects.spotZ, 'hdrg'],
-    ['elbstrand', 'https://penning.info/', LAY.projects.xs[4], 0.1, LAY.projects.spotZ, 'elbstrand'],
+    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.projects.xs[0], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'wimmelbild'],
+    ['monitorShort', 'https://ai.gillespenning.com/', LAY.projects.xs[1], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'monitor'],
+    ['praxisfaden', null, LAY.projects.xs[2], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'praxisfaden'],
+    ['hdrg', 'https://www.hdrg-kompass.de/', LAY.projects.xs[3], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'hdrg'],
+    ['elbstrand', 'https://penning.info/', LAY.projects.xs[4], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'elbstrand'],
   ],
   writing: [
     ['signal', 'https://medtechsignal.substack.com/', LAY.writing.table[0] - 0.05, 0.52, LAY.writing.table[1], 'signal'],

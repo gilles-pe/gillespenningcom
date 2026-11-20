@@ -768,6 +768,20 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     });
   }
   function togglePop(key) {
+    if (openId === 'writing' && (key === 'protein' || key === 'latestArticle')) {
+      if (objectFocus?.target?.key === key) {
+        if (key === 'latestArticle') openExternal(t(curLang, 'model.inspections.latestArticle.href'));
+        else if (!popKey) openPop(key);
+        else closePop(true);
+      } else {
+        closePop(false); closePhoto(false); closeAlbum(false);
+        if (objectFocus) restoreObjectView();
+        rememberView('object');
+        stage.classList.add('object-focused');
+        focusObject(inspectionFor(key));
+      }
+      return;
+    }
     // The Writing room's MedTech Signal document opens its destination on a
     // second deliberate click after inspection, just like a project object.
     if (popKey === key && (projectKeys.has(key) || (openId === 'writing' && key === 'signal'))) {
@@ -1473,10 +1487,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     closeNote() {
       const faxFocused = objectFocus?.target === faxTarget || objectFocus?.target === sheetTarget;
       const bookFocused = objectFocus?.target?.bookId;
-      const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || bookUI.isActive() || Boolean(roomWarp?.isActive());
+      const had = egg.isOpen || faxFocused || pOpen || Boolean(popKey) || albumOpen || albumFramed || bookUI.isActive() || Boolean(objectFocus) || Boolean(roomWarp?.isActive());
       bookUI.close(true);
       egg.close(true); closePhoto(true); closePop(true); closeAlbum(true); cancelWarp();
-      if (faxFocused || bookFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
+      if (objectFocus || faxFocused || bookFocused) { restoreObjectView(); stage.focus({ preventScroll: true }); }
       markDirty();
       return had;
     },

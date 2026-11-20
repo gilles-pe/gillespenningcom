@@ -418,3 +418,16 @@ delete window.AudioContext;
   assert.equal(c.started.length, 0); assert.equal(c.closed, 1);
   console.log('warp sound: scheduled against the flight clock, late join, stop: passed');
 }
+
+api.open('writing'); draw();
+api.debug.selectProject('protein'); draw();
+assert(stage.classList.contains('object-focused'), 'Protein first click focuses the sculpture');
+api.debug.selectProject('protein'); draw();
+assert(stage.children.some(el=>el.classList.contains('pop-card') && !el.hidden), 'Protein second click opens the card');
+assert(api.closeNote()); draw();
+api.debug.selectProject('latestArticle'); draw();
+assert(stage.classList.contains('object-focused'), 'Paper first click focuses the article');
+api.debug.selectProject('latestArticle'); draw();
+assert(openedTabs.some(tab=>tab.url==='https://medtechsignal.substack.com/p/can-ai-see-death-in-your-eyes'), 'Paper second click opens article');
+assert(api.closeNote()); draw();
+api.open(null); draw();

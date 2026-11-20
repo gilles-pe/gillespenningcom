@@ -1,3 +1,4 @@
+import proteinCoords from './data/protein-1a8o.json';
 import { createEnterprise } from './enterprise.js';
 import { createBookAlbum } from './book-album.js';
 import { booksByAnchor, placeCatalogBook } from './book-jackets.js';
@@ -665,6 +666,50 @@ function writingDisplayShelf(parent, x, z, w) {
   // One concealed base shelf, not another pair of prominent cupboard doors.
   box(g, w - 2 * side, 0.18, 0.26, 0, 0.04, -0.02, wood(C.woodDark));
   return g;
+}
+
+
+// A compact protein backbone sculpture, derived from the experimental 1A8O structure.
+// It illustrates a folded protein; it is not presented as an AlphaFold prediction.
+function proteinSculpture(parent, x, y, z) {
+  const group = new THREE.Group(); group.position.set(x, y, z); parent.add(group);
+  cyl(group, 0.075, 0.082, 0.014, 0, 0, 0, mat(0xb38242, { metalness: 0.52, roughness: 0.45 }), 20);
+  const pts = proteinCoords.map(p => new THREE.Vector3(...p));
+  const bounds = new THREE.Box3().setFromPoints(pts), center = bounds.getCenter(new THREE.Vector3());
+  const extent = bounds.getSize(new THREE.Vector3());
+  const scale = 0.22 / Math.max(extent.x, extent.y, extent.z);
+  const offsetY = 0.035 - (bounds.min.y - center.y) * scale;
+  const points = pts.map(p => p.sub(center).multiplyScalar(scale).add(new THREE.Vector3(0, offsetY, 0)));
+  const colors = [0x31546c, 0x628d91, 0xb99c66];
+  for (let start = 0; start < points.length - 1; start += 22) {
+    const segment = points.slice(start, Math.min(start + 23, points.length));
+    if (segment.length < 2) continue;
+    const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(segment), segment.length * 3, 0.0045, 6, false), mat(colors[Math.floor(start / 22)], { roughness: 0.55 }));
+    mesh.castShadow = true; group.add(mesh);
+  }
+  return group;
+}
+
+// An editorial paper: a single article now, extensible to a small stack later.
+function articlePaper(parent, x, y, z) {
+  const group = new THREE.Group(); group.position.set(x, y, z); parent.add(group);
+  const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 680;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f7f6f2'; ctx.fillRect(0, 0, 512, 680);
+  ctx.fillStyle = '#1e3a8a'; ctx.fillRect(28, 28, 456, 6);
+  ctx.font = 'bold 29px Georgia'; ctx.fillText('MEDTECH SIGNAL', 28, 76);
+  ctx.fillStyle = '#18181b'; ctx.fillRect(28, 92, 456, 2);
+  ctx.font = 'bold 39px Georgia'; ctx.fillText('Can AI See Death', 28, 157); ctx.fillText('in Your Eyes?', 28, 207);
+  ctx.font = '20px Georgia'; ctx.fillText('Gilles Penning  |  6 Nov 2026', 28, 249);
+  ctx.fillStyle = '#e8edf7'; ctx.fillRect(28, 280, 456, 132);
+  ctx.fillStyle = '#1e3a8a'; ctx.font = 'italic 24px Georgia'; ctx.fillText('AI, medicine and the questions', 47, 334); ctx.fillText('behind the numbers.', 47, 370);
+  ctx.fillStyle = '#92969d';
+  for (let row = 0; row < 8; row++) for (let col = 0; col < 2; col++) ctx.fillRect(28 + col * 235, 450 + row * 21, 208 - (row % 3) * 16, 3);
+  const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+  const paper = box(group, 0.28, 0.012, 0.205, 0, 0, 0, mat(0xf7f6f2));
+  const print = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.195), new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9 }));
+  print.rotation.x = -Math.PI / 2; print.position.y = 0.013; group.add(print);
+  return group;
 }
 
 // Satin glass door with a thin frame. viewer.js slides it along z via door.position.z.
@@ -1919,6 +1964,10 @@ function furnish(id, g, r, inspectionTargets) {
     loungeFloorLamp(g, ...L.lamp);
     const shelf = writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
     inspect('writingShelf', [shelf], -0.18, 0.30, true);
+    const protein = proteinSculpture(shelf, -0.39, 1.0, 0.02);
+    const article = articlePaper(shelf, -0.38, 0.705, 0.02);
+    inspect('protein', [protein], -0.14, 0.32);
+    inspect('latestArticle', [article], -0.14, 0.72);
     const speakingPic = standingPicture(g, 'writing-shelf-1', ...L.speaking, -0.12, 0.78);
     loungeFern(g, -RW / 2 + 0.47, RD / 2 - 0.54);
     return { projectPicks, speakingPic };

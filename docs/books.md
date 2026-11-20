@@ -45,3 +45,23 @@ Where a usable cover exists, add `public/books/<id>/cover-sm.webp` (maximum 256 
 - Test with `npm run check:books`, `npm run check`, `npm run test:inspection`, and `npm run build`. The harness tests request timing, failure fallback, late-arriving images and existing interactions; it does not replace visual desktop/mobile checks.
 - Personal notes remain hidden until supplied by Gilles. Summaries stay concise, neutral, in English, and attributable to publisher descriptions; no fabricated endorsements.
 - Do not add Aftershocks, Nexus, Civilization or Dungeon Crawler Carl unless the owner asks.
+
+## Open Library lookup of missing covers (2026-11-20)
+
+Indexed edition pages found by ISBN; a search result's image marker is not proof that the actual image is an edition-correct front cover, nor a licence to redistribute it. Open Library requested human verification in the browser session, so no cover bytes were retrieved or visually verified through it. Search results also contain inconsistent metadata: the Sapiens record labels the 13-digit number as ISBN-10 and the Thinking, Fast and Slow record states 2001, so verify against the publisher before adopting either record.
+
+| ISBN-13 | Indexed Open Library edition | Search indicates image |
+| --- | --- | --- |
+| 9780141033570 | [Thinking, Fast and Slow](https://openlibrary.org/books/OL60701008M/Thinking_Fast_and_Slow) | yes, unverified |
+| 9780062316110 | [Sapiens](https://openlibrary.org/books/OL32599195M/Sapiens_A_Brief_History_of_Humankind) | yes, inconsistent ISBN field |
+| 9780374173227 | [The WEIRDest People](https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World) | unclear |
+| 9781529156171 | [Eve](https://openlibrary.org/books/OL50620709M/Eve) | unclear |
+| 9780525556572 | [Everything Is Tuberculosis](https://openlibrary.org/books/OL58565652M/Everything_Is_Tuberculosis) | yes, unverified |
+| 9781783962433 | [Prisoners of Geography](https://openlibrary.org/books/OL28050703M/Prisoners_of_Geography) | unclear |
+| 9780679763994 | [The Moral Animal](https://openlibrary.org/books/OL7700793M/The_Moral_Animal_Why_We_Are_the_Way_We_Are) | yes, unverified |
+| 9780857522405 | [The Body](https://openlibrary.org/books/OL28720778M/The_Body) | yes, unverified |
+| 9780141180144 | [The Master and Margarita](https://openlibrary.org/books/OL22644233M/The_Master_and_Margarita) | yes, unverified |
+| 9780141441337 | [Fathers and Sons](https://openlibrary.org/books/OL28439595M/Fathers_and_Sons) | unclear |
+| 9781529157468 | [Project Hail Mary](https://openlibrary.org/books/OL35577396M/Project_Hail_Mary) | yes, unverified |
+
+No exact ISBN edition was found through indexed search for The Hard Sell (9780385544900), The Fortress (9780141986333), Autocracy, Inc. (9781802062137), A (Very) Short History of Life on Earth (9781529060560), or We Are Legion (9781668221570). This is a search limitation, not proof that Open Library lacks the editions or images.

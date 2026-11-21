@@ -578,6 +578,8 @@ function antiqueGlobe(parent, x, y, z) {
     atlas.needsUpdate = true;
   };
   image.src = `${import.meta.env.BASE_URL}models/antique-globe-map.webp`;
+  globe.userData.earth = earth;
+  globe.userData.radius = radius;
   return globe;
 }
 
@@ -955,7 +957,7 @@ export function buildScene() {
   const SEG = 120;                                    // tube segments; viewer.js draws hotSegs of them (36 indices each)
 
   const projectPicks = [], trophyPicks = [], storyPicks = [], albumPicks = [], inspectionTargets = [], projectDisplays = [];
-  let albumBook = null, enterprise = null;
+  let albumBook = null, enterprise = null, globe = null;
   for (const [id, r] of Object.entries(ROOMS)) {
     const g = new THREE.Group();
     g.position.set(r.cx, 0, r.cz); scene.add(g);
@@ -1006,13 +1008,14 @@ export function buildScene() {
     if (extra?.albumPicks) albumPicks.push(...extra.albumPicks);
     if (extra?.albumBook) albumBook = extra.albumBook;
     if (extra?.enterprise) enterprise = extra.enterprise;
+    if (extra?.globe) globe = extra.globe;
   }
   // Outline of the whole model, for the camera: base corners plus the top of every room.
   const outline = [];
   for (const y of [-0.96, 0]) for (const x of [BASE.x0, BASE.x1]) for (const z of [BASE.z0, BASE.z1]) outline.push(new THREE.Vector3(x, y, z));
   for (const r of Object.values(ROOMS)) for (const sx of [-1, 1]) for (const sz of [-1, 1]) outline.push(new THREE.Vector3(r.cx + sx * r.w / 2, r.h, r.cz + sz * r.d / 2));
   const cellar = buildCellar(scene, occluders);
-  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets, projectDisplays };
+  return { scene, rooms, outline, center: new THREE.Vector3(bx, 0.3, bz), cellar, occluders, photo: rooms.about.photo, speakingPhoto: rooms.writing?.speakingPic, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, globe, inspectionTargets, projectDisplays };
 }
 
 // Furniture positions, in room coordinates (origin = room centre). Shared by furnish() and HOTSPOTS.
@@ -1932,7 +1935,7 @@ function furnish(id, g, r, inspectionTargets) {
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
     studyRubberPlant(g, RW / 2 - 0.43, RD / 2 - 0.44);
-    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks, albumBook: album, enterprise };
+    return { photo: { pick: [pic.userData.frame, pic], anchor }, trophyPicks, storyPicks, albumPicks: album.picks, albumBook: album, enterprise, globe: sh.userData.globe };
   }
   if (id === 'ai') {
     const projectPicks = [];

@@ -1,5 +1,6 @@
 import { enterpriseCopy, labelShipAction } from './enterprise-copy.js';
 import { loadEnterpriseGlb, createRoomWarp } from './enterprise.js';
+import { createGlobeFlight } from './globe-flight.js';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
@@ -35,8 +36,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   window.addEventListener('book-cover-loaded', markDirty);
 
   setModelLanguage(lang);
-  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, inspectionTargets, projectDisplays } = buildScene();
+  let curLang = lang;
+  const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, globe, inspectionTargets, projectDisplays } = buildScene();
   const roomWarp = enterprise ? createRoomWarp(scene, enterprise.root) : null;
+  const globeFlight = globe ? createGlobeFlight(globe) : null;
   // Default light rig, only if the scene does not bring its own. Room point lights and local fixture spots (the operating light) do not count.
   let sceneLit = false;
   scene.traverse(o => { if (o.isHemisphereLight || o.isDirectionalLight || o.isAmbientLight || o.isRectAreaLight) sceneLit = true; });
@@ -82,7 +85,6 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     spots.push({ id, el, sp, above: sp.above, w: 0, h: 0, px: 0, py: 0, pos, deco, link, dot, mark: '' });
   }
 
-  let curLang = lang;
   function labelSpots() {
     for (const s of spots) {
       s.el.textContent = t(curLang, `model.spots.${s.sp.key}`) || t(curLang, `model.inspections.${s.sp.key}.title`);
@@ -125,11 +127,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   function stopGlobeMusic() {
     const m = music; music = { state: 'idle', ctx: null, play: null, player: null };
+    globeFlight?.stop();
+    markDirty();
     if (m.player) m.player.stop(); else { try { m.ctx?.close(); } catch { /* ignore */ } }
   }
   function startGlobeMusic() {
     const m = music; m.state = 'playing';
-    m.player = m.play(m.ctx, () => { if (music === m) music = { state: 'idle', ctx: null, play: null, player: null }; });
+    globeFlight?.start(reduced);
+    markDirty();
+    m.player = m.play(m.ctx, () => {
+      if (music === m) {
+        music = { state: 'idle', ctx: null, play: null, player: null };
+        globeFlight?.stop();
+        markDirty();
+      }
+    });
   }
   // Warp flight sound: the AudioContext is created inside the click, the sounds are scheduled against the flight clock.
   let warpLoad = null, warpSound = null;
@@ -1380,6 +1392,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const bookMoving = albumBook ? albumBook.update(dt) : false;
     const shelfBookMoving = bookUI.update(dt);
     const warpMoving = roomWarp ? roomWarp.update(now) : false;
+    const globeMoving = globeFlight ? globeFlight.update(now) : false;
     let displaysMoving = false;
     for (const display of projectDisplays) {
       const target = openId === 'projects' && popKey === display.key ? 1 : 0;
@@ -1408,7 +1421,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         break;
       }
     }
-    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !shelfBookMoving && !warpMoving && !displaysMoving && !egg.isAnimating) return;
+    if (!dirty && !camMoving && !roomsMoving && !bookMoving && !shelfBookMoving && !warpMoving && !globeMoving && !displaysMoving && !egg.isAnimating) return;
     dirty = false;
 
     const k = reduced ? 1 : 1 - Math.exp(-dt * (objectFocus ? 6 : 2.6));

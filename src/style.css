@@ -92,7 +92,7 @@ a.btn:hover, a.pill:hover { border-color: var(--brass); }
 html:not(.js):not(.static) .scene-column { display: none; }
 html:not(.js):not(.static) .hero { grid-template-columns: 1fr; }
 .stage[role="application"] { touch-action: pan-y; cursor: grab; }
-.stage[role="application"].panning { touch-action: none; }
+.stage[role="application"].panning, .stage[role="application"].album-open { touch-action: none; }
 .stage:focus, .stage:focus-visible { outline: none; }
 .keyboard-navigation .stage:not(.object-focused):focus-visible { outline: 1px solid var(--brass); outline-offset: calc(var(--s1) * -1); }
 #scene {

@@ -943,7 +943,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const h = albumRay.intersectObjects(albumThings, false)[0];
     return h && albumParts.has(h.object) ? h.object.userData : null;
   };
-  let albumFramed = false, albumZoomSettled = false, albumOpen = false, albumOpenedAt = 0;
+  let albumFramed = false, albumZoomSettled = false, albumOpen = false, albumOpenedAt = 0;   // stage gets .album-open while the book is open (touch-action none, see style.css)
   let albumHudEl = null, albumHudPrompt = null, albumHudNav = null, albumPromptTitle = null, albumPromptCloseBtn = null;
   let albumOpenBtn = null, albumPrevBtn = null, albumNextBtn = null, albumCounterEl = null, albumCloseBtn = null;
   let albumLightbox = null, albumLightboxClose = null, albumLightboxImage = null, albumLightboxCaption = null;
@@ -1119,7 +1119,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     albumReturnFocus = document.activeElement;
     albumFramed = true;
     albumZoomSettled = Boolean(reduced);
-    albumOpen = false;
+    albumOpen = false; stage.classList.toggle('album-open', albumOpen);
     stage.classList.add('object-focused');
     updateAlbumHud();
     focusObject(closedAlbumTarget());
@@ -1134,7 +1134,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     albumPhotoFocus = null;
     albumFramed = true;
     albumZoomSettled = true;
-    albumOpen = true;
+    albumOpen = true; stage.classList.toggle('album-open', albumOpen);
     albumOpenedAt = performance.now() + 340;
     stage.classList.add('object-focused', 'album-open');
     albumBook.open(reduced);
@@ -1147,7 +1147,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function closeAlbumBook(restoreFocus = false) {
     if (!albumOpen) return;
     if (albumLightbox && !albumLightbox.hidden) albumLightbox.hidden = true;
-    albumOpen = false;
+    albumOpen = false; stage.classList.toggle('album-open', albumOpen);
     albumFramed = true;
     albumZoomSettled = true;
     stage.classList.remove('album-open');
@@ -1163,7 +1163,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const hadAny = albumFramed || albumOpen;
     albumFramed = false;
     albumZoomSettled = false;
-    albumOpen = false;
+    albumOpen = false; stage.classList.toggle('album-open', albumOpen);
     stage.classList.remove('album-open');
     if (albumLightbox && !albumLightbox.hidden) albumLightbox.hidden = true;
     albumBook?.close(true);
@@ -1333,7 +1333,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         zoomBy(drag.p.d / n.d, true); panBy(n.x - drag.p.x, n.y - drag.p.y, true);
         drag.p = n; return;
       }
-      if (!drag.moved && Math.abs(e.clientX - drag.sx) <= 5 && Math.abs(e.clientY - drag.sy) <= 5) return;
+      const slop = e.pointerType === 'touch' ? 10 : 5;   // a finger tap always slides a little
+      if (!drag.moved && Math.abs(e.clientX - drag.sx) <= slop && Math.abs(e.clientY - drag.sy) <= slop) return;
       drag.moved = true;
       if (drag.mode === 'bookFlip') {
         const nowT = performance.now();

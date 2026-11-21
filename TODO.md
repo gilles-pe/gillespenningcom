@@ -7,6 +7,9 @@
 - [x] Social links with logos, news from the monitor (D-017, D-018).
 - [x] GitHub Pages workflow, CNAME, canonical and Open Graph tags, favicon, robots.txt, sitemap.xml (D-019). Prepared only.
 
+## Recurring maintenance
+- [ ] **Every 5 days:** Check `https://medtechsignal.substack.com/feed` for new Substack articles. When a new post appears, save its article graphic as a local WebP (`public/models/article-*.webp`, 768px wide, quality 82), update the 5 entries in `src/data/substack-articles.json` (newest first; keep key `latestArticle` on index 0 and `substackArticle2`–`substackArticle5` on indices 1–4), and refresh `src/news-snapshot.json` (`node scripts/update-news-snapshot.mjs`). Last checked: 2026-11-21.
+
 ## Owner steps before going live
 - [ ] Enable GitHub Pages (Settings > Pages > Source: GitHub Actions), merge to `main`, check the build.
 - [ ] Switch the DNS of `gillespenning.com` to GitHub Pages without touching `ai.gillespenning.com`.

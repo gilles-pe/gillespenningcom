@@ -151,3 +151,8 @@ External HTTP(S) destinations open in a new tab with a focus request; browsers m
 
 ## Progressive book covers (owner request 2026-11-20; D-100)
 Read docs/books.md before changing jackets. Use edition-correct English front art only when its provenance and intended reuse are recorded; identify AI-retouched user images as altered. Overview loads no cover files; entering a room loads only its small local WebP files, and extracting one book loads only its large version. Preserve the generated fallback, small-to-large race handling, bounded GPU cache, the D-097–D-099 interaction contract and all exit paths. Validate the cover files and run all four book/viewer/build checks; the harness does not replace desktop/mobile visual verification. Do not present unresolved source rights as verified.
+
+## Substack newspaper shelf (D-108)
+- The 5 latest Substack issues from `https://medtechsignal.substack.com/feed` live as structured data in `src/data/substack-articles.json`, rendered as broadsheet front pages on the `Writing & Speaking` shelf (`y = 0.705`) with local WebP graphics in `public/models/article-*.webp`.
+- **5-day refresh cadence:** Every 5 days, check `https://medtechsignal.substack.com/feed` for new posts. If a new post is published, save its graphic locally (`public/models/article-*.webp`, 768px wide, quality 82), shift/update the 5 entries in `src/data/substack-articles.json` (keeping `key: "latestArticle"` on index 0), and update `lastChecked` and `TODO.md`.
+- Keep all 5 newspapers free of external floating hover labels; preserve zoom-first framing on first click and direct new-tab opening (`_blank`) on second click.

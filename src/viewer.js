@@ -1,6 +1,7 @@
 import { enterpriseCopy, labelShipAction } from './enterprise-copy.js';
 import { loadEnterpriseGlb, createRoomWarp } from './enterprise.js';
 import { createGlobeFlight } from './globe-flight.js';
+import substackData from './data/substack-articles.json';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
@@ -574,7 +575,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       return;
     }
     delete popBody.dataset.openLeadership;
-    const data = t(curLang, `model.projectCards.${popKey}`) || t(curLang, `model.inspections.${popKey}`);
+    const sub = substackByKey.get(popKey);
+    const data = t(curLang, `model.projectCards.${popKey}`) || t(curLang, `model.inspections.${popKey}`)
+      || (sub && { title: sub.title, text: curLang === 'de' ? 'Den Artikel auf MedTech Signal lesen.' : 'Read the article on MedTech Signal.', href: sub.href });
     if (!data) return;
     popEl.setAttribute('aria-label', data.title);
     popClose.setAttribute('aria-label', t(curLang, 'ui.close'));
@@ -779,10 +782,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       margin: 1.16, captionHeight: 0,
     });
   }
+  const substackByKey = new Map(substackData.articles.map(a => [a.key, a]));
   function togglePop(key) {
-    if (openId === 'writing' && (key === 'protein' || key === 'latestArticle')) {
+    if (openId === 'writing' && (key === 'protein' || substackByKey.has(key))) {
       if (objectFocus?.target?.key === key) {
-        if (key === 'latestArticle') openExternal(t(curLang, 'model.inspections.latestArticle.href'));
+        if (substackByKey.has(key)) openExternal(substackByKey.get(key).href);
         else if (!popKey) openPop(key);
         else closePop(true);
       } else {
@@ -1139,6 +1143,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   };
   function updateHoverTip() {
     if (!hoverTarget || drag || (albumLightbox && !albumLightbox.hidden)) { hoverTip.hidden = true; return; }
+    if (substackByKey.has(hoverTarget.key)) { hoverTip.hidden = true; return; }
     let label = hoverTarget.customLabel;
     if (!label) {
       if (hoverTarget.type === 'album' && albumFramed && albumZoomSettled && !albumOpen) {

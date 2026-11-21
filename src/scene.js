@@ -1,4 +1,5 @@
 import proteinCoords from './data/protein-1a8o.json';
+import substackData from './data/substack-articles.json';
 import { createEnterprise } from './enterprise.js';
 import { createBookAlbum } from './book-album.js';
 import { booksByAnchor, placeCatalogBook } from './book-jackets.js';
@@ -692,25 +693,163 @@ function proteinSculpture(parent, x, y, z) {
   return group;
 }
 
-// An editorial paper: a single article now, extensible to a small stack later.
-function articlePaper(parent, x, y, z) {
-  const group = new THREE.Group(); group.position.set(x, y, z); parent.add(group);
-  const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 680;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#f7f6f2'; ctx.fillRect(0, 0, 512, 680);
-  ctx.fillStyle = '#1e3a8a'; ctx.fillRect(28, 28, 456, 6);
-  ctx.font = 'bold 29px Georgia'; ctx.fillText('MEDTECH SIGNAL', 28, 76);
-  ctx.fillStyle = '#18181b'; ctx.fillRect(28, 92, 456, 2);
-  ctx.font = 'bold 39px Georgia'; ctx.fillText('Can AI See Death', 28, 157); ctx.fillText('in Your Eyes?', 28, 207);
-  ctx.font = '20px Georgia'; ctx.fillText('Gilles Penning  |  6 Nov 2026', 28, 249);
-  ctx.fillStyle = '#e8edf7'; ctx.fillRect(28, 280, 456, 132);
-  ctx.fillStyle = '#1e3a8a'; ctx.font = 'italic 24px Georgia'; ctx.fillText('AI, medicine and the questions', 47, 334); ctx.fillText('behind the numbers.', 47, 370);
-  ctx.fillStyle = '#92969d';
-  for (let row = 0; row < 8; row++) for (let col = 0; col < 2; col++) ctx.fillRect(28 + col * 235, 450 + row * 21, 208 - (row % 3) * 16, 3);
-  const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
-  const paper = box(group, 0.28, 0.012, 0.205, 0, 0, 0, mat(0xf7f6f2));
-  const print = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.195), new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9 }));
-  print.rotation.x = -Math.PI / 2; print.position.y = 0.013; group.add(print);
+// A single broadsheet newspaper front page for one of the latest MedTech Signal articles.
+function articlePaper(parent, x, y, z, article, rotY = 0) {
+  const group = new THREE.Group();
+  group.position.set(x, y, z);
+  group.rotation.y = rotY;
+  parent.add(group);
+
+  const SANS = "'Source Sans 3', system-ui, sans-serif";
+  const sheetW = 0.258, sheetD = 0.194;
+
+  // Thin layered newsprint sheets (slightly offset so it reads as loose broadsheet paper, not a book).
+  const sheet1 = box(group, sheetW, 0.0018, sheetD, 0.0016, 0, 0.0008, mat(0xe8e3d7, { roughness: 0.94 }));
+  sheet1.rotation.y = -0.016;
+  const sheet2 = box(group, sheetW, 0.0018, sheetD, -0.0012, 0.0018, -0.0008, mat(0xefebe0, { roughness: 0.93 }));
+  sheet2.rotation.y = 0.011;
+  box(group, sheetW, 0.0018, sheetD, 0, 0.0036, 0, mat(0xf6f3eb, { roughness: 0.92 }));
+
+  const c = canvas(1024, 768), ctx = c.getContext('2d');
+  const texture = tex(c);
+  const heroImg = new Image();
+  heroImg.decoding = 'async';
+
+  function wrapLines(text, maxW, maxLines) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const test = cur ? `${cur} ${w}` : w;
+      if (ctx.measureText(test).width > maxW && cur) {
+        lines.push(cur);
+        if (lines.length >= maxLines) return lines;
+        cur = w;
+      } else {
+        cur = test;
+      }
+    }
+    if (cur && lines.length < maxLines) lines.push(cur);
+    return lines;
+  }
+
+  function drawBars(bx, by, widths, h = 4.5, step = 16, maxY = 720, color = '#9b9fa7') {
+    ctx.fillStyle = color;
+    for (let i = 0; i < widths.length; i++) {
+      const py = by + i * step;
+      if (py + h > maxY) break;
+      ctx.fillRect(bx, py, widths[i], h);
+    }
+  }
+
+  function drawNewspaper() {
+    ctx.fillStyle = '#f6f4ee';
+    ctx.fillRect(0, 0, 1024, 768);
+
+    // Masthead
+    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(34, 26, 956, 3);
+    ctx.fillStyle = '#18181b'; ctx.fillRect(34, 33, 956, 1);
+
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#4b5563'; ctx.font = `600 13px ${SANS}`;
+    ctx.textAlign = 'left'; ctx.fillText(article.dateLabel || '', 34, 65);
+    ctx.textAlign = 'right'; ctx.fillText('GILLES PENNING', 990, 65);
+    ctx.fillStyle = '#18181b'; ctx.font = `700 30px ${FONT}`;
+    ctx.textAlign = 'center'; ctx.fillText('MEDTECH SIGNAL', 512, 68);
+
+    ctx.fillStyle = '#18181b'; ctx.fillRect(34, 82, 956, 1.5);
+    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, 87, 956, 1);
+
+    // Full-width headline & real article summary lead
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1e3a8a';
+    ctx.font = `700 44px ${FONT}`;
+    let subY;
+    if (ctx.measureText(article.title).width <= 956) {
+      ctx.fillText(article.title, 34, 140, 956);
+      subY = 172;
+    } else {
+      ctx.font = `700 35px ${FONT}`;
+      const hLines = wrapLines(article.title, 956, 2);
+      hLines.forEach((line, i) => ctx.fillText(line, 34, 132 + i * 42, 956));
+      subY = 132 + hLines.length * 42 - 6;
+    }
+
+    ctx.fillStyle = '#18181b'; ctx.font = `400 17px ${SANS}`;
+    const sLines = wrapLines(article.subtitle, 956, 2);
+    sLines.forEach((line, i) => ctx.fillText(line, 34, subY + i * 23, 956));
+
+    const ruleY = subY + Math.max(sLines.length, 1) * 23 + 4;
+    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, ruleY, 956, 1.2);
+    const bodyY = ruleY + 14;
+
+    // Lead left + center columns: aspect-preserved real article graphic + two quiet newsprint columns
+    const frameH = 354;
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(34, bodyY, 630, frameH);
+    ctx.strokeStyle = '#dcd9d0'; ctx.lineWidth = 1; ctx.strokeRect(34, bodyY, 630, frameH);
+    if (heroImg.complete && heroImg.naturalWidth > 0) {
+      const pad = 6, fw = 630 - pad * 2, fh = frameH - pad * 2;
+      const s = Math.min(fw / heroImg.naturalWidth, fh / heroImg.naturalHeight);
+      const dw = heroImg.naturalWidth * s, dh = heroImg.naturalHeight * s;
+      ctx.drawImage(heroImg, 34 + pad + (fw - dw) / 2, bodyY + pad + (fh - dh) / 2, dw, dh);
+    } else {
+      ctx.fillStyle = '#edeae2';
+      ctx.fillRect(46, bodyY + 12, 606, frameH - 24);
+    }
+
+    const colTop = bodyY + frameH + 18;
+    drawBars(34, colTop, [296, 284, 294, 276, 210], 4.5, 16, 728);
+    drawBars(364, colTop, [294, 298, 282, 288, 195], 4.5, 16, 728);
+
+    // Vertical newspaper column rule
+    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(682, bodyY, 1, 726 - bodyY);
+
+    // Right column: abstract text lines, existing editorial quote, bottom URL
+    drawBars(700, bodyY + 4, [286, 272, 288, 264, 210], 4.5, 17, 700);
+
+    const qY = bodyY + 102;
+    ctx.font = `italic 18.5px ${FONT}`;
+    const qLines = wrapLines(article.quote, 254, 4);
+    const qH = Math.max(84, 34 + qLines.length * 26);
+    ctx.fillStyle = '#e8edf7'; ctx.fillRect(700, qY, 290, qH);
+    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(700, qY, 4, qH);
+    ctx.fillStyle = '#172554';
+    qLines.forEach((line, i) => ctx.fillText(line, 718, qY + 34 + i * 26, 254));
+
+    drawBars(700, qY + qH + 22, [284, 290, 270, 286, 276, 282, 264, 198], 4.5, 17, 686);
+
+    ctx.fillStyle = '#1e3a8a'; ctx.font = `600 13px ${SANS}`;
+    ctx.fillText('medtechsignal.substack.com', 700, 720);
+
+    // Whisper-light horizontal newspaper fold crease
+    const fold = ctx.createLinearGradient(0, 368, 0, 400);
+    fold.addColorStop(0, 'rgba(24,24,27,0)');
+    fold.addColorStop(0.5, 'rgba(24,24,27,0.075)');
+    fold.addColorStop(1, 'rgba(24,24,27,0)');
+    ctx.fillStyle = fold;
+    ctx.fillRect(0, 368, 1024, 32);
+
+    texture.needsUpdate = true;
+  }
+
+  whenFont(drawNewspaper);
+  heroImg.onload = () => { if (heroImg.naturalWidth) drawNewspaper(); };
+  heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
+
+  // Gently waved broadsheet page with a subtle horizontal center fold
+  const pageGeo = new THREE.PlaneGeometry(sheetW - 0.004, sheetD - 0.004, 8, 16);
+  const pos = pageGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const v = pos.getY(i) / (sheetD - 0.004) + 0.5;
+    const ripple = Math.sin(v * Math.PI) * 0.0014 - Math.exp(-Math.pow((v - 0.5) * 14, 2)) * 0.0009;
+    pos.setZ(i, ripple);
+  }
+  pageGeo.computeVertexNormals();
+  const print = new THREE.Mesh(pageGeo, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.90 }));
+  print.rotation.x = -Math.PI / 2;
+  print.position.y = 0.0056;
+  print.castShadow = print.receiveShadow = true;
+  group.add(print);
   return group;
 }
 
@@ -1968,9 +2107,13 @@ function furnish(id, g, r, inspectionTargets) {
     const shelf = writingDisplayShelf(g, L.shelf[0], L.shelf[1], L.shelf[2]);
     inspect('writingShelf', [shelf], -0.18, 0.30, true);
     const protein = proteinSculpture(shelf, -0.39, 1.0, 0.02);
-    const article = articlePaper(shelf, -0.38, 0.705, 0.02);
     inspect('protein', [protein], -0.14, 0.32);
-    inspect('latestArticle', [article], -0.14, 0.72);
+    const paperRots = [0.018, -0.024, 0.014, -0.018, 0.022];
+    substackData.articles.forEach((entry, i) => {
+      const px = -0.56 + i * 0.28;
+      const paper = articlePaper(shelf, px, 0.705, 0.02, entry, paperRots[i % paperRots.length]);
+      inspect(entry.key, [paper], -0.14, 0.72);
+    });
     const speakingPic = standingPicture(g, 'writing-shelf-1', ...L.speaking, -0.12, 0.78);
     loungeFern(g, -RW / 2 + 0.47, RD / 2 - 0.54);
     return { projectPicks, speakingPic };

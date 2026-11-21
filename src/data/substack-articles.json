@@ -1,0 +1,57 @@
+{
+  "feedUrl": "https://medtechsignal.substack.com/feed",
+  "refreshIntervalDays": 5,
+  "lastChecked": "2026-11-21",
+  "articles": [
+    {
+      "key": "latestArticle",
+      "date": "2026-11-06",
+      "dateLabel": "6 NOV 2026",
+      "title": "Can AI See Death in Your Eyes?",
+      "subtitle": "What a conversation with a palliative care doctor taught me about a rather unusual AI study.",
+      "quote": "AI, medicine and the questions behind the numbers.",
+      "image": "models/article-death-eyes.webp",
+      "href": "https://medtechsignal.substack.com/p/can-ai-see-death-in-your-eyes"
+    },
+    {
+      "key": "substackArticle2",
+      "date": "2026-10-13",
+      "dateLabel": "13 OCT 2026",
+      "title": "Die langweilige AI-Revolution",
+      "subtitle": "Warum der größte AI-Effekt im Gesundheitswesen zunächst unspektakulär aussehen wird und dabei dringend notwendig ist.",
+      "quote": "Weniger Dokumentation, bessere Koordination, mehr Zeit für Patienten.",
+      "image": "models/article-boring-ai.webp",
+      "href": "https://medtechsignal.substack.com/p/die-langweilige-ai-revolution"
+    },
+    {
+      "key": "substackArticle3",
+      "date": "2026-07-06",
+      "dateLabel": "6 JUL 2026",
+      "title": "The heart has a blue screen of death. AI learns to predict it.",
+      "subtitle": "A new paper brings two of my favorite topics together: AI and defibrillation.",
+      "quote": "AI, sudden cardiac arrest and what it means for MedTech.",
+      "image": "models/article-heart-bsod.webp",
+      "href": "https://medtechsignal.substack.com/p/the-heart-has-a-blue-screen-of-death-4d8"
+    },
+    {
+      "key": "substackArticle4",
+      "date": "2026-06-15",
+      "dateLabel": "15 JUN 2026",
+      "title": "Health-Daten: Mitten im medizinischen Souveränitätsverlust",
+      "subtitle": "Wir geben schleichend ein erhebliches Stück unserer digitalen Souveränität her, unsere Gesundheitsdaten.",
+      "quote": "Souveränität vs. Profit: Wer kontrolliert unsere Gesundheitsdaten?",
+      "image": "models/article-health-data.webp",
+      "href": "https://medtechsignal.substack.com/p/health-daten-mitten-im-medizinische"
+    },
+    {
+      "key": "substackArticle5",
+      "date": "2026-04-26",
+      "dateLabel": "26 APR 2026",
+      "title": "KI-Diagnostik hat ein Problem mit dem realen Leben",
+      "subtitle": "Wir alle kennen die Headline – KI-Ärzte sind genial. Eine neue Studie weckt Zweifel.",
+      "quote": "Strukturierte Daten sind die Grundlage sicherer Entscheidungen.",
+      "image": "models/article-ki-diagnostik.webp",
+      "href": "https://medtechsignal.substack.com/p/ki-diagnostik-hat-ein-problem-mit"
+    }
+  ]
+}

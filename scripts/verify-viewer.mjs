@@ -430,4 +430,100 @@ assert(stage.classList.contains('object-focused'), 'Paper first click focuses th
 api.debug.selectProject('latestArticle'); draw();
 assert(openedTabs.some(tab=>tab.url==='https://medtechsignal.substack.com/p/can-ai-see-death-in-your-eyes'), 'Paper second click opens article');
 assert(api.closeNote()); draw();
+
+// ArrowLeft / ArrowRight navigation across articles, books, and projects
+const fireKey = (targetEl, key, extra = {}) => {
+  const ev = { target: targetEl, key, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, stopPropagation() {}, ...extra };
+  if (targetEl === stage) stage.fire('keydown', ev);
+  else for (const fn of globalListeners.keydown || []) fn(ev);
+  draw();
+  return ev;
+};
+
+// 1. Substack articles in Writing & Speaking
+api.open('writing'); draw();
+api.debug.selectProject('latestArticle'); draw();
+assert.equal(api.debug.focusedKey, 'latestArticle');
+const art1X = api.debug.goal.t.x;
+fireKey(stage, 'ArrowRight');
+assert.equal(api.debug.focusedKey, 'substackArticle2', 'ArrowRight steps to 2nd Substack paper');
+assert(api.debug.goal.t.x > art1X, 'Next article target sits further right');
+const tabsBeforeArrowOpen = openedTabs.length;
+api.debug.selectProject('substackArticle2'); draw();
+assert.equal(openedTabs.length, tabsBeforeArrowOpen + 1);
+assert(openedTabs.at(-1).url.includes('die-langweilige-ai-revolution'));
+fireKey(stage, 'ArrowLeft');
+assert.equal(api.debug.focusedKey, 'latestArticle', 'ArrowLeft returns to 1st article');
+fireKey(stage, 'ArrowLeft');
+assert.equal(api.debug.focusedKey, 'substackArticle5', 'ArrowLeft wraps from 1st to 5th article');
+assert(api.closeNote()); draw();
+assert(!stage.classList.contains('object-focused'));
+
+// 2. Projects gallery displays (via global window keydown while focus is on card)
+api.open('projects'); draw();
+api.debug.selectProject('wimmelbild'); draw();
+assert.equal(api.debug.popKey, 'wimmelbild');
+fireKey(card, 'ArrowRight');
+assert.equal(api.debug.popKey, 'monitor', 'ArrowRight advances from Wimmelbild to AI Monitor');
+assert(card.classList.contains('project-link'));
+fireKey(card, 'ArrowRight');
+assert.equal(api.debug.popKey, 'praxisfaden', 'ArrowRight advances to Praxisfaden');
+assert(!card.classList.contains('project-link'));
+const arrowSoonBadge = stage.children.find(element => element.classList.contains('project-soon-badge'));
+assert(!arrowSoonBadge.hidden, 'Coming Soon badge updates immediately on arrow navigation');
+fireKey(card, 'ArrowLeft');
+assert.equal(api.debug.popKey, 'monitor');
+fireKey(card, 'ArrowLeft');
+fireKey(card, 'ArrowLeft');
+assert.equal(api.debug.popKey, 'elbstrand', 'ArrowLeft wraps around to last project');
+assert(api.back()); draw();
+assert(!stage.classList.contains('object-focused') && api.debug.popKey === null, 'Single BACK exits project sequence to room');
+
+// 3. Curated books (Writing left-to-right across anchors, extracted transition, and About multi-tier shelf)
+api.open('writing'); draw();
+const coversBeforeArrow = covers().filter(r => r.url.includes('cover-lg')).length;
+api.debug.tapShelfBook('factfulness'); draw();
+for (let i = 0; i < 4; i++) fireKey(stage, 'ArrowRight');
+assert.equal(api.debug.bookUI.activeId, 'guns-germs-and-steel', 'ArrowRight follows physical left-to-right shelf order across anchors');
+assert(!api.debug.bookUI.isExtracted(), 'Stepping between framed books keeps next book framed on shelf');
+assert.equal(covers().filter(r => r.url.includes('cover-lg')).length, coversBeforeArrow, 'Stepping framed books must not load large covers');
+fireKey(stage, 'ArrowLeft');
+assert.equal(api.debug.bookUI.activeId, 'the-weirdest-people');
+const weirdMesh = api.debug.bookUI.getMesh('the-weirdest-people');
+const weirdOrigin = weirdMesh.position.clone();
+api.debug.tapShelfBook('the-weirdest-people'); draw();
+assert(api.debug.bookUI.isExtracted());
+fireKey(stage, 'ArrowRight');
+assert.equal(api.debug.bookUI.activeId, 'guns-germs-and-steel');
+assert(api.debug.bookUI.isExtracted(), 'Stepping from extracted book lifts next book');
+assert.equal(api.debug.bookUI.activeFace, 'front', 'Extracted neighbor book starts at cover (D-097)');
+assert(weirdMesh.position.distanceTo(weirdOrigin) < 1e-8, 'Previous extracted book returns cleanly to its shelf slot');
+assert(api.back()); draw();
+assert(!api.debug.bookUI.isActive() && !stage.classList.contains('object-focused'));
+
+api.open('about'); draw();
+api.debug.tapShelfBook('bloodlands'); draw();
+fireKey(stage, 'ArrowRight');
+assert.equal(api.debug.bookUI.activeId, 'project-hail-mary', 'Top cabinet bay right end is leaning Project Hail Mary');
+fireKey(stage, 'ArrowRight');
+assert.equal(api.debug.bookUI.activeId, 'the-fortress', 'ArrowRight drops down to upper cabinet left book');
+assert(api.closeNote()); draw();
+
+// 4. Guards: unfocused stage still orbits; Shift+ArrowRight pans instead of stepping; <input> is untouched
+api.open('projects'); draw();
+const roomAzBefore = api.debug.goal.az;
+fireKey(stage, 'ArrowRight');
+assert(Math.abs(api.debug.goal.az - roomAzBefore) > 0.05, 'Unfocused room ArrowRight still orbits');
+api.debug.selectProject('wimmelbild'); draw();
+const wimmelPosBeforeShift = api.debug.goal.t.clone();
+fireKey(stage, 'ArrowRight', { shiftKey: true });
+assert.equal(api.debug.popKey, 'wimmelbild', 'Shift+ArrowRight must pan, not step project');
+assert(api.debug.goal.t.distanceTo(wimmelPosBeforeShift) > 0.01);
+const fakeInput = new Element('input');
+fakeInput.focus();
+fireKey(fakeInput, 'ArrowRight');
+assert.equal(api.debug.popKey, 'wimmelbild', 'Input elements keep native ArrowRight behavior');
+assert(api.closeNote()); draw();
+console.log('arrow navigation: articles, projects, books (framed, extracted, multi-tier) & orbit/shift/input guards: passed');
+
 api.open(null); draw();

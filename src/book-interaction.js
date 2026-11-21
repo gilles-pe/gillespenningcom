@@ -129,7 +129,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     selected.face = face;
     fillCard(); markDirty();
   }
-  function extract() {
+  function extract(viewPose = null) {
     if (!selected || selected.returning) return false;
     // First slide the book forwards beyond the shelf's front edge, THEN turn
     // it towards the visitor. Store the direction once so orbiting the camera
@@ -138,8 +138,11 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     s.mesh.parent.updateWorldMatrix(true, false);
     const parentQ = s.mesh.parent.getWorldQuaternion(new THREE.Quaternion());
     const outward = FORWARD.clone().applyQuaternion(parentQ).normalize();
-    const toEye = camera.position.clone().sub(s.originWorld).normalize();
-    const cameraUp = VERTICAL.clone().applyQuaternion(camera.quaternion).normalize();
+    const eye = viewPose?.eye || camera.position;
+    const toEye = eye.clone().sub(s.originWorld).normalize();
+    const cameraUp = viewPose?.up
+      ? viewPose.up.clone().normalize()
+      : VERTICAL.clone().applyQuaternion(camera.quaternion).normalize();
     s.faceDirection = toEye;
     s.cameraUp = cameraUp;
     s.pull = outward.multiplyScalar(SHELF_PULL)

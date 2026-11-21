@@ -2,6 +2,7 @@ import { enterpriseCopy, labelShipAction } from './enterprise-copy.js';
 import { loadEnterpriseGlb, createRoomWarp } from './enterprise.js';
 import { createGlobeFlight } from './globe-flight.js';
 import substackData from './data/substack-articles.json';
+import booksCatalog from './data/books.json';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
@@ -114,6 +115,35 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     stage, scene, camera, reduced, language: lang, markDirty,
     onReturn: () => { bookUI.close(false); if (objectFocus?.target?.bookId) restoreObjectView(); markDirty(); },
   });
+  function buildRoomBookOrder() {
+    const byRoom = {};
+    const box = new THREE.Box3(), itemCenter = new THREE.Vector3();
+    for (const room of ['about', 'writing']) {
+      const items = [];
+      for (const book of booksCatalog.books) {
+        if (book.room !== room) continue;
+        const mesh = bookUI.getMesh(book.id);
+        if (!mesh) continue;
+        mesh.updateWorldMatrix(true, false);
+        box.setFromObject(mesh).getCenter(itemCenter);
+        items.push({ id: book.id, minY: box.min.y, x: itemCenter.x });
+      }
+      items.sort((a, b) => b.minY - a.minY);
+      const tiers = [];
+      for (const item of items) {
+        const tier = tiers.at(-1);
+        if (!tier || tier.topY - item.minY > 0.18) tiers.push({ topY: item.minY, items: [item] });
+        else tier.items.push(item);
+      }
+      byRoom[room] = tiers.flatMap(tier =>
+        tier.items
+          .sort((a, b) => (Math.abs(a.x - b.x) < 0.04 ? b.minY - a.minY : a.x - b.x))
+          .map(item => item.id)
+      );
+    }
+    return byRoom;
+  }
+  const roomBookOrder = buildRoomBookOrder();
   // Globe theme: the click that frames the globe creates the AudioContext (browser rule) and loads the player;
   // it plays as soon as it is loaded and stops when the view leaves the globe.
   let music = { state: 'idle', ctx: null, play: null, player: null };
@@ -467,7 +497,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     || inspectionTargets.some(target => target.room === roomId && target.key === key);
   let popEl = null, popBody = null, popImg = null, popTitle = null, popText = null, popMore = null, popTimeline = null, popClose = null, shipActions = null;
   let popKey = null, popTimer = null;
-  const projectKeys = new Set(['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand']);
+  const projectOrder = ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'];
+  const projectKeys = new Set(projectOrder);
+  const substackOrder = substackData.articles.map(a => a.key);
   const soonBadge = document.createElement('div'); soonBadge.className = 'project-soon-badge';
   soonBadge.setAttribute('role', 'status'); soonBadge.hidden = true; stage.append(soonBadge);
   const badgePos = new THREE.Vector3(), badgeBox = new THREE.Box3();
@@ -684,8 +716,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     else popTimer = setTimeout(() => { if (!popKey) popEl.hidden = true; }, 260);
     if (had || restoreFocus) stage.focus({ preventScroll: true });
   }
-  function openPop(key) {
-    rememberView('object');
+  function openPop(key, { replace = false } = {}) {
+    if (!replace) rememberView('object');
     closePhoto(false);
     closeAlbum(false);
     if (!inspectionFor(key)) restoreObjectView();
@@ -732,41 +764,57 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     popEl.classList.toggle('inspection-card', Boolean(inspectionFor(key)));
     fillPop();
     const project = t(curLang, `model.projectCards.${key}`);
-    popEl.classList.toggle('project-link', ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand'].includes(key) && Boolean(project?.href));
+    popEl.classList.toggle('project-link', projectKeys.has(key) && Boolean(project?.href));
     popEl.hidden = false;
     popEl.inert = false;
     updatePop();
     void popEl.offsetWidth;
     popEl.classList.add('on');
     const target = inspectionFor(key);
-    if (target) { stage.classList.add('object-focused'); focusObject(target); }
+    if (target) { stage.classList.add('object-focused'); focusObject(target, !replace); }
+    updateSoonBadge();
     popClose.focus({ preventScroll: true });
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
+  }
+  function extractCurrentBook(useGoalPose = false) {
+    let viewPose = null;
+    if (useGoalPose) {
+      const ce = Math.cos(goal.el), se = Math.sin(goal.el), sa = Math.sin(goal.az), ca = Math.cos(goal.az);
+      viewPose = {
+        eye: new THREE.Vector3(
+          goal.t.x + goal.dist * ce * sa,
+          goal.t.y + goal.dist * se,
+          goal.t.z + goal.dist * ce * ca,
+        ),
+        up: new THREE.Vector3(-se * sa, ce, -se * ca).normalize(),
+      };
+    }
+    if (!bookUI.extract(viewPose)) return false;
+    // Reframe the extracted book rather than the old shelf slot. A little
+    // breathing room is essential: at the original close-up distance the
+    // cover could be clipped by the camera or remain behind the cabinet.
+    const presentation = bookUI.getPresentationPoint();
+    if (presentation) {
+      const screenUp = viewPose ? viewPose.up : new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+      goal.t.copy(presentation).addScaledVector(screenUp, -0.09);
+      goal.dist = Math.max(goal.dist, 1.28);
+      custom = true;
+      zoom = clampZoom(goal.dist / home.dist);
+      panOffset.copy(goal.t).sub(home.t);
+      if (reduced) {
+        view.az = goal.az; view.el = goal.el;
+        view.dist = goal.dist; view.t.copy(goal.t);
+      }
+      checkAway();
+    }
+    return true;
   }
   function tapShelfBook(id) {
     const mesh = bookUI.getMesh(id);
     if (!mesh) return;
     if (bookUI.isFocused(id)) {
       if (bookUI.isExtracted()) bookUI.nextFace();
-      else if (bookUI.extract()) {
-        // Reframe the extracted book rather than the old shelf slot. A little
-        // breathing room is essential: at the original close-up distance the
-        // cover could be clipped by the camera or remain behind the cabinet.
-        const presentation = bookUI.getPresentationPoint();
-        if (presentation) {
-          const screenUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-          goal.t.copy(presentation).addScaledVector(screenUp, -0.09);
-          goal.dist = Math.max(goal.dist, 1.28);
-          custom = true;
-          zoom = clampZoom(goal.dist / home.dist);
-          panOffset.copy(goal.t).sub(home.t);
-          if (reduced) {
-            view.az = goal.az; view.el = goal.el;
-            view.dist = goal.dist; view.t.copy(goal.t);
-          }
-          checkAway();
-        }
-      }
+      else extractCurrentBook(false);
       markDirty();
       return;
     }
@@ -783,6 +831,49 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     });
   }
   const substackByKey = new Map(substackData.articles.map(a => [a.key, a]));
+  function stepFocusedItem(dir) {
+    if (!openId) return false;
+    const clearHover = () => { hoverTarget = null; hoverTip.hidden = true; };
+    const focusedKey = objectFocus?.target?.key;
+    if (openId === 'writing' && substackByKey.has(focusedKey)) {
+      const idx = substackOrder.indexOf(focusedKey);
+      const nextKey = substackOrder[(idx + dir + substackOrder.length) % substackOrder.length];
+      const nextTarget = inspectionFor(nextKey);
+      if (!nextTarget) return false;
+      clearHover();
+      focusObject(nextTarget, false);
+      return true;
+    }
+    if (openId === 'projects' && projectKeys.has(popKey)) {
+      const idx = projectOrder.indexOf(popKey);
+      const nextKey = projectOrder[(idx + dir + projectOrder.length) % projectOrder.length];
+      clearHover();
+      openPop(nextKey, { replace: true });
+      return true;
+    }
+    const books = roomBookOrder[openId];
+    if (bookUI.isActive() && books?.includes(bookUI.activeId)) {
+      const idx = books.indexOf(bookUI.activeId);
+      const nextId = books[(idx + dir + books.length) % books.length];
+      const mesh = bookUI.getMesh(nextId);
+      if (!mesh) return false;
+      const wasExtracted = bookUI.isExtracted();
+      const az = objectFocus?.target?.az ?? goal.az;
+      const el = objectFocus?.target?.el ?? Math.max(.25, Math.min(.75, goal.el));
+      clearHover();
+      bookUI.close(true);
+      bookUI.start(nextId);
+      stage.classList.add('object-focused');
+      focusObject({
+        id: `book:${nextId}`, key: `book:${nextId}`, bookId: nextId, room: openId,
+        objects: [mesh], az, el, margin: 1.16, captionHeight: 0,
+      }, false);
+      if (wasExtracted) extractCurrentBook(true);
+      markDirty();
+      return true;
+    }
+    return false;
+  }
   function togglePop(key) {
     if (openId === 'writing' && (key === 'protein' || substackByKey.has(key))) {
       if (objectFocus?.target?.key === key) {
@@ -1186,6 +1277,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       openAlbumBook();
       return;
     }
+    if (!e.defaultPrevented && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey
+      && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')
+      && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)
+      && !document.activeElement?.isContentEditable
+      && !document.querySelector?.('dialog[open]')
+      && stepFocusedItem(e.key === 'ArrowRight' ? 1 : -1)) {
+      e.preventDefault();
+      return;
+    }
     if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
       spaceDown = true;
       if (e.target === stage) e.preventDefault();
@@ -1320,10 +1420,15 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (Math.abs(e.deltaX) > 2 && Math.abs(e.deltaX) >= Math.abs(e.deltaY)) panBy(-e.deltaX * 0.8, 0, false);
     else zoomBy(Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), false);
   }, { passive: false });
-  // Shift + Arrow keys pan; Arrow keys orbit when the stage has focus.
+  // Shift + Arrow keys pan; Arrow keys navigate focused articles/books/projects or orbit the stage.
   stage.addEventListener('keydown', e => {
     if (e.target !== stage) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!e.shiftKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && stepFocusedItem(e.key === 'ArrowRight' ? 1 : -1)) {
+      e.preventDefault();
+      e.stopPropagation?.();
+      return;
+    }
     const S = 0.14, P = 48; let used = true;
     switch (e.key) {
       case 'ArrowLeft': if (e.shiftKey || panMode) panBy(P, 0); else orbit(-S, 0); break;
@@ -1532,6 +1637,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         get music() { return music.state; },
         get custom() { return custom; },
         get zoom() { return zoom; },
+        get focusedKey() { return objectFocus?.target?.key ?? null; },
+        get popKey() { return popKey; },
         inspectionTargets,
         inspect: key => openPop(key),
         selectProject: key => togglePop(key),

@@ -44,7 +44,7 @@ export const content = {
     hero: {
       h1: 'Why is change so hard in healthcare?',
       p1: 'As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care.',
-      p2Html: `I look back on 25 years in MedTech, alongside great people and projects. Here I share my projects - the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor ↗</a> on progress in medical AI and the <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book ↗</a> to explore AI through play - as well as thoughts on the future of healthcare and analysis in my newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal ↗</a>.`,
+      p2Html: `I look back on 25 years in MedTech, alongside great people and projects. Here I share my projects - the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor\u00A0↗</a> on progress in medical AI and the <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book\u00A0↗</a> to explore AI through play - as well as thoughts on the future of healthcare and analysis in my newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal\u00A0↗</a>.`,
     },
     strip: {
       label: 'More links',
@@ -376,7 +376,7 @@ export const content = {
     hero: {
       h1: 'Warum ist Veränderung im Gesundheitswesen so schwer?',
       p1: 'Mit der alternden Bevölkerung wächst der Bedarf an Versorgung. Daten und KI eröffnen neue Möglichkeiten, und Menschen entscheiden, was davon im Versorgungsalltag ankommt.',
-      p2Html: `Ich blicke auf 25 Jahre in der MedTech zurück, an der Seite großartiger Menschen und Projekte. Hier teile ich meine Projekte - den <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor ↗</a> zum Fortschritt medizinischer KI und das <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book ↗</a>, um KI spielerisch zu entdecken -, Gedanken zur Zukunft des Gesundheitswesens sowie Analysen im Newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal ↗</a>.`,
+      p2Html: `Ich blicke auf 25 Jahre in der MedTech zurück, an der Seite großartiger Menschen und Projekte. Hier teile ich meine Projekte - den <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor\u00A0↗</a> zum Fortschritt medizinischer KI und das <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book\u00A0↗</a>, um KI spielerisch zu entdecken -, Gedanken zur Zukunft des Gesundheitswesens sowie Analysen im Newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal\u00A0↗</a>.`,
     },
     strip: {
       label: 'Weitere Links',

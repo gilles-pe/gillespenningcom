@@ -23,11 +23,15 @@ const viewControls = document.getElementById('view-controls');
 const resetBtn = document.getElementById('reset-view');
 const panBtn = document.getElementById('pan-toggle');
 const zoomSlider = document.getElementById('zoom-view');
-// Programmatic focus after a mouse action must not draw a frame around the scene.
+// Show the stage focus hairline only when focus moves via Tab, never during
+// pointer actions or in-scene arrow/Escape switching (D-071, D-110).
 document.addEventListener('keydown', e => {
-  if (!e.metaKey && !e.ctrlKey && !e.altKey) html.classList.add('keyboard-navigation');
+  if (e.key === 'Tab') document.documentElement.classList.add('keyboard-navigation');
+  else if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Escape'].includes(e.key)) {
+    document.documentElement.classList.remove('keyboard-navigation');
+  }
 }, true);
-document.addEventListener('pointerdown', () => html.classList.remove('keyboard-navigation'), true);
+document.addEventListener('pointerdown', () => document.documentElement.classList.remove('keyboard-navigation'), true);
 const syncZoom = zoom => {
   zoomSlider.value = zoomToSlider(zoom);
   zoomSlider.setAttribute('aria-valuetext', `${Math.round(100 / zoom)}%`);

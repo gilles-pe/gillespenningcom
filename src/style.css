@@ -29,12 +29,22 @@ main { flex: 1 0 auto; }
 .intro { display: grid; min-width: 0; gap: var(--s3); max-width: calc(var(--s7) * 5); }
 h1 { font-size: var(--t5); line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: var(--petrol); text-wrap: balance; font-family: var(--serif); }
 .intro hr { width: var(--s6); margin: 0; border: 0; border-top: 2px solid var(--brass); }
-.hero-actions { display: grid; gap: var(--s2); }
-.hero-action { line-height: 1.35; }
-.hero-link { font-size: var(--t2); font-weight: 600; color: var(--petrol); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: var(--s1); }
-.hero-link:hover { color: var(--brass-ink); text-decoration-color: var(--brass); }
-.hero-desc { font-size: var(--t1); color: var(--muted); }
-.hero-desc::before { content: ' - '; }
+.inline-project-link {
+  color: #163a5f;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  background-color: rgba(22, 58, 95, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.inline-project-link:hover {
+  background-color: rgba(22, 58, 95, 0.14);
+  color: #0d243c;
+}
+.inline-project-link:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
 .btn, .pill { display: inline-flex; align-items: center; gap: var(--s3); height: var(--h2); padding: 0 var(--s3); font-size: var(--t2); font-family: inherit; text-decoration: none; border: 1px solid var(--petrol); border-radius: var(--r1); color: var(--petrol); background: transparent; cursor: pointer; }
 .btn.primary { background: var(--petrol); color: var(--paper); }

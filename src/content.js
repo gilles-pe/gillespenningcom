@@ -44,13 +44,7 @@ export const content = {
     hero: {
       h1: 'Why is change so hard in healthcare?',
       p1: 'As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care.',
-      p2: 'I enjoy 25 years in MedTech, alongside great people and projects. Here I share the projects I build, the ideas I pick up from the people I meet, and a few thoughts on what we need to sustain and improve healthcare in times of technological and demographic changes.',
-      wimmelbild: 'AI Medicine Wimmel Book',
-      wimmelbildDesc: 'Explore medical AI through play',
-      monitor: 'AI in Medicine Monitor',
-      monitorDesc: 'Progress in medical AI',
-      substack: 'MedTech Signal',
-      substackDesc: 'Substack on medicine & technology',
+      p2Html: `I look back on 25 years in MedTech, alongside great people and projects. Here I share my projects - the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor ↗</a> on progress in medical AI and the <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book ↗</a> to explore AI through play - as well as thoughts on the future of healthcare and analysis in my newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal ↗</a>.`,
     },
     strip: {
       label: 'More links',
@@ -382,13 +376,7 @@ export const content = {
     hero: {
       h1: 'Warum ist Veränderung im Gesundheitswesen so schwer?',
       p1: 'Mit der alternden Bevölkerung wächst der Bedarf an Versorgung. Daten und KI eröffnen neue Möglichkeiten, und Menschen entscheiden, was davon im Versorgungsalltag ankommt.',
-      p2: 'Ich blicke auf 25 Jahre in der MedTech zurück, an der Seite großartiger Menschen und Projekte. Hier teile ich die Projekte, an denen ich baue, Ideen aus der Arbeit mit Menschen, denen ich begegne, und ein paar Gedanken dazu, was wir brauchen, um das Gesundheitswesen in Zeiten technologischer und demografischer Veränderungen zukunftsfähig zu machen.',
-      wimmelbild: 'AI Medicine Wimmel Book',
-      wimmelbildDesc: 'KI spielerisch entdecken',
-      monitor: 'AI in Medicine Monitor',
-      monitorDesc: 'Fortschritt medizinischer KI',
-      substack: 'MedTech Signal',
-      substackDesc: 'Substack über Medizin & Technologie',
+      p2Html: `Ich blicke auf 25 Jahre in der MedTech zurück, an der Seite großartiger Menschen und Projekte. Hier teile ich meine Projekte - den <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor ↗</a> zum Fortschritt medizinischer KI und das <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book ↗</a>, um KI spielerisch zu entdecken -, Gedanken zur Zukunft des Gesundheitswesens sowie Analysen im Newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal ↗</a>.`,
     },
     strip: {
       label: 'Weitere Links',

@@ -33,9 +33,16 @@ const HEIGHT = /^(height|min-height|max-height)$/;
 const rawPx = v => [...v.replace(/var\([^)]*\)/g, '').matchAll(/(-?\d*\.?\d+)px/g)].map(m => m[1]);
 const vars = v => [...v.matchAll(/var\((--[\w-]+)/g)].map(m => m[1]);
 
+let selector = '';
+// The owner explicitly approved these exact inline-link values on 2026-11-21.
+// Other declarations and selectors continue to be checked against the token scale.
+const heroInlineExceptions = new Set(['text-decoration-thickness:1.5px', 'padding:1px 5px', 'border-radius:4px']);
 lines.forEach((line, i) => {
+  const selectorStart = line.match(/^\s*([^{}]+)\s*\{/);
+  if (selectorStart) selector = selectorStart[1].trim();
   for (const m of line.matchAll(/(?:^|[{;\s])([a-z-]+)\s*:\s*([^;{}]+)/g)) {
     const prop = m[1], val = m[2];
+    if (file === 'style.css' && selector === '.inline-project-link' && heroInlineExceptions.has(`${prop}:${val.trim()}`)) continue;
     const px = rawPx(val).filter(n => parseFloat(n) !== 0);
     const used = vars(val);
     for (const v of used) if (!defined.has(v) && !['--font'].includes(v)) fail(i, prop, val, `unknown token ${v}`);

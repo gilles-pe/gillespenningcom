@@ -556,6 +556,14 @@ api.open(null); draw();
     api.closeNote(); draw();
   }
   assert.deepEqual(outside, [], 'inspection poses outside the leash');
+  // Turning below the floor while close to an object in a room keeps the object as orbit centre (no jump to the cellar fax).
+  api.open('about'); draw(); api.debug.inspect('enterprise'); draw();
+  const shipTarget = api.debug.goal.t.clone();
+  for (let i = 0; i < 8; i++) fireKey(stage, 'ArrowUp');
+  draw();
+  assert(api.debug.goal.el < 0, 'the turn must reach below the floor for this check');
+  assert(api.debug.goal.t.distanceTo(shipTarget) < 1e-6, 'room close-up: turning under the floor must not drift to the cellar');
+  api.closeNote(); draw();
   api.open(null); api.reset(); draw();
   console.log('pan leash: overview and rooms, drag/keyboard, rubber band and spring-back, inspection poses inside: passed');
 }

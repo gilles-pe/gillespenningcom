@@ -348,7 +348,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   // Zoomed in on the underside, the orbit centre drifts to the middle of the recess, so the close view stays on it.
   function aim() {
-    const w = custom ? THREE.MathUtils.clamp((0.6 - zoom) / 0.3, 0, 1) * THREE.MathUtils.clamp(-Math.sin(goal.el) * 3, 0, 1) : 0;
+    // Overview only: zoomed in close to an object in a room (Enterprise, books) a turn below the floor must not jump to the fax.
+    const w = custom && !openId ? THREE.MathUtils.clamp((0.6 - zoom) / 0.3, 0, 1) * THREE.MathUtils.clamp(-Math.sin(goal.el) * 3, 0, 1) : 0;
     goal.t.copy(home.t).add(panOffset).lerp(cellar.center, w);
     clampTarget(goal.t);
   }

@@ -660,7 +660,7 @@ function writingDisplayShelf(parent, x, z, w) {
   const separate = booksByAnchor['writing-shelf-display-right-separate'];
   for (let i = 0; i < 4; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
     -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, 'upright');
-  for (let i = 0; i < 3; i++) placeCatalogBook(g, middle[i], 0.047, 0.22 - (i % 2) * 0.015, 0.18,
+  for (let i = 0; i < 4; i++) placeCatalogBook(g, middle[i], 0.047, 0.22 - (i % 2) * 0.015, 0.18,
     -0.36 + i * 0.055, 0.365, 0.015, 'upright');
   for (let i = 0; i < 2; i++) placeCatalogBook(g, stack[i], 0.13 - i * 0.006, 0.028, 0.19,
     w / 2 - 0.21, 0.365 + i * 0.032, 0.02, 'horizontal');

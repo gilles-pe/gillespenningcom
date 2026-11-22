@@ -1005,6 +1005,46 @@
         "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-20"
       }
+    },
+    {
+      "id": "riding-the-waves-of-culture",
+      "title": "Riding the Waves of Culture: Understanding Cultural Diversity in Business",
+      "author": "Fons Trompenaars, Charles Hampden-Turner",
+      "editionLanguage": "en",
+      "room": "writing",
+      "placement": {
+        "anchor": "writing-shelf-display-middle",
+        "orientation": "upright",
+        "order": 4
+      },
+      "isbn13": "9781857881769",
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      },
+      "editionSourceUrl": "https://openlibrary.org/isbn/9781857881769",
+      "coverImageStatus": "open-library-image-edition-matched",
+      "backSurface": "generated",
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null,
+      "summary": {
+        "en": "A classic guide to cross-cultural management, showing how cultural differences shape global business."
+      },
+      "summarySourceUrl": "https://www.hachette.co.uk/titles/fons-trompenaars/riding-the-waves-of-culture/9781529346183/",
+      "coverImages": {
+        "small": "/books/riding-the-waves-of-culture/cover-sm.webp",
+        "large": "/books/riding-the-waves-of-culture/cover-lg.webp"
+      },
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/isbn/9781857881769",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9781857881769-L.jpg",
+        "visualReview": "English 2nd edition front cover visually checked against title, authors, and ISBN record. Source image 326 x 500 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "checkedAt": "2026-11-22"
+      }
     }
   ]
 }

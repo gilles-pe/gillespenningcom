@@ -186,7 +186,7 @@ function applyLocation() {
   }
 }
 addEventListener('hashchange', applyLocation);
-// Desktop: clicking a room zooms/re-centers into that room (All rooms button on the right exits). Mobile: second tap toggles out.
+// Desktop: clicking a room zooms/re-centers into that room (Overview button on the right exits). Mobile: second tap toggles out.
 const toggleRoom = id => (current === id && mobile() ? closeRoom() : openRoom(id));
 // A tap on the canvas: id is the room under the pointer, or null.
 function tapCanvas(id) {

@@ -1515,6 +1515,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       case '+': case '=': zoomBy(0.85); break;
       case '-': case '_': zoomBy(1 / 0.85); break;
       case 'Home': case '0': case 't': case 'T': resetView(); break;
+      case 'Enter': if (bookUI.activeId) tapShelfBook(bookUI.activeId); else used = false; break;   // same steps as a click on the book (no card, D-114)
       default: used = false;
     }
     if (used) e.preventDefault();

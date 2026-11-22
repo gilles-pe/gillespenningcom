@@ -1,5 +1,5 @@
-// Physical book removal and compact catalog card. The 3D mesh stays in the scene:
-// first click frames it, second lifts and turns it; closing returns it to its shelf.
+// Physical book removal without a card (D-114). The 3D mesh stays in the scene: first click frames it,
+// then clicks on the book show cover, spine and back, and the fourth puts it back on its shelf.
 import * as THREE from 'three';
 import catalog from './data/books.json';
 import { showLargeBookCover, releaseLargeBookCover } from './book-jackets.js';
@@ -16,8 +16,8 @@ const easeOut = progress => 1 - (1 - progress) ** 3;
 const smoothStep = progress => { const x = THREE.MathUtils.clamp(progress, 0, 1); return x * x * (3 - 2 * x); };
 
 const labels = {
-  en: { shelf: 'From the bookshelf', close: 'Return book', front: 'Cover', spine: 'Spine', back: 'Back', return: 'Return to shelf', shop: 'View edition' },
-  de: { shelf: 'Aus dem Bücherregal', close: 'Buch zurückstellen', front: 'Cover', spine: 'Rücken', back: 'Rückseite', return: 'Zurück ins Regal', shop: 'Ausgabe ansehen' },
+  en: { front: 'cover', spine: 'spine', back: 'back' },
+  de: { front: 'Cover', spine: 'Rücken', back: 'Rückseite' },
 };
 
 function targetOrientation(normal, up, towardsCamera, cameraUp) {
@@ -35,71 +35,21 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   });
 
   let selected = null;
-  let card = null, kicker, heading, author, summary, closeBtn, returnBtn, shopBtn, faceButtons = [];
+  let status = null;                                         // visually hidden: the book and its face for screen readers
   let currentLanguage = language === 'de' ? 'de' : 'en';
 
-  function ensureCard() {
-    if (card) return;
-    card = document.createElement('section');
-    card.className = 'book-inspector-card';
-    card.hidden = true;
-    card.inert = true;
-    card.setAttribute('role', 'region');
-    closeBtn = document.createElement('button');
-    closeBtn.type = 'button'; closeBtn.className = 'card-x book-inspector-close'; closeBtn.textContent = '×';
-    closeBtn.addEventListener('click', () => onReturn?.());
-
-    kicker = document.createElement('div'); kicker.className = 'book-inspector-kicker';
-    heading = document.createElement('h3'); heading.className = 'book-inspector-title';
-    author = document.createElement('p'); author.className = 'book-inspector-author';
-    summary = document.createElement('p'); summary.className = 'book-inspector-summary';
-
-    const actions = document.createElement('div'); actions.className = 'book-inspector-faces';
-    for (const face of ['front', 'spine', 'back']) {
-      const button = document.createElement('button');
-      button.type = 'button'; button.className = 'book-inspector-action';
-      button.dataset.bookFace = face;
-      button.addEventListener('click', () => showFace(face));
-      faceButtons.push(button);
-      actions.append(button);
+  // No visible card (D-114): the book itself is the interface. A polite live region names it for assistive technology.
+  function announce() {
+    if (!selected?.extracted) { if (status) status.textContent = ''; return; }
+    if (!status) {
+      status = document.createElement('p');
+      status.className = 'book-status';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      stage.append(status);
     }
-    const footer = document.createElement('div'); footer.className = 'book-inspector-footer';
-    returnBtn = document.createElement('button'); returnBtn.type = 'button'; returnBtn.className = 'book-inspector-return';
-    returnBtn.addEventListener('click', () => onReturn?.());
-    shopBtn = document.createElement('a'); shopBtn.className = 'book-inspector-link';
-    shopBtn.target = '_blank'; shopBtn.rel = 'noopener noreferrer';
-    footer.append(returnBtn, shopBtn);
-    card.append(closeBtn, kicker, heading, author, summary, actions, footer);
-    stage.append(card);
-  }
-  function fillCard() {
-    if (!card || !selected) return;
-    const text = labels[currentLanguage];
-    const { book } = selected;
-    card.setAttribute('aria-label', book.title);
-    closeBtn.setAttribute('aria-label', text.close);
-    kicker.textContent = text.shelf;
-    heading.textContent = book.title;
-    author.textContent = book.author;
-    // These are neutral publisher-based synopses, NOT personal recommendations.
-    summary.textContent = book.summary?.[currentLanguage] || book.summary?.en || '';
-    summary.hidden = !summary.textContent;
-    for (const btn of faceButtons) {
-      btn.textContent = text[btn.dataset.bookFace];
-      btn.setAttribute('aria-pressed', String(btn.dataset.bookFace === selected.face));
-    }
-    returnBtn.textContent = text.return;
-    shopBtn.textContent = text.shop;
-    const link = book.amazonUrl;
-    shopBtn.hidden = !(typeof link === 'string' && /^https:\/\//.test(link));
-    if (shopBtn.hidden) shopBtn.removeAttribute('href');
-    else shopBtn.href = link;
-  }
-  function hideCard() {
-    if (!card) return;
-    card.hidden = true;
-    card.inert = true;
-    card.classList.remove('on');
+    const { book, face } = selected;
+    status.textContent = `${book.title}, ${book.author} - ${labels[currentLanguage][face]}`;
   }
   function start(id) {
     if (!meshes.has(id) || !byId.has(id)) return null;
@@ -127,7 +77,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   function showFace(face) {
     if (!selected || !selected.extracted || !['front', 'spine', 'back'].includes(face)) return;
     selected.face = face;
-    fillCard(); markDirty();
+    announce(); markDirty();
   }
   function extract(viewPose = null) {
     if (!selected || selected.returning) return false;
@@ -152,10 +102,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     s.extracted = true;
     s.face = 'front';
     showLargeBookCover(s.id);
-    ensureCard();
-    fillCard();
-    card.hidden = false; card.inert = false;
-    card.classList.add('on');
+    announce();
     markDirty();
     return true;
   }
@@ -210,10 +157,9 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
     return travelling || turning;
   }
   function close(immediate = true) {
-    if (!selected) { hideCard(); return false; }
+    if (!selected) return false;
     const s = selected;
     releaseLargeBookCover(s.id);
-    hideCard();
     if (immediate || reduced || !s.extracted) {
       s.mesh.position.copy(s.originPosition);
       s.mesh.quaternion.copy(s.originQuaternion);
@@ -222,12 +168,13 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
       s.extracted = false;
       s.returning = true;
     }
+    if (status) status.textContent = '';
     markDirty();
     return true;
   }
   function setLanguage(next) {
     currentLanguage = next === 'de' ? 'de' : 'en';
-    fillCard();
+    announce();
   }
   return {
     getMesh: id => meshes.get(id),

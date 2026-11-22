@@ -143,7 +143,7 @@ External HTTP(S) destinations open in a new tab with a focus request; browsers m
 
 
 ## Curated book interaction (D-097)
-- The 26 English-edition books live in src/data/books.json; keep titles, synopsis sources and placements in data.
+- The 27 English-edition books live in src/data/books.json; keep titles, synopsis sources and placements in data.
 - Book meshes use src/book-jackets.js; src/book-interaction.js animates removal and rotation. The very first scene click only frames the book. Subsequent clicks on that same book follow **1 Cover (lift), 2 Spine, 3 Back, 4 return to shelf**. Never cycle Back to Cover on the fourth interaction. No card is shown for books (D-114): the book itself is the interface; Enter on the focused stage does the same as a click, a visually hidden status names the book and face for screen readers, and BACK / Escape / Reset / room changes restore it. Test the whole sequence and a fresh restart after returning.
 - Synopses are short, neutral, in English, sourced from published book descriptions. No invented owner endorsements. The reserved personalNote stays hidden until owner text is supplied.
 - Do not add a book card or book buttons back without an owner decision (D-114). Synopses stay in the data for later use.

@@ -495,7 +495,7 @@
       "placement": {
         "anchor": "about-cabinet-lower-left",
         "orientation": "upright",
-        "order": 3
+        "order": 4
       },
       "isbn13": "9780857522405",
       "amazonUrl": null,
@@ -575,7 +575,7 @@
       "placement": {
         "anchor": "about-cabinet-lower-right-stack",
         "orientation": "horizontal",
-        "order": 2
+        "order": 3
       },
       "isbn13": "9781529060560",
       "amazonUrl": null,
@@ -615,7 +615,7 @@
       "placement": {
         "anchor": "about-cabinet-lower-right-stack",
         "orientation": "horizontal",
-        "order": 3
+        "order": 2
       },
       "isbn13": "9781784978518",
       "amazonUrl": null,
@@ -1042,6 +1042,46 @@
         "editionSourceUrl": "https://openlibrary.org/isbn/9781857881769",
         "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9781857881769-L.jpg",
         "visualReview": "English 2nd edition front cover visually checked against title, authors, and ISBN record. Source image 326 x 500 pixels.",
+        "usageRights": "Open Library image; underlying cover rights not independently established.",
+        "checkedAt": "2026-11-22"
+      }
+    },
+    {
+      "id": "leviathan-wakes",
+      "title": "Leviathan Wakes",
+      "author": "James S. A. Corey",
+      "editionLanguage": "en",
+      "room": "about",
+      "placement": {
+        "anchor": "about-cabinet-lower-left",
+        "orientation": "upright",
+        "order": 3
+      },
+      "isbn13": "9781841499895",
+      "amazonUrl": null,
+      "coverImage": null,
+      "personalNote": {
+        "en": null,
+        "de": null
+      },
+      "editionSourceUrl": "https://openlibrary.org/isbn/9781841499895",
+      "coverImageStatus": "open-library-image-edition-matched",
+      "backSurface": "generated",
+      "spineSurface": "generated",
+      "backImage": null,
+      "spineImage": null,
+      "summary": {
+        "en": "The opening novel of The Expanse: humanity has colonized the solar system, and a missing woman triggers a conspiracy across space."
+      },
+      "summarySourceUrl": "https://www.hachette.co.uk/titles/james-s-a-corey/leviathan-wakes/9781841499895/",
+      "coverImages": {
+        "small": "/books/leviathan-wakes/cover-sm.webp",
+        "large": "/books/leviathan-wakes/cover-lg.webp"
+      },
+      "coverResearch": {
+        "editionSourceUrl": "https://openlibrary.org/isbn/9781841499895",
+        "imageSourceUrl": "https://covers.openlibrary.org/b/isbn/9781841499895-L.jpg",
+        "visualReview": "English Orbit edition front cover visually checked against title, author, and ISBN record. Source image 317 x 500 pixels.",
         "usageRights": "Open Library image; underlying cover rights not independently established.",
         "checkedAt": "2026-11-22"
       }

@@ -50,7 +50,7 @@ const finishCover = suffix => { const request = covers().find(r => r.url.endsWit
 const catalog=testCatalog().books;
 assert.equal(covers().length, 0, 'Overview must not request any book covers');
 // The physical book catalog is resolved from the scene, not decorative proxies.
-assert.equal(api.debug.bookUI.bookCount,26);
+assert.equal(api.debug.bookUI.bookCount,27);
 const wright=api.debug.bookUI.getMesh('the-wright-brothers');
 assert(wright && wright.isMesh);
 const initialWright=wright.position.clone();
@@ -89,7 +89,7 @@ assert.equal(unicorn.material[0].map,unicornSmall,'A failed large cover must lea
 assert(api.back());draw();
 assert(!api.debug.bookUI.isActive());
 assert(wright.position.distanceTo(initialWright)<1e-8);
-console.log('books: 26 real meshes, zoom-first, lift, face, BACK: passed');
+console.log('books: 27 real meshes, zoom-first, lift, face, BACK: passed');
 api.open('writing');draw();
 assert.equal(covers().filter(r=>r.url.includes('factfulness/cover-sm')).length,1,'Only small covers for newly entered room load');
 const standing=api.debug.bookUI.getMesh('factfulness');

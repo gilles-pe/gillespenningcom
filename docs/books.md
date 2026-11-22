@@ -1,6 +1,6 @@
 # Books: source, interactions and maintenance
 
-Status: local cover implementation, 2026-11-22. The catalog contains 26 selected English editions: 15 in About Me, 11 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
+Status: local cover implementation, 2026-11-22. The catalog contains 27 selected English editions: 16 in About Me, 11 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
 
 ## Cover provenance and remaining work
 
@@ -32,6 +32,7 @@ The source is not a licence. Hachette asks for permission for book-cover reprodu
 | Project Hail Mary | 9781529157468 | about | open-library-image-edition-matched | [edition](https://openlibrary.org/books/OL35577396M/Project_Hail_Mary) · [image](https://covers.openlibrary.org/b/id/14433087-L.jpg) | Open Library image; underlying cover rights not independently established. |
 | The Wright Brothers | 9781476728742 | about | publisher-image-edition-matched | [edition](https://www.simonandschuster.com/books/The-Wright-Brothers/David-McCullough/9781476728742) · [image](https://d28hgpri8am2if.cloudfront.net/book_images/onix/cvr9781476728742/the-wright-brothers-9781476728742_lg.jpg) | not-independently-established |
 | Riding the Waves of Culture: Understanding Cultural Diversity in Business | 9781857881769 | writing | open-library-image-edition-matched | [edition](https://openlibrary.org/isbn/9781857881769) · [image](https://covers.openlibrary.org/b/isbn/9781857881769-L.jpg) | Open Library image; underlying cover rights not independently established. |
+| Leviathan Wakes | 9781841499895 | about | open-library-image-edition-matched | [edition](https://openlibrary.org/isbn/9781841499895) · [image](https://covers.openlibrary.org/b/isbn/9781841499895-L.jpg) | Open Library image; underlying cover rights not independently established. |
 
 ## Assets and loading
 

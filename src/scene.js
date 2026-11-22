@@ -621,7 +621,7 @@ function cabinetShelf(parent, x, z, w, h, rotY = 0, { imperfect = false, skipUpp
     const availH = (si === 0 ? midY - cabH : h - topT - (midY + 0.028));
     // Left cluster: upright books, slightly imperfect heights and tilt when requested
     let bx = -innerW / 2 + 0.08;
-    const nStand = (skipUpperRight && si === 1) ? 3 : w > 1.3 ? 4 : 3;
+    const nStand = (skipUpperRight && si === 0) ? 4 : (skipUpperRight && si === 1) ? 3 : w > 1.3 ? 4 : 3;
     for (let i = 0; i < nStand; i++) {
       const bw = 0.042 + rand() * 0.018;
       const bh = Math.min(availH * 0.84, 0.21 + rand() * 0.06);

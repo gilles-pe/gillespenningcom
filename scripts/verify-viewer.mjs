@@ -301,7 +301,21 @@ projectViewer.open('projects');projectViewer.debug.selectProject('monitor');draw
 projectViewer.debug.selectProject('monitor');assert.equal(openedTabs.length,1);assert.equal(openedTabs[0].target,'_blank');assert(openedTabs[0].focused);assert.equal(openedTabs[0].opener,null);
 projectViewer.closeNote();projectViewer.debug.selectProject('praxisfaden');draw();const badge=stage.children.findLast(element=>element.classList.contains('project-soon-badge'));assert(!badge.hidden);assert.equal(badge.textContent,'Coming Soon');
 projectViewer.debug.selectProject('praxisfaden');assert.equal(openedTabs.length,1);assert(!badge.hidden);
-console.log('project first/second click, new-tab focus and Coming Soon: passed');
+projectViewer.open('about');
+for (const [plaque, host] of [['linkedin', 'linkedin.com'], ['bluesky', 'bsky.app'], ['substack', 'medtechsignal.substack.com']]) {
+  const beforeTabs = openedTabs.length;
+  projectViewer.debug.selectProject(plaque); draw();
+  assert.equal(openedTabs.length, beforeTabs, `${plaque} first click must frame without opening`);
+  projectViewer.debug.selectProject(plaque);
+  assert.equal(openedTabs.length, beforeTabs + 1, `${plaque} second click must open external link`);
+  const tab = openedTabs.at(-1);
+  assert(tab.url.includes(host));
+  assert.equal(tab.target, '_blank');
+  assert.equal(tab.opener, null);
+  assert(!tab.focused, `${plaque} second click must open in background without focusing tab`);
+}
+projectViewer.closeNote();
+console.log('project & social plaque first/second click, foreground/background tab focus and Coming Soon: passed');
 
 // Selection feedback must settle in reduced motion and return to the idle pose.
 projectViewer.closeNote();

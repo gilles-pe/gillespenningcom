@@ -560,7 +560,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // Compact project, social & story card at a fixed position (clicking image or text opens the link; top-right X closes).
   const projParts = new Set(projectPicks), projThings = [...projectPicks, ...occluders];
   const projRay = new THREE.Raycaster();
-  const SOCIAL_CARDS = new Set(['signal', 'substack', 'bluesky', 'linkedin']);
+  const SOCIAL_PLAQUES = new Set(['substack', 'bluesky', 'linkedin']);
+  const SOCIAL_CARDS = new Set(['signal', ...SOCIAL_PLAQUES]);
   const ABOUT_CARDS = new Set(['story', 'enterprise', ...SOCIAL_CARDS]);
   const popAllowed = (roomId, key) =>
     roomId === 'projects' || roomId === 'ai'
@@ -967,6 +968,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const data = t(curLang, `model.projectCards.${key}`);
       if (data?.href) openExternal(data.href);
       else updateSoonBadge();
+    } else if (popKey === key && SOCIAL_PLAQUES.has(key)) {
+      const data = t(curLang, `model.projectCards.${key}`);
+      if (data?.href) openExternal(data.href, { background: true });
     } else if (popKey === key && key === 'globe') { if (music.state === 'idle') armGlobeMusic(); else stopGlobeMusic(); }
     else if (popKey === key) closePop(true);
     else openPop(key);

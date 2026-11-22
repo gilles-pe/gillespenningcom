@@ -1,9 +1,13 @@
 // Called only from a user gesture. Browsers may enforce their own tab-focus policy.
-export function openExternal(url) {
+export function openExternal(url, { background = false } = {}) {
   let tab;
   try { tab = window.open(url, '_blank'); } catch { return false; }
   if (!tab) return false;
-  try { tab.opener = null; tab.focus(); } catch { /* Browser controls tab focus. */ }
+  try {
+    tab.opener = null;
+    if (background) { tab.blur?.(); window.focus?.(); }
+    else tab.focus();
+  } catch { /* Browser controls tab focus. */ }
   return true;
 }
 

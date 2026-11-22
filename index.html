@@ -26,6 +26,74 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Gilles Penning · Healthcare &amp; MedTech">
   <meta name="twitter:description" content="Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://gillespenning.com/#person",
+        "name": "Gilles Penning",
+        "url": "https://gillespenning.com/",
+        "description": "Gilles Penning on change in healthcare: 25 years in MedTech, AI and digital health, projects, writing and speaking.",
+        "knowsAbout": [
+          "MedTech",
+          "Digital Health",
+          "AI in Medicine",
+          "Healthcare"
+        ],
+        "sameAs": [
+          "https://www.linkedin.com/in/gillespenning/",
+          "https://medtechsignal.substack.com/",
+          "https://bsky.app/profile/gillespe.bsky.social"
+        ],
+        "mainEntityOfPage": {
+          "@id": "https://gillespenning.com/#website"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://gillespenning.com/#website",
+        "url": "https://gillespenning.com/",
+        "name": "Gilles Penning",
+        "description": "Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.",
+        "inLanguage": ["en", "de"],
+        "author": {
+          "@id": "https://gillespenning.com/#person"
+        },
+        "publisher": {
+          "@id": "https://gillespenning.com/#person"
+        },
+        "hasPart": [
+          { "@id": "https://ai.gillespenning.com/#website" },
+          { "@id": "https://wimmelbild.gillespenning.com/#website" }
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ai.gillespenning.com/#website",
+        "url": "https://ai.gillespenning.com/",
+        "name": "AI in Medicine Monitor",
+        "description": "Studies, benchmarks and progress charts on clinical AI.",
+        "creator": {
+          "@id": "https://gillespenning.com/#person"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://wimmelbild.gillespenning.com/#website",
+        "url": "https://wimmelbild.gillespenning.com/en/",
+        "sameAs": "https://wimmelbild.gillespenning.com/",
+        "name": "AI Medicine Wimmel Book (Wimmelbild)",
+        "description": "Interactive hidden-object world exploring connected care along patient and pharmacist paths.",
+        "inLanguage": ["en", "de"],
+        "creator": {
+          "@id": "https://gillespenning.com/#person"
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <header class="top">
@@ -134,10 +202,10 @@
         <h2 data-i18n="rooms.projects.h">Projects</h2>
         <p data-i18n="rooms.projects.p">Four projects are linked here. Praxisfaden is coming soon.</p>
         <ul class="links">
-          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer">Wimmelbild</a><span data-i18n="rooms.projects.wimmelbild">The patient’s path</span></li>
+          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/" data-i18n-attr="href:links.wimmelbild" target="_blank" rel="noopener noreferrer">Wimmelbild</a><span data-i18n="rooms.projects.wimmelbild">Interactive care world: patient &amp; pharmacist paths</span></li>
           <li><a class="pill" href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer">AI in Medicine Monitor</a><span data-i18n="rooms.projects.monitor">Studies and benchmarks</span></li>
           <li><span class="pill muted">Praxisfaden</span><span data-i18n="ui.soon">Coming soon</span></li>
-          <li><a class="pill" href="https://www.hdrg-kompass.de/" target="_blank" rel="noopener noreferrer">hDRG-Kompass</a><span data-i18n="rooms.projects.hdrg">Hybrid-DRG for practices</span></li>
+          <li><a class="pill" href="https://www.hdrg-kompass.de/" target="_blank" rel="noopener noreferrer">hDRG-Kompass</a><span data-i18n="rooms.projects.hdrg">Hybrid-DRG guidance for practices</span></li>
           <li><a class="pill" href="https://penning.info/" target="_blank" rel="noopener noreferrer">Elbstrand</a></li>
         </ul>
       </article>
@@ -154,7 +222,7 @@
       </article>
       <article id="ai" data-room="ai">
         <h2 data-i18n="rooms.ai.h">AI &amp; Digital Health</h2>
-        <p data-i18n-html="rooms.ai.pHtml">Longitudinal data and AI in everyday clinical care. Two ways in: <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer">Wimmelbild</a> follows the patient, the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer">AI in Medicine Monitor</a> follows the evidence.</p>
+        <p data-i18n-html="rooms.ai.pHtml">Longitudinal data and AI in everyday clinical care. Two ways in: <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer">Wimmelbild</a> explores connected care along patient and pharmacist paths, the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer">AI in Medicine Monitor</a> follows the evidence.</p>
       </article>
       <article id="writing" data-room="writing">
         <h2 data-i18n="rooms.writing.h">Writing &amp; Speaking</h2>
@@ -175,7 +243,7 @@
 
   <footer class="strip">
     <nav aria-label="More links" data-i18n-attr="aria-label:strip.label">
-      <a href="https://wimmelbild.gillespenning.com/en/" data-i18n="strip.wimmelbild" target="_blank" rel="noopener noreferrer">Wimmelbild</a>
+      <a href="https://wimmelbild.gillespenning.com/en/" data-i18n="strip.wimmelbild" data-i18n-attr="href:links.wimmelbild" target="_blank" rel="noopener noreferrer">Wimmelbild</a>
       <!-- Plain text links without JavaScript; with JavaScript they become logo marks with accessible names. -->
       <div id="social" class="social" data-social="icons">
         <a href="https://medtechsignal.substack.com/" target="_blank" rel="me noopener noreferrer">Substack</a>

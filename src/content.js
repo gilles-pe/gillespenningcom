@@ -5,7 +5,8 @@
 // The static text in index.html must equal the English values here.
 
 export const LINKS = {
-  wimmelbild: 'https://wimmelbild.gillespenning.com/en/',   // confirmed path; a German path is an open question
+  wimmelbild: 'https://wimmelbild.gillespenning.com/en/',
+  wimmelbildDe: 'https://wimmelbild.gillespenning.com/',
   monitor: 'https://ai.gillespenning.com/',
   hdrg: 'https://www.hdrg-kompass.de/',
   signal: 'https://medtechsignal.substack.com/',
@@ -13,10 +14,13 @@ export const LINKS = {
   bluesky: 'https://bsky.app/profile/gillespe.bsky.social',
   elbstrand: 'https://penning.info/',
 };
-const a = (href, text) => `<a href="${href}">${text}</a>`;
+const a = (href, text) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 
 export const content = {
   en: {
+    links: {
+      wimmelbild: LINKS.wimmelbild,
+    },
     meta: {
       title: 'Gilles Penning · Healthcare & MedTech',
       description: 'Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.',
@@ -73,7 +77,7 @@ export const content = {
         h: 'Projects',
         p: 'Four projects are linked here. Praxisfaden is coming soon.',
         cardHint: 'Click a project in the room for details.',
-        wimmelbild: 'The patient’s path',
+        wimmelbild: 'Interactive care world: patient & pharmacist paths',
         monitor: 'Studies and benchmarks',
         hdrg: 'Hybrid-DRG guidance for practices',
       },
@@ -117,7 +121,7 @@ export const content = {
       ai: {
         h: 'AI & Digital Health',
         cardHint: 'Clinical AI and longitudinal data. Click a monitor in the room for details.',
-        pHtml: `Longitudinal data and AI in everyday clinical care. Two ways in: ${a(LINKS.wimmelbild, 'Wimmelbild')} follows the patient, the ${a(LINKS.monitor, 'AI in Medicine Monitor')} follows the evidence.`,
+        pHtml: `Longitudinal data and AI in everyday clinical care. Two ways in: ${a(LINKS.wimmelbild, 'Wimmelbild')} explores connected care along patient and pharmacist paths, the ${a(LINKS.monitor, 'AI in Medicine Monitor')} follows the evidence.`,
       },
       writing: {
         h: 'Writing & Speaking',
@@ -249,7 +253,7 @@ export const content = {
         wimmelbild: {
           title: 'Wimmelbild',
           img: 'slots/projects-board-1.webp',
-          text: 'Interactive hidden-object picture following a patient’s path through connected care.',
+          text: 'Interactive hidden-object world exploring connected care along patient and pharmacist paths.',
           href: LINKS.wimmelbild,
         },
         monitor: {
@@ -349,6 +353,9 @@ export const content = {
   },
 
   de: {
+    links: {
+      wimmelbild: LINKS.wimmelbildDe,
+    },
     meta: {
       title: 'Gilles Penning · Gesundheitswesen & MedTech',
       description: 'Gilles Penning über Veränderung im Gesundheitswesen: KI und Digital Health, Projekte, Schreiben und Vorträge.',
@@ -376,7 +383,7 @@ export const content = {
     hero: {
       h1: 'Warum ist Veränderung im Gesundheitswesen so schwer?',
       p1: 'Mit der alternden Bevölkerung wächst der Bedarf an Versorgung. Daten und KI eröffnen neue Möglichkeiten, und Menschen entscheiden, was davon im Versorgungsalltag ankommt.',
-      p2Html: `Ich blicke auf 25 Jahre in der MedTech zurück, an der Seite großartiger Menschen und Projekte. Hier teile ich meine Projekte - den <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor\u00A0↗</a> zum Fortschritt medizinischer KI und das <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book\u00A0↗</a>, um KI spielerisch zu entdecken -, Gedanken zur Zukunft des Gesundheitswesens sowie Analysen im Newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal\u00A0↗</a>.`,
+      p2Html: `Ich blicke auf 25 Jahre in der MedTech zurück, an der Seite großartiger Menschen und Projekte. Hier teile ich meine Projekte - den <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor\u00A0↗</a> zum Fortschritt medizinischer KI und das <a href="${LINKS.wimmelbildDe}" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book\u00A0↗</a>, um KI spielerisch zu entdecken -, Gedanken zur Zukunft des Gesundheitswesens sowie Analysen im Newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal\u00A0↗</a>.`,
     },
     strip: {
       label: 'Weitere Links',
@@ -405,7 +412,7 @@ export const content = {
         h: 'Projekte',
         p: 'Vier Projekte sind hier verlinkt. Praxisfaden kommt demnächst.',
         cardHint: 'Klicke im Raum auf ein Projekt für Details.',
-        wimmelbild: 'Der Weg des Patienten',
+        wimmelbild: 'Interaktive Medizin-Welt: Patienten- & Apothekerpfad',
         monitor: 'Studien und Benchmarks',
         hdrg: 'Leitfaden für Praxen und MVZ',
       },
@@ -449,7 +456,7 @@ export const content = {
       ai: {
         h: 'KI & Digital Health',
         cardHint: 'Klinische KI und Längsschnittdaten. Klicke im Raum auf einen Monitor für Details.',
-        pHtml: `Längsschnittdaten und KI im klinischen Alltag. Zwei Zugänge: ${a(LINKS.wimmelbild, 'Wimmelbild')} folgt dem Patienten, der ${a(LINKS.monitor, 'AI in Medicine Monitor')} folgt der Evidenz.`,
+        pHtml: `Längsschnittdaten und KI im klinischen Alltag. Zwei Zugänge: ${a(LINKS.wimmelbildDe, 'Wimmelbild')} zeigt vernetzte Versorgung auf Patienten- und Apothekerpfad, der ${a(LINKS.monitor, 'AI in Medicine Monitor')} folgt der Evidenz.`,
       },
       writing: {
         h: 'Schreiben & Vorträge',
@@ -624,8 +631,8 @@ export const content = {
         wimmelbild: {
           title: 'Wimmelbild',
           img: 'slots/projects-board-1.webp',
-          text: 'Interaktives Wimmelbild, das dem Weg eines Patienten durch die vernetzte Versorgung folgt.',
-          href: LINKS.wimmelbild,
+          text: 'Interaktive Medizin-Welt mit Patienten- und Apothekerpfad durch die vernetzte Versorgung.',
+          href: LINKS.wimmelbildDe,
         },
         monitor: {
           title: 'AI in Medicine Monitor',

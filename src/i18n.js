@@ -30,8 +30,18 @@ export function rememberLang(lang) {
 // Swap all text marked with data-i18n (text), data-i18n-html (text with links) and data-i18n-attr ("attr:key;attr:key").
 export function applyStatic(lang) {
   document.documentElement.lang = lang;
-  document.title = t(lang, 'meta.title');
-  document.querySelector('meta[name=description]')?.setAttribute('content', t(lang, 'meta.description'));
+  const title = t(lang, 'meta.title');
+  const description = t(lang, 'meta.description');
+  const pageUrl = lang === 'de' ? 'https://gillespenning.com/?lang=de' : 'https://gillespenning.com/';
+  document.title = title;
+  document.querySelector('meta[name=description]')?.setAttribute('content', description);
+  document.querySelector('link[rel=canonical]')?.setAttribute('href', pageUrl);
+  document.querySelector('meta[property="og:url"]')?.setAttribute('content', pageUrl);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', description);
+  document.querySelector('meta[property="og:locale"]')?.setAttribute('content', lang === 'de' ? 'de_DE' : 'en_US');
+  document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', title);
+  document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description);
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(lang, el.dataset.i18n); });
   document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(lang, el.dataset.i18nHtml); });
   document.querySelectorAll('[data-i18n-attr]').forEach(el => {

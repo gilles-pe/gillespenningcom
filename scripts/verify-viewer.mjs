@@ -556,14 +556,24 @@ api.open(null); draw();
     api.closeNote(); draw();
   }
   assert.deepEqual(outside, [], 'inspection poses outside the leash');
-  // Turning below the floor while close to an object in a room keeps the object as orbit centre (no jump to the cellar fax).
+  // Room tilt limit (D-112): close to the Enterprise a drag up meets resistance, springs back above the floor and keeps
+  // the ship as orbit centre (no jump to the cellar fax); keyboard turns stop at the limit; the overview stays free.
+  const norm = a => a - 2 * Math.PI * Math.round(a / (2 * Math.PI));
   api.open('about'); draw(); api.debug.inspect('enterprise'); draw();
   const shipTarget = api.debug.goal.t.clone();
-  for (let i = 0; i < 8; i++) fireKey(stage, 'ArrowUp');
-  draw();
-  assert(api.debug.goal.el < 0, 'the turn must reach below the floor for this check');
-  assert(api.debug.goal.t.distanceTo(shipTarget) < 1e-6, 'room close-up: turning under the floor must not drift to the cellar');
-  api.closeNote(); draw();
+  for (let i = 0; i < 200; i++) api.debug.orbitPx(0, -20);
+  assert(norm(api.debug.goal.el) > 0, 'room drag never reaches below the floor, even inside the soft band');
+  api.debug.endPan(); draw();
+  assert(norm(api.debug.goal.el) >= 0.15 - 1e-6, 'room drag springs back to the tilt limit');
+  assert(api.debug.goal.t.distanceTo(shipTarget) < 1e-6, 'room close-up keeps the ship as orbit centre');
+  for (let i = 0; i < 40; i++) fireKey(stage, 'ArrowDown');
+  assert(norm(api.debug.goal.el) <= 1.45 + 1e-6, 'room keyboard turn stops before tipping over the top');
+  for (let i = 0; i < 40; i++) fireKey(stage, 'ArrowUp');
+  assert(Math.abs(norm(api.debug.goal.el) - 0.15) < 1e-6, 'room keyboard turn stops at the floor limit');
+  api.closeNote(); api.open(null); api.reset(); draw();
+  for (let i = 0; i < 12; i++) fireKey(stage, 'ArrowUp');
+  assert(norm(api.debug.goal.el) < 0, 'overview keeps free rotation (cellar stays findable)');
+  api.reset(); draw();
   api.open(null); api.reset(); draw();
   console.log('pan leash: overview and rooms, drag/keyboard, rubber band and spring-back, inspection poses inside: passed');
 }

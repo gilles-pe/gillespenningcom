@@ -369,9 +369,23 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function wrap() {
     for (const k of ['az', 'el']) while (Math.abs(goal[k]) > Math.PI) { const d = goal[k] > 0 ? -TAU : TAU; goal[k] += d; view[k] += d; }
   }
-  function orbit(dAz, dEl, instant) {
+  // Room tilt limit (D-112): in a room the camera stays above the floor and does not tip over the top. Past the limit a
+  // drag meets growing resistance (at most TILT.soft beyond it) and springs back on release; keyboard turns stop at it.
+  // The overview keeps free rotation (D-024) so the cellar can still be found.
+  const TILT = { min: 0.15, max: 1.45, soft: 0.12 };
+  const normEl = a => a - TAU * Math.round(a / TAU);
+  function roomTilt(dEl, soft) {
+    const el = normEl(goal.el);
+    if (!soft) return THREE.MathUtils.clamp(el + dEl, TILT.min, TILT.max) - el;
+    const over = dEl < 0 ? TILT.min - el : dEl > 0 ? el - TILT.max : 0;   // already past the limit, in the direction of travel
+    if (over > 0) dEl /= (1 + over / TILT.soft) ** 2;
+    leashPending = true;
+    return THREE.MathUtils.clamp(el + dEl, TILT.min - TILT.soft, TILT.max + TILT.soft) - el;
+  }
+  function orbit(dAz, dEl, instant, soft = true) {
     markDirty();
     rememberView('orbit', true);
+    if (openId) dEl = roomTilt(dEl, soft);
     const s = Math.cos(instant ? view.el : goal.el) >= 0 ? 1 : -1;
     goal.az -= dAz * s; goal.el += dEl;
     if (instant) { view.az -= dAz * s; view.el += dEl; }
@@ -406,17 +420,21 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (instant) view.t.copy(goal.t);
     checkAway();
   }
-  // End of a soft pan: glide back inside the leash (jump under reduced motion). No history step of its own.
+  // End of a soft pan or room turn: glide back inside the leash and the room tilt limit (jump under reduced motion). No history step of its own.
   let leashTimer = null;
   function settleLeash() {
     clearTimeout(leashTimer); leashTimer = null;
     if (!leashPending) return;
     leashPending = false;
+    let moved = false;
+    if (openId) {
+      const el = normEl(goal.el), kept = THREE.MathUtils.clamp(el, TILT.min, TILT.max);
+      if (kept !== el) { goal.el += kept - el; if (reduced) view.el = goal.el; moved = true; }
+    }
     panNext.copy(home.t).add(panOffset);
     const box = leash();
-    if (box.containsPoint(panNext)) return;
-    panNext.clamp(box.min, box.max);
-    panOffset.copy(panNext).sub(home.t);
+    if (!box.containsPoint(panNext)) { panNext.clamp(box.min, box.max); panOffset.copy(panNext).sub(home.t); moved = true; }
+    if (!moved) return;
     markDirty(); aim();
     if (reduced) view.t.copy(goal.t);
     checkAway();
@@ -1490,10 +1508,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     const S = 0.14, P = 48; let used = true;
     switch (e.key) {
-      case 'ArrowLeft': if (e.shiftKey || panMode) panBy(P, 0, false, false); else orbit(-S, 0); break;
-      case 'ArrowRight': if (e.shiftKey || panMode) panBy(-P, 0, false, false); else orbit(S, 0); break;
-      case 'ArrowUp': if (e.shiftKey || panMode) panBy(0, P, false, false); else orbit(0, -S); break;
-      case 'ArrowDown': if (e.shiftKey || panMode) panBy(0, -P, false, false); else orbit(0, S); break;
+      case 'ArrowLeft': if (e.shiftKey || panMode) panBy(P, 0, false, false); else orbit(-S, 0, false, false); break;
+      case 'ArrowRight': if (e.shiftKey || panMode) panBy(-P, 0, false, false); else orbit(S, 0, false, false); break;
+      case 'ArrowUp': if (e.shiftKey || panMode) panBy(0, P, false, false); else orbit(0, -S, false, false); break;
+      case 'ArrowDown': if (e.shiftKey || panMode) panBy(0, -P, false, false); else orbit(0, S, false, false); break;
       case '+': case '=': zoomBy(0.85); break;
       case '-': case '_': zoomBy(1 / 0.85); break;
       case 'Home': case '0': case 't': case 'T': resetView(); break;
@@ -1711,6 +1729,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         get leash() { return leash().clone(); },
         panPx: (dx, dy, soft = true) => panBy(dx, dy, true, soft),
         endPan: settleLeash,
+        orbitPx: (dx, dy, soft = true) => orbit(dx * K, dy * K, true, soft),
       },
     } : {}),
   };

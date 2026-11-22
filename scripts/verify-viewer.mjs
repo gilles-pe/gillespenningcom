@@ -527,3 +527,53 @@ assert(api.closeNote()); draw();
 console.log('arrow navigation: articles, projects, books (framed, extracted, multi-tier) & orbit/shift/input guards: passed');
 
 api.open(null); draw();
+
+// 5. Pan leash (D-089): drag, pinch, trackpad and keyboard can never push the model out of view.
+{
+  const inside = (box, p, eps = 1e-6) => p.x >= box.min.x - eps && p.x <= box.max.x + eps && p.y >= box.min.y - eps && p.y <= box.max.y + eps && p.z >= box.min.z - eps && p.z <= box.max.z + eps;
+  for (const room of [null, 'projects', 'about', 'ai', 'writing']) {
+    api.open(room); draw();
+    const box = api.debug.leash;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1]]) {
+      api.reset(); draw();
+      let first = null;
+      for (let i = 0; i < 400; i++) { api.debug.panPx(dx * 40, dy * 40); if (i === 199) first = api.debug.goal.t.clone(); }
+      const pulled = api.debug.goal.t.clone();
+      assert(pulled.distanceTo(first) < 0.05, `${room ?? 'overview'}: rubber band must stiffen past the edge`);
+      assert(inside(box.clone().expandByScalar(0.6), pulled), `${room ?? 'overview'}: soft pan stays within the rubber band`);
+      api.debug.endPan(); draw();
+      assert(inside(box, api.debug.goal.t), `${room ?? 'overview'}: released pan springs back inside the leash`);
+      for (let i = 0; i < 200; i++) fireKey(stage, dx > 0 ? 'ArrowLeft' : dx < 0 ? 'ArrowRight' : dy > 0 ? 'ArrowUp' : 'ArrowDown', { shiftKey: true });
+      assert(inside(box, api.debug.goal.t), `${room ?? 'overview'}: keyboard pan stops at the leash`);
+    }
+    api.reset(); draw();
+  }
+  // Inspection poses already sit inside the leash, so a pan after framing an object never jumps on release.
+  const outside = [];
+  for (const target of api.debug.inspectionTargets) {
+    api.open(target.room); draw(); api.debug.inspect(target.key); draw();
+    if (!inside(api.debug.leash, api.debug.goal.t, 0.02)) outside.push(`${target.room}:${target.key}`);
+    api.closeNote(); draw();
+  }
+  assert.deepEqual(outside, [], 'inspection poses outside the leash');
+  // Room tilt limit (D-112): close to the Enterprise a drag up meets resistance, springs back above the floor and keeps
+  // the ship as orbit centre (no jump to the cellar fax); keyboard turns stop at the limit; the overview stays free.
+  const norm = a => a - 2 * Math.PI * Math.round(a / (2 * Math.PI));
+  api.open('about'); draw(); api.debug.inspect('enterprise'); draw();
+  const shipTarget = api.debug.goal.t.clone();
+  for (let i = 0; i < 200; i++) api.debug.orbitPx(0, -20);
+  assert(norm(api.debug.goal.el) > 0, 'room drag never reaches below the floor, even inside the soft band');
+  api.debug.endPan(); draw();
+  assert(norm(api.debug.goal.el) >= 0.15 - 1e-6, 'room drag springs back to the tilt limit');
+  assert(api.debug.goal.t.distanceTo(shipTarget) < 1e-6, 'room close-up keeps the ship as orbit centre');
+  for (let i = 0; i < 40; i++) fireKey(stage, 'ArrowDown');
+  assert(norm(api.debug.goal.el) <= 1.45 + 1e-6, 'room keyboard turn stops before tipping over the top');
+  for (let i = 0; i < 40; i++) fireKey(stage, 'ArrowUp');
+  assert(Math.abs(norm(api.debug.goal.el) - 0.15) < 1e-6, 'room keyboard turn stops at the floor limit');
+  api.closeNote(); api.open(null); api.reset(); draw();
+  for (let i = 0; i < 12; i++) fireKey(stage, 'ArrowUp');
+  assert(norm(api.debug.goal.el) < 0, 'overview keeps free rotation (cellar stays findable)');
+  api.reset(); draw();
+  api.open(null); api.reset(); draw();
+  console.log('pan leash: overview and rooms, drag/keyboard, rubber band and spring-back, inspection poses inside: passed');
+}

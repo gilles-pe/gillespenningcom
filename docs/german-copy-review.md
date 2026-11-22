@@ -9,7 +9,7 @@ Links in the text are shown as Markdown links. Both languages use the confirmed 
 |---|---|---|
 | `meta.title` | Gilles Penning – Healthcare & MedTech | Gilles Penning – Gesundheitswesen & MedTech |
 | `meta.description` | Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking. | Gilles Penning über Veränderung im Gesundheitswesen: KI und Digital Health, Projekte, Schreiben und Vorträge. |
-| `ui.allRooms` | All rooms | Alle Räume |
+| `ui.allRooms` | Overview | Übersicht |
 | `ui.soon` | Coming soon | Demnächst |
 | `ui.resetView` | Reset view | Ansicht zurücksetzen |
 | `ui.langLabel` | Language | Sprache |

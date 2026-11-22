@@ -243,6 +243,31 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     v.z = THREE.MathUtils.clamp(v.z, -14, 14);
     return v;
   };
+  // Pan leash (D-089): the point the camera aims at may not leave the model, so the model can never be pushed out of view.
+  // Overview: the base plate; a room: its floor plus a margin. Past the edge a pan meets growing resistance and springs
+  // back when the gesture ends. Orbit and zoom stay free, and the cellar drift in aim() is applied on top.
+  const LEASH = { margin: 0.35, soft: 0.6 };
+  const overviewLeash = new THREE.Box3().setFromPoints(outline);
+  overviewLeash.min.y = -0.8; overviewLeash.max.y += 0.4;
+  const leashBox = new THREE.Box3(), leashSoftBox = new THREE.Box3();
+  let leashPending = false;                                  // a soft pan may have left the box; settle when the gesture ends
+  // The floor area shrinks by half the visible height around the target: from afar most of the model stays in the
+  // picture, close up every corner can still be centred.
+  function leash() {
+    if (!openId) leashBox.copy(overviewLeash);
+    else {
+      const r = rooms[openId], m = LEASH.margin;
+      leashBox.min.set(r.cx - r.w / 2 - m, -0.2, r.cz - r.d / 2 - m);
+      leashBox.max.set(r.cx + r.w / 2 + m, r.h + m, r.cz + r.d / 2 + m);
+    }
+    const seen = 0.5 * goal.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    for (const k of ['x', 'z']) {
+      const mid = (leashBox.min[k] + leashBox.max[k]) / 2, half = (leashBox.max[k] - leashBox.min[k]) / 2;
+      const keep = Math.max(half * 0.2, half - seen);
+      leashBox.min[k] = mid - keep; leashBox.max[k] = mid + keep;
+    }
+    return leashBox;
+  }
 
   function resize() {
     markDirty();
@@ -323,7 +348,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   }
   // Zoomed in on the underside, the orbit centre drifts to the middle of the recess, so the close view stays on it.
   function aim() {
-    const w = custom ? THREE.MathUtils.clamp((0.6 - zoom) / 0.3, 0, 1) * THREE.MathUtils.clamp(-Math.sin(goal.el) * 3, 0, 1) : 0;
+    // Overview only: zoomed in close to an object in a room (Enterprise, books) a turn below the floor must not jump to the fax.
+    const w = custom && !openId ? THREE.MathUtils.clamp((0.6 - zoom) / 0.3, 0, 1) * THREE.MathUtils.clamp(-Math.sin(goal.el) * 3, 0, 1) : 0;
     goal.t.copy(home.t).add(panOffset).lerp(cellar.center, w);
     clampTarget(goal.t);
   }
@@ -343,28 +369,74 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function wrap() {
     for (const k of ['az', 'el']) while (Math.abs(goal[k]) > Math.PI) { const d = goal[k] > 0 ? -TAU : TAU; goal[k] += d; view[k] += d; }
   }
-  function orbit(dAz, dEl, instant) {
+  // Room tilt limit (D-112): in a room the camera stays above the floor and does not tip over the top. Past the limit a
+  // drag meets growing resistance (at most TILT.soft beyond it) and springs back on release; keyboard turns stop at it.
+  // The overview keeps free rotation (D-024) so the cellar can still be found.
+  const TILT = { min: 0.15, max: 1.45, soft: 0.12 };
+  const normEl = a => a - TAU * Math.round(a / TAU);
+  function roomTilt(dEl, soft) {
+    const el = normEl(goal.el);
+    if (!soft) return THREE.MathUtils.clamp(el + dEl, TILT.min, TILT.max) - el;
+    const over = dEl < 0 ? TILT.min - el : dEl > 0 ? el - TILT.max : 0;   // already past the limit, in the direction of travel
+    if (over > 0) dEl /= (1 + over / TILT.soft) ** 2;
+    leashPending = true;
+    return THREE.MathUtils.clamp(el + dEl, TILT.min - TILT.soft, TILT.max + TILT.soft) - el;
+  }
+  function orbit(dAz, dEl, instant, soft = true) {
     markDirty();
     rememberView('orbit', true);
+    if (openId) dEl = roomTilt(dEl, soft);
     const s = Math.cos(instant ? view.el : goal.el) >= 0 ? 1 : -1;
     goal.az -= dAz * s; goal.el += dEl;
     if (instant) { view.az -= dAz * s; view.el += dEl; }
     custom = true; wrap(); aim(); checkAway();
   }
-  const panRgt = new THREE.Vector3(), panUp = new THREE.Vector3(), panNext = new THREE.Vector3();
-  function panBy(dxPx, dyPx, instant) {
+  const panRgt = new THREE.Vector3(), panUp = new THREE.Vector3(), panNext = new THREE.Vector3(), panStep = new THREE.Vector3();
+  // soft: drag, pinch and trackpad (rubber band, settled by settleLeash); hard: keyboard steps stop at the edge.
+  function panBy(dxPx, dyPx, instant, soft = true) {
     markDirty();
     rememberView('pan', true);
     const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
     const scale = (instant ? view.dist : goal.dist) * (2 * tv) / Math.max(stageH, 1);
     panRgt.set(1, 0, 0).applyQuaternion(camera.quaternion);
     panUp.set(0, 1, 0).applyQuaternion(camera.quaternion);
-    panOffset.addScaledVector(panRgt, -dxPx * scale).addScaledVector(panUp, dyPx * scale);
+    panStep.set(0, 0, 0).addScaledVector(panRgt, -dxPx * scale).addScaledVector(panUp, dyPx * scale);
     panNext.copy(home.t).add(panOffset);
+    const box = leash();
+    if (soft) {
+      for (const k of ['x', 'y', 'z']) {
+        const d = panStep[k];
+        const over = d > 0 ? panNext[k] - box.max[k] : d < 0 ? box.min[k] - panNext[k] : 0;   // already past the edge, in the direction of travel
+        if (over > 0) panStep[k] /= (1 + over / LEASH.soft) ** 2;
+      }
+      panNext.add(panStep);
+      leashSoftBox.copy(box).expandByScalar(LEASH.soft);
+      panNext.clamp(leashSoftBox.min, leashSoftBox.max);
+      leashPending = true;
+    } else panNext.add(panStep).clamp(box.min, box.max);
     clampTarget(panNext);
     panOffset.copy(panNext).sub(home.t);
     custom = true; aim();
     if (instant) view.t.copy(goal.t);
+    checkAway();
+  }
+  // End of a soft pan or room turn: glide back inside the leash and the room tilt limit (jump under reduced motion). No history step of its own.
+  let leashTimer = null;
+  function settleLeash() {
+    clearTimeout(leashTimer); leashTimer = null;
+    if (!leashPending) return;
+    leashPending = false;
+    let moved = false;
+    if (openId) {
+      const el = normEl(goal.el), kept = THREE.MathUtils.clamp(el, TILT.min, TILT.max);
+      if (kept !== el) { goal.el += kept - el; if (reduced) view.el = goal.el; moved = true; }
+    }
+    panNext.copy(home.t).add(panOffset);
+    const box = leash();
+    if (!box.containsPoint(panNext)) { panNext.clamp(box.min, box.max); panOffset.copy(panNext).sub(home.t); moved = true; }
+    if (!moved) return;
+    markDirty(); aim();
+    if (reduced) view.t.copy(goal.t);
     checkAway();
   }
   function zoomBy(f, instant) {
@@ -1371,6 +1443,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const endPointer = (e, cancelled) => {
     if (!pts.has(e.pointerId)) return;
     pts.delete(e.pointerId);
+    if (pts.size === 0) settleLeash();
     if (drag && pts.size === 0) {
       if (drag.mode === 'bookFlip') {
         if (drag.moved) {
@@ -1418,7 +1491,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (e.target !== stage) return;
     if (e.ctrlKey || e.metaKey) return;
     e.preventDefault();
-    if (Math.abs(e.deltaX) > 2 && Math.abs(e.deltaX) >= Math.abs(e.deltaY)) panBy(-e.deltaX * 0.8, 0, false);
+    if (Math.abs(e.deltaX) > 2 && Math.abs(e.deltaX) >= Math.abs(e.deltaY)) {
+      panBy(-e.deltaX * 0.8, 0, false);
+      clearTimeout(leashTimer); leashTimer = setTimeout(settleLeash, 180);   // a trackpad swipe has no end event
+    }
     else zoomBy(Math.exp(e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015)), false);
   }, { passive: false });
   // Shift + Arrow keys pan; Arrow keys navigate focused articles/books/projects or orbit the stage.
@@ -1432,10 +1508,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     const S = 0.14, P = 48; let used = true;
     switch (e.key) {
-      case 'ArrowLeft': if (e.shiftKey || panMode) panBy(P, 0); else orbit(-S, 0); break;
-      case 'ArrowRight': if (e.shiftKey || panMode) panBy(-P, 0); else orbit(S, 0); break;
-      case 'ArrowUp': if (e.shiftKey || panMode) panBy(0, P); else orbit(0, -S); break;
-      case 'ArrowDown': if (e.shiftKey || panMode) panBy(0, -P); else orbit(0, S); break;
+      case 'ArrowLeft': if (e.shiftKey || panMode) panBy(P, 0, false, false); else orbit(-S, 0, false, false); break;
+      case 'ArrowRight': if (e.shiftKey || panMode) panBy(-P, 0, false, false); else orbit(S, 0, false, false); break;
+      case 'ArrowUp': if (e.shiftKey || panMode) panBy(0, P, false, false); else orbit(0, -S, false, false); break;
+      case 'ArrowDown': if (e.shiftKey || panMode) panBy(0, -P, false, false); else orbit(0, S, false, false); break;
       case '+': case '=': zoomBy(0.85); break;
       case '-': case '_': zoomBy(1 / 0.85); break;
       case 'Home': case '0': case 't': case 'T': resetView(); break;
@@ -1650,6 +1726,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         get albumFramed() { return albumFramed; },
         get albumOpen() { return albumOpen; },
         get historyLength() { return viewHistory.length; },
+        get leash() { return leash().clone(); },
+        panPx: (dx, dy, soft = true) => panBy(dx, dy, true, soft),
+        endPan: settleLeash,
+        orbitPx: (dx, dy, soft = true) => orbit(dx * K, dy * K, true, soft),
       },
     } : {}),
   };

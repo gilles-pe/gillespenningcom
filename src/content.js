@@ -22,7 +22,7 @@ export const content = {
       description: 'Gilles Penning on change in healthcare: AI and digital health, projects, writing and speaking.',
     },
     ui: {
-      allRooms: 'All rooms',
+      allRooms: 'Overview',
       soon: 'Coming soon',
       close: 'Close',
       langLabel: 'Language',
@@ -354,7 +354,7 @@ export const content = {
       description: 'Gilles Penning über Veränderung im Gesundheitswesen: KI und Digital Health, Projekte, Schreiben und Vorträge.',
     },
     ui: {
-      allRooms: 'Alle Räume',
+      allRooms: 'Übersicht',
       soon: 'Demnächst',
       close: 'Schließen',
       langLabel: 'Sprache',

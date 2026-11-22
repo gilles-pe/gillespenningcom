@@ -577,3 +577,23 @@ api.open(null); draw();
   api.open(null); api.reset(); draw();
   console.log('pan leash: overview and rooms, drag/keyboard, rubber band and spring-back, inspection poses inside: passed');
 }
+
+// 6. Books without a card (D-114): no visible card, the four clicks still cycle, Enter does the same as a click.
+{
+  const cards = el => (el.classList?.contains('book-inspector-card') ? 1 : 0) + el.children.reduce((n, c) => n + cards(c), 0);
+  const status = () => stage.children.find(c => c.classList.contains('book-status'));
+  api.open('writing'); draw();
+  api.debug.tapShelfBook('factfulness'); draw();
+  assert(api.debug.bookUI.isFocused('factfulness') && !api.debug.bookUI.isExtracted(), 'first click only frames the book');
+  api.debug.tapShelfBook('factfulness'); draw();
+  assert.equal(api.debug.bookUI.activeFace, 'front');
+  assert.equal(cards(stage), 0, 'no book card is shown');
+  assert(status()?.textContent.includes('Factfulness'), 'screen readers hear the book title');
+  fireKey(stage, 'Enter'); assert.equal(api.debug.bookUI.activeFace, 'spine', 'Enter turns to the spine like a click');
+  api.debug.tapShelfBook('factfulness'); assert.equal(api.debug.bookUI.activeFace, 'back');
+  api.debug.tapShelfBook('factfulness'); draw();
+  assert(!api.debug.bookUI.isActive(), 'fourth click puts the book back');
+  assert.equal(status().textContent, '', 'status clears when the book is back');
+  api.open(null); draw();
+  console.log('books without card: framing, four clicks, Enter, screen-reader status: passed');
+}

@@ -19,9 +19,12 @@ try {
   const report = [];
   const live = process.env.BOOK_REVIEW_LIVE === '1';
   if (live) {
-    const html = await (await fetch('https://gillespenning.com/?book-review=' + Date.now())).text();
-    assert(html.includes('An oldie but a goldie.'), 'live built bundle includes approved English text');
-    assert(html.includes('Ein Klassiker, zu dem ich immer wieder'), 'live built bundle includes approved German text');
+    const response = await fetch('https://gillespenning.com/?book-review=' + Date.now());
+    assert(response.ok, 'live homepage loads');
+    const html = await response.text();
+    assert(html.includes('id="scene"'), 'live homepage includes the real scene');
+    // Vite publishes book data in lazy-loaded JavaScript chunks. Validate the
+    // rendered back via its accessibility status below, rather than HTML text.
   }
   for (const [device, viewport] of [['desktop', { width: 1440, height: 1000 }], ['mobile', { width: 390, height: 844 }]]) {
     const context = await browser.newContext({ viewport, deviceScaleFactor: device === 'mobile' ? 2 : 1, isMobile: device === 'mobile', hasTouch: device === 'mobile', reducedMotion: 'reduce' });

@@ -2,7 +2,8 @@
 // then clicks on the book show cover, spine and back, and the fourth puts it back on its shelf.
 import * as THREE from 'three';
 import catalog from './data/books.json';
-import { showLargeBookCover, releaseLargeBookCover } from './book-jackets.js';
+import { personalBookNote } from './book-note-layout.js';
+import { showLargeBookCover, releaseLargeBookCover, setBookJacketLanguage } from './book-jackets.js';
 
 const byId = new Map(catalog.books.map(book => [book.id, book]));
 const VERTICAL = new THREE.Vector3(0, 1, 0);
@@ -37,6 +38,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   let selected = null;
   let status = null;                                         // visually hidden: the book and its face for screen readers
   let currentLanguage = language === 'de' ? 'de' : 'en';
+  setBookJacketLanguage(currentLanguage);
 
   // No visible card (D-114): the book itself is the interface. A polite live region names it for assistive technology.
   function announce() {
@@ -49,7 +51,9 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
       stage.append(status);
     }
     const { book, face } = selected;
-    status.textContent = `${book.title}, ${book.author} - ${labels[currentLanguage][face]}`;
+    const note = face === 'back' ? personalBookNote(book, currentLanguage) : null;
+    const credit = currentLanguage === 'de' ? 'Persönliche Leseempfehlung von Gilles Penning' : 'Personal reading note by Gilles Penning';
+    status.textContent = `${book.title}, ${book.author} - ${labels[currentLanguage][face]}` + (note ? `. ${credit}: ${note}` : '');
   }
   function start(id) {
     if (!meshes.has(id) || !byId.has(id)) return null;
@@ -175,7 +179,8 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   }
   function setLanguage(next) {
     currentLanguage = next === 'de' ? 'de' : 'en';
-    announce();
+    setBookJacketLanguage(currentLanguage);
+    announce(); markDirty();
   }
   return {
     getMesh: id => meshes.get(id),

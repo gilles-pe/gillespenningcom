@@ -1,6 +1,6 @@
 # Books: source, interactions and maintenance
 
-Status: local cover implementation, 2026-11-22. The catalog contains 27 selected English editions: 16 in About Me, 11 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
+Status: bilingual personal reading notes, 2026-11-23. The catalog contains 27 selected English editions: 16 in About Me, 11 in Writing & Speaking. See `src/data/books.json` for the authoritative title, author, ISBN, room, placement, summaries and image status.
 
 ## Cover provenance and remaining work
 
@@ -42,10 +42,10 @@ Where a usable cover exists, add `public/books/<id>/cover-sm.webp` (maximum 256 
 
 ## Interaction contract
 
-- The first scene click frames the real book without extracting it. The next four clicks are Cover/pull out, Spine, Back, Return to shelf. The separate Cover/Spine/Back and Return controls still work.
+- The first scene click frames the real book without extracting it. The next four clicks are Cover/pull out, Spine, Back, Return to shelf. Enter on the focused stage performs the same action; no separate book card, dialog or book buttons are shown (D-114).
 - BACK, Escape, Reset, room changes, camera restoration, reduced motion and the existing extraction animation must remain intact.
 - Test with `npm run check:books`, `npm run check`, `npm run test:inspection`, and `npm run build`. The harness tests request timing, failure fallback, late-arriving images and existing interactions; it does not replace visual desktop/mobile checks.
-- Personal notes remain hidden until supplied by Gilles. Summaries stay concise, neutral, in English, and attributable to publisher descriptions; no fabricated endorsements.
+- Only personal notes supplied and explicitly approved by Gilles appear on the physical back, labelled as his personal reading note in the selected language. Missing notes retain the previous back. Summaries stay concise, neutral, in English, and attributable to publisher descriptions; no fabricated endorsements.
 - Do not add Aftershocks, Nexus, Civilization or Dungeon Crawler Carl unless the owner asks.
 
 ## Review notes (2026-11-20)
@@ -55,3 +55,15 @@ The original 21 books have local small and large WebP files. Thirteen use an edi
 ## Added titles (2026-11-20)
 
 Bloodlands (About Me), Guns, Germs, and Steel, Predictably Irrational and The Innovator’s Dilemma (Writing & Speaking) use the English editions and sources recorded in the catalog. Project Hail Mary leans against its neighbors. The four new English cover images were checked for title and author, then stored locally; the owner’s exact editions have not been confirmed. Sources and rights status are recorded in each catalog entry.
+
+## Personal descriptions: binding editorial workflow (2026-11-23)
+- Work with Gilles on one book at a time. Write short, personal texts in his language; no generic reviews or marketing wording.
+- Present a German and an English version. Store and publish only after explicit approval. Do not independently modify approved copy.
+- Store recommendations in `personalNote.en` and `personalNote.de`; retain the neutral, sourced `summary` separately.
+- For every book, maintain title, author, ISBN, English cover, spine, back, location, Amazon URL, neutral summary and personal description as structured catalog fields. Missing information remains null, not guessed.
+- Keep original English titles and covers in both website languages. Language switching updates only approved personal text and its label, preserving the displayed face.
+- After every update test desktop/mobile representation, complete wording, clipping and the full interaction sequence.
+
+The first approved note is `riding-the-waves-of-culture` (D-124). Its wording is locked by `scripts/check-book-notes.mjs`. Personal backs use a high-resolution canvas with the real mesh aspect ratio, complete word wrapping and paper/ink contrast; the original horizontal-back rotation is retained. Replaced language textures are disposed. Ordinary book jackets are unchanged. The visually hidden live region also reads the personal note on the back.
+
+See [the catalog/scene audit](books-audit-2026-11-23.md) for the 27-book comparison and outstanding cover issues.

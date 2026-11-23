@@ -1787,7 +1787,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       markDirty();
       cancelWarp();
       if (id === 'about') preloadEnterpriseAssets();
-      bookUI.close(true);
+      if (!keepView || id !== openId) bookUI.close(true);
       if (!keepView && (id !== openId || custom)) rememberView('room');
       if (id !== openId) closeAlbum(false);
       if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }

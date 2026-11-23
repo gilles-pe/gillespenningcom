@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import catalog from './data/books.json';
+import { personalBookNote, personalNoteLayout } from './book-note-layout.js';
 
 // Local English-edition front covers load progressively when available.
 // Back panels and spines are original typographic reconstructions, NOT publisher artwork.
@@ -76,7 +77,24 @@ function frontFallback(book, colors) {
     authors.forEach((line, i) => ctx.fillText(line, w / 2, h - 74 + i * 23));
   });
 }
-function backReconstruction(book, colors, flip180 = false) {
+let jacketLanguage = 'en';
+function personalBack(book, flip180, aspect) {
+  return sheet(768, Math.round(768 / aspect), (ctx, w, h) => {
+    if (flip180) { ctx.translate(w, h); ctx.rotate(Math.PI); }
+    ctx.fillStyle = '#F7F6F2'; ctx.fillRect(0, 0, w, h);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    const layout = personalNoteLayout(ctx, book, jacketLanguage, w, h);
+    for (const [index, block] of layout.blocks.entries()) {
+      ctx.fillStyle = index === 2 ? '#1E3A8A' : '#18181B';
+      ctx.font = block.font;
+      block.lines.forEach((line, i) => ctx.fillText(line, block.x, block.y + i * block.lineHeight));
+    }
+    ctx.fillStyle = '#4B5563'; ctx.font = '20px Georgia, serif';
+    if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 52, h - 52);
+  });
+}
+function backReconstruction(book, colors, flip180 = false, aspect = 2 / 3) {
+  if (personalBookNote(book, jacketLanguage)) return personalBack(book, flip180, aspect);
   const [bg, ink, accent] = colors;
   return sheet(256, 384, (ctx, w, h) => {
     if (flip180) { ctx.translate(w, h); ctx.rotate(Math.PI); }
@@ -178,30 +196,47 @@ export function releaseLargeBookCover(id) {
   display(record); pruneLarge();
 }
 
-function makeMaterials(book, orientation) {
+function makeMaterials(book, orientation, backAspect) {
   const cacheKey = `${book.id}:${orientation}`;
   if (materialCache.has(cacheKey)) return materialCache.get(cacheKey);
   const colors = palette(book.id);
   const paper = new THREE.MeshStandardMaterial({ color: 0xe8decc, roughness: .88 });
   const flat = !(orientation === 'upright' || orientation === 'leaning');
   const front = new THREE.MeshStandardMaterial({ map: frontFallback(book, colors), roughness: .76 });
-  const back = new THREE.MeshStandardMaterial({ map: backReconstruction(book, colors, flat), roughness: .79 });
+  const backMap = backReconstruction(book, colors, flat, backAspect);
+  // Keep owner copy at paper/ink contrast even in the shaded shelf.
+  const backMaterial = personalBookNote(book, jacketLanguage)
+    ? new THREE.MeshBasicMaterial({ map: backMap, toneMapped: false })
+    : new THREE.MeshStandardMaterial({ map: backMap, roughness: .79 });
   const spine = new THREE.MeshStandardMaterial({ map: flat ? flatSpineReconstruction(book, colors) : spineReconstruction(book, colors), roughness: .76 });
   // BoxGeometry material order: +X, -X, +Y, -Y, +Z, -Z.
   // Upright: cover on the leaf-facing (+X) side; spine looks out (+Z).
   // Horizontal: front cover looks up (+Y), back cover down (-Y, rotated 180° in canvas to align head at -Z);
   // the spine is the long left edge (-X). The short ends (+Z, -Z) are paper. Keep book-interaction.js normalAndUp() in step.
   const materials = !flat
-    ? [front, back, paper, paper, spine, paper]
-    : [paper, spine, front, back, paper, paper];
+    ? [front, backMaterial, paper, paper, spine, paper]
+    : [paper, spine, front, backMaterial, paper, paper];
   materialCache.set(cacheKey, materials);
-  jackets.set(book.id, { book, material: front, fallback: front.map, small: null, large: null, active: false, used: 0 });
+  jackets.set(book.id, { book, material: front, back: backMaterial, backAspect, flat, colors, fallback: front.map, small: null, large: null, active: false, used: 0 });
   return materials;
+}
+
+export function setBookJacketLanguage(language) {
+  const next = language === 'de' ? 'de' : 'en';
+  if (next === jacketLanguage) return;
+  jacketLanguage = next;
+  for (const record of jackets.values()) {
+    if (!record.book.personalNote?.en && !record.book.personalNote?.de) continue;
+    const previous = record.back.map;
+    record.back.map = backReconstruction(record.book, record.colors, record.flat, record.backAspect);
+    record.back.needsUpdate = true;
+    previous.dispose();
+  }
 }
 
 export function placeCatalogBook(parent, book, w, h, d, x, y, z, orientation = 'upright') {
   if (!book) throw new Error('Catalog book is required');
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), makeMaterials(book, orientation));
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), makeMaterials(book, orientation, orientation === 'horizontal' ? w / d : d / h));
   mesh.position.set(x, y + h / 2, z);
   mesh.castShadow = mesh.receiveShadow = true;
   mesh.name = `Book: ${book.title}`;

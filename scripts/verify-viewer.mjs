@@ -658,3 +658,54 @@ api.open(null); draw();
   api.open(null); draw();
   console.log('lying books: cover, spine and back share upright head axis with 90 deg turns: passed');
 }
+
+// 8. Catalog/scene audit and owner-approved bilingual physical back.
+{
+  const allMeshes = [];
+  api.debug.scene.traverse(o => { if (o.isMesh && o.userData.bookId) allMeshes.push(o); });
+  assert.equal(allMeshes.length, 27, 'all catalog books exist exactly once');
+  const sceneModule = cache.get(resolve('src/scene.js')).namespace;
+  for (const b of catalog) {
+    const matches = allMeshes.filter(m => m.userData.bookId === b.id);
+    assert.equal(matches.length, 1, b.id + ': exactly one real book');
+    const mesh = matches[0], flat = b.placement.orientation === 'horizontal';
+    assert.equal(mesh.name, 'Book: ' + b.title);
+    assert.equal(mesh.userData.bookTitle, b.title);
+    assert(mesh.material[flat ? 2 : 0].map, b.id + ': front texture');
+    assert(mesh.material[flat ? 3 : 1].map, b.id + ': back texture');
+    assert(mesh.material[flat ? 1 : 4].map, b.id + ': spine texture');
+    const p = mesh.getWorldPosition(new Three.Vector3()), r = sceneModule.ROOMS[b.room];
+    assert(Math.abs(p.x - r.cx) < r.w / 2 && Math.abs(p.z - r.cz) < r.d / 2, b.id + ': correct actual room');
+  }
+  for (const anchor of new Set(catalog.map(b => b.placement.anchor))) {
+    const group = catalog.filter(b => b.placement.anchor === anchor).sort((a,b) => a.placement.order - b.placement.order);
+    const axis = group[0].placement.orientation === 'horizontal' ? 'y' : 'x';
+    for (let i = 1; i < group.length; i++) assert(api.debug.bookUI.getMesh(group[i].id).position[axis] > api.debug.bookUI.getMesh(group[i-1].id).position[axis], anchor + ': order matches geometry');
+  }
+  const id = 'riding-the-waves-of-culture', mesh = api.debug.bookUI.getMesh(id);
+  const ordinary = api.debug.bookUI.getMesh('factfulness'), ordinaryBack = ordinary.material[1].map;
+  const front = mesh.material[0], spine = mesh.material[4];
+  const origin = mesh.position.clone();
+  api.setLanguage('en'); api.open('writing'); draw();
+  api.debug.tapShelfBook(id); draw();
+  assert(!api.debug.bookUI.isExtracted());
+  api.debug.tapShelfBook(id); draw();
+  api.debug.tapShelfBook(id); draw();
+  api.debug.tapShelfBook(id); draw();
+  assert.equal(api.debug.bookUI.activeFace, 'back');
+  const enBack = mesh.material[1].map;
+  assert(stage.children.find(c => c.classList.contains('book-status')).textContent.includes("An oldie but a goldie. I keep returning to this book to better understand and manage people across different cultures. Extremely valuable in business and private life. If you don't have time to read it, take a look at the diagrams."));
+  let disposed = false; enBack.addEventListener('dispose', () => { disposed = true; });
+  api.setLanguage('de'); api.open('writing', { keepView: true }); draw();
+  assert.equal(api.debug.bookUI.activeFace, 'back', 'language change preserves the shown face');
+  assert(api.debug.bookUI.isExtracted(), 'language change does not put the book away');
+  assert(mesh.material[1].map !== enBack && disposed, 'language changes replace and dispose the personal back texture');
+  assert.equal(ordinary.material[1].map, ordinaryBack, 'ordinary backs stay unchanged');
+  assert.equal(mesh.material[0], front); assert.equal(mesh.material[4], spine);
+  assert(stage.children.find(c => c.classList.contains('book-status')).textContent.includes("Ein Klassiker, zu dem ich immer wieder zurückkehre, um Menschen unterschiedlicher Kulturen besser zu verstehen und zu führen. Extrem wertvoll im Berufs- wie im Privatleben. Wer keine Zeit zum Lesen hat, sollte sich zumindest die Diagramme anschauen."));
+  api.debug.tapShelfBook(id); draw();
+  assert(!api.debug.bookUI.isActive());
+  assert(mesh.position.distanceTo(origin) < 1e-8);
+  api.setLanguage('en'); api.open(null); draw();
+  console.log('Catalog audit: 27 unique meshes, correct rooms/order/faces; approved bilingual back, language switching, disposal and return: passed');
+}

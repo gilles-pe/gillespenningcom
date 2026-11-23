@@ -149,7 +149,7 @@ External HTTP(S) destinations open in a new tab with a focus request; browsers m
 ## Curated book interaction (D-097)
 - The 27 English-edition books live in src/data/books.json; keep titles, synopsis sources and placements in data.
 - Book meshes use src/book-jackets.js; src/book-interaction.js animates removal and rotation. The very first scene click only frames the book. Subsequent clicks on that same book follow **1 Cover (lift), 2 Spine, 3 Back, 4 return to shelf**. Never cycle Back to Cover on the fourth interaction. No card is shown for books (D-114): the book itself is the interface; Enter on the focused stage does the same as a click, a visually hidden status names the book and face for screen readers, and BACK / Escape / Reset / room changes restore it. Test the whole sequence and a fresh restart after returning.
-- Synopses are short, neutral, in English, sourced from published book descriptions. No invented owner endorsements. The reserved personalNote stays hidden until owner text is supplied.
+- Synopses are short, neutral, in English, sourced from published book descriptions. No invented owner endorsements. Owner-approved bilingual personalNote text appears on the physical back in the selected website language (D-124); never use a summary as a personal endorsement.
 - Do not add a book card or book buttons back without an owner decision (D-114). Synopses stay in the data for later use.
 - Run npm run check:books, npm run check, npm run test:inspection, and npm run build. Keep the album, globe, photo and Enterprise interactions intact.
 
@@ -166,3 +166,10 @@ Whenever pictures, textures or jacket faces change (covers, spines, backs, slots
 - The 5 latest Substack issues from `https://medtechsignal.substack.com/feed` live as structured data in `src/data/substack-articles.json`, rendered as broadsheet front pages on the `Writing & Speaking` shelf (`y = 0.705`) with local WebP graphics in `public/models/article-*.webp`.
 - **5-day refresh cadence:** Every 5 days, check `https://medtechsignal.substack.com/feed` for new posts. If a new post is published, save its graphic locally (`public/models/article-*.webp`, 768px wide, quality 82), shift/update the 5 entries in `src/data/substack-articles.json` (keeping `key: "latestArticle"` on index 0), and update `lastChecked` and `TODO.md`.
 - Keep all 5 newspapers free of external floating hover labels; preserve zoom-first framing on first click and direct new-tab opening (`_blank`) on second click.
+
+## Personal reading notes (D-124, owner instruction 2026-11-23)
+- Develop each new personal book description together with Gilles, one book at a time. Use short personal wording in his language, never generic reviews or marketing copy.
+- Present both German and English versions. Save and publish only after explicit approval. Never independently rewrite already approved text.
+- Keep neutral sourced `summary` and personal `personalNote.en` / `personalNote.de` separate. Missing facts or translations stay null; do not invent them.
+- Maintain structured title, author, ISBN, English cover, spine, back, placement/location, Amazon link, neutral summary and personal note for every book over time.
+- After every update test the actual representation, both languages and desktop/mobile, including all affected placements and the complete book sequence. Run the book, token, viewer and build checks.

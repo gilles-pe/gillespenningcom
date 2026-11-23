@@ -62,6 +62,8 @@ for (const b of books) {
     const large = await sharp(fileURLToPath(new URL('../public' + b.coverImages.large, import.meta.url))).metadata();
     if (Math.abs(small.width / small.height - large.width / large.height) > .01) fail('Cover aspect ratio differs: ' + b.id);
   } else if (b.coverImageStatus !== 'generated-fallback-pending-review') fail('Missing fallback status: ' + b.id);
+  if (!b.personalNote || !['en', 'de'].every(lang => b.personalNote[lang] === null || (typeof b.personalNote[lang] === 'string' && b.personalNote[lang].trim()))) fail('Invalid personal note fields: ' + b.id);
+  if (!b.summary?.en || !b.summarySourceUrl) fail('Missing neutral sourced summary: ' + b.id);
   if (b.amazonUrl && !/^https:\/\//.test(b.amazonUrl)) fail('Invalid Amazon URL: ' + b.id);
 }
 if (roomCounts.about !== 16 || roomCounts.writing !== 11) fail('Room counts mismatch');

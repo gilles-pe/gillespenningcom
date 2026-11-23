@@ -1,0 +1,49 @@
+name: Book browser review
+on:
+  push:
+    branches: [work/personal-book-notes-20261123]
+  workflow_run:
+    workflows: [Deploy to GitHub Pages]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  books:
+    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - if: github.event_name == 'push'
+        run: |
+          npm run check:books
+          npm run check
+          npm run test:inspection
+          npm run build
+      - run: npm install --no-save --package-lock=false --ignore-scripts playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/verify-book-browser.mjs
+        env:
+          BOOK_REVIEW_LIVE: ${{ github.event_name == 'workflow_run' && '1' || '0' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: book-browser-review
+          path: .book-review/
+      - name: Preserve review captures
+        if: success()
+        run: |
+          node --input-type=module -e "import { readdirSync,readFileSync,writeFileSync } from 'node:fs'; for(const name of readdirSync('.book-review')) if(name.endsWith('.png')) writeFileSync('.book-review/'+name+'.b64', readFileSync('.book-review/'+name).toString('base64'));"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f .book-review
+          git commit -m "test: preserve book review screenshots for run ${{ github.run_id }}"
+          git push origin HEAD:refs/heads/review/book-captures-${{ github.run_id }}

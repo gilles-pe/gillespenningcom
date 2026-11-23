@@ -59,13 +59,11 @@ The two rear shelves have different silhouettes and roles (D-053). About Me keep
 D-058 refines these furnishings. The About Me desk now has a softly eased oak top, tapered legs, slim drawers and restrained brass pulls; its laptop, album and mug stay at their original clickable coordinates. Its upholstered, rounded office chair has a visible swivel base and shared design language with the AI room chair. The front Writing & Speaking shelf is more lived-in: varied upright and stacked books on both open levels, a slim drawer base and a small antique globe on the top right, clear of the clickable speaking photo. The books have subtle spine marks and slight variation without making a uniform wall of color. This supersedes the intentionally sparse book arrangement of D-053.
 
 
-## Book collection object cards (D-097)
+## Book collection (D-097, D-114, D-124)
 
-Twenty-one English-edition books are individual scene meshes (14 About Me, 7 Writing & Speaking). First click frames the mesh; second click lifts the book from its shelf. Cover, Spine and Back controls rotate the book, while Return, BACK, Escape, Reset and navigation restore it. Reduced-motion mode skips interpolation.
+The 27 English-edition books are individual meshes (16 About Me, 11 Writing & Speaking), sourced from `src/data/books.json`. First click frames the real book. The next four clicks show Cover/pull out, Spine, Back and Return to shelf; Enter does the same. There is no separate book card, dialog or book buttons. BACK, Escape, Reset and room changes restore the book.
 
-The card belongs to the existing restrained paper-glass family: var(--paper) at 86% opacity, backdrop-filter blur(10px), 1px var(--line) border and var(--r1) = 6px corner radius (not a proposed larger CI radius). Source Serif 4 serves the book title and Source Sans 3 the author and two-line English synopsis. Buttons use existing --h3 48px mobile targets. The real cover and generated spine/back are object surfaces, not new UI colors; no gradient or heavy shadow.
-
-See docs/books.md for catalog data, sources, and implementation notes.
+Approved personal reading notes appear on the physical back in the selected language, identified as Gilles Penning's reading note. The back uses warm paper #F7F6F2, ink #18181B and a restrained #1E3A8A label from the shared CI, a high-resolution canvas fitted to the actual mesh aspect ratio and full wrapping without truncation. English titles/front artwork and ordinary backs remain unchanged. Neutral summaries are stored separately. See `docs/books.md`.
 
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long

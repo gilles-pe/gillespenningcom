@@ -134,7 +134,7 @@
       "room": "writing",
       "placement": {
         "anchor": "writing-shelf-display-left",
-        "orientation": "upright",
+        "orientation": "leaning",
         "order": 4
       },
       "isbn13": "9780374173227",

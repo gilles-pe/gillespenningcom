@@ -612,10 +612,11 @@ api.open(null); draw();
   console.log('books without card: framing, four clicks, Enter, screen-reader status: passed');
 }
 
-// 7. Lying books (D-115): spine is the long left edge (-X), the short ends are plain; the spine step turns that edge to the viewer.
+// 7. Lying books (D-123): cover (+Y), spine (-X) and back (-Y) share the head-up axis (-Z) for clean 90 deg turns; back is rotated 180 deg to stay upright.
 {
   const books = testCatalog().books.filter(b => b.placement.orientation === 'horizontal');
   assert(books.length >= 7, 'lying books exist');
+  const settle = () => { for (let i = 0; i < 12; i++) api.debug.bookUI.update(0.05); };
   for (const b of books) {
     api.open(b.room); draw();
     const mesh = api.debug.bookUI.getMesh(b.id), m = mesh.material;
@@ -625,22 +626,35 @@ api.open(null); draw();
     api.debug.tapShelfBook(b.id); draw();
     mesh.updateWorldMatrix(true, false);
     // The book turns towards the camera as it was when the book was pulled out, so read that camera before drawing on.
-    const eye = api.debug.camera.position.clone().sub(mesh.getWorldPosition(new Three.Vector3())).normalize();
-    const camUp = new Three.Vector3(0, 1, 0).applyQuaternion(api.debug.camera.quaternion);
     api.debug.tapShelfBook(b.id);
     const eye0 = api.debug.camera.position.clone().sub(mesh.getWorldPosition(new Three.Vector3())).normalize();
     const camUp0 = new Three.Vector3(0, 1, 0).applyQuaternion(api.debug.camera.quaternion);
-    draw(); api.debug.tapShelfBook(b.id); draw();
-    for (let i = 0; i < 10; i++) api.debug.bookUI.update(0.05);   // let the turn finish; the headless frame does not drive it
+    draw();
+    settle();
+    assert.equal(api.debug.bookUI.activeFace, 'front');
+    mesh.updateWorldMatrix(true, false);
+    const qFront = mesh.getWorldQuaternion(new Three.Quaternion());
+    assert(new Three.Vector3(0, 1, 0).applyQuaternion(qFront).dot(eye0) > 0.95, `${b.id}: front cover (+Y) faces viewer`);
+    assert(new Three.Vector3(0, 0, -1).applyQuaternion(qFront).dot(camUp0) > 0.95, `${b.id}: front cover head (-Z) is upright`);
+
+    api.debug.tapShelfBook(b.id); draw(); settle();
     assert.equal(api.debug.bookUI.activeFace, 'spine');
     mesh.updateWorldMatrix(true, false);
-    const q = mesh.getWorldQuaternion(new Three.Quaternion());
-    const left = new Three.Vector3(-1, 0, 0).applyQuaternion(q), up = new Three.Vector3(0, 1, 0).applyQuaternion(q);
-    void eye; void camUp;
-    assert(left.dot(eye0) > 0.95, `${b.id}: spine step shows the long spine edge to the viewer, not an end or the underside`);
-    assert(up.dot(camUp0) > 0.95, `${b.id}: spine lettering is upright`);
+    const qSpine = mesh.getWorldQuaternion(new Three.Quaternion());
+    assert(new Three.Vector3(-1, 0, 0).applyQuaternion(qSpine).dot(eye0) > 0.95, `${b.id}: spine step shows the long spine edge (-X)`);
+    assert(new Three.Vector3(0, 0, -1).applyQuaternion(qSpine).dot(camUp0) > 0.95, `${b.id}: spine shares head-up axis (-Z), no landscape tilt`);
+    assert(Math.abs(qFront.angleTo(qSpine) - Math.PI / 2) < 0.15, `${b.id}: front->spine is a clean 90 deg turn`);
+
+    api.debug.tapShelfBook(b.id); draw(); settle();
+    assert.equal(api.debug.bookUI.activeFace, 'back');
+    mesh.updateWorldMatrix(true, false);
+    const qBack = mesh.getWorldQuaternion(new Three.Quaternion());
+    assert(new Three.Vector3(0, -1, 0).applyQuaternion(qBack).dot(eye0) > 0.95, `${b.id}: back step shows back cover (-Y)`);
+    assert(new Three.Vector3(0, 0, -1).applyQuaternion(qBack).dot(camUp0) > 0.95, `${b.id}: back cover head (-Z) stays upright`);
+    assert(Math.abs(qSpine.angleTo(qBack) - Math.PI / 2) < 0.15, `${b.id}: spine->back is a clean 90 deg turn`);
+
     assert(api.back()); draw();
   }
   api.open(null); draw();
-  console.log('lying books: spine on the long edge, spine step faces the viewer upright: passed');
+  console.log('lying books: cover, spine and back share upright head axis with 90 deg turns: passed');
 }

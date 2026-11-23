@@ -1,6 +1,7 @@
 // Verify book metadata and scene-placement invariants before publishing.
 import { readFileSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const file = new URL('../src/data/books.json', import.meta.url);
@@ -53,12 +54,12 @@ for (const b of books) {
       if (path !== expected) fail(`Unexpected ${size} path for ${b.id}`);
       const asset = new URL('../public' + path, import.meta.url);
       let meta, info;
-      try { [meta, info] = await Promise.all([sharp(asset.pathname).metadata(), stat(asset)]); }
+      try { [meta, info] = await Promise.all([sharp(fileURLToPath(asset)).metadata(), stat(asset)]); }
       catch { fail(`Missing or invalid ${size} cover for ${b.id}`); }
       if (meta.format !== 'webp' || meta.width < 24 || meta.height < 24 || meta.width > maxWidth || meta.height > maxHeight || info.size < 100) fail(`Implausible ${size} cover for ${b.id}`);
     }
-    const small = await sharp(new URL('../public' + b.coverImages.small, import.meta.url).pathname).metadata();
-    const large = await sharp(new URL('../public' + b.coverImages.large, import.meta.url).pathname).metadata();
+    const small = await sharp(fileURLToPath(new URL('../public' + b.coverImages.small, import.meta.url))).metadata();
+    const large = await sharp(fileURLToPath(new URL('../public' + b.coverImages.large, import.meta.url))).metadata();
     if (Math.abs(small.width / small.height - large.width / large.height) > .01) fail('Cover aspect ratio differs: ' + b.id);
   } else if (b.coverImageStatus !== 'generated-fallback-pending-review') fail('Missing fallback status: ' + b.id);
   if (b.amazonUrl && !/^https:\/\//.test(b.amazonUrl)) fail('Invalid Amazon URL: ' + b.id);

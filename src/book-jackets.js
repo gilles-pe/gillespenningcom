@@ -76,9 +76,10 @@ function frontFallback(book, colors) {
     authors.forEach((line, i) => ctx.fillText(line, w / 2, h - 74 + i * 23));
   });
 }
-function backReconstruction(book, colors) {
+function backReconstruction(book, colors, flip180 = false) {
   const [bg, ink, accent] = colors;
   return sheet(256, 384, (ctx, w, h) => {
+    if (flip180) { ctx.translate(w, h); ctx.rotate(Math.PI); }
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.strokeRect(18, 18, w - 36, h - 36);
     ctx.fillStyle = ink; ctx.textAlign = 'left';
@@ -182,14 +183,14 @@ function makeMaterials(book, orientation) {
   if (materialCache.has(cacheKey)) return materialCache.get(cacheKey);
   const colors = palette(book.id);
   const paper = new THREE.MeshStandardMaterial({ color: 0xe8decc, roughness: .88 });
-  const front = new THREE.MeshStandardMaterial({ map: frontFallback(book, colors), roughness: .76 });
-  const back = new THREE.MeshStandardMaterial({ map: backReconstruction(book, colors), roughness: .79 });
   const flat = !(orientation === 'upright' || orientation === 'leaning');
+  const front = new THREE.MeshStandardMaterial({ map: frontFallback(book, colors), roughness: .76 });
+  const back = new THREE.MeshStandardMaterial({ map: backReconstruction(book, colors, flat), roughness: .79 });
   const spine = new THREE.MeshStandardMaterial({ map: flat ? flatSpineReconstruction(book, colors) : spineReconstruction(book, colors), roughness: .76 });
   // BoxGeometry material order: +X, -X, +Y, -Y, +Z, -Z.
   // Upright: cover on the leaf-facing (+X) side; spine looks out (+Z).
-  // Horizontal (D-115): front cover looks up (+Y), back cover down (-Y); the spine is the long left edge (-X), as on a
-  // real book lying cover up. The short ends (+Z, -Z) are paper. Keep book-interaction.js normalAndUp() in step.
+  // Horizontal: front cover looks up (+Y), back cover down (-Y, rotated 180° in canvas to align head at -Z);
+  // the spine is the long left edge (-X). The short ends (+Z, -Z) are paper. Keep book-interaction.js normalAndUp() in step.
   const materials = !flat
     ? [front, back, paper, paper, spine, paper]
     : [paper, spine, front, back, paper, paper];

@@ -67,12 +67,12 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   }
   function normalAndUp(face, orientation) {
     const flat = orientation === 'horizontal';
-    // Lying book (D-115): the spine is the long left edge (-X face), lettering upright (+Y).
-    if (face === 'spine') return flat ? { normal: FRONT.clone().negate(), up: VERTICAL.clone() } : { normal: FORWARD.clone(), up: VERTICAL.clone() };
+    // Lying books share the true head axis (-Z) across front (+Y), spine (-X), and back (-Y)
+    // so clicks turn cleanly 90° around -Z instead of tumbling diagonally; keep book-jackets.js flip180 in step.
+    const up = flat ? FORWARD.clone().negate() : VERTICAL.clone();
+    if (face === 'spine') return { normal: flat ? FRONT.clone().negate() : FORWARD.clone(), up };
     const normal = flat ? VERTICAL.clone() : FRONT.clone();
     if (face === 'back') normal.negate();
-    // BoxGeometry maps the underside's texture in the opposite direction.
-    const up = flat && face === 'back' ? FORWARD.clone() : flat ? FORWARD.clone().negate() : VERTICAL.clone();
     return { normal, up };
   }
   function showFace(face) {

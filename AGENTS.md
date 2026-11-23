@@ -101,6 +101,9 @@ design, critique, audit and polish work.
 - Slot names, aspect ratios and minimum sizes are listed in `DESIGN.md` and in `public/slots/README.md`.
 - A new picture surface needs a row in `DESIGN.md` and an entry in the `SLOTS` table in `src/scene.js`.
 
+## Structured data (JSON-LD) - Search Console rules (2026-11-23)
+`index.html` carries JSON-LD (Person, WebSite). Search Console flagged the monitor's news markup (`ai.gillespenning.com`) for dates without a time zone and authors without a url. Apply the same rules here whenever JSON-LD is added or changed: every `datePublished` / `dateModified` is a full ISO 8601 datetime with a time zone (`2026-11-21T00:00:00+01:00`, never a bare date, never an invented time); every `author` / `publisher` person has `name` and `url` or an `@id` that resolves to such a node. Re-test in Google's Rich Results Test after a deploy.
+
 ## Hosting and domain
 `gillespenning.com` is reserved for this site. The monitor stays on the subdomain
 `ai.gillespenning.com` and must keep working.

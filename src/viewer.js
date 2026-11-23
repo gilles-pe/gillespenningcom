@@ -23,14 +23,25 @@ const loadGlobeMusic = async () => {
 const loadWarpSound = async () => {
   const mod = await import('./warp-sound.js');
   const data = await mod.fetchWarpSound(import.meta.env.BASE_URL);
-  return (ctx, t0) => mod.playWarpSound(ctx, data, t0);
+  return {
+    prepare: ctx => mod.decodeWarpSound(ctx, data),
+    play: (ctx, t0, decoded) => mod.playWarpSound(ctx, decoded || data, t0),
+  };
 };
 
 export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, musicLoader = loadGlobeMusic, warpLoader = loadWarpSound }) {
-  let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch { return null; }
+  let renderer = null;
+  for (const opts of [
+    { canvas, antialias: true, alpha: true, powerPreference: 'high-performance' },
+    { canvas, antialias: false, alpha: true },
+  ]) {
+    try { renderer = new THREE.WebGLRenderer(opts); break; } catch { renderer = null; }
+  }
+  if (!renderer) return null;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2;
+  canvas.addEventListener?.('webglcontextlost', e => { e.preventDefault(); }, false);
+  canvas.addEventListener?.('webglcontextrestored', () => { resize(); markDirty(); }, false);
 
   let dirty = true;
   const markDirty = () => { dirty = true; };
@@ -100,6 +111,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // so pixels continue under the surrounding surfaces at the same scale.
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
   const renderCamera = camera.clone();
+  const viewscreenCamera = new THREE.PerspectiveCamera(36, 1.6, 0.015, 80);
   const hero = stage.closest('.hero');
   const column = stage.parentElement;
   const panel = hero.querySelector('.panel');
@@ -183,9 +195,18 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     let ctx = null;
     try { const AC = window.AudioContext || window.webkitAudioContext; ctx = AC ? new AC() : null; ctx?.resume?.(); } catch { ctx = null; }
     if (!ctx) return null;
-    const ws = { ctx, play: null, player: null, t0: null };
+    const ws = { ctx, play: null, decoded: null, player: null, t0: null };
     warpSound = ws;
-    loadWarp().then(play => { ws.play = play; kickWarpSound(ws); }).catch(() => { if (warpSound === ws) stopWarpSound(); });
+    loadWarp().then(loaded => {
+      if (warpSound !== ws) return;
+      if (typeof loaded === 'function') { ws.play = loaded; kickWarpSound(ws); return; }
+      return Promise.resolve(loaded?.prepare?.(ctx)).then(decoded => {
+        if (warpSound !== ws) return;
+        ws.decoded = decoded;
+        ws.play = (c, t0) => loaded.play(c, t0, ws.decoded);
+        kickWarpSound(ws);
+      });
+    }).catch(() => { if (warpSound === ws) stopWarpSound(); });
     return ws;
   }
   function beginWarpSound(ws) { if (!ws || warpSound !== ws) return; ws.t0 = performance.now(); kickWarpSound(ws); }
@@ -195,7 +216,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!ws) return;
     if (ws.player) ws.player.stop(); else { try { ws.ctx.close(); } catch { /* ignore */ } }
   }
-  function cancelWarp() { roomWarp?.cancel(); stopWarpSound(); }
+  function cancelWarp() { roomWarp?.cancel(); stopWarpSound(); if (viewscreenEl) viewscreenEl.hidden = true; }
   document.addEventListener?.('visibilitychange', () => { if (document.hidden && music.state !== 'idle') stopGlobeMusic(); if (document.hidden) stopWarpSound(); });
   let custom = false, zoom = 1, away = false;               // custom: the user turned, panned or zoomed away from the default
   const DMIN = 0.7;
@@ -269,8 +290,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return leashBox;
   }
 
+  const lastLayout = { w: 0, h: 0, left: 0, top: 0, width: 0, height: 0 };
   function resize() {
-    markDirty();
     const frame = stage.getBoundingClientRect(), region = hero.getBoundingClientRect();
     const w = frame.width, h = frame.height;
     if (!w || !h) return;
@@ -280,7 +301,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const left = region.left - frame.left;
     const top = Math.max(region.top - frame.top, -104);
     const bottom = Math.min(region.bottom, Math.max(below, details ? details.top + 104 : below) + 40);
-    const width = Math.ceil(region.width), height = Math.ceil(bottom - frame.top - top);
+    const width = Math.max(1, Math.floor(region.width)), height = Math.max(1, Math.ceil(bottom - frame.top - top));
+    if (Math.abs(w - lastLayout.w) < 0.5 && Math.abs(h - lastLayout.h) < 0.5
+      && Math.abs(left - lastLayout.left) < 0.5 && Math.abs(top - lastLayout.top) < 0.5
+      && Math.abs(width - lastLayout.width) < 0.5 && Math.abs(height - lastLayout.height) < 0.5) return;
+    Object.assign(lastLayout, { w, h, left, top, width, height });
+    markDirty();
     Object.assign(canvas.style, { left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px` });
 
     // Limit the extra raster area on high density and large screens.
@@ -584,21 +610,45 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   exploreBtn.type = 'button'; exploreBtn.className = 'ship-engage-btn'; exploreBtn.textContent = 'Explore';
   engageGroup.append(engageBtn, exploreBtn);
   stage.append(engageGroup);
+  const viewscreenEl = document.createElement('div');
+  viewscreenEl.className = 'warp-viewscreen';
+  viewscreenEl.setAttribute('aria-hidden', 'true');
+  viewscreenEl.hidden = true;
+  const viewscreenTag = document.createElement('span');
+  viewscreenTag.className = 'warp-viewscreen-tag';
+  viewscreenTag.textContent = 'VIEWSCREEN · NCC-1701';
+  viewscreenEl.append(viewscreenTag);
+  stage.append(viewscreenEl);
   const engagePos = new THREE.Vector3();
   async function openShipInspector() {
     const { showEnterprise } = await import('./enterprise-inspector.js');
     return showEnterprise(enterpriseCopy[curLang], reduced, () => { triggerRoomWarp(); });
   }
+  function preloadEnterpriseAssets() {
+    ensureEnterpriseGlb().then(() => { roomWarp?.warmup?.(renderer, camera); }).catch(() => {});
+    if (!reduced) loadWarp().catch(() => {});
+  }
   async function triggerRoomWarp() {
     if (reduced) { if (popText) popText.textContent = enterpriseCopy[curLang].reduced; return; }
     const ws = prepareWarpSound();   // still inside the click: browsers only allow audio that starts from a gesture
-    try { await ensureEnterpriseGlb(); } catch (error) { if (warpSound === ws) stopWarpSound(); throw error; }
+    try {
+      await ensureEnterpriseGlb();
+      roomWarp?.warmup?.(renderer, viewscreenCamera);
+      roomWarp?.warmup?.(renderer, camera);
+    } catch (error) { if (warpSound === ws) stopWarpSound(); throw error; }
     closePop(false);
     restoreObjectView();
     // Stay inside the About Me room at normal room framing so the entire 180° curve & warp-in stay in view
     openId = 'about'; custom = false; zoom = 1; panOffset.set(0, 0, 0);
     setGoal();
-    if (roomWarp?.engage(() => markDirty())) beginWarpSound(ws); else if (warpSound === ws) stopWarpSound();
+    markDirty();
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    if (warpSound !== ws && ws) return;
+    if (roomWarp?.engage(() => markDirty(), () => beginWarpSound(ws))) {
+      // Wait cleanly for liftoff before playing warp audio.
+    } else if (warpSound === ws) {
+      stopWarpSound();
+    }
     markDirty();
   }
   engageBtn.addEventListener('click', () => { triggerRoomWarp(); });
@@ -612,6 +662,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const camDist = camera.position.distanceTo(engagePos);
     const closeZoom = popKey === 'enterprise' || (openId === 'about' && camDist < 2.8) || (!openId && camDist < 2.3);
     if (!closeZoom) { engageGroup.hidden = true; return; }
+    preloadEnterpriseAssets();
     const p = engagePos.clone().project(camera);
     if (p.z < -1 || p.z > 1) { engageGroup.hidden = true; return; }
     const x = (p.x * 0.5 + 0.5) * stageW;
@@ -979,7 +1030,12 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!popEl || popEl.hidden || !popKey) return;
     if (!popAllowed(openId, popKey)) closePop(false);
   }
-  const observer = new ResizeObserver(resize);
+  let resizeRaf = 0;
+  const observer = new ResizeObserver(entries => {
+    if (!entries) { resize(); return; }
+    if (resizeRaf) return;
+    resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
+  });
   for (const layout of [hero, stage, column, panel]) observer.observe(layout);
   resize();
   Object.assign(view, { az: goal.az, el: goal.el, dist: goal.dist }); view.t.copy(goal.t);
@@ -1309,7 +1365,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     return { ...(action || { key: target.key, type: 'card', anchor: target.objects[0] }), room };
   };
   function updateHoverTip() {
-    if (!hoverTarget || drag || (albumLightbox && !albumLightbox.hidden)) { hoverTip.hidden = true; return; }
+    if (!hoverTarget || drag || roomWarp?.isViewscreenActive?.() || (albumLightbox && !albumLightbox.hidden)) { hoverTip.hidden = true; return; }
     if (substackByKey.has(hoverTarget.key)) { hoverTip.hidden = true; return; }
     let label = hoverTarget.customLabel;
     if (!label) {
@@ -1534,7 +1590,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   function placeSpots() {
     const live = [];
     for (const s of spots) {
-      const on = s.id === openId && rooms[s.id].open > 0.7, low = Math.sin(view.el) < 0.12;   // seen from below or edge-on: fade out
+      const on = s.id === openId && rooms[s.id].open > 0.7 && !roomWarp?.isViewscreenActive?.(), low = Math.sin(view.el) < 0.12;   // seen from below or edge-on: fade out
       if (on !== s.on || low !== s.low) { s.on = on; s.low = low; s.el.classList.toggle('on', on); s.el.classList.toggle('away', low); if (s.el.href || s.el.tagName === 'BUTTON') s.el.tabIndex = on && !low ? 0 : -1; }
       if (rooms[s.id].open < 0.05) continue;
       v3.copy(s.pos).project(camera);
@@ -1661,6 +1717,40 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     renderCamera.position.copy(camera.position);
     renderCamera.quaternion.copy(camera.quaternion);
     renderer.render(scene, renderCamera);
+
+    const vs = !reduced ? roomWarp?.getViewscreenPose?.() : null;
+    if (!vs) {
+      if (!viewscreenEl.hidden) viewscreenEl.hidden = true;
+    } else {
+      viewscreenEl.hidden = false;
+      viewscreenEl.style.opacity = '1';
+      if (renderer.setScissorTest) {
+        const vr = viewscreenEl.getBoundingClientRect();
+        const cr = canvas.getBoundingClientRect();
+        const vx = Math.round(vr.left - cr.left);
+        const vy = Math.round(cr.bottom - vr.bottom);
+        const vw = Math.round(vr.width);
+        const vh = Math.round(vr.height);
+        if (vw > 20 && vh > 20) {
+          viewscreenCamera.aspect = vw / vh;
+          viewscreenCamera.updateProjectionMatrix();
+          viewscreenCamera.position.copy(vs.eye);
+          viewscreenCamera.lookAt(vs.target);
+          const prevAutoClear = renderer.autoClear;
+          renderer.autoClear = false;
+          renderer.setScissorTest(true);
+          renderer.setScissor(vx, vy, vw, vh);
+          renderer.setViewport(vx, vy, vw, vh);
+          renderer.setClearColor(0xf7f6f2, 1);
+          renderer.clear(true, true, false);
+          renderer.render(scene, viewscreenCamera);
+          renderer.setScissorTest(false);
+          renderer.setViewport(0, 0, lastLayout.width || stageW, lastLayout.height || stageH);
+          renderer.setClearColor(0x000000, 0);
+          renderer.autoClear = prevAutoClear;
+        }
+      }
+    }
   }
   requestAnimationFrame(frame);
 
@@ -1668,7 +1758,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     open(id, { keepView = false } = {}) {
       markDirty();
       cancelWarp();
-      if (id === 'about') ensureEnterpriseGlb();
+      if (id === 'about') preloadEnterpriseAssets();
       bookUI.close(true);
       if (!keepView && (id !== openId || custom)) rememberView('room');
       if (id !== openId) closeAlbum(false);

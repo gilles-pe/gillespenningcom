@@ -247,19 +247,26 @@ function useStatic() {
   if (pending) { pending = null; applyLocation(); }
 }
 
-// Text and links are usable before the 3D code arrives.
-import('./viewer.js').then(({ startViewer }) => {
-  api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
-    onZoom: syncZoom,
-    onBackState: available => { sceneBack.hidden = !available; stage.classList.toggle('has-view-history', available); },
-    onViewBack: id => { if (id) openRoom(id, true); else closeRoom({ fromHistory: true }); writeRoomHash(id); },
-    onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
-  if (!api) return useStatic();
-  viewControls.hidden = false;
-  // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
-  stage.tabIndex = 0; stage.setAttribute('role', 'application');
-  stage.closest('.hero').classList.add('hero--rendered');
-  if (import.meta.env.DEV) window.__gp = api.debug;
-  mode = '3d';
-  if (pending) { pending = null; applyLocation(); }
-}).catch(useStatic);
+// Text and links are usable before the 3D code arrives. Retry transient chunk/WebGL
+// hiccups twice before falling back to the static view; SEO HTML stays intact throughout.
+function loadViewer(attempt = 0) {
+  import('./viewer.js').then(({ startViewer }) => {
+    api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
+      onZoom: syncZoom,
+      onBackState: available => { sceneBack.hidden = !available; stage.classList.toggle('has-view-history', available); },
+      onViewBack: id => { if (id) openRoom(id, true); else closeRoom({ fromHistory: true }); writeRoomHash(id); },
+      onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
+    if (!api) throw new Error('WebGL unavailable');
+    viewControls.hidden = false;
+    // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
+    stage.tabIndex = 0; stage.setAttribute('role', 'application');
+    stage.closest('.hero').classList.add('hero--rendered');
+    if (import.meta.env.DEV) window.__gp = api.debug;
+    mode = '3d';
+    if (pending) { pending = null; applyLocation(); }
+  }).catch(() => {
+    if (attempt < 2) setTimeout(() => loadViewer(attempt + 1), attempt === 0 ? 600 : 1500);
+    else useStatic();
+  });
+}
+loadViewer();

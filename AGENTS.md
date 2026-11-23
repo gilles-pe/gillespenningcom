@@ -86,6 +86,7 @@ design, critique, audit and polish work.
   and record the new version and commit here.
 
 ## Operating rules
+- **Quick Prototyping & Dialog first (owner rule 2026-11-23):** For visual, animation, camera, or UX work, align briefly with the owner first and prototype directly on the live dev server (`localhost:5173`) without running browser subagents, full test suites, builds, or `docs/decisions.md` updates. Only run tests, builds, and documentation once the owner has inspected and approved the prototype.
 - Plan before building. Never program or redesign unless asked.
 - Never invent facts about the owner: positions, employers, degrees, talks, clients,
   testimonials, press, logos, numbers or dates. If it is not supplied by the owner, ask.

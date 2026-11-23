@@ -1180,7 +1180,7 @@ function enterpriseModel(parent, x, y, z, rotY = -0.95) {
   const g = createEnterprise(true); g.scale.setScalar(0.095);
   g.position.set(x, y, z); g.rotation.y = rotY; parent.add(g);
   const anchor = new THREE.Object3D(); anchor.position.set(0, 1.8, 0); g.add(anchor);
-  const engageAnchor = new THREE.Object3D(); engageAnchor.position.set(-0.55, 0.36, 1.45); g.add(engageAnchor);
+  const engageAnchor = new THREE.Object3D(); engageAnchor.position.set(0, 0.22, -1.55); g.add(engageAnchor);
   const tagMesh = o => {
     o.userData.project = 'enterprise';
     o.userData.anchor = anchor;
@@ -2068,8 +2068,8 @@ function furnish(id, g, r, inspectionTargets) {
     lean.rotation.z = 0.25;
     // Raise the rotated lower corner onto the cabinet surface.
     lean.position.y = shelfH + (0.22 * Math.cos(0.25) + 0.044 * Math.sin(0.25)) / 2;
-    studyLamp(sh, 0.005, shelfH, -0.045);
-    const enterprise = enterpriseModel(sh, 0.34, shelfH, 0.02, -0.95);
+    studyLamp(sh, 0.42, shelfH, -0.045);
+    const enterprise = enterpriseModel(sh, 0.04, shelfH, 0.03, 2.35);
     trophyPicks.push(...enterprise.picks);
     const pic = wallPicture(g, 'about-wall-1', L.pic[0], L.pic[1], RD);
     const anchor = new THREE.Object3D(); anchor.position.copy(pic.position); g.add(anchor);
@@ -2146,7 +2146,7 @@ export const HOTSPOTS = {
     ['photo', null, LAY.about.pic[0], LAY.about.pic[1], -ROOMS.about.d / 2 + 0.1, 'photo'],
     ['story', null, LAY.about.desk[0] - 0.24, 0.85, LAY.about.desk[1] + 0.03, 'story'],
     ['album', null, LAY.about.desk[0] + 0.26, 0.74, LAY.about.desk[1] + 0.08, 'album'],
-    ['enterprise', null, LAY.about.shelf[0] + 0.34, 1.40, LAY.about.shelf[1] + 0.02, 'enterprise'],
+    ['enterprise', null, LAY.about.shelf[0] + 0.04, 1.40, LAY.about.shelf[1] + 0.03, 'enterprise'],
     ['substack', LINKS.signal, LAY.about.shelf[0] + 0.06, 0.9, LAY.about.shelf[1] + 0.05, 'substack'],
     ['bluesky', LINKS.bluesky, LAY.about.shelf[0] + 0.25, 0.9, LAY.about.shelf[1] + 0.05, 'bluesky'],
     ['linkedin', LINKS.linkedin, LAY.about.shelf[0] + 0.44, 0.9, LAY.about.shelf[1] + 0.05, 'linkedin'],

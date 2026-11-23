@@ -9,7 +9,7 @@ await mkdir(output, { recursive: true });
 const catalog = JSON.parse(await readFile('src/data/books.json', 'utf8')).books;
 const approved = catalog.find(b => b.id === 'riding-the-waves-of-culture');
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1'], { stdio: 'inherit' });
-let browser;
+let browser, currentPage;
 try {
   for (let i = 0; i < 100; i++) {
     try { const r = await fetch('http://127.0.0.1:5173'); if (r.ok) break; } catch {}
@@ -28,7 +28,7 @@ try {
   }
   for (const [device, viewport] of [['desktop', { width: 1440, height: 1000 }], ['mobile', { width: 390, height: 844 }]]) {
     const context = await browser.newContext({ viewport, deviceScaleFactor: device === 'mobile' ? 2 : 1, isMobile: device === 'mobile', hasTouch: device === 'mobile', reducedMotion: 'reduce' });
-    const page = await context.newPage();
+    const page = await context.newPage(); currentPage = page;
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.goto('http://127.0.0.1:5173/?lang=en#writing');
@@ -55,6 +55,7 @@ try {
       await page.waitForTimeout(100);
       assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'front');
     }
+    if (!live) {
     await enter(approved.id, 'writing');
     await stage.press('Enter'); await stage.press('Enter');
     for (const lang of ['en', 'de']) {
@@ -113,21 +114,36 @@ try {
     await stage.press('Escape'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
     assert.deepEqual(errors, [], 'no browser runtime errors');
+    }
     if (live) {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       // Capture the real live renderer, then use its keyboard interface after framing
       // by the shelf coordinates obtained from the identical tested source geometry.
       await page.goto('http://127.0.0.1:5173/?lang=en#writing');
       await page.waitForFunction(() => window.__gp?.bookUI.bookCount === 27);
       await page.waitForTimeout(900);
-      const point = await page.evaluate(() => {
+      const candidates = await page.evaluate(() => {
         const gp = window.__gp, m = gp.bookUI.getMesh('riding-the-waves-of-culture');
         const p = m.getWorldPosition(gp.camera.position.clone()).project(gp.camera);
         const r = document.getElementById('stage').getBoundingClientRect();
-        return { x: r.left + (p.x + 1) * r.width / 2, y: r.top + (1 - p.y) * r.height / 2 };
+        const x = (p.x + 1) / 2, y = (1 - p.y) / 2;
+        return [0, -.35, .35, -.7, .7].flatMap(dy =>
+          [0, -2, 2, -5, 5].map(dx => ({ x: x + dx / r.width, y: y + dy * .12 })));
       });
       await page.goto('https://gillespenning.com/?lang=en#writing');
       await page.locator('.hero--rendered').waitFor();
-      await page.waitForTimeout(1100);
+      await page.waitForTimeout(600);
+      await stage.scrollIntoViewIfNeeded();
+      const rect = await stage.boundingBox();
+      let point = null;
+      for (const c of candidates) {
+        const p = { x: rect.x + c.x * rect.width, y: rect.y + c.y * rect.height };
+        await page.mouse.move(p.x, p.y);
+        const tip = page.locator('.hover-tip');
+        if (await tip.isVisible() && (await tip.textContent()) === approved.title) { point = p; break; }
+      }
+      await stage.screenshot({ path: output + '/live-' + device + '-shelf.png' });
+      assert(point, 'live shelf hover identifies Riding the Waves of Culture before click');
       await page.mouse.click(point.x, point.y);
       await stage.focus(); await page.waitForTimeout(800);
       await stage.press('Enter'); await page.waitForTimeout(900);
@@ -156,6 +172,10 @@ try {
   await sharp({ create:{ width:1050,height:2040,channels:4,background:'#f7f6f2' } }).composite(tiles).png().toFile(output + '/all-27-covers.png');
   await writeFile(output + '/report.json', JSON.stringify({ source:process.env.GITHUB_SHA, live, checks:report }, null, 2));
   console.log('Real Chromium: desktop/mobile EN/DE complete backs, language switch, three placements/two angles, animation and return passed' + (live ? '; live site verified' : ''));
+} catch (error) {
+  await currentPage?.screenshot({ path: output + '/failure.png', fullPage: true }).catch(() => {});
+  await writeFile(output + '/failure.txt', String(error?.stack || error));
+  throw error;
 } finally {
   await browser?.close();
   server.kill();

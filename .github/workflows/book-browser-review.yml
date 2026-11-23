@@ -38,8 +38,9 @@ jobs:
         with:
           name: book-browser-review
           path: .book-review/
+          include-hidden-files: true
       - name: Preserve review captures
-        if: success()
+        if: always()
         run: |
           node --input-type=module -e "import { readdirSync,readFileSync,writeFileSync } from 'node:fs'; for(const name of readdirSync('.book-review')) if(name.endsWith('.png')) writeFileSync('.book-review/'+name+'.b64', readFileSync('.book-review/'+name).toString('base64'));"
           git config user.name "github-actions[bot]"

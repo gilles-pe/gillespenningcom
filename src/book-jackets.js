@@ -109,6 +109,19 @@ function spineReconstruction(book, colors) {
     ctx.restore();
   });
 }
+// Lying book: the spine is the long side edge (-X face, 0.19 x 0.03), so the lettering runs horizontally, not rotated.
+function flatSpineReconstruction(book, colors) {
+  const [bg, ink, accent] = colors;
+  return sheet(600, 112, (ctx, w, h) => {
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = accent; ctx.fillRect(0, 0, w, 9); ctx.fillRect(0, h - 8, w, 8);
+    ctx.fillStyle = ink; ctx.textAlign = 'center';
+    let fontSize = 35;
+    do { ctx.font = `600 ${fontSize}px Georgia, serif`; if (ctx.measureText(book.title).width <= w - 44) break; fontSize -= 2; } while (fontSize > 14);
+    ctx.fillText(book.title, w / 2, h / 2 - 2, w - 44);
+    ctx.font = '20px Georgia, serif'; ctx.fillText(book.author, w / 2, h / 2 + 30, w - 60);
+  });
+}
 const materialCache = new Map();
 const jackets = new Map();
 const MAX_LARGE_TEXTURES = 2;
@@ -171,13 +184,15 @@ function makeMaterials(book, orientation) {
   const paper = new THREE.MeshStandardMaterial({ color: 0xe8decc, roughness: .88 });
   const front = new THREE.MeshStandardMaterial({ map: frontFallback(book, colors), roughness: .76 });
   const back = new THREE.MeshStandardMaterial({ map: backReconstruction(book, colors), roughness: .79 });
-  const spine = new THREE.MeshStandardMaterial({ map: spineReconstruction(book, colors), roughness: .76 });
+  const flat = !(orientation === 'upright' || orientation === 'leaning');
+  const spine = new THREE.MeshStandardMaterial({ map: flat ? flatSpineReconstruction(book, colors) : spineReconstruction(book, colors), roughness: .76 });
   // BoxGeometry material order: +X, -X, +Y, -Y, +Z, -Z.
   // Upright: cover on the leaf-facing (+X) side; spine looks out (+Z).
-  // Horizontal: front cover looks up (+Y); spine faces out (+Z).
-  const materials = orientation === 'upright' || orientation === 'leaning'
+  // Horizontal (D-115): front cover looks up (+Y), back cover down (-Y); the spine is the long left edge (-X), as on a
+  // real book lying cover up. The short ends (+Z, -Z) are paper. Keep book-interaction.js normalAndUp() in step.
+  const materials = !flat
     ? [front, back, paper, paper, spine, paper]
-    : [paper, paper, front, back, spine, paper];
+    : [paper, spine, front, back, paper, paper];
   materialCache.set(cacheKey, materials);
   jackets.set(book.id, { book, material: front, fallback: front.map, small: null, large: null, active: false, used: 0 });
   return materials;

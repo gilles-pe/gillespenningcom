@@ -83,7 +83,7 @@ export const content = {
       },
       about: {
         h: 'About Me',
-        p1: 'Originally a surgical guy, I’ve spent 25 years in MedTech, with extensive experience in patient monitoring, digital health, ambulatory care and emergency medical services. Digital health has been part of that journey since 2004, from telemedicine to today’s AI and analytics.',
+        p1: 'Originally from surgery, I’ve spent 25 years in MedTech, with extensive experience in patient monitoring, digital health, ambulatory care and emergency medical services. Digital health has been part of that journey since 2004, from telemedicine to today’s AI and analytics.',
         p2: 'My strength is building businesses and transforming large teams, helping them succeed as healthcare itself changes, and bringing technology into practice to improve how care is delivered.',
         more: 'More details',
         linkedin: 'Full profile',

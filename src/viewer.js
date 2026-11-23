@@ -111,7 +111,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   // so pixels continue under the surrounding surfaces at the same scale.
   const camera = new THREE.PerspectiveCamera(24, 1, 0.1, 200);
   const renderCamera = camera.clone();
-  const viewscreenCamera = new THREE.PerspectiveCamera(36, 1.6, 0.015, 80);
+  const viewscreenCamera = new THREE.PerspectiveCamera(50, 1.6, 0.015, 80);
   const hero = stage.closest('.hero');
   const column = stage.parentElement;
   const panel = hero.querySelector('.panel');
@@ -644,7 +644,35 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     markDirty();
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (warpSound !== ws && ws) return;
-    if (roomWarp?.engage(() => markDirty(), () => beginWarpSound(ws))) {
+    const entTarget = inspectionFor('enterprise');
+    let restCorners = null;
+    if (entTarget?.objects?.length) {
+      const restBounds = new THREE.Box3();
+      for (const object of entTarget.objects) {
+        object.updateWorldMatrix(true, true);
+        restBounds.expandByObject(object);
+      }
+      const { min, max } = restBounds;
+      restCorners = [];
+      for (const x of [min.x, max.x])
+        for (const y of [min.y, max.y])
+          for (const z of [min.z, max.z])
+            restCorners.push([x, y, z]);
+    }
+    const onWarpDone = () => {
+      if (objectFocus?.target?.key === 'enterprise' && !popKey) {
+        objectFocus.target = { ...(inspectionFor('enterprise') || objectFocus.target), captionHeight: 0 };
+      }
+      markDirty();
+    };
+    const onPreLand = () => {
+      if (openId !== 'about' || !entTarget || !restCorners) return;
+      rememberView('object');
+      stage.classList.add('object-focused');
+      focusObject({ ...entTarget, getCorners: () => restCorners, margin: 1.08, captionHeight: 0 }, true);
+      markDirty();
+    };
+    if (roomWarp?.engage(onWarpDone, () => beginWarpSound(ws), onPreLand)) {
       // Wait cleanly for liftoff before playing warp audio.
     } else if (warpSound === ws) {
       stopWarpSound();

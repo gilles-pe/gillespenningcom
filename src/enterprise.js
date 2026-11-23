@@ -242,16 +242,18 @@ const smoothstep = x => {
 };
 
 // In-room TOS warp flight inside About Me:
-// Viewscreen performs a low frontal Star Trek: TMP flyover over Enterprise on its shelf pedestal
-// (warming assets/audio) -> lifts off cleanly -> follows smoothly behind -> closes BEFORE warp.
+// Viewscreen performs a low frontal Star Trek: TMP flyover over Enterprise on its shelf pedestal ->
+// pauses 1s behind stern showing both nacelles -> 1s nacelle glow-up + sound start -> continuous circular arc & warp.
 export function createRoomWarp(scene, root) {
-  const ORBIT = 3.80;
-  const VIEWSCREEN_END = 5.25;
-  const FLIGHT_END = 6.75;
-  const WARP_OUT_END = 7.60;
-  const WAIT_END = 8.00;
-  const WARP_IN_END = 8.85;
-  const LAND_END = 11.05;
+  const FLYOVER_END = 3.60;
+  const HOLD_END = 4.60;
+  const CHARGE_END = 6.60;
+  const VIEWSCREEN_END = 9.05;
+  const FLIGHT_END = 9.55;
+  const WARP_OUT_END = 10.40;
+  const WAIT_END = 10.80;
+  const WARP_IN_END = 11.65;
+  const LAND_END = 13.85;
 
   const ship = root.userData.ship;
   const starCount = 64;
@@ -287,6 +289,8 @@ export function createRoomWarp(scene, root) {
   let onDoneCb = null;
   let onLiftoffCb = null;
   let liftoffFired = false;
+  let onPreLandCb = null;
+  let preLandFired = false;
   let chaseInitialized = false;
   let viewscreenPose = null;
 
@@ -320,18 +324,23 @@ export function createRoomWarp(scene, root) {
       return;
     }
     let follow = 12;
-    if (t < ORBIT) {
-      orbitCurve.getPointAt(smoothstep(t / ORBIT), desiredEye);
+    if (t < FLYOVER_END) {
+      orbitCurve.getPointAt(smoothstep(t / FLYOVER_END), desiredEye);
       desiredTarget.copy(restPos);
       desiredTarget.y += 0.015;
       follow = 12;
+    } else if (t < CHARGE_END) {
+      desiredEye.copy(orbitEnd);
+      desiredTarget.copy(restPos);
+      desiredTarget.y += 0.015;
+      follow = 10;
     } else {
       chaseFwd.copy(forwardDir).normalize();
-      chasePt.copy(ship.position).addScaledVector(chaseFwd, -0.48);
-      chasePt.y += 0.15;
+      chasePt.copy(ship.position).addScaledVector(chaseFwd, -0.66);
+      chasePt.y += 0.07;
       chasePt.x = Math.min(chasePt.x, 3.55);
       chasePt.z = Math.max(chasePt.z, -4.68);
-      const blendIn = smoothstep((t - ORBIT) / 1.05);
+      const blendIn = smoothstep((t - CHARGE_END) / 1.05);
       desiredEye.lerpVectors(orbitEnd, chasePt, blendIn);
       desiredTarget.copy(ship.position).addScaledVector(chaseFwd, 0.04 * blendIn);
       if (blendIn < 0.15) desiredTarget.y += 0.015 * (1 - blendIn / 0.15);
@@ -382,6 +391,8 @@ export function createRoomWarp(scene, root) {
     chaseInitialized = false;
     liftoffFired = false;
     onLiftoffCb = null;
+    preLandFired = false;
+    onPreLandCb = null;
     if (ship.parent !== root) root.add(ship);
     ship.position.copy(restLocalPos);
     ship.quaternion.copy(restLocalQuat);
@@ -395,7 +406,7 @@ export function createRoomWarp(scene, root) {
     if (cb) cb();
   }
 
-  function engage(onDone, onLiftoff) {
+  function engage(onDone, onLiftoff, onPreLand) {
     if (active) return false;
     root.updateMatrixWorld(true);
     ship.getWorldPosition(restPos);
@@ -412,12 +423,12 @@ export function createRoomWarp(scene, root) {
     const rightSide = new THREE.Vector3(1, 0, 0).applyQuaternion(restQuat).setY(0).normalize();
 
     // Dead-frontal Star Trek: The Motion Picture flyover over the Enterprise on its shelf stand
-    orbitEnd = restPos.clone().addScaledVector(aft, 0.24).add(new THREE.Vector3(-0.04, 0.24, 0.04));
+    orbitEnd = restPos.clone().addScaledVector(aft, 0.34).add(new THREE.Vector3(0.05, 0.09, 0.05));
     orbitCurve = new THREE.CatmullRomCurve3([
       restPos.clone().addScaledVector(restFwd, 0.72).add(new THREE.Vector3(0, -0.01, 0)),
       restPos.clone().addScaledVector(restFwd, 0.36).add(new THREE.Vector3(0.02, 0.06, 0.02)),
       restPos.clone().addScaledVector(restFwd, 0.08).addScaledVector(rightSide, -0.08).add(new THREE.Vector3(0, 0.18, 0)),
-      restPos.clone().addScaledVector(aft, 0.12).addScaledVector(rightSide, -0.07).add(new THREE.Vector3(0, 0.23, 0)),
+      restPos.clone().addScaledVector(aft, 0.14).addScaledVector(rightSide, -0.05).add(new THREE.Vector3(0, 0.17, 0)),
       orbitEnd.clone(),
     ], false, 'centripetal');
 
@@ -452,9 +463,11 @@ export function createRoomWarp(scene, root) {
     lastUpdateNow = startTime;
     chaseInitialized = false;
     liftoffFired = false;
+    preLandFired = false;
     viewscreenPose = null;
     onDoneCb = onDone || null;
     onLiftoffCb = onLiftoff || null;
+    onPreLandCb = onPreLand || null;
     glowLight.visible = true;
     return true;
   }
@@ -465,18 +478,28 @@ export function createRoomWarp(scene, root) {
     const dt = Math.min(Math.max((now - lastUpdateNow) / 1000, 1 / 240), 0.05);
     lastUpdateNow = now;
 
-    // Phase 0: Frontal TMP flyover over stationary Enterprise on pedestal while audio/shaders pre-decode (0 -> 3.80s)
-    if (t < ORBIT) {
+    // Phase 0a: Frontal TMP flyover over stationary Enterprise while audio/shaders pre-decode (0 -> 3.60s)
+    if (t < FLYOVER_END) {
       ship.position.copy(restPos);
       ship.quaternion.copy(restQuat);
       ship.scale.copy(restScale);
       ship.visible = true;
-      const charge = smoothstep((t - (ORBIT - 1.0)) / 1.0) * 0.55;
-      root.userData.setWarpGlow(charge);
-      ship.updateMatrixWorld();
-      glowLight.position.copy(ship.localToWorld(aftMid.set(0, 0.42, 2.02)));
-      glowLight.color.setHex(0x66ccff);
-      glowLight.intensity = charge * 0.85;
+      root.userData.setWarpGlow(0);
+      glowLight.intensity = 0;
+      updateStars(ship.position, _fwdLocal, 0, 0);
+      flash.visible = false;
+      updateChaseCamera(t, dt, _fwdLocal);
+      return true;
+    }
+
+    // Phase 0b: 1s calm rear hold showing the entire stern & unlit warp nacelles (3.60 -> 4.60s)
+    if (t < HOLD_END) {
+      ship.position.copy(restPos);
+      ship.quaternion.copy(restQuat);
+      ship.scale.copy(restScale);
+      ship.visible = true;
+      root.userData.setWarpGlow(0);
+      glowLight.intensity = 0;
       updateStars(ship.position, _fwdLocal, 0, 0);
       flash.visible = false;
       updateChaseCamera(t, dt, _fwdLocal);
@@ -490,10 +513,28 @@ export function createRoomWarp(scene, root) {
       if (liftoff) liftoff();
     }
 
-    // Phase 1+2: Continuous circular left-banked arc off the pedestal straight into warp (3.80 -> 6.75s)
-    // Viewscreen continues trailing gracefully until 5.25s, then closes before warp.
+    // Phase 0c: 2s gradual distal nacelle power-up & sound start on pedestal before liftoff (4.60 -> 6.60s)
+    if (t < CHARGE_END) {
+      const charge = Math.pow(smoothstep((t - HOLD_END) / (CHARGE_END - HOLD_END)), 1.45) * 0.85;
+      ship.position.copy(restPos);
+      ship.quaternion.copy(restQuat);
+      ship.scale.copy(restScale);
+      ship.visible = true;
+      root.userData.setWarpGlow(charge);
+      ship.updateMatrixWorld();
+      glowLight.position.copy(ship.localToWorld(aftMid.set(0, 0.42, 2.02)));
+      glowLight.color.setHex(0x66ccff);
+      glowLight.intensity = charge * 1.1;
+      updateStars(ship.position, _fwdLocal, 0, 0);
+      flash.visible = false;
+      updateChaseCamera(t, dt, _fwdLocal);
+      return true;
+    }
+
+    // Phase 1+2: Continuous circular left-banked arc off the pedestal straight into warp (5.60 -> 8.55s)
+    // Viewscreen continues trailing gracefully until 7.05s, then closes before warp.
     if (t < FLIGHT_END) {
-      const p = (t - ORBIT) / (FLIGHT_END - ORBIT);
+      const p = (t - CHARGE_END) / (FLIGHT_END - CHARGE_END);
       const u = p * p * (1.85 - 0.85 * p);
       flightCurve.getPointAt(u, tmpPos);
       flightCurve.getTangentAt(u, tmpTan);
@@ -503,11 +544,11 @@ export function createRoomWarp(scene, root) {
       ship.position.copy(tmpPos);
       ship.scale.copy(restScale);
       ship.visible = true;
-      root.userData.setWarpGlow(0.55 + p * 1.05);
+      root.userData.setWarpGlow(0.85 + p * 0.75);
       ship.updateMatrixWorld();
       glowLight.position.copy(ship.localToWorld(aftMid.set(0, 0.42, 2.02)));
       glowLight.color.setHex(0x8cd8ff);
-      glowLight.intensity = 0.65 + p * 1.75;
+      glowLight.intensity = 0.95 + p * 1.45;
       updateStars(ship.position, tmpTan, 0.12 + p * 0.28, Math.max(0, (p - 0.72) * 0.9));
       flash.visible = false;
       updateChaseCamera(t, dt, tmpTan);
@@ -599,6 +640,12 @@ export function createRoomWarp(scene, root) {
       glowLight.intensity = (1 - p) * 1.4;
       updateStars(ship.position, arriveDir, 0, 0);
       flash.visible = false;
+      if (!preLandFired && t >= LAND_END - 1.20) {
+        preLandFired = true;
+        const preLand = onPreLandCb;
+        onPreLandCb = null;
+        if (preLand) preLand();
+      }
       return true;
     }
 

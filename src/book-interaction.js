@@ -67,7 +67,8 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   }
   function normalAndUp(face, orientation) {
     const flat = orientation === 'horizontal';
-    if (face === 'spine') return { normal: FORWARD.clone(), up: flat ? FRONT.clone() : VERTICAL.clone() };
+    // Lying book (D-115): the spine is the long left edge (-X face), lettering upright (+Y).
+    if (face === 'spine') return flat ? { normal: FRONT.clone().negate(), up: VERTICAL.clone() } : { normal: FORWARD.clone(), up: VERTICAL.clone() };
     const normal = flat ? VERTICAL.clone() : FRONT.clone();
     if (face === 'back') normal.negate();
     // BoxGeometry maps the underside's texture in the opposite direction.

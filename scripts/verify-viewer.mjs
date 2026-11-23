@@ -611,3 +611,36 @@ api.open(null); draw();
   api.open(null); draw();
   console.log('books without card: framing, four clicks, Enter, screen-reader status: passed');
 }
+
+// 7. Lying books (D-115): spine is the long left edge (-X), the short ends are plain; the spine step turns that edge to the viewer.
+{
+  const books = testCatalog().books.filter(b => b.placement.orientation === 'horizontal');
+  assert(books.length >= 7, 'lying books exist');
+  for (const b of books) {
+    api.open(b.room); draw();
+    const mesh = api.debug.bookUI.getMesh(b.id), m = mesh.material;
+    assert(m[1].map && m[2].map && m[3].map, `${b.id}: cover (+Y), back (-Y) and spine (-X) carry textures`);
+    assert(!m[4].map && !m[5].map && !m[0].map, `${b.id}: short ends and right edge are plain paper`);
+    assert(m[1].map !== m[2].map && m[1].map !== m[3].map, `${b.id}: spine texture is its own`);
+    api.debug.tapShelfBook(b.id); draw();
+    mesh.updateWorldMatrix(true, false);
+    // The book turns towards the camera as it was when the book was pulled out, so read that camera before drawing on.
+    const eye = api.debug.camera.position.clone().sub(mesh.getWorldPosition(new Three.Vector3())).normalize();
+    const camUp = new Three.Vector3(0, 1, 0).applyQuaternion(api.debug.camera.quaternion);
+    api.debug.tapShelfBook(b.id);
+    const eye0 = api.debug.camera.position.clone().sub(mesh.getWorldPosition(new Three.Vector3())).normalize();
+    const camUp0 = new Three.Vector3(0, 1, 0).applyQuaternion(api.debug.camera.quaternion);
+    draw(); api.debug.tapShelfBook(b.id); draw();
+    for (let i = 0; i < 10; i++) api.debug.bookUI.update(0.05);   // let the turn finish; the headless frame does not drive it
+    assert.equal(api.debug.bookUI.activeFace, 'spine');
+    mesh.updateWorldMatrix(true, false);
+    const q = mesh.getWorldQuaternion(new Three.Quaternion());
+    const left = new Three.Vector3(-1, 0, 0).applyQuaternion(q), up = new Three.Vector3(0, 1, 0).applyQuaternion(q);
+    void eye; void camUp;
+    assert(left.dot(eye0) > 0.95, `${b.id}: spine step shows the long spine edge to the viewer, not an end or the underside`);
+    assert(up.dot(camUp0) > 0.95, `${b.id}: spine lettering is upright`);
+    assert(api.back()); draw();
+  }
+  api.open(null); draw();
+  console.log('lying books: spine on the long edge, spine step faces the viewer upright: passed');
+}

@@ -98,7 +98,7 @@ try {
     }
     // A normal animation run supplements reduced-motion snapshots.
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.reload();
+    await page.goto('http://127.0.0.1:5173/?lang=de#writing');
     await page.waitForFunction(() => window.__gp?.bookUI.bookCount === 27);
     await page.evaluate(() => window.__gp.tapShelfBook('riding-the-waves-of-culture'));
     await page.waitForTimeout(700);

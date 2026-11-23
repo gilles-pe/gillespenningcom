@@ -28,6 +28,7 @@ for (const lang of ['en', 'de']) {
   }
 }
 assert.equal(book.summary.en, "A classic guide to cross-cultural management, showing how cultural differences shape global business.");
+assert.equal(book.amazonUrl, "https://link.amazon/B06jsIxLh", 'owner-supplied external destination');
 assert.deepEqual(book.placement, { anchor: 'writing-shelf-display-middle', orientation: 'upright', order: 4 });
 for (const b of books.filter(b => b.id !== book.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);

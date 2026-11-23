@@ -8,10 +8,10 @@ The viewer regression test checks 27 distinct physical meshes against every cata
 - README still said 21 editions and said personal notes were not shown. Corrected to 27, correct room counts, central catalog and separate bilingual personal notes.
 - DESIGN.md still described the removed book card and 21 books (14/7). Corrected to current 27-book, card-free behavior.
 - docs/books.md still claimed separate book buttons existed. Corrected to D-114.
-- The cover provenance table in docs/books.md contains 23 rows, omitting Bloodlands, Guns, Germs, and Steel, Predictably Irrational and The Innovator's Dilemma; their structured entries and sources are present in the authoritative catalog and the later added-titles paragraph. No catalog entries were missing for these four.
+- The cover provenance table in docs/books.md contains 23 rows, omitting Bloodlands, Guns, Germs, and Steel, Predictably Irrational and The Innovator's Dilemma; their structured entries and sources are present in the authoritative catalog and the later added-titles paragraph. Completed the table from the catalog; no catalog entries were missing for these four.
 - Eight covers are explicitly AI-retouched user images: The WEIRDest People in the World, The Hard Sell, The Fortress, The Moral Animal, The Body, Red Plenty, A (Very) Short History of Life on Earth, We Are Legion (We Are Bob). They must not be described as untouched publisher art.
 - We Are Legion (We Are Bob): existing research records that its retouched image differs from the publisher artwork for ISBN 9781668221570. Exact edition matching remains unresolved. Do not silently swap it or mark it verified.
-- All 27 Amazon URLs are null; all spines and backs are generated rather than original publisher scans. These are documented missing data, not fabricated replacements. Only Riding the Waves of Culture now has approved personal wording.
+- Initially all 27 Amazon URLs were null; Gilles supplied https://link.amazon/B06jsIxLh for Riding the Waves of Culture during this update. The other 26 remain null; all spines and backs are generated rather than original publisher scans. These are documented missing data, not fabricated replacements. Only Riding the Waves of Culture now has approved personal wording.
 - During a language refresh, viewer.open previously returned an extracted book to its shelf. Fixed only for a same-room keepView refresh so the back can switch languages in place.
 - Cover images, catalog titles/authors/ISBNs and shelf positions are unchanged by this update. Independent visual/edition limits remain as recorded in the catalog; file existence alone does not establish an exact edition match.
 
@@ -48,3 +48,11 @@ The viewer regression test checks 27 distinct physical meshes against every cata
 
 ## Validation evidence
 The book metadata/assets check, exact-approved-copy and no-clipping layout check, token check, geometry/viewer regression test and production build run before publication. Browser captures and a machine-readable audit report are produced by `scripts/verify-book-browser.mjs` in the Book browser review workflow; its post-deployment run verifies the live build and records desktop/mobile screenshots. Their workflow conclusions, not this document's intentions, determine pass/fail.
+
+## Observed results from review run 45269010382
+- Book/catalog assets, exact approved EN/DE text, token, inspection/viewer and build checks: passed.
+- Real Chromium, desktop 1440 × 1000 and mobile 390 × 844 at device scale 2: both personal backs complete, no horizontal/vertical text clipping, language switch in place and full return path passed. Body font is 46 texture pixels; German text ends at y = 698.3 within limit 787.
+- Upright, leaning and lying sequences passed from two camera angles on both viewport classes, plus a normal-motion run and Escape.
+- Visually inspected the contact sheet made from all 27 actual large cover assets: no cover/title/author mix-up found. Riding the Waves of Culture shows the correct English second-edition cover with both authors; all 27 IDs resolve to unique meshes in their catalog room and shelf order.
+- Existing AI-retouched and exact-edition limitations above remain unresolved. This audit does not turn altered cover art into independently verified originals.
+- Review source: https://github.com/gilles-pe/gillespenningcom/commit/678b810029c8ac444fdd7ed0c5e19ac39b52541f. Captures: branch `review/book-captures-45269010382`.

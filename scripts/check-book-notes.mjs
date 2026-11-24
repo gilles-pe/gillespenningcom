@@ -31,7 +31,19 @@ assert.equal(book.summary.en, "A classic guide to cross-cultural management, sho
 assert.equal(new URL(book.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21', 'owner-supplied affiliate tracking ID');
 assert(new URL(book.amazonUrl).pathname.includes('/dp/1529346185'), 'owner-supplied book destination');
 assert.deepEqual(book.placement, { anchor: 'writing-shelf-display-middle', orientation: 'upright', order: 4 });
-for (const b of books.filter(b => b.id !== book.id)) {
+const hail = books.find(b => b.id === 'project-hail-mary');
+const hailApproved = {
+  "en": "The movie is good, the book is fantastic. Science and emotion come together in a way a movie can never quite capture. A quick, smart and emotional read.",
+  "de": "Der Film ist gut, das Buch fantastisch. Wissenschaft und Emotionen werden auf eine Weise verbunden, die ein Film nie ganz einfangen kann. Eine kurzweilige, kluge und emotionale Lektüre."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(hail, lang), hailApproved[lang], 'approved Project Hail Mary text');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, hail, lang, 768, Math.round(768 / (.15 / .22)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), hailApproved[lang], 'complete personal note');
+  assert(layout.bottom <= layout.limit, 'personal note does not overlap the Amazon link');
+}
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

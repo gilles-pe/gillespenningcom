@@ -129,7 +129,28 @@ try {
           await stage.press('Enter'); await page.waitForTimeout(50);
           assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), face);
           if (id === 'project-hail-mary' && face === 'back') {
-            assert.equal(await page.locator('.book-amazon-access').getAttribute('href'), catalog.find(b => b.id === id).amazonUrl, 'link shown on a book without a personal note');
+            const hail = catalog.find(b => b.id === id);
+            assert.equal(await page.locator('.book-amazon-access').getAttribute('href'), hail.amazonUrl);
+            if (angle === 0) for (const lang of ['en', 'de']) {
+              await page.locator('#lang [data-lang="' + lang + '"]').click();
+              await page.waitForTimeout(120);
+              assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back');
+              assert((await page.locator('.book-status').textContent()).includes(hail.personalNote[lang]));
+              const layout = await page.evaluate(async ({ id, lang }) => {
+                const book = (await import('/src/data/books.json')).default.books.find(b => b.id === id);
+                const { personalNoteLayout } = await import('/src/book-note-layout.js');
+                const canvas = window.__gp.bookUI.getMesh(id).material[1].map.image;
+                const ctx = canvas.getContext('2d');
+                const result = personalNoteLayout(ctx, book, lang, canvas.width, canvas.height);
+                ctx.font = result.blocks.at(-1).font;
+                return { text: result.blocks.at(-1).lines.join(' '), bottom: result.bottom, limit: result.limit,
+                  fits: result.blocks.every(block => { ctx.font = block.font; return block.lines.every(line => ctx.measureText(line).width <= canvas.width - 104); }) };
+              }, { id, lang });
+              assert.equal(layout.text, hail.personalNote[lang]);
+              assert(layout.fits && layout.bottom <= layout.limit, 'Project Hail Mary note fits without clipping');
+              await stage.screenshot({ path: output + '/project-hail-mary-' + device + '-' + lang + '.png' });
+            }
+            await stage.focus();
           }
         }
         await stage.press('Enter');

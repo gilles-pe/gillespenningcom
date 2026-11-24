@@ -728,7 +728,13 @@ api.open(null); draw();
   for (let i = 0; i < 4; i++) { api.debug.tapShelfBook('project-hail-mary'); draw(); }
   assert.equal(api.debug.bookUI.activeFace, 'back');
   const link = stage.children.find(c => c.classList.contains('book-amazon-access'));
-  assert(!link.hidden && link.href === catalog.find(b => b.id === 'project-hail-mary').amazonUrl, 'leaning book without personal note exposes supplied link');
+  const hail = catalog.find(b => b.id === 'project-hail-mary');
+  assert(!link.hidden && link.href === hail.amazonUrl, 'leaning book exposes supplied link');
+  api.setLanguage('en'); draw();
+  assert(stage.children.find(c => c.classList.contains('book-status')).textContent.includes(hail.personalNote.en));
+  api.setLanguage('de'); draw();
+  assert.equal(api.debug.bookUI.activeFace, 'back');
+  assert(stage.children.find(c => c.classList.contains('book-status')).textContent.includes(hail.personalNote.de));
   api.debug.tapShelfBook('project-hail-mary'); draw();
   assert(link.hidden, 'link hides after returning the book');
   api.open(null); draw();

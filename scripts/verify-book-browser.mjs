@@ -109,7 +109,8 @@ try {
       throw Error('Link UV triangle not found');
     });
     await page.evaluate(() => { window.__openedBooks = []; window.open = (url, target) => { window.__openedBooks.push({url, target}); return { focus() {}, opener:null }; }; });
-    await page.mouse.click(linkPoint.x, linkPoint.y);
+    if (device === 'mobile') await page.touchscreen.tap(linkPoint.x, linkPoint.y);
+    else await page.mouse.click(linkPoint.x, linkPoint.y);
     assert.equal(await page.evaluate(() => window.__openedBooks?.[0]?.url), approved.amazonUrl, 'click on back opens Amazon destination');
     assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back', 'link does not return the book');
     const accessibleLink = page.locator('.book-amazon-access');

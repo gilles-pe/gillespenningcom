@@ -658,8 +658,13 @@ function writingDisplayShelf(parent, x, z, w) {
   const middle = booksByAnchor['writing-shelf-display-middle'];
   const stack = booksByAnchor['writing-shelf-display-right-stack'];
   const separate = booksByAnchor['writing-shelf-display-right-separate'];
-  for (let i = 0; i < 4; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
+  for (let i = 0; i < 3; i++) placeCatalogBook(g, standing[i], 0.047, 0.23 - (i % 2) * 0.025, 0.18,
     -w / 2 + 0.13 + i * 0.055, 0.365, 0.015, 'upright');
+  const leanW = 0.047, leanH = 0.205, leanTilt = 0.25;
+  const leanX = (-0.36 - 0.047 / 2 - 0.001) - (leanW * Math.cos(leanTilt) + leanH * Math.sin(leanTilt)) / 2;
+  const weird = placeCatalogBook(g, standing[3], leanW, leanH, 0.18, leanX, 0.365, 0.015, 'leaning');
+  weird.rotation.z = -leanTilt;
+  weird.position.y = 0.365 + (leanH * Math.cos(leanTilt) + leanW * Math.sin(leanTilt)) / 2;
   for (let i = 0; i < 4; i++) placeCatalogBook(g, middle[i], 0.047, 0.22 - (i % 2) * 0.015, 0.18,
     -0.36 + i * 0.055, 0.365, 0.015, 'upright');
   for (let i = 0; i < 2; i++) placeCatalogBook(g, stack[i], 0.13 - i * 0.006, 0.028, 0.19,

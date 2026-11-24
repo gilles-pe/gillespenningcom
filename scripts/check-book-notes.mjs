@@ -81,7 +81,19 @@ for (const lang of ['en','de']) {
   assert.equal(layout.blocks.at(-1).lines.join(' '), sapiensApproved[lang]);
   assert(layout.bottom <= layout.limit, 'note must fit on back');
 }
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id)) {
+const weird = books.find(b => b.id === 'the-weirdest-people');
+const weirdApproved = {
+  "en": "I love this book, even though it’s a difficult read. Its scientific and historical detail is extraordinary. It’s one of those rare books that are very hard to finish, yet I love every line of it. If you’re interested in history and want to understand society and progress, go for it.",
+  "de": "Ich liebe dieses Buch, auch wenn es schwer zu lesen ist. Sein wissenschaftlicher und historischer Detailreichtum ist außergewöhnlich. Es gehört zu den seltenen Büchern, die sehr schwer zu Ende zu lesen sind und bei denen ich gleichzeitig jede Zeile liebe. Wer sich für Geschichte interessiert und Gesellschaft und Fortschritt verstehen möchte, sollte es lesen."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(weird, lang), weirdApproved[lang], 'approved WEIRDest note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, weird, lang, 768, Math.round(768 / (.18 / .205)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), weirdApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit on back');
+}
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

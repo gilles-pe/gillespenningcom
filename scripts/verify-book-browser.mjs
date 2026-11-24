@@ -157,6 +157,28 @@ try {
         assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
       }
     }
+    // Inspect the newly approved upright and leaning backs in both languages.
+    for (const [id, room] of [['leviathan-wakes','about'], ['thinking-fast-and-slow','writing'], ['sapiens','writing'], ['the-weirdest-people','writing']]) {
+      const book = catalog.find(b => b.id === id);
+      await enter(id, room);
+      await stage.press('Enter'); await stage.press('Enter');
+      for (const lang of ['en','de']) {
+        await page.locator('#lang [data-lang="' + lang + '"]').click();
+        await page.waitForTimeout(100);
+        assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back');
+        assert((await page.locator('.book-status').textContent()).includes(book.personalNote[lang]));
+        const check = await page.evaluate(async ({ id, lang }) => {
+          const b = (await import('/src/data/books.json')).default.books.find(b => b.id === id);
+          const { personalNoteLayout } = await import('/src/book-note-layout.js');
+          const canvas = window.__gp.bookUI.getMesh(id).material[1].map.image, ctx = canvas.getContext('2d');
+          const layout = personalNoteLayout(ctx, b, lang, canvas.width, canvas.height);
+          return { text:layout.blocks.at(-1).lines.join(' '), ok:layout.bottom <= layout.limit };
+        }, { id, lang });
+        assert.equal(check.text, book.personalNote[lang]); assert(check.ok, id + ' text fits');
+        await page.screenshot({ path: output + '/' + id + '-' + device + '-' + lang + '.png' });
+      }
+      await stage.focus(); await stage.press('Enter'); assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
+    }
     // A normal animation run supplements reduced-motion snapshots.
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('http://127.0.0.1:5173/?lang=de#writing');
@@ -167,7 +189,7 @@ try {
     await stage.press('Enter'); await page.waitForTimeout(600);
     await stage.press('Enter'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back');
-    await page.screenshot({ path: output + '/' + device + '-animated-back.png', fullPage: true });
+    await page.screenshot({ path: output + '/' + device + '-animated-back.png' });
     await stage.press('Escape'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
     assert.deepEqual(errors, [], 'no browser runtime errors');

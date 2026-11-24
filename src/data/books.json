@@ -134,15 +134,15 @@
       "room": "writing",
       "placement": {
         "anchor": "writing-shelf-display-left",
-        "orientation": "upright",
+        "orientation": "leaning",
         "order": 4
       },
       "isbn13": "9780374173227",
       "amazonUrl": null,
       "coverImage": null,
       "personalNote": {
-        "en": null,
-        "de": null
+        "en": "I love this book, even though it’s a difficult read. Its scientific and historical detail is extraordinary. It’s one of those rare books that are very hard to finish, yet I love every line of it. If you’re interested in history and want to understand society and progress, go for it.",
+        "de": "Ich liebe dieses Buch, auch wenn es schwer zu lesen ist. Sein wissenschaftlicher und historischer Detailreichtum ist außergewöhnlich. Es gehört zu den seltenen Büchern, die sehr schwer zu Ende zu lesen sind und bei denen ich gleichzeitig jede Zeile liebe. Wer sich für Geschichte interessiert und Gesellschaft und Fortschritt verstehen möchte, sollte es lesen."
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL28221735M/The_WEIRDest_People_in_the_World",
       "coverImageStatus": "user-image-ai-retouched",

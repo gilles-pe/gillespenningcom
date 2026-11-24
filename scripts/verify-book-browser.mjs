@@ -80,7 +80,7 @@ try {
       assert(layout.bottom <= layout.limit && layout.maxWidth <= layout.width);
       // Texture capture makes the exact rendered back independently reviewable.
       if (device === 'desktop') await writeFile(output + '/riding-back-' + lang + '.png', Buffer.from(layout.dataUrl.split(',')[1], 'base64'));
-      await stage.screenshot({ path: output + '/' + device + '-' + lang + '.png' });
+      await writeFile(output + '/' + device + '-' + lang + '.png', Buffer.from(layout.dataUrl.split(',')[1], 'base64'));
       report.push({ device, language: lang, complete: true, bodyTexturePx: layout.fontSize, bottom: layout.bottom, limit: layout.limit });
     }
     // Click the actual rendered back at the link's UV position and intercept
@@ -148,7 +148,8 @@ try {
               }, { id, lang });
               assert.equal(layout.text, hail.personalNote[lang]);
               assert(layout.fits && layout.bottom <= layout.limit, 'Project Hail Mary note fits without clipping');
-              await stage.screenshot({ path: output + '/project-hail-mary-' + device + '-' + lang + '.png' });
+              const png = await page.evaluate(id => window.__gp.bookUI.getMesh(id).material[1].map.image.toDataURL('image/png'), id);
+              await writeFile(output + '/project-hail-mary-' + device + '-' + lang + '.png', Buffer.from(png.split(',')[1], 'base64'));
             }
             await stage.focus();
           }

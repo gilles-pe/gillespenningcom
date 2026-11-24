@@ -146,7 +146,21 @@ for (const lang of ['en','de']) {
 }
 assert(new URL(hardSell.amazonUrl).pathname.includes('/dp/B0B96F2CSQ'));
 assert.equal(new URL(hardSell.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id && b.id !== hardSell.id)) {
+const fortress = books.find(b => b.id === 'the-fortress');
+const fortressApproved = {
+  "en": "A special book for anyone interested in history. The siege of Przemyśl was one of the great battles of the 20th century, yet it has largely faded from view. It already contained the horrors that would shape the decades to come: industrial warfare, antisemitism and clashes between European powers. A book about the past that also helps us recognize signs in the present.",
+  "de": "Ein besonderes Buch für alle, die sich für Geschichte interessieren. Die Belagerung von Przemyśl war eine der großen Schlachten des 20. Jahrhunderts und ist dennoch weitgehend in Vergessenheit geraten. Sie enthielt bereits die Schrecken der kommenden Jahrzehnte: industrialisierte Kriegsführung, Antisemitismus und den Zusammenstoß europäischer Mächte. Ein Buch über die Vergangenheit, das auch hilft, Zeichen in der Gegenwart zu erkennen."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(fortress, lang), fortressApproved[lang], 'approved The Fortress note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, fortress, lang, 768, Math.round(768 / (.17 / .23)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), fortressApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit above Amazon link');
+}
+assert(new URL(fortress.amazonUrl).pathname.includes('/dp/B07PLMJN9Y'));
+assert.equal(new URL(fortress.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id && b.id !== hardSell.id && b.id !== fortress.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

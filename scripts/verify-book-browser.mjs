@@ -160,7 +160,7 @@ try {
       }
     }
     // Inspect the newly approved upright and leaning backs in both languages.
-    for (const [id, room] of [['leviathan-wakes','about'], ['thinking-fast-and-slow','writing'], ['sapiens','writing'], ['the-weirdest-people','writing']]) {
+    for (const [id, room] of [['leviathan-wakes','about'], ['thinking-fast-and-slow','writing'], ['sapiens','writing'], ['the-weirdest-people','writing'], ['factfulness','writing'], ['eve','writing'], ['everything-is-tuberculosis','writing'], ['the-hard-sell','writing'], ['the-fortress','about']]) {
       const book = catalog.find(b => b.id === id);
       await enter(id, room);
       await stage.press('Enter'); await stage.press('Enter');
@@ -172,7 +172,7 @@ try {
         const check = await page.evaluate(async ({ id, lang }) => {
           const b = (await import('/src/data/books.json')).default.books.find(b => b.id === id);
           const { personalNoteLayout } = await import('/src/book-note-layout.js');
-          const canvas = window.__gp.bookUI.getMesh(id).material[1].map.image, ctx = canvas.getContext('2d');
+          const canvas = window.__gp.bookUI.getMesh(id).material[b.placement.orientation === 'horizontal' ? 3 : 1].map.image, ctx = canvas.getContext('2d');
           const layout = personalNoteLayout(ctx, b, lang, canvas.width, canvas.height);
           return { text:layout.blocks.at(-1).lines.join(' '), ok:layout.bottom <= layout.limit, dataUrl:canvas.toDataURL('image/png') };
         }, { id, lang });

@@ -69,7 +69,19 @@ for (const lang of ['en', 'de']) {
   assert.equal(layout.blocks.at(-1).lines.join(' '), kahnemanApproved[lang], 'complete personal note');
   assert(layout.bottom <= layout.limit, 'note must fit on the back');
 }
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id)) {
+const sapiens = books.find(b => b.id === 'sapiens');
+const sapiensApproved = {
+  "en": "This book made Harari famous, and for good reason. It combines a broad historical view with a fresh perspective on human development and how the stories we share shape societies.",
+  "de": "Dieses Buch machte Harari berühmt - und das zu Recht. Es verbindet einen breiten Blick auf die Geschichte mit einer neuen Perspektive auf die Entwicklung der Menschheit und darauf, wie gemeinsame Geschichten Gesellschaften prägen."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(sapiens, lang), sapiensApproved[lang], 'approved Sapiens note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, sapiens, lang, 768, Math.round(768 / (.18 / .23)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), sapiensApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit on back');
+}
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

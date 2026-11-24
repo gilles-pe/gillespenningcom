@@ -403,3 +403,5 @@ until a later entry replaces it.
 - **D-130 (2026-11-24) Leviathan Wakes personal description and Amazon link.** Gilles approved the English and German personal descriptions stored verbatim in `personalNote` and supplied the Amazon Kindle affiliate destination `B004XCGKYQ`. Preserve the neutral summary and English cover. Prepare this with Project Hail Mary for a later combined publication, as requested by Gilles.
 
 - **D-131 (2026-11-24) Thinking, Fast and Slow personal description.** Gilles approved the English and German descriptions after removing the sentence expressing hate. Store both verbatim in `personalNote`; preserve the neutral summary and English cover. Prepare for the later combined publication. Amazon link remains empty until its Amazon.de destination is verified or Gilles supplies one.
+
+- **D-132 (2026-11-24) Sapiens personal description.** Gilles approved the exact German and English personal descriptions in `personalNote`. Preserve the neutral summary and English cover; prepare for the upcoming combined publication. Leave Amazon destination empty until a valid target is verified.

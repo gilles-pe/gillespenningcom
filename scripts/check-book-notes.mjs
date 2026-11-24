@@ -132,7 +132,21 @@ for (const lang of ['en','de']) {
   assert(layout.bottom <= layout.limit, 'note must fit above Amazon link');
 }
 assert.equal(tuberculosis.amazonUrl, 'https://link.amazon/B07X6F5sT');
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id)) {
+const hardSell = books.find(b => b.id === 'the-hard-sell');
+const hardSellApproved = {
+  "en": "Crime and Punishment at an Opioid Startup - this book is about ethics, health and selling. A little like Predictably Irrational, it shows the pitfalls that can come with success.",
+  "de": "Crime and Punishment at an Opioid Startup - dieses Buch handelt von Ethik, Gesundheit und Verkauf. Ähnlich wie Predictably Irrational zeigt es die Fallstricke, die mit Erfolg einhergehen können."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(hardSell, lang), hardSellApproved[lang], 'approved The Hard Sell note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, hardSell, lang, 768, Math.round(768 / (.124 / .19)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), hardSellApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit above Amazon link');
+}
+assert(new URL(hardSell.amazonUrl).pathname.includes('/dp/B0B96F2CSQ'));
+assert.equal(new URL(hardSell.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id && b.id !== hardSell.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

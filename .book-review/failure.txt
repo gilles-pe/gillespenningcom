@@ -1,0 +1,9 @@
+locator.screenshot: Timeout 29991.063000000002ms exceeded.
+Call log:
+  - taking element screenshot
+  - waiting for fonts to load...
+  - fonts loaded
+  - attempting scroll into view action
+    - waiting for element to be stable
+
+    at /home/runner/work/gillespenningcom/gillespenningcom/scripts/verify-book-browser.mjs:146:17

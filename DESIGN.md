@@ -63,7 +63,7 @@ D-058 refines these furnishings. The About Me desk now has a softly eased oak to
 
 The 27 English-edition books are individual meshes (16 About Me, 11 Writing & Speaking), sourced from `src/data/books.json`. First click frames the real book. The next four clicks show Cover/pull out, Spine, Back and Return to shelf; Enter does the same. There is no separate book card, dialog or book buttons. BACK, Escape, Reset and room changes restore the book.
 
-Approved personal reading notes appear on the physical back in the selected language, identified as Gilles Penning's reading note. The back uses warm paper #F7F6F2, ink #18181B and a restrained #1E3A8A label from the shared CI, a high-resolution canvas fitted to the actual mesh aspect ratio and full wrapping without truncation. English titles/front artwork and ordinary backs remain unchanged. Neutral summaries are stored separately. See `docs/books.md`.
+Approved personal reading notes appear on the physical back in the selected language without a separate heading. A verified Amazon URL appears as an underlined “Book on Amazon” link. The back uses warm paper #F7F6F2, ink #18181B and restrained #1E3A8A for the link, a high-resolution canvas fitted to the actual mesh aspect ratio and full wrapping without truncation. English titles/front artwork and ordinary backs remain unchanged. Neutral summaries are stored separately. See `docs/books.md`.
 
 ## Model layout
 The four rooms are different sizes on one rectangular dark-petrol base, like a floor plan. Projects (gallery, long

@@ -93,7 +93,19 @@ for (const lang of ['en','de']) {
   assert.equal(layout.blocks.at(-1).lines.join(' '), weirdApproved[lang]);
   assert(layout.bottom <= layout.limit, 'note must fit on back');
 }
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id)) {
+const factfulness = books.find(b => b.id === 'factfulness');
+const factfulnessApproved = {
+  "en": "A little book that is not nearly famous enough. It offers a sober perspective and encourages us to think more in facts and less in emotions or historical assumptions. Kudos to Hans Rosling for recognizing this and trying to change it with this book.",
+  "de": "Ein kleines Buch, das nicht bekannt genug ist. Es bietet eine nüchterne Perspektive und ermutigt uns, mehr in Fakten und weniger in Emotionen oder historischen Annahmen zu denken. Respekt an Hans Rosling, der dies erkannt hat und mit diesem Buch etwas verändern wollte."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(factfulness, lang), factfulnessApproved[lang], 'approved Factfulness note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, factfulness, lang, 768, Math.round(768 / (.18 / .23)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), factfulnessApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit on back');
+}
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

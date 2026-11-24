@@ -683,7 +683,7 @@ api.open(null); draw();
     for (let i = 1; i < group.length; i++) assert(api.debug.bookUI.getMesh(group[i].id).position[axis] > api.debug.bookUI.getMesh(group[i-1].id).position[axis], anchor + ': order matches geometry');
   }
   const id = 'riding-the-waves-of-culture', mesh = api.debug.bookUI.getMesh(id);
-  const ordinary = api.debug.bookUI.getMesh('factfulness'), ordinaryBack = ordinary.material[1].map;
+  const ordinary = api.debug.bookUI.getMesh('guns-germs-and-steel'), ordinaryBack = ordinary.material[1].map;
   const front = mesh.material[0], spine = mesh.material[4];
   const origin = mesh.position.clone();
   api.setLanguage('en'); api.open('writing'); draw();

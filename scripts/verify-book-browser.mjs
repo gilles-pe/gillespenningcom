@@ -167,7 +167,7 @@ try {
     await stage.press('Enter'); await page.waitForTimeout(600);
     await stage.press('Enter'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back');
-    await stage.screenshot({ path: output + '/' + device + '-animated-back.png' });
+    await page.screenshot({ path: output + '/' + device + '-animated-back.png', fullPage: true });
     await stage.press('Escape'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
     assert.deepEqual(errors, [], 'no browser runtime errors');

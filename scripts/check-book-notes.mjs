@@ -160,7 +160,35 @@ for (const lang of ['en','de']) {
 }
 assert(new URL(fortress.amazonUrl).pathname.includes('/dp/B07PLMJN9Y'));
 assert.equal(new URL(fortress.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id && b.id !== hardSell.id && b.id !== fortress.id)) {
+// Additional owner-supplied notes already present in the catalog.
+const additionalApprovedNotes = {
+  "prisoners-of-geography": {
+    "en": "A great, easy read that is highly insightful. Each chapter stands on its own. It shows how geography still helps shape the behavior of countries like the US and Russia - and why mountains and rivers have given Africa and Europe different paths of development.",
+    "de": "Ein tolles, leicht lesbares und hochinteressantes Buch. Jedes Kapitel steht für sich. Es zeigt, wie Geografie das heutige Verhalten von Ländern wie den USA und Russland mitprägt - und warum Berge und Flüsse Afrika und Europa unterschiedliche Entwicklungsmöglichkeiten gegeben haben."
+  },
+  "the-moral-animal": {
+    "en": "A classic in behavioral science, offering insights into our psychology and what we may have inherited through evolution. Controversial, but with a lot of food for thought.",
+    "de": "Ein Klassiker der Verhaltensforschung, der Einblicke in unsere Psyche und unser evolutionäres Erbe bietet."
+  },
+  "the-body": {
+    "en": "All books by Bill Bryson are delightful. This one gives wonderful insights into how our body works and offers great anecdotes from the history of medical science.",
+    "de": "Alle Bücher von Bill Bryson sind ein Vergnügen. Dieses hier gibt wunderbare Einblicke darin, wie unser Körper funktioniert, und erzählt großartige Anekdoten aus der Geschichte der Medizin."
+  }
+};
+for (const [id, notes] of Object.entries(additionalApprovedNotes)) {
+  const b = books.find(book => book.id === id);
+  assert(b, id + ' exists');
+  for (const lang of ['en', 'de']) {
+    assert.equal(personalBookNote(b, lang), notes[lang], id + ' approved text');
+    const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+    for (const aspect of [.16 / .27, .19 / .21]) {
+      const layout = personalNoteLayout(ctx, b, lang, 768, Math.round(768 / aspect));
+      assert.equal(layout.blocks.at(-1).lines.join(' '), notes[lang], id + ' complete text');
+      assert(layout.bottom <= layout.limit, id + ' fits');
+    }
+  }
+}
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id && b.id !== hardSell.id && b.id !== fortress.id && !(b.id in additionalApprovedNotes))) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

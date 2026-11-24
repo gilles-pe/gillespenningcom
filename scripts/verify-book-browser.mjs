@@ -160,7 +160,7 @@ try {
       }
     }
     // Inspect the newly approved upright and leaning backs in both languages.
-    for (const [id, room] of [['leviathan-wakes','about'], ['thinking-fast-and-slow','writing'], ['sapiens','writing'], ['the-weirdest-people','writing'], ['factfulness','writing'], ['eve','writing'], ['everything-is-tuberculosis','writing'], ['the-hard-sell','writing'], ['the-fortress','about'], ['prisoners-of-geography','about'], ['the-moral-animal','about'], ['the-body','about'], ['the-last-unicorn','about']]) {
+    for (const [id, room] of [['leviathan-wakes','about'], ['thinking-fast-and-slow','writing'], ['sapiens','writing'], ['the-weirdest-people','writing'], ['factfulness','writing'], ['eve','writing'], ['everything-is-tuberculosis','writing'], ['the-hard-sell','writing'], ['the-fortress','about'], ['prisoners-of-geography','about'], ['the-moral-animal','about'], ['the-body','about'], ['the-last-unicorn','about'], ['autocracy-inc','about']]) {
       const book = catalog.find(b => b.id === id);
       await enter(id, room);
       await stage.press('Enter'); await stage.press('Enter');

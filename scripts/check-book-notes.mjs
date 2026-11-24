@@ -177,6 +177,10 @@ const additionalApprovedNotes = {
   "the-last-unicorn": {
     "en": "You may know the movie, but the book has a very special language. Whether the unicorn is running “with the speed of life” or the most frightening monster in the travelling carnival is old age - a scene not in the movie - the book instills a feeling of wonder.",
     "de": "Du kennst vielleicht den Film, aber das Buch hat eine ganz besondere Sprache. Ob das Einhorn „with the speed of life“ läuft oder das Alter das schrecklichste Monster des reisenden Jahrmarkts ist - eine Szene, die im Film fehlt: Das Buch vermittelt ein Gefühl des Staunens."
+  },
+  "autocracy-inc": {
+    "en": "Like Timothy Snyder, Anne Applebaum makes a compelling case that historians may be our best guides to the future. Sadly, what she described in this book in 2024 is already making headlines and will be breaking news for years to come.",
+    "de": "Wie Timothy Snyder zeigt auch Anne Applebaum, dass Historiker vielleicht unsere besten Wegweiser für die Zukunft sind. Leider bestimmt das, was sie 2024 in diesem Buch beschrieben hat, bereits heute unsere Nachrichten - und wird es wohl noch über Jahre tun."
   }
 };
 for (const [id, notes] of Object.entries(additionalApprovedNotes)) {

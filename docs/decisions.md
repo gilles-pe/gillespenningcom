@@ -417,3 +417,5 @@ until a later entry replaces it.
 - **Social preview (2026-11-24, owner request).** Use the owner-approved four-room image as the single 1200 × 630 social preview for the homepage. Set Open Graph and large-image card metadata using the absolute image URL. Fragment links share the same preview.
 
 - **The Last Unicorn personal reading note (2026-11-24).** Gilles approved the exact English and German notes, including “with the speed of life” in both languages and without the Red Bull reference. Keep the neutral summary and existing book interaction. No Amazon link was supplied.
+
+- **Autocracy, Inc. personal reading note (2026-11-24).** Gilles approved the exact English note and the German version ending “unsere Nachrichten - und wird es wohl noch über Jahre tun.” Keep both texts verbatim on the existing book back, retain the neutral summary, and leave the Amazon URL empty until verified or supplied.

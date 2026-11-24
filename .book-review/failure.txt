@@ -1,0 +1,7 @@
+AssertionError [ERR_ASSERTION]: click on back opens Amazon destination
++ actual - expected
+
++ undefined
+- 'https://www.amazon.de/-/en/Riding-Waves-Culture-Understanding-Diversity/dp/1529346185?crid=9CBXAO8641TC&dib=eyJ2IjoiMSJ9.NqzifGLuBskW7ZfD7gxuF7r1zmByMCfWPfuwjGwrbiQ7Zq5-zwn7Bl66OBmQHqDWquXGViHeb6muVWWTfX-cI3zJ66uxNXYecJBWkgwSXqbshWcqb1_cobMLorZwz5iZBbv7okFD1YMnRGE32teF5eOP_HvVWVhKDBtVajOh3Zy2gupxgXqIFvXL_NBthQInqRCTY6VCKFba5gQvgcJuYzm1smmz_gO1RKT6YwZBgjA.th1D4H1B-vXn2nlSbaOqtE55XT_zS_HK-XSYNXAdDQU&dib_tag=se&keywords=riding%2Bthe%2Bwaves%2Bof%2Bculture&qid=1795510990&sprefix=riding%2Bwaves%2Bof%2B%2Caps%2C328&sr=8-1&th=1&linkCode=ll2&tag=aiinmedicine-21&linkId=98c44e01d02789197275a42ae5dd9349&gaOptInStatus=false&optOutTS=1795511060255&ref_=as_li_ss_tl'
+
+    at file:///home/runner/work/gillespenningcom/gillespenningcom/scripts/verify-book-browser.mjs:114:12

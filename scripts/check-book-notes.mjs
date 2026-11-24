@@ -173,6 +173,10 @@ const additionalApprovedNotes = {
   "the-body": {
     "en": "All books by Bill Bryson are delightful. This one gives wonderful insights into how our body works and offers great anecdotes from the history of medical science.",
     "de": "Alle Bücher von Bill Bryson sind ein Vergnügen. Dieses hier gibt wunderbare Einblicke darin, wie unser Körper funktioniert, und erzählt großartige Anekdoten aus der Geschichte der Medizin."
+  },
+  "the-last-unicorn": {
+    "en": "You may know the movie, but the book has a very special language. Whether the unicorn is running “with the speed of life” or the most frightening monster in the travelling carnival is old age - a scene not in the movie - the book instills a feeling of wonder.",
+    "de": "Du kennst vielleicht den Film, aber das Buch hat eine ganz besondere Sprache. Ob das Einhorn „with the speed of life“ läuft oder das Alter das schrecklichste Monster des reisenden Jahrmarkts ist - eine Szene, die im Film fehlt: Das Buch vermittelt ein Gefühl des Staunens."
   }
 };
 for (const [id, notes] of Object.entries(additionalApprovedNotes)) {

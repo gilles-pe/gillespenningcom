@@ -415,3 +415,5 @@ until a later entry replaces it.
 - **D-136 (2026-11-24) The Fortress personal description and Amazon link.** Gilles approved both personal notes and supplied the Amazon Kindle affiliate link for `B07PLMJN9Y`. Store the exact copy and link; preserve the neutral summary and current cover. Test this and the preceding four approved bilingual notes before combined publication.
 
 - **Social preview (2026-11-24, owner request).** Use the owner-approved four-room image as the single 1200 × 630 social preview for the homepage. Set Open Graph and large-image card metadata using the absolute image URL. Fragment links share the same preview.
+
+- **The Last Unicorn personal reading note (2026-11-24).** Gilles approved the exact English and German notes, including “with the speed of life” in both languages and without the Red Bull reference. Keep the neutral summary and existing book interaction. No Amazon link was supplied.

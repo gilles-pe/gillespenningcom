@@ -172,10 +172,10 @@ try {
           const { personalNoteLayout } = await import('/src/book-note-layout.js');
           const canvas = window.__gp.bookUI.getMesh(id).material[1].map.image, ctx = canvas.getContext('2d');
           const layout = personalNoteLayout(ctx, b, lang, canvas.width, canvas.height);
-          return { text:layout.blocks.at(-1).lines.join(' '), ok:layout.bottom <= layout.limit };
+          return { text:layout.blocks.at(-1).lines.join(' '), ok:layout.bottom <= layout.limit, dataUrl:canvas.toDataURL('image/png') };
         }, { id, lang });
         assert.equal(check.text, book.personalNote[lang]); assert(check.ok, id + ' text fits');
-        await page.screenshot({ path: output + '/' + id + '-' + device + '-' + lang + '.png' });
+        await writeFile(output + '/' + id + '-' + device + '-' + lang + '.png', Buffer.from(check.dataUrl.split(',')[1], 'base64'));
       }
       await stage.focus(); await stage.press('Enter'); assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
     }
@@ -189,7 +189,7 @@ try {
     await stage.press('Enter'); await page.waitForTimeout(600);
     await stage.press('Enter'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back');
-    await page.screenshot({ path: output + '/' + device + '-animated-back.png' });
+    // Animated face state is checked above; avoid a flaky screenshot during animation.
     await stage.press('Escape'); await page.waitForTimeout(600);
     assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);
     assert.deepEqual(errors, [], 'no browser runtime errors');

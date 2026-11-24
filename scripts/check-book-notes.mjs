@@ -105,7 +105,21 @@ for (const lang of ['en','de']) {
   assert.equal(layout.blocks.at(-1).lines.join(' '), factfulnessApproved[lang]);
   assert(layout.bottom <= layout.limit, 'note must fit on back');
 }
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id)) {
+const eve = books.find(b => b.id === 'eve');
+const eveApproved = {
+  "en": "Women’s health and how medicine is shaped by gender bias receive far too little attention. Combined with a historical and biological perspective, this makes for a great read. There is a lot to learn from this book.",
+  "de": "Frauengesundheit und die Frage, wie geschlechtsspezifische Vorurteile die Medizin prägen, bekommen viel zu wenig Aufmerksamkeit. In Verbindung mit einer historischen und biologischen Perspektive macht das dieses Buch zu einer großartigen Lektüre. Es gibt viel daraus zu lernen."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(eve, lang), eveApproved[lang], 'approved Eve note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, eve, lang, 768, Math.round(768 / (.13 / .19)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), eveApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit above the Amazon link');
+}
+assert(new URL(eve.amazonUrl).pathname.includes('/dp/B0BRMSFDJW'));
+assert.equal(new URL(eve.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

@@ -178,11 +178,11 @@
         "order": 1
       },
       "isbn13": "9781529156171",
-      "amazonUrl": null,
+      "amazonUrl": "https://www.amazon.de/-/en/Eve-Million-Evolution-Longlisted-Non-Fiction-ebook/dp/B0BRMSFDJW?crid=3H8M39SIWDWF2&dib=eyJ2IjoiMSJ9.zRLFV-6tw4KTevCsVPghQxOUkmqVYNizbO1ztDlGZd4ootA08txin3qAKCnvwVyZK8tS9iW8A77W1qQFAicLdQ.UteiIZbBTiNn_rce1R8X84WebnE-KOM4__VLWgbXj7Q&dib_tag=se&keywords=cat%2Bbohannon%2Beve&qid=1795517352&s=digital-text&sprefix=eve%2Bcat%2B%2Cdigital-text%2C140&sr=1-1&th=1&linkCode=ll2&tag=aiinmedicine-21&linkId=381b22764d4c8ad62d05584218bf828b&gaOptInStatus=true&ref_=as_li_ss_tl",
       "coverImage": null,
       "personalNote": {
-        "en": null,
-        "de": null
+        "en": "Women’s health and how medicine is shaped by gender bias receive far too little attention. Combined with a historical and biological perspective, this makes for a great read. There is a lot to learn from this book.",
+        "de": "Frauengesundheit und die Frage, wie geschlechtsspezifische Vorurteile die Medizin prägen, bekommen viel zu wenig Aufmerksamkeit. In Verbindung mit einer historischen und biologischen Perspektive macht das dieses Buch zu einer großartigen Lektüre. Es gibt viel daraus zu lernen."
       },
       "editionSourceUrl": "https://openlibrary.org/books/OL50620709M/Eve",
       "coverImageStatus": "open-library-image-edition-matched",

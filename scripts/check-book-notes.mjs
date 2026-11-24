@@ -99,3 +99,8 @@ for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !
 }
 assert.equal(personalBookNote({ personalNote: { en: 'Approved English only' } }, 'de'), null, 'no invented translation or language fallback');
 console.log('Personal book notes: exact approved EN/DE, separate summary, complete wrapping, missing-note fallback: passed');
+
+for (const [id, asin] of Object.entries({ 'thinking-fast-and-slow':'B00555X8OA', 'sapiens':'B00ICN066A', 'the-weirdest-people':'B07RZFCPMD' })) {
+  const url = new URL(books.find(b => b.id === id).amazonUrl);
+  assert(url.pathname.includes('/dp/' + asin)); assert.equal(url.searchParams.get('tag'), 'aiinmedicine-21');
+}

@@ -8,6 +8,7 @@ import { renderSocial, renderNews, renderLatest } from './widgets.js';
 import { onNews, refreshNews } from './news.js';
 import { zoomToSlider, sliderToZoom } from './inspection.js';
 import { enableExternalLinks } from './external-links.js';
+import { ROOMS as ORDER, resolveRoute, hashForView } from './routes.js';
 enableExternalLinks();
 
 const stage = document.getElementById('stage');
@@ -41,7 +42,6 @@ document.getElementById('zoom-out').addEventListener('click', () => { zoomSlider
 document.getElementById('zoom-in').addEventListener('click', () => { zoomSlider.value = Math.min(100, Number(zoomSlider.value) + 4); api?.setZoom(sliderToZoom(Number(zoomSlider.value))); });
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => matchMedia('(max-width: 800px)').matches;
-const ORDER = ['projects', 'about', 'ai', 'writing'];
 let lang = initialLang();
 const name = id => t(lang, `nav.${id}`);
 
@@ -98,17 +98,13 @@ function closeLeadership({ restoreFocus = false } = {}) {
 
 leadershipClose?.addEventListener('click', () => closeLeadership({ restoreFocus: true }));
 
-function roomFromHash() {
-  const id = location.hash.slice(1);
-  return ORDER.includes(id) ? id : null;
-}
-
-function writeRoomHash(id) {
-  const hash = id ? `#${id}` : '';
-  if (location.hash === hash) return;
+function writeHash(hash, { replace = false } = {}) {
+  const next = hash ? `#${hash}` : '';
+  if (location.hash === next) return;
   const url = new URL(location.href);
-  url.hash = hash;
-  history.pushState(null, '', url);
+  url.hash = next;
+  if (replace) history.replaceState(null, '', url);
+  else history.pushState(null, '', url);
 }
 
 function roomNodes(id) {
@@ -127,9 +123,10 @@ function roomNodes(id) {
   return [close, ...nodes];
 }
 
-function openRoom(id, auto = false) {
-  if (!auto) writeRoomHash(id);
-  if (mode === 'loading') { pending = id; return; }
+function openRoom(id, opts = false) {
+  const { auto = false, keepView = false, hash = id } = typeof opts === 'boolean' ? { auto: opts, keepView: opts } : opts;
+  if (!auto) writeHash(hash);
+  if (mode === 'loading') { pending = { room: id, focus: null, hash }; return; }
   const wasCurrent = current === id;
   current = id;
   if (id !== 'about') closeLeadership();
@@ -152,14 +149,21 @@ function openRoom(id, auto = false) {
   back.hidden = false;
   panel.replaceChildren(...roomNodes(id));
   panel.hidden = false;
-  api.open(id, { keepView: auto && wasCurrent });
+  api.open(id, { keepView: keepView && wasCurrent });
   // Header navigation should make the scene reachable on a vertically stacked page.
   if (!auto && mobile() && stage.getBoundingClientRect().top > window.innerHeight) {
     stage.scrollIntoView({ block: 'start', behavior: reduced ? 'instant' : 'smooth' });
   }
 }
+function openRoute(route, { auto = false } = {}) {
+  if (!route) return;
+  if (mode === 'loading') { pending = route; return; }
+  openRoom(route.room, { auto, keepView: false, hash: route.hash });
+  if (api && route.focus) api.focus(route.focus, { fromRoute: auto });
+  if (!api && !auto) document.getElementById(route.room)?.scrollIntoView();
+}
 function closeRoom({ fromHistory = false } = {}) {
-  if (!fromHistory) writeRoomHash(null);
+  if (!fromHistory) writeHash(null);
   pending = null;
   current = null;
   closeLeadership();
@@ -173,12 +177,12 @@ function closeRoom({ fromHistory = false } = {}) {
 }
 
 function applyLocation() {
-  const id = roomFromHash();
-  if (id) {
-    if (mode === 'loading') pending = id;
+  const route = resolveRoute(location.hash);
+  if (route) {
+    if (mode === 'loading') pending = route;
     else {
-      openRoom(id, true);
-      if (!api) document.getElementById(id)?.scrollIntoView();
+      openRoute(route, { auto: true });
+      if (!api) document.getElementById(route.room)?.scrollIntoView();
       else if (mobile()) stage.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
   } else if (!location.hash) {
@@ -215,8 +219,8 @@ document.addEventListener('click', e => {
   if (lead) { e.preventDefault(); openLeadership(); return; }
   const a = e.target.closest?.('a[href^="#"]');
   if (!a || mode === 'static' || (a.getAttribute('href').length < 2)) return;
-  const h = a.getAttribute('href').slice(1);
-  if (ORDER.includes(h)) { e.preventDefault(); openRoom(h); }
+  const route = resolveRoute(a.getAttribute('href'));
+  if (route) { e.preventDefault(); openRoute(route); }
 });
 
 // Language switch: static text, room names, 3D lettering and room details.
@@ -232,7 +236,7 @@ function setLang(next, { save = true } = {}) {
   langBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
   for (const id of ORDER) { labels[id].textContent = name(id); bar.querySelector(`[data-room="${id}"]`).textContent = name(id); }
   api?.setLanguage(lang);
-  if (current) openRoom(current, true);
+  if (current) openRoom(current, { auto: true, keepView: true });
   if (save) rememberLang(lang);
 }
 langBtns.forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) setLang(b.dataset.lang); }));
@@ -254,7 +258,8 @@ function loadViewer(attempt = 0) {
     api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
       onZoom: syncZoom,
       onBackState: available => { sceneBack.hidden = !available; stage.classList.toggle('has-view-history', available); },
-      onViewBack: id => { if (id) openRoom(id, true); else closeRoom({ fromHistory: true }); writeRoomHash(id); },
+      onViewBack: id => { if (id) openRoom(id, { auto: true, keepView: true }); else closeRoom({ fromHistory: true }); writeHash(id); },
+      onFocusChange: (roomId, focusKey, { replace = false } = {}) => { if (mode === '3d') writeHash(hashForView(roomId, focusKey), { replace }); },
       onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
     if (!api) throw new Error('WebGL unavailable');
     viewControls.hidden = false;

@@ -30,7 +30,7 @@ const loadWarpSound = async () => {
   };
 };
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, musicLoader = loadGlobeMusic, warpLoader = loadWarpSound }) {
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, onFocusChange, musicLoader = loadGlobeMusic, warpLoader = loadWarpSound }) {
   let renderer = null;
   for (const opts of [
     { canvas, antialias: true, alpha: true, powerPreference: 'high-performance' },
@@ -224,6 +224,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   const near = (a, b) => b - TAU * Math.round((b - a) / TAU);   // angle equal to b that is closest to a
   const viewHistory = [];
   let restoringView = false, navigationGroup = null;
+  let suppressFocusEmit = false, lastEmittedRoom = null, lastEmittedKey = null;
   const snapshot = () => ({ room: openId, az: goal.az, el: goal.el, zoom, custom, pan: panOffset.clone(), point: goal.t.clone(), dist: goal.dist });
   const samePose = (a, b) => a.room === b.room && Math.abs(a.az - b.az) < .001 && Math.abs(a.el - b.el) < .001 && Math.abs(a.dist - b.dist) < .001 && a.point.distanceToSquared(b.point) < .000001;
   function notifyBack() { onBackState?.(viewHistory.length > 0); }
@@ -256,7 +257,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       goal.dist = Math.max(DMIN, home.dist * saved.zoom); goal.t.copy(home.t).add(saved.pan);
       if (reduced) { view.az = goal.az; view.el = goal.el; view.dist = goal.dist; view.t.copy(goal.t); }
       checkAway();
-    } finally { restoringView = false; notifyBack(); }
+    } finally { restoringView = false; syncEmittedFocus(); notifyBack(); }
     return true;
   }
   const clampTarget = v => {
@@ -637,11 +638,17 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       roomWarp?.warmup?.(renderer, viewscreenCamera);
       roomWarp?.warmup?.(renderer, camera);
     } catch (error) { if (warpSound === ws) stopWarpSound(); throw error; }
-    closePop(false);
-    restoreObjectView();
+    suppressFocusEmit = true;
+    try {
+      closePop(false);
+      restoreObjectView();
+    } finally {
+      suppressFocusEmit = false;
+    }
     // Stay inside the About Me room at normal room framing so the entire 180° curve & warp-in stay in view
     openId = 'about'; custom = false; zoom = 1; panOffset.set(0, 0, 0);
     setGoal();
+    emitFocus(true);
     markDirty();
     await new Promise(resolve => requestAnimationFrame(resolve));
     if (warpSound !== ws && ws) return;
@@ -671,6 +678,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       rememberView('object');
       stage.classList.add('object-focused');
       focusObject({ ...entTarget, getCorners: () => restCorners, margin: 1.08, captionHeight: 0 }, true);
+      emitFocus(true);
       markDirty();
     };
     if (roomWarp?.engage(onWarpDone, () => beginWarpSound(ws), onPreLand)) {
@@ -856,12 +864,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     stage.classList.remove('object-focused', 'ship-focused'); custom = saved.custom; zoom = saved.zoom; panOffset.copy(saved.pan);
     goal.az = near(view.az, saved.az); goal.el = near(view.el, saved.el); goal.dist = saved.dist; goal.t.copy(saved.point);
     if (!restoringView) while (viewHistory.length && samePose(viewHistory.at(-1), snapshot())) viewHistory.pop();
+    emitFocus(false);
     notifyBack(); checkAway();
   }
   function closePop(restoreFocus = false) {
     if (!popEl || !popKey) return;
     restoreObjectView();
     popKey = null; soonBadge.hidden = true; popEl.classList.remove('on'); popEl.inert = true;
+    emitFocus(false);
     stopAutoCard();
     clearTimeout(popTimer);
     const had = popEl.contains(document.activeElement);
@@ -927,6 +937,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (target) { stage.classList.add('object-focused'); focusObject(target, !replace); }
     updateSoonBadge();
     popClose.focus({ preventScroll: true });
+    emitFocus(replace);
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
   function extractCurrentBook(useGoalPose = false) {
@@ -984,6 +995,25 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     });
   }
   const substackByKey = new Map(substackData.articles.map(a => [a.key, a]));
+  function currentShareableKey() {
+    if (openId === 'about' && (popKey === 'enterprise' || popKey === 'globe')) return popKey;
+    if (openId === 'about' && objectFocus?.target?.key === 'enterprise') return 'enterprise';
+    if (openId === 'writing' && substackByKey.has(objectFocus?.target?.key)) return objectFocus.target.key;
+    if (openId === 'projects' && projectKeys.has(popKey)) return popKey;
+    return null;
+  }
+  function syncEmittedFocus() {
+    lastEmittedRoom = openId;
+    lastEmittedKey = currentShareableKey();
+  }
+  function emitFocus(replace = false) {
+    if (suppressFocusEmit || restoringView) return;
+    const key = currentShareableKey();
+    if (openId === lastEmittedRoom && key === lastEmittedKey) return;
+    lastEmittedRoom = openId;
+    lastEmittedKey = key;
+    onFocusChange?.(openId, key, { replace });
+  }
   function stepFocusedItem(dir) {
     if (!openId) return false;
     const clearHover = () => { hoverTarget = null; hoverTip.hidden = true; };
@@ -995,6 +1025,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       if (!nextTarget) return false;
       clearHover();
       focusObject(nextTarget, false);
+      emitFocus(true);
       return true;
     }
     if (openId === 'projects' && projectKeys.has(popKey)) {
@@ -1039,6 +1070,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         rememberView('object');
         stage.classList.add('object-focused');
         focusObject(inspectionFor(key));
+        emitFocus(false);
       }
       return;
     }
@@ -1079,6 +1111,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         trophyParts.add(m);
         trophyThings.unshift(m);
       }
+      if (objectFocus?.target?.key === 'enterprise' && !roomWarp?.isActive()) focusObject(objectFocus.target, false);
       markDirty();
     });
   }
@@ -1793,22 +1826,58 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   return {
     open(id, { keepView = false } = {}) {
-      markDirty();
-      cancelWarp();
-      if (id === 'about') preloadEnterpriseAssets();
-      if (!keepView || id !== openId) bookUI.close(true);
-      if (!keepView && (id !== openId || custom)) rememberView('room');
-      if (id !== openId) closeAlbum(false);
-      if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
-      openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
-      if (id === 'about' || id === 'writing') loadBookCoversForRoom(id);
-      if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
-      if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
-      if (id !== 'about') closeAlbum(false);
-      if (popKey && !popAllowed(id, popKey)) closePop(false);
-      if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
-      setGoal();
-      if (objectFocus) focusObject(objectFocus.target, false);
+      const prevSuppress = suppressFocusEmit;
+      suppressFocusEmit = true;
+      try {
+        markDirty();
+        cancelWarp();
+        if (id === 'about') preloadEnterpriseAssets();
+        if (!keepView || id !== openId) bookUI.close(true);
+        if (!keepView && (id !== openId || custom)) rememberView('room');
+        if (id !== openId) closeAlbum(false);
+        if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
+        openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
+        if (id === 'about' || id === 'writing') loadBookCoversForRoom(id);
+        if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
+        if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
+        if (id !== 'about') closeAlbum(false);
+        if (popKey && !popAllowed(id, popKey)) closePop(false);
+        if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
+        setGoal();
+        if (objectFocus) focusObject(objectFocus.target, false);
+      } finally {
+        suppressFocusEmit = prevSuppress;
+        syncEmittedFocus();
+      }
+    },
+    focus(key, { fromRoute = false } = {}) {
+      if (!key || !openId) return false;
+      const prev = suppressFocusEmit;
+      if (fromRoute) suppressFocusEmit = true;
+      try {
+        if (openId === 'writing' && substackByKey.has(key)) {
+          if (objectFocus?.target?.key === key) return true;
+          bookUI.close(true);
+          closePop(false); closePhoto(false); closeAlbum(false);
+          if (objectFocus) restoreObjectView();
+          rememberView('object');
+          stage.classList.add('object-focused');
+          focusObject(inspectionFor(key));
+          markDirty();
+          if (!fromRoute) emitFocus(false);
+          return true;
+        }
+        if (popAllowed(openId, key)) {
+          if (popKey === key && objectFocus?.target?.key === key) return true;
+          bookUI.close(true);
+          openPop(key, { replace: false });
+          return true;
+        }
+        return false;
+      } finally {
+        suppressFocusEmit = prev;
+        syncEmittedFocus();
+      }
     },
     hover(id) { hoverId = id; markDirty(); },
     setPanMode(on) { panMode = Boolean(on); stage.classList.toggle('panning', panMode); if (!drag) stage.style.cursor = panMode ? 'move' : 'grab'; return panMode; },

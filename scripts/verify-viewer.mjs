@@ -42,8 +42,8 @@ async function getModule(file){if(cache.has(file))return cache.get(file);if(file
 const module=await getModule(resolve('src/viewer.js'));
 await module.link(async(spec,mod)=>{if(spec.startsWith('.'))return getModule(resolve(dirname(mod.identifier),spec));if(!cache.has(spec))cache.set(spec,await external(spec));return cache.get(spec);});await module.evaluate();
 const labels=Object.fromEntries(['projects','about','ai','writing'].map(key=>[key,new Element('button')]));
-let api,zoomEvents=0;
-api=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick:id=>api.open(id),onAway(){},onZoom:()=>zoomEvents++});assert(api);
+let api,zoomEvents=0;const focusEvents=[];
+api=module.namespace.startViewer({canvas,stage,labels,spotsEl,reduced:true,lang:'en',onPick:id=>api.open(id),onAway(){},onZoom:()=>zoomEvents++,onFocusChange:(room,key,opts)=>focusEvents.push({room,key,replace:Boolean(opts?.replace)})});assert(api);
 function draw(){frame(performance.now()+1000);}
 const covers = () => textureRequests.filter(r => r.url.includes('/books/'));
 const finishCover = suffix => { const request = covers().find(r => r.url.endsWith(suffix)); assert(request, `missing cover request ${suffix}`); const t = new Three.Texture({width:256,height:384}); request.onLoad(t); return t; };
@@ -732,4 +732,90 @@ api.open(null); draw();
   api.debug.tapShelfBook('project-hail-mary'); draw();
   assert(link.hidden, 'link hides after returning the book');
   api.open(null); draw();
+}
+
+// 9. Direct viewpoint links and address-bar hash syncing (D-130)
+{
+  const routesMod = await getModule(resolve('src/routes.js'));
+  await routesMod.link(async (spec, mod) => {
+    if (spec.startsWith('.')) return getModule(resolve(dirname(mod.identifier), spec));
+    if (!cache.has(spec)) cache.set(spec, await external(spec));
+    return cache.get(spec);
+  });
+  await routesMod.evaluate();
+  const { resolveRoute, hashForView } = routesMod.namespace;
+  const plain = value => (value ? { ...value } : value);
+
+  assert.deepEqual(plain(resolveRoute('#enterprise')), { room: 'about', focus: 'enterprise', hash: 'enterprise' });
+  assert.deepEqual(plain(resolveRoute('#globe')), { room: 'about', focus: 'globe', hash: 'globe' });
+  assert.deepEqual(plain(resolveRoute('#latest-article')), { room: 'writing', focus: 'latestArticle', hash: 'article/can-ai-see-death-in-your-eyes' });
+  assert.deepEqual(plain(resolveRoute('#articles')), { room: 'writing', focus: 'latestArticle', hash: 'article/can-ai-see-death-in-your-eyes' });
+  assert.equal(resolveRoute('#article/1')?.focus, 'latestArticle');
+  assert.equal(resolveRoute('#article/5')?.focus, 'substackArticle5');
+  assert.equal(resolveRoute('#article/can-ai-see-death-in-your-eyes')?.focus, 'latestArticle');
+  assert.deepEqual(plain(resolveRoute('#article/archived-old-slug')), { room: 'writing', focus: null, hash: 'writing' });
+  for (const key of ['wimmelbild', 'monitor', 'praxisfaden', 'hdrg', 'elbstrand']) {
+    assert.deepEqual(plain(resolveRoute('#' + key)), { room: 'projects', focus: key, hash: key });
+  }
+  assert.deepEqual(plain(resolveRoute('#docease')), { room: 'projects', focus: 'praxisfaden', hash: 'praxisfaden' });
+  assert.equal(resolveRoute('#leadership-deepdive'), null);
+  assert.equal(resolveRoute('#unknown-anchor'), null);
+
+  assert.equal(hashForView('about', 'enterprise'), 'enterprise');
+  assert.equal(hashForView('about', 'globe'), 'globe');
+  assert.equal(hashForView('about', null), 'about');
+  assert.equal(hashForView('projects', 'wimmelbild'), 'wimmelbild');
+  assert.equal(hashForView('ai', 'wimmelbild'), 'ai');
+  assert.equal(hashForView('writing', 'latestArticle'), 'article/can-ai-see-death-in-your-eyes');
+  assert.equal(hashForView(null, null), null);
+
+  focusEvents.length = 0;
+  api.open('about'); draw();
+  assert(api.focus('enterprise', { fromRoute: true })); draw();
+  assert.equal(api.debug.popKey, 'enterprise');
+  assert.equal(api.debug.focusedKey, 'enterprise');
+  assert.equal(focusEvents.length, 0, 'fromRoute enterprise load must not emit redundant hash events');
+
+  assert(api.focus('globe', { fromRoute: true })); draw();
+  assert.equal(api.debug.popKey, 'globe');
+  assert.equal(api.debug.focusedKey, 'globe');
+  assert.equal(focusEvents.length, 0, 'fromRoute globe load must not emit redundant hash events');
+
+  api.open('writing'); draw();
+  assert(api.focus('latestArticle', { fromRoute: true })); draw();
+  assert.equal(api.debug.focusedKey, 'latestArticle');
+  assert.equal(api.debug.popKey, null);
+  assert.equal(focusEvents.length, 0, 'fromRoute article load must not emit redundant hash events');
+
+  api.open('projects'); draw();
+  assert(api.focus('wimmelbild', { fromRoute: true })); draw();
+  assert.equal(api.debug.popKey, 'wimmelbild');
+  assert.equal(api.debug.focusedKey, 'wimmelbild');
+  assert.equal(focusEvents.length, 0, 'fromRoute project load must not emit redundant hash events');
+
+  focusEvents.length = 0;
+  api.open('about'); draw();
+  api.debug.selectProject('enterprise'); draw();
+  assert.deepEqual(focusEvents.at(-1), { room: 'about', key: 'enterprise', replace: false });
+  assert(api.closeNote()); draw();
+  assert.deepEqual(focusEvents.at(-1), { room: 'about', key: null, replace: false });
+
+  api.open('projects'); draw();
+  api.debug.selectProject('wimmelbild'); draw();
+  assert.deepEqual(focusEvents.at(-1), { room: 'projects', key: 'wimmelbild', replace: false });
+  fireKey(stage, 'ArrowRight'); draw();
+  assert.deepEqual(focusEvents.at(-1), { room: 'projects', key: 'monitor', replace: true });
+
+  api.open('writing'); draw();
+  api.debug.selectProject('latestArticle'); draw();
+  assert.deepEqual(focusEvents.at(-1), { room: 'writing', key: 'latestArticle', replace: false });
+  fireKey(stage, 'ArrowRight'); draw();
+  assert.deepEqual(focusEvents.at(-1), { room: 'writing', key: 'substackArticle2', replace: true });
+
+  focusEvents.length = 0;
+  api.open('about'); draw();
+  assert.equal(focusEvents.length, 0, 'switching rooms must suppress intermediate closePop/restoreObjectView events');
+
+  api.open(null); draw();
+  console.log('direct viewpoint links and hash syncing: passed');
 }

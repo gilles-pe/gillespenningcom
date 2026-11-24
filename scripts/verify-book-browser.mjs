@@ -85,6 +85,7 @@ try {
     }
     // Click the actual rendered back at the link's UV position and intercept
     // the external destination without relying on Amazon's redirects.
+    await stage.scrollIntoViewIfNeeded();
     const linkPoint = await page.evaluate(async () => {
       const gp = window.__gp, mesh = gp.bookUI.getMesh('riding-the-waves-of-culture');
       const book = (await import('/src/data/books.json')).default.books.find(b => b.id === 'riding-the-waves-of-culture');

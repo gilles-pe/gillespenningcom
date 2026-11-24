@@ -399,3 +399,5 @@ until a later entry replaces it.
 - **D-128 (2026-11-24) Project Hail Mary affiliate link.** Gilles supplied the Amazon Kindle link for *Project Hail Mary* (`B08FFJS3YW`, tag `aiinmedicine-21`). Store the exact URL in its catalog entry and expose “Book on Amazon” on its existing back. Its personal note remains empty until Gilles supplies and explicitly approves both language versions.
 
 - **D-129 (2026-11-24) Personal description for Project Hail Mary.** Gilles explicitly approved both versions shown in the collaboration; save them verbatim in `personalNote.en` and `personalNote.de`. Keep the neutral summary, supplied Amazon link, English cover and the existing book interaction. Test both languages, legibility, the leaning book and its return path.
+
+- **D-130 (2026-11-24) Leviathan Wakes personal description and Amazon link.** Gilles approved the English and German personal descriptions stored verbatim in `personalNote` and supplied the Amazon Kindle affiliate destination `B004XCGKYQ`. Preserve the neutral summary and English cover. Prepare this with Project Hail Mary for a later combined publication, as requested by Gilles.

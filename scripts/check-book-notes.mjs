@@ -43,7 +43,21 @@ for (const lang of ['en','de']) {
   assert.equal(layout.blocks.at(-1).lines.join(' '), hailApproved[lang], 'complete personal note');
   assert(layout.bottom <= layout.limit, 'personal note does not overlap the Amazon link');
 }
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id)) {
+const leviathan = books.find(b => b.id === 'leviathan-wakes');
+const leviathanApproved = {
+  "en": "The start of a series that rivals The Lord of the Rings. The first book starts slowly, but the story grows to incredible proportions with each book, while staying grounded in physics. Fantastic.",
+  "de": "Der Auftakt zu einer Serie, die ein Rivale für Der Herr der Ringe ist. Das erste Buch startet langsam, doch die Geschichte wächst mit jedem Buch in unfassbare Dimensionen und bleibt dabei in der Physik verankert. Fantastisch."
+};
+for (const lang of ['en', 'de']) {
+  assert.equal(personalBookNote(leviathan, lang), leviathanApproved[lang], 'approved Leviathan Wakes text');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, leviathan, lang, 768, Math.round(768 / (.16 / .23)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), leviathanApproved[lang], 'complete personal note');
+  assert(layout.bottom <= layout.limit, 'note must not overlap the Amazon link');
+}
+assert.equal(new URL(leviathan.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
+assert(new URL(leviathan.amazonUrl).pathname.includes('/dp/B004XCGKYQ'));
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

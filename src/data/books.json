@@ -218,11 +218,11 @@
         "order": 1
       },
       "isbn13": "9780525556572",
-      "amazonUrl": null,
+      "amazonUrl": "https://link.amazon/B07X6F5sT",
       "coverImage": null,
       "personalNote": {
-        "en": null,
-        "de": null
+        "en": "The impact of tuberculosis on health and history is heavily underrated in the Western world. This book takes us through its past and present and offers insights into other diseases we have yet to conquer.",
+        "de": "Der Einfluss der Tuberkulose auf Gesundheit und Geschichte wird in der westlichen Welt stark unterschätzt. Das Buch führt durch ihre Vergangenheit und Gegenwart und liefert Denkanstöße für andere Krankheiten, die wir noch besiegen müssen."
       },
       "editionSourceUrl": "https://penguinrandomhousehighereducation.com/book/?isbn=9780525556572",
       "coverImageStatus": "publisher-image-edition-matched",

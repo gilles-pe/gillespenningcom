@@ -407,3 +407,5 @@ until a later entry replaces it.
 - **D-132 (2026-11-24) Factfulness personal reading note.** Gilles approved the English note and German text after removing “noch” and “längst”. Save both verbatim; preserve the neutral summary. Gilles requested four more books before any publication, so keep this change on the work branch.
 
 - **D-133 (2026-11-24) Eve personal description and Amazon link.** Gilles approved the exact bilingual personal notes in `personalNote` and supplied the tagged Kindle link for *Eve* (`B0BRMSFDJW`). Preserve the neutral summary, original cover and horizontal orientation. Keep the work unpublished until the agreed batch of four further books is complete.
+
+- **D-134 (2026-11-24) Everything Is Tuberculosis personal description and Amazon link.** Gilles approved both personal notes after removing the opening “Very interesting” and supplied `https://link.amazon/B07X6F5sT`. Preserve both texts, the supplied link, neutral summary, cover and horizontal position. Include in the future combined publication; do not publish until the agreed remaining books are completed.

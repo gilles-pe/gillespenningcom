@@ -119,7 +119,20 @@ for (const lang of ['en','de']) {
 }
 assert(new URL(eve.amazonUrl).pathname.includes('/dp/B0BRMSFDJW'));
 assert.equal(new URL(eve.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id)) {
+const tuberculosis = books.find(b => b.id === 'everything-is-tuberculosis');
+const tuberculosisApproved = {
+  "en": "The impact of tuberculosis on health and history is heavily underrated in the Western world. This book takes us through its past and present and offers insights into other diseases we have yet to conquer.",
+  "de": "Der Einfluss der Tuberkulose auf Gesundheit und Geschichte wird in der westlichen Welt stark unterschätzt. Das Buch führt durch ihre Vergangenheit und Gegenwart und liefert Denkanstöße für andere Krankheiten, die wir noch besiegen müssen."
+};
+for (const lang of ['en','de']) {
+  assert.equal(personalBookNote(tuberculosis, lang), tuberculosisApproved[lang], 'approved Everything Is Tuberculosis note');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, tuberculosis, lang, 768, Math.round(768 / (.13 / .19)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), tuberculosisApproved[lang]);
+  assert(layout.bottom <= layout.limit, 'note must fit above Amazon link');
+}
+assert.equal(tuberculosis.amazonUrl, 'https://link.amazon/B07X6F5sT');
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id && b.id !== sapiens.id && b.id !== weird.id && b.id !== factfulness.id && b.id !== eve.id && b.id !== tuberculosis.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

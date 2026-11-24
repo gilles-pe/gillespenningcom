@@ -57,7 +57,19 @@ for (const lang of ['en', 'de']) {
 }
 assert.equal(new URL(leviathan.amazonUrl).searchParams.get('tag'), 'aiinmedicine-21');
 assert(new URL(leviathan.amazonUrl).pathname.includes('/dp/B004XCGKYQ'));
-for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id)) {
+const kahneman = books.find(b => b.id === 'thinking-fast-and-slow');
+const kahnemanApproved = {
+  "en": "Everyone talks about it. Hardly anyone finishes it. I fought my way through it and, in the years since, have kept returning to it in certain situations. It was worth it.",
+  "de": "Alle reden darüber. Kaum jemand liest es zu Ende. Ich habe mich durchgekämpft und bin in den Jahren danach in bestimmten Situationen immer wieder darauf zurückgekommen. Es war es wert."
+};
+for (const lang of ['en', 'de']) {
+  assert.equal(personalBookNote(kahneman, lang), kahnemanApproved[lang], 'approved Thinking, Fast and Slow text');
+  const ctx = { font: '', measureText(text) { const size = Number(this.font.match(/([\d.]+)px/)?.[1] || 16); return { width: [...text].length * size * .56 }; } };
+  const layout = personalNoteLayout(ctx, kahneman, lang, 768, Math.round(768 / (.18 / .205)));
+  assert.equal(layout.blocks.at(-1).lines.join(' '), kahnemanApproved[lang], 'complete personal note');
+  assert(layout.bottom <= layout.limit, 'note must fit on the back');
+}
+for (const b of books.filter(b => b.id !== book.id && b.id !== hail.id && b.id !== leviathan.id && b.id !== kahneman.id)) {
   assert.equal(personalBookNote(b, 'en'), null, b.id);
   assert.equal(personalBookNote(b, 'de'), null, b.id);
 }

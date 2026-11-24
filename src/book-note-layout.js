@@ -20,7 +20,6 @@ export function personalNoteLayout(ctx, book, language, width, height) {
   if (!text) return null;
   const lang = language === 'de' ? 'de' : 'en';
   const scale = width / 768, margin = 52 * scale, measure = width - 2 * margin;
-  const heading = lang === 'de' ? 'Persönliche Leseempfehlung' : 'Personal reading note';
   const blocks = [];
   let y = margin;
   function block(text, size, weight, gap) {
@@ -31,9 +30,8 @@ export function personalNoteLayout(ctx, book, language, width, height) {
     y += lines.length * lineHeight + gap * scale;
   }
   block(book.title, 28, '600', 12);
-  block(book.author, 22, '400', 30);
-  block(heading + ' · Gilles Penning', 25, '600', 26);
-  const bottom = height - margin - 36 * scale;
+  block(book.author, 24, '400', 54);
+  const bottom = height - margin - (book.amazonUrl ? 120 : 36) * scale;
   let size = 46 * scale, lines, lineHeight;
   do {
     ctx.font = `400 ${size}px Georgia, serif`;
@@ -45,4 +43,18 @@ export function personalNoteLayout(ctx, book, language, width, height) {
   if (size < 24 * scale) throw new Error('Personal book note does not fit: ' + book.id + ':' + lang);
   blocks.push({ text, lines, font: ctx.font, lineHeight, x: margin, y });
   return { language: lang, text, blocks, bottom: y + lines.length * lineHeight, limit: bottom, bodyFontSize: size };
+}
+
+export function amazonBackLink(book, width, height) {
+  if (!book.amazonUrl || !/^https:\/\//i.test(book.amazonUrl)) return null;
+  const scale = width / 768;
+  return { x: 52 * scale, y: height - 145 * scale, width: width - 104 * scale, height: 55 * scale };
+}
+export function hitAmazonBack(book, uv, materialIndex, width, height) {
+  if (!uv || materialIndex !== (book.placement.orientation === 'horizontal' ? 3 : 1)) return false;
+  const box = amazonBackLink(book, width, height);
+  if (!box) return false;
+  const flat = book.placement.orientation === 'horizontal';
+  const x = (flat ? 1 - uv.x : uv.x) * width, y = (flat ? uv.y : 1 - uv.y) * height;
+  return x >= box.x && x <= box.x + box.width && y >= box.y && y <= box.y + box.height;
 }

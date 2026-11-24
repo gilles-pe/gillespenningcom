@@ -6,6 +6,7 @@ import booksCatalog from './data/books.json';
 import * as THREE from 'three';
 import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
+import { hitAmazonBack } from './book-note-layout.js';
 import { createBookInteraction } from './book-interaction.js';
 import { t } from './i18n.js';
 import { createEgg } from './egg.js';
@@ -1390,6 +1391,13 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     if (!target && !action) return null;
     let parent = hit.object, room = target?.room;
     while (!room && parent) { room = Object.values(rooms).find(room => room.group === parent)?.id; parent = parent.parent; }
+    if (action?.type === 'book' && bookUI.isFocused(action.key) && bookUI.isExtracted() && bookUI.activeFace === 'back') {
+      const book = booksCatalog.books.find(b => b.id === action.key);
+      const materialIndex = hit.face?.materialIndex;
+      const canvas = hit.object.material[materialIndex]?.map?.image;
+      if (book && canvas && hitAmazonBack(book, hit.uv, materialIndex, canvas.width, canvas.height))
+        return { ...action, type: 'book-amazon', href: book.amazonUrl, customLabel: 'Book on Amazon', room };
+    }
     return { ...(action || { key: target.key, type: 'card', anchor: target.objects[0] }), room };
   };
   function updateHoverTip() {
@@ -1554,9 +1562,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         const eggKind = egg.pick(ndc(e));
         if (eggKind) eggClick(eggKind);
         else if (object) {
-          if (object.type !== 'book' && bookUI.isActive()) { bookUI.close(true); restoreObjectView(); }
+          if (object.type !== 'book' && object.type !== 'book-amazon' && bookUI.isActive()) { bookUI.close(true); restoreObjectView(); }
           if (object.room !== openId) onPick(object.room);
-          if (object.type === 'book') tapShelfBook(object.key);
+          if (object.type === 'book-amazon') openExternal(object.href);
+          else if (object.type === 'book') tapShelfBook(object.key);
           else if (object.type === 'album') toggleAlbum();
           else if (object.type === 'photo') togglePhoto(object.key);
           else togglePop(object.key);

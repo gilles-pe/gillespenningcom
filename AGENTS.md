@@ -173,3 +173,6 @@ Whenever pictures, textures or jacket faces change (covers, spines, backs, slots
 - Keep neutral sourced `summary` and personal `personalNote.en` / `personalNote.de` separate. Missing facts or translations stay null; do not invent them.
 - Maintain structured title, author, ISBN, English cover, spine, back, placement/location, Amazon link, neutral summary and personal note for every book over time.
 - After every update test the actual representation, both languages and desktop/mobile, including all affected placements and the complete book sequence. Run the book, token, viewer and build checks.
+
+## Amazon links and personal book backs (owner instruction 2026-11-24)
+When a book has an owner-supplied `amazonUrl`, show the clickable line “Book on Amazon” on its physical back in both languages. Open the HTTPS destination in a new tab; provide keyboard access. Only the link area opens Amazon; tapping the rest of the back keeps the normal return-to-shelf behavior. Apply to future books, including books without personal notes and all orientations; do not invent URLs. Test on desktop and mobile. Remove the visible personal-reading-note heading from personal backs while retaining the exact approved text.

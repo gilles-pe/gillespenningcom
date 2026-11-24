@@ -398,3 +398,7 @@ a.spot:hover, button.spot:hover { background: color-mix(in srgb, var(--paper) 84
 /* ---- Bookshelf inspection: tactile object, restrained paper-glass detail card ---- */
 /* Books have no visible card (D-114); this line only names the presented book for screen readers. */
 .book-status { position: absolute; width: var(--s1); height: var(--s1); margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Keyboard access to the link drawn on the physical book back. */
+.book-amazon-access:not(:focus) { position: absolute; width: var(--s1); height: var(--s1); margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.book-amazon-access:focus { position: absolute; z-index: 6; left: var(--s2); top: var(--s2); padding: var(--s2); color: var(--petrol); background: var(--paper); }

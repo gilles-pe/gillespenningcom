@@ -83,6 +83,38 @@ try {
       await stage.screenshot({ path: output + '/' + device + '-' + lang + '.png' });
       report.push({ device, language: lang, complete: true, bodyTexturePx: layout.fontSize, bottom: layout.bottom, limit: layout.limit });
     }
+    // Click the actual rendered back at the link's UV position and intercept
+    // the external destination without relying on Amazon's redirects.
+    const linkPoint = await page.evaluate(async () => {
+      const gp = window.__gp, mesh = gp.bookUI.getMesh('riding-the-waves-of-culture');
+      const book = (await import('/src/data/books.json')).default.books.find(b => b.id === 'riding-the-waves-of-culture');
+      const { amazonBackLink } = await import('/src/book-note-layout.js');
+      const canvas = mesh.material[1].map.image, box = amazonBackLink(book, canvas.width, canvas.height);
+      const target = { x: (box.x + box.width / 2) / canvas.width, y: 1 - (box.y + box.height / 2) / canvas.height };
+      const g = mesh.geometry, uv = g.attributes.uv, pos = g.attributes.position, idx = g.index;
+      for (let i=0; i<idx.count; i+=3) {
+        if (g.groups.find(group => i >= group.start && i < group.start + group.count)?.materialIndex !== 1) continue;
+        const ids = [idx.getX(i), idx.getX(i+1), idx.getX(i+2)];
+        const [a,b,c] = ids.map(k => ({ x:uv.getX(k), y:uv.getY(k) }));
+        const det = (b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y);
+        const u=((b.y-c.y)*(target.x-c.x)+(c.x-b.x)*(target.y-c.y))/det;
+        const v=((c.y-a.y)*(target.x-c.x)+(a.x-c.x)*(target.y-c.y))/det, w=1-u-v;
+        if (Math.min(u,v,w) < -0.001) continue;
+        const point = gp.camera.position.clone().set(0,0,0);
+        for (const [j,weight] of [u,v,w].entries()) { point.x += pos.getX(ids[j])*weight; point.y += pos.getY(ids[j])*weight; point.z += pos.getZ(ids[j])*weight; }
+        mesh.localToWorld(point).project(gp.camera);
+        const r = document.getElementById('stage').getBoundingClientRect();
+        return { x:r.left+(point.x+1)*r.width/2, y:r.top+(1-point.y)*r.height/2 };
+      }
+      throw Error('Link UV triangle not found');
+    });
+    await page.evaluate(() => { window.__openedBooks = []; window.open = (url, target) => { window.__openedBooks.push({url, target}); return { focus() {}, opener:null }; }; });
+    await page.mouse.click(linkPoint.x, linkPoint.y);
+    assert.equal(await page.evaluate(() => window.__openedBooks?.[0]?.url), approved.amazonUrl, 'click on back opens Amazon destination');
+    assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), 'back', 'link does not return the book');
+    const accessibleLink = page.locator('.book-amazon-access');
+    assert.equal(await accessibleLink.getAttribute('href'), approved.amazonUrl);
+    assert.equal(await accessibleLink.getAttribute('target'), '_blank');
     // All placements, at two orbit angles; existing keyboard/click contract and return.
     await stage.focus(); await stage.press('Enter');
     assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);

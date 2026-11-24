@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import catalog from './data/books.json';
-import { personalBookNote, personalNoteLayout } from './book-note-layout.js';
+import { personalBookNote, personalNoteLayout, amazonBackLink } from './book-note-layout.js';
 
 // Local English-edition front covers load progressively when available.
 // Back panels and spines are original typographic reconstructions, NOT publisher artwork.
@@ -77,6 +77,15 @@ function frontFallback(book, colors) {
     authors.forEach((line, i) => ctx.fillText(line, w / 2, h - 74 + i * 23));
   });
 }
+function drawAmazonLink(ctx, book, w, h, ink) {
+  const box = amazonBackLink(book, w, h);
+  if (!box) return;
+  const scale = w / 768;
+  ctx.fillStyle = ink; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.font = `600 ${30 * scale}px Georgia, serif`;
+  ctx.fillText('Book on Amazon ↗', box.x, box.y + 7 * scale);
+  ctx.fillRect(box.x, box.y + 42 * scale, Math.min(ctx.measureText('Book on Amazon ↗').width, box.width), 2 * scale);
+}
 let jacketLanguage = 'en';
 function personalBack(book, flip180, aspect) {
   return sheet(768, Math.round(768 / aspect), (ctx, w, h) => {
@@ -85,10 +94,11 @@ function personalBack(book, flip180, aspect) {
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
     const layout = personalNoteLayout(ctx, book, jacketLanguage, w, h);
     for (const [index, block] of layout.blocks.entries()) {
-      ctx.fillStyle = index === 2 ? '#1E3A8A' : '#18181B';
+      ctx.fillStyle = index === 1 ? '#4B5563' : '#18181B';
       ctx.font = block.font;
       block.lines.forEach((line, i) => ctx.fillText(line, block.x, block.y + i * block.lineHeight));
     }
+    drawAmazonLink(ctx, book, w, h, '#1E3A8A');
     ctx.fillStyle = '#4B5563'; ctx.font = '20px Georgia, serif';
     if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 52, h - 52);
   });
@@ -110,7 +120,8 @@ function backReconstruction(book, colors, flip180 = false, aspect = 2 / 3) {
     const a = wrapped(ctx, book.author, w - 52, 4);
     a.forEach((line, i) => ctx.fillText(line, 27, separator + 35 + i * 19));
     ctx.fillStyle = accent; ctx.fillRect(27, h - 49, 42, 3);
-    ctx.font = '10px sans-serif'; ctx.fillStyle = ink;
+    drawAmazonLink(ctx, book, w, h, ink);
+    ctx.textBaseline = 'alphabetic'; ctx.font = '10px sans-serif'; ctx.fillStyle = ink;
     if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 27, h - 28);
   });
 }

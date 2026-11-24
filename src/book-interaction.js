@@ -36,13 +36,14 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   });
 
   let selected = null;
+  let amazonLink = null;
   let status = null;                                         // visually hidden: the book and its face for screen readers
   let currentLanguage = language === 'de' ? 'de' : 'en';
   setBookJacketLanguage(currentLanguage);
 
   // No visible card (D-114): the book itself is the interface. A polite live region names it for assistive technology.
   function announce() {
-    if (!selected?.extracted) { if (status) status.textContent = ''; return; }
+    if (!selected?.extracted) { if (status) status.textContent = ''; if (amazonLink) amazonLink.hidden = true; return; }
     if (!status) {
       status = document.createElement('p');
       status.className = 'book-status';
@@ -51,6 +52,18 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
       stage.append(status);
     }
     const { book, face } = selected;
+    if (face === 'back' && /^https:\/\//i.test(book.amazonUrl || '')) {
+      if (!amazonLink) {
+        amazonLink = document.createElement('a');
+        amazonLink.className = 'book-amazon-access';
+        amazonLink.textContent = 'Book on Amazon';
+        amazonLink.target = '_blank';
+        amazonLink.rel = 'noopener noreferrer';
+        stage.append(amazonLink);
+      }
+      amazonLink.href = book.amazonUrl;
+      amazonLink.hidden = false;
+    } else if (amazonLink) amazonLink.hidden = true;
     const note = face === 'back' ? personalBookNote(book, currentLanguage) : null;
     const credit = currentLanguage === 'de' ? 'Persönliche Leseempfehlung von Gilles Penning' : 'Personal reading note by Gilles Penning';
     status.textContent = `${book.title}, ${book.author} - ${labels[currentLanguage][face]}` + (note ? `. ${credit}: ${note}` : '');
@@ -174,6 +187,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
       s.returning = true;
     }
     if (status) status.textContent = '';
+    if (amazonLink) amazonLink.hidden = true;
     markDirty();
     return true;
   }

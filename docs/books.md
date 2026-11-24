@@ -72,3 +72,6 @@ Bloodlands (About Me), Guns, Germs, and Steel, Predictably Irrational and The In
 The first approved note is `riding-the-waves-of-culture` (D-124). Its wording is locked by `scripts/check-book-notes.mjs`. Personal backs use a high-resolution canvas with the real mesh aspect ratio, complete word wrapping and paper/ink contrast; the original horizontal-back rotation is retained. Replaced language textures are disposed. Ordinary book jackets are unchanged. The visually hidden live region also reads the personal note on the back.
 
 See [the catalog/scene audit](books-audit-2026-11-23.md) for the 27-book comparison and outstanding cover issues.
+
+## Book on Amazon and personal back design (2026-11-24)
+For every book with an owner-supplied `amazonUrl`, show “Book on Amazon” on the physical back in both languages. It opens the stored HTTPS URL in a new tab; the rest of the back returns the book normally. A keyboard-accessible link is available when the back is shown. Apply to upright, leaning and horizontal books, including those without personal notes. Do not invent URLs. Test link hit areas, keyboard access, return behavior and desktop/mobile rendering. Personal backs show the approved text without a visible personal-reading-note heading.

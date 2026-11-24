@@ -54,6 +54,7 @@ export const content = {
     strip: {
       label: 'More links',
       legal: 'Legal & privacy',
+      amazonDisclosure: 'As an Amazon Associate I earn from qualifying purchases.',
       wimmelbild: 'Wimmelbild',
     },
     social: {
@@ -390,6 +391,7 @@ export const content = {
     strip: {
       label: 'Weitere Links',
       legal: 'Impressum & Datenschutz',
+      amazonDisclosure: 'Als Amazon-Partner verdiene ich an qualifizierten Verkäufen.',
       wimmelbild: 'Wimmelbild',
     },
     social: {

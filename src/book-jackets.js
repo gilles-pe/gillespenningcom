@@ -84,7 +84,10 @@ function drawAmazonLink(ctx, book, w, h, ink) {
   ctx.fillStyle = ink; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
   ctx.font = `600 ${30 * scale}px Georgia, serif`;
   ctx.fillText('Book on Amazon ↗', box.x, box.y + 7 * scale);
-  ctx.fillRect(box.x, box.y + 42 * scale, Math.min(ctx.measureText('Book on Amazon ↗').width, box.width), 2 * scale);
+  const labelWidth = ctx.measureText('Book on Amazon ↗').width;
+  ctx.font = `${23 * scale}px Georgia, serif`;
+  ctx.fillText(jacketLanguage === 'de' ? '(Partnerlink)' : '(Affiliate link)', box.x + labelWidth + 20 * scale, box.y + 12 * scale);
+  ctx.fillRect(box.x, box.y + 42 * scale, Math.min(labelWidth, box.width), 2 * scale);
 }
 let jacketLanguage = 'en';
 function personalBack(book, flip180, aspect) {

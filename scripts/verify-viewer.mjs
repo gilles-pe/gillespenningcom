@@ -694,7 +694,7 @@ api.open(null); draw();
   api.debug.tapShelfBook(id); draw();
   assert.equal(api.debug.bookUI.activeFace, 'back');
   const link = stage.children.find(c => c.classList.contains('book-amazon-access'));
-  assert(link && !link.hidden && link.href === 'https://link.amazon/B06jsIxLh', 'keyboard accessible Amazon link appears on back');
+  assert(link && !link.hidden && link.href === catalog.find(b => b.id === id).amazonUrl, 'keyboard accessible Amazon link appears on back');
   const layout = cache.get(resolve('src/book-note-layout.js')).namespace;
   const book = catalog.find(b => b.id === id), image = mesh.material[1].map.image;
   const rect = layout.amazonBackLink(book, image.width, image.height);

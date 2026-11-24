@@ -1,0 +1,38 @@
+{
+  "source": "04a28fea66b4dd484c179e6813eb005ca1a40777",
+  "live": false,
+  "checks": [
+    {
+      "device": "desktop",
+      "language": "en",
+      "complete": true,
+      "bodyTexturePx": 46,
+      "bottom": 611.66,
+      "limit": 703
+    },
+    {
+      "device": "desktop",
+      "language": "de",
+      "complete": true,
+      "bodyTexturePx": 46,
+      "bottom": 668.24,
+      "limit": 703
+    },
+    {
+      "device": "mobile",
+      "language": "en",
+      "complete": true,
+      "bodyTexturePx": 46,
+      "bottom": 611.66,
+      "limit": 703
+    },
+    {
+      "device": "mobile",
+      "language": "de",
+      "complete": true,
+      "bodyTexturePx": 46,
+      "bottom": 668.24,
+      "limit": 703
+    }
+  ]
+}

@@ -128,6 +128,9 @@ try {
         for (const face of ['spine','back']) {
           await stage.press('Enter'); await page.waitForTimeout(50);
           assert.equal(await page.evaluate(() => window.__gp.bookUI.activeFace), face);
+          if (id === 'project-hail-mary' && face === 'back') {
+            assert.equal(await page.locator('.book-amazon-access').getAttribute('href'), catalog.find(b => b.id === id).amazonUrl, 'link shown on a book without a personal note');
+          }
         }
         await stage.press('Enter');
         assert.equal(await page.evaluate(() => window.__gp.bookUI.isActive()), false);

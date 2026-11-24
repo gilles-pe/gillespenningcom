@@ -722,3 +722,14 @@ api.open(null); draw();
   api.setLanguage('en'); api.open(null); draw();
   console.log('Catalog audit: 27 unique meshes, correct rooms/order/faces; approved bilingual back, language switching, disposal and return: passed');
 }
+
+{
+  api.open('about'); draw();
+  for (let i = 0; i < 4; i++) { api.debug.tapShelfBook('project-hail-mary'); draw(); }
+  assert.equal(api.debug.bookUI.activeFace, 'back');
+  const link = stage.children.find(c => c.classList.contains('book-amazon-access'));
+  assert(!link.hidden && link.href === catalog.find(b => b.id === 'project-hail-mary').amazonUrl, 'leaning book without personal note exposes supplied link');
+  api.debug.tapShelfBook('project-hail-mary'); draw();
+  assert(link.hidden, 'link hides after returning the book');
+  api.open(null); draw();
+}

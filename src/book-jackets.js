@@ -28,7 +28,7 @@ function palette(id) {
 function texture(c) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
+  t.anisotropy = 16;
   return t;
 }
 function sheet(w, h, draw) {
@@ -86,12 +86,12 @@ function drawAmazonLink(ctx, book, w, h, ink) {
   ctx.fillText('Book on Amazon ↗', box.x, box.y + 7 * scale);
   const labelWidth = ctx.measureText('Book on Amazon ↗').width;
   ctx.font = `${23 * scale}px Georgia, serif`;
-  ctx.fillText(jacketLanguage === 'de' ? '(Partnerlink)' : '(Affiliate link)', box.x + labelWidth + 20 * scale, box.y + 12 * scale);
+  ctx.fillText('(Affiliate)', box.x + labelWidth + 16 * scale, box.y + 12 * scale);
   ctx.fillRect(box.x, box.y + 42 * scale, Math.min(labelWidth, box.width), 2 * scale);
 }
 let jacketLanguage = 'en';
 function personalBack(book, flip180, aspect) {
-  return sheet(768, Math.round(768 / aspect), (ctx, w, h) => {
+  return sheet(1024, Math.round(1024 / aspect), (ctx, w, h) => {
     if (flip180) { ctx.translate(w, h); ctx.rotate(Math.PI); }
     ctx.fillStyle = '#F7F6F2'; ctx.fillRect(0, 0, w, h);
     ctx.textAlign = 'left'; ctx.textBaseline = 'top';
@@ -102,8 +102,9 @@ function personalBack(book, flip180, aspect) {
       block.lines.forEach((line, i) => ctx.fillText(line, block.x, block.y + i * block.lineHeight));
     }
     drawAmazonLink(ctx, book, w, h, '#1E3A8A');
-    ctx.fillStyle = '#4B5563'; ctx.font = '20px Georgia, serif';
-    if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 52, h - 52);
+    const scale = w / 768;
+    ctx.fillStyle = '#4B5563'; ctx.font = `${20 * scale}px Georgia, serif`;
+    if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 52 * scale, h - 52 * scale);
   });
 }
 function backReconstruction(book, colors, flip180 = false, aspect = 2 / 3) {

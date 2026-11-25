@@ -85,7 +85,13 @@ assert.equal(wrightFront.map,largeWright,'A late small image must not replace th
 assert(api.debug.bookUI.isExtracted());
 assert(wright.position.distanceTo(initialWright)>0.30, 'Flat book must clear the cabinet before turning');
 assert(wright.position.z-initialWright.z>0.25, 'Flat book must move towards the front of the shelf');
-assert(api.debug.goal.dist>=1.28, 'Book camera must not clip the presented cover');
+assert(api.debug.goal.dist >= 0.55 && api.debug.goal.dist < 0.95, 'Extracted book frames closer for reading without clipping camera near plane');
+const { width: wg, height: hg, depth: dg } = wright.geometry.parameters;
+wright.updateMatrixWorld(true);
+for (const sx of [-0.5, 0.5]) for (const sy of [-0.5, 0.5]) for (const sz of [-0.5, 0.5]) {
+  const wp = new Three.Vector3(sx * wg, sy * hg, sz * dg).applyMatrix4(wright.matrixWorld).project(api.debug.camera);
+  assert(Math.abs(wp.x) <= 0.90 && Math.abs(wp.y) <= 0.90, 'Extracted cover corner must fit inside viewport');
+}
 const pulledWright=wright.getWorldPosition(new Three.Vector3()).project(api.debug.camera);
 assert(Math.abs(pulledWright.x)<0.8 && Math.abs(pulledWright.y)<0.8, 'Lifted cover must be inside the camera frame');
 api.debug.bookUI.showFace('back');draw();
@@ -722,6 +728,7 @@ api.open(null); draw();
   assert(link && !link.hidden && link.href === catalog.find(b => b.id === id).amazonUrl, 'keyboard accessible Amazon link appears on back');
   const layout = cache.get(resolve('src/book-note-layout.js')).namespace;
   const book = catalog.find(b => b.id === id), image = mesh.material[1].map.image;
+  assert.equal(image.width, 1024, 'Personal back canvas renders at 1024 px width');
   const rect = layout.amazonBackLink(book, image.width, image.height);
   const uv = { x: (rect.x + rect.width / 2) / image.width, y: 1 - (rect.y + rect.height / 2) / image.height };
   assert(layout.hitAmazonBack(book, uv, 1, image.width, image.height), 'back link hit');
@@ -737,6 +744,16 @@ api.open(null); draw();
   assert.equal(api.debug.bookUI.activeFace, 'back', 'language change preserves the shown face');
   assert(api.debug.bookUI.isExtracted(), 'language change does not put the book away');
   assert(mesh.material[1].map !== enBack && disposed, 'language changes replace and dispose the personal back texture');
+  assert(api.debug.goal.dist >= 0.55 && api.debug.goal.dist < 0.95, 'extracted personal back stays closely zoomed after language switch');
+  const prevVp = { ...viewport };
+  viewport = { width: 390, height: 540 }; resize(); draw();
+  const { width: mgw, height: mgh, depth: mgd } = mesh.geometry.parameters;
+  mesh.updateMatrixWorld(true);
+  for (const msx of [-0.5, 0.5]) for (const msy of [-0.5, 0.5]) for (const msz of [-0.5, 0.5]) {
+    const mp = new Three.Vector3(msx * mgw, msy * mgh, msz * mgd).applyMatrix4(mesh.matrixWorld).project(api.debug.camera);
+    assert(Math.abs(mp.x) <= 0.90 && Math.abs(mp.y) <= 0.90, 'extracted book stays inside mobile portrait viewport');
+  }
+  viewport = prevVp; resize(); draw();
   assert.notEqual(ordinary.material[1].map, ordinaryBack, 'additional personal back updates when language changes');
   assert.equal(mesh.material[0], front); assert.equal(mesh.material[4], spine);
   assert(stage.children.find(c => c.classList.contains('book-status')).textContent.includes("Ein Klassiker, zu dem ich immer wieder zurückkehre, um Menschen unterschiedlicher Kulturen besser zu verstehen und zu führen. Extrem wertvoll im Berufs- wie im Privatleben. Wer keine Zeit zum Lesen hat, sollte sich zumindest die Diagramme anschauen."));

@@ -357,6 +357,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     }
     if (objectFocus) {
       if (music.state === 'playing' && !reduced && objectFocus.target?.key === 'globe') frameGlobeMacro();
+      else if (objectFocus.target?.bookId && bookUI.isExtracted()) frameExtractedBook();
       else focusObject(objectFocus.target, false);
     }
   }
@@ -974,6 +975,32 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     emitFocus(replace);
     if (!objectFocus && !['rack', 'enterprise'].includes(key)) startAutoCard(() => closePop(false));
   }
+  function frameExtractedBook() {
+    const presentation = bookUI.getPresentationPoint();
+    const id = bookUI.activeId;
+    const mesh = id ? bookUI.getMesh(id) : null;
+    if (!presentation || !mesh) return false;
+    const book = booksCatalog.books.find(b => b.id === id);
+    const p = mesh.geometry?.parameters || { width: 0.048, height: 0.22, depth: 0.17 };
+    const flat = book?.placement?.orientation === 'horizontal';
+    const faceW = flat ? p.width : p.depth;
+    const faceH = flat ? p.depth : p.height;
+    const halfT = (flat ? p.height : p.width) / 2;
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const th = tv * Math.max(camera.aspect, 0.25);
+    const dist = Math.max(0.58, (faceH / 2) / (0.74 * tv) + halfT, (faceW / 2) / (0.78 * th) + halfT);
+    goal.t.copy(presentation);
+    goal.dist = dist;
+    custom = true;
+    zoom = clampZoom(goal.dist / home.dist);
+    panOffset.copy(goal.t).sub(home.t);
+    if (reduced) {
+      view.az = goal.az; view.el = goal.el;
+      view.dist = goal.dist; view.t.copy(goal.t);
+    }
+    checkAway();
+    return true;
+  }
   function extractCurrentBook(useGoalPose = false) {
     let viewPose = null;
     if (useGoalPose) {
@@ -988,23 +1015,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       };
     }
     if (!bookUI.extract(viewPose)) return false;
-    // Reframe the extracted book rather than the old shelf slot. A little
-    // breathing room is essential: at the original close-up distance the
-    // cover could be clipped by the camera or remain behind the cabinet.
-    const presentation = bookUI.getPresentationPoint();
-    if (presentation) {
-      const screenUp = viewPose ? viewPose.up : new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-      goal.t.copy(presentation).addScaledVector(screenUp, -0.09);
-      goal.dist = Math.max(goal.dist, 1.28);
-      custom = true;
-      zoom = clampZoom(goal.dist / home.dist);
-      panOffset.copy(goal.t).sub(home.t);
-      if (reduced) {
-        view.az = goal.az; view.el = goal.el;
-        view.dist = goal.dist; view.t.copy(goal.t);
-      }
-      checkAway();
-    }
+    // Frame the extracted cover/back close and centered based on real book dimensions so text reads cleanly on desktop and mobile.
+    frameExtractedBook();
     return true;
   }
   function tapShelfBook(id) {
@@ -1917,6 +1929,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         setGoal();
         if (objectFocus) {
           if (music.state === 'playing' && !reduced && objectFocus.target?.key === 'globe') frameGlobeMacro();
+          else if (objectFocus.target?.bookId && bookUI.isExtracted()) frameExtractedBook();
           else focusObject(objectFocus.target, false);
         }
       } finally {
@@ -1981,6 +1994,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       updateAlbumHud();
       if (objectFocus) {
         if (music.state === 'playing' && !reduced && objectFocus.target?.key === 'globe') frameGlobeMacro();
+        else if (objectFocus.target?.bookId && bookUI.isExtracted()) frameExtractedBook();
         else focusObject(objectFocus.target, false);
       }
       updateHoverTip();

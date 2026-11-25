@@ -246,7 +246,9 @@ refreshNews();   // snapshot is already on screen; the live feed replaces it if 
 
 function useStatic() {
   mode = 'static'; html.classList.remove('js'); html.classList.add('static'); source.hidden = false;
-  canvas.hidden = true; stage.querySelector('.fallback').hidden = false; stage.classList.add('static');
+  const fallback = stage.querySelector('.fallback');
+  if (!fallback.getAttribute('src') && fallback.dataset.src) fallback.src = fallback.dataset.src;
+  canvas.hidden = true; fallback.hidden = false; stage.classList.add('static');
   viewControls.hidden = true; bar.hidden = true;
   if (pending) { pending = null; applyLocation(); }
 }

@@ -4,7 +4,7 @@ import { createGlobeFlight } from './globe-flight.js';
 import substackData from './data/substack-articles.json';
 import booksCatalog from './data/books.json';
 import * as THREE from 'three';
-import { buildScene, setModelLanguage, HOTSPOTS } from './scene.js';
+import { buildScene, setModelLanguage, loadRoomAssets, loadGlobeHiRes, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
 import { hitAmazonBack } from './book-note-layout.js';
 import { createBookInteraction } from './book-interaction.js';
@@ -46,8 +46,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   let dirty = true;
   const markDirty = () => { dirty = true; };
-  // The book jacket materials resolve asynchronously; render again when a front cover arrives.
+  // The book jacket and room scene materials resolve asynchronously; render again when assets arrive.
   window.addEventListener('book-cover-loaded', markDirty);
+  window.addEventListener('scene-asset-loaded', markDirty);
 
   setModelLanguage(lang);
   let curLang = lang;
@@ -169,20 +170,49 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     const mine = music;
     musicLoader().then(play => { if (music === mine && mine.state === 'loading') { mine.play = play; startGlobeMusic(); } }).catch(() => { if (music === mine) stopGlobeMusic(); });
   }
+  function frameGlobeMacro() {
+    if (reduced || !globe?.userData?.earth || objectFocus?.target?.key !== 'globe') return;
+    globe.userData.earth.updateWorldMatrix(true, false);
+    const globeCenter = globe.userData.earth.getWorldPosition(new THREE.Vector3());
+    globeCenter.y += 0.016;
+    const th = camera.aspect * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const dist = Math.max(0.32, 0.072 / Math.max(th, 0.12));
+    goal.t.copy(globeCenter);
+    goal.dist = dist;
+    goal.az = near(view.az, -0.04);
+    goal.el = near(view.el, 0.42);
+    custom = true;
+    panOffset.copy(goal.t).sub(home.t);
+    zoom = clampZoom(goal.dist / home.dist);
+    checkAway();
+  }
   function stopGlobeMusic() {
     const m = music; music = { state: 'idle', ctx: null, play: null, player: null };
     globeFlight?.stop();
+    if (objectFocus?.target?.key === 'globe') {
+      if (popEl && popKey === 'globe') popEl.classList.add('on');
+      focusObject(objectFocus.target, false);
+    }
     markDirty();
     if (m.player) m.player.stop(); else { try { m.ctx?.close(); } catch { /* ignore */ } }
   }
   function startGlobeMusic() {
     const m = music; m.state = 'playing';
     globeFlight?.start(reduced);
+    if (!reduced && objectFocus?.target?.key === 'globe') {
+      if (popEl && popKey === 'globe') popEl.classList.remove('on');
+      frameGlobeMacro();
+    }
     markDirty();
+    if (m.ctx?.state === 'suspended') m.ctx.resume?.().catch?.(() => {});
     m.player = m.play(m.ctx, () => {
       if (music === m) {
         music = { state: 'idle', ctx: null, play: null, player: null };
         globeFlight?.stop();
+        if (objectFocus?.target?.key === 'globe') {
+          if (popEl && popKey === 'globe') popEl.classList.add('on');
+          focusObject(objectFocus.target, false);
+        }
         markDirty();
       }
     });
@@ -325,7 +355,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         objectFocus.point.copy(home.t).add(objectFocus.pan);
       }
     }
-    if (objectFocus) focusObject(objectFocus.target, false);
+    if (objectFocus) {
+      if (music.state === 'playing' && !reduced && objectFocus.target?.key === 'globe') frameGlobeMacro();
+      else focusObject(objectFocus.target, false);
+    }
   }
   // Camera distance at which all points fit into [leftNdc, rightNdc] x [-below, above] (NDC), seen from azimuth az.
   const fwd = new THREE.Vector3(), rgt = new THREE.Vector3(), upv = new THREE.Vector3(), dv = new THREE.Vector3();
@@ -922,6 +955,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     stopAutoCard();
     popKey = key;
     if (key === 'enterprise') { ensureEnterpriseGlb(); if (!reduced) loadWarp().catch(() => {}); }
+    if (key === 'globe') loadGlobeHiRes();
     popEl.classList.toggle('rack-card', key === 'rack');
     popEl.classList.toggle('ship-card', key === 'enterprise');
     popEl.classList.toggle('inspection-card', Boolean(inspectionFor(key)));
@@ -1517,10 +1551,19 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
           return;
         }
       }
+      if (objectFocus?.target?.key === 'globe' && !panMode && (e.pointerType !== 'mouse' || (e.button === 0 && !e.shiftKey && !e.ctrlKey && !e.altKey && !spaceDown))) {
+        if (hoverObject(ndc(e))?.key === 'globe') {
+          globeFlight?.beginUserSpin?.();
+          drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: 'globeSpin', vx: 0, lastT: performance.now() };
+          stage.style.cursor = 'grabbing';
+          return;
+        }
+      }
       const pan = panMode || (e.pointerType === 'mouse' && (e.button === 2 || e.button === 1 || e.shiftKey || e.ctrlKey || e.altKey || spaceDown));
       drag = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, moved: false, btn: e.button, mode: pan ? 'pan' : e.pointerType === 'touch' ? 'pending' : 'orbit' };
     } else if (pts.size === 2 && drag) {
       if (drag.mode === 'bookFlip') { albumBook.endDrag(0); }
+      if (drag.mode === 'globeSpin') { globeFlight?.releaseUserSpin?.(0); }
       drag.moved = true; drag.mode = 'pinch'; drag.p = pinchState();
     }
     stage.style.cursor = drag?.mode === 'pan' ? 'move' : 'grabbing';
@@ -1547,6 +1590,18 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         albumBook?.moveDrag(dx, stageW);
         return;
       }
+      if (drag.mode === 'globeSpin') {
+        const nowT = performance.now();
+        const dtSec = Math.max(0.004, (nowT - (drag.lastT || nowT)) / 1000);
+        const dx = e.clientX - drag.x;
+        const dAngle = dx * 0.011;
+        globeFlight?.spinBy?.(dAngle);
+        drag.vx = drag.vx * 0.4 + (dAngle / dtSec) * 0.6;
+        drag.lastT = nowT;
+        drag.x = e.clientX; drag.y = e.clientY;
+        markDirty();
+        return;
+      }
       if (drag.mode === 'pending') drag.mode = Math.abs(e.clientX - drag.sx) >= Math.abs(e.clientY - drag.sy) ? 'orbit' : 'scroll';
       if (drag.mode === 'orbit') { orbit((e.clientX - drag.x) * K, (e.clientY - drag.y) * K, true); drag.x = e.clientX; drag.y = e.clientY; }
       else if (drag.mode === 'pan') { panBy(e.clientX - drag.x, e.clientY - drag.y, true); drag.x = e.clientX; drag.y = e.clientY; }
@@ -1563,7 +1618,8 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const prevHoverId = hoverId;
       hoverId = !openId && !overObj ? pick(e) : null;
       if (hoverId !== prevHoverId) markDirty();
-      stage.style.cursor = panMode ? 'move' : hoverId || overObj ? 'pointer' : 'grab';
+      const overGlobe = objectFocus?.target?.key === 'globe' && hoverTarget?.key === 'globe';
+      stage.style.cursor = panMode ? 'move' : overGlobe ? 'grab' : hoverId || overObj ? 'pointer' : 'grab';
       updateHoverTip();
     } else if (!drag) {
       hoverTarget = null; hoverTip.hidden = true;
@@ -1590,6 +1646,17 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         markDirty();
         return;
       }
+      if (drag.mode === 'globeSpin') {
+        if (drag.moved) {
+          globeFlight?.releaseUserSpin?.(drag.vx || 0);
+        } else {
+          globeFlight?.releaseUserSpin?.(0);
+          if (!cancelled && e.target === stage && (e.pointerType !== 'mouse' || drag.btn === 0)) togglePop('globe');
+        }
+        drag = null; navigationGroup = null; stage.style.cursor = panMode ? 'move' : 'grab';
+        markDirty();
+        return;
+      }
       if (!cancelled && !drag.moved && e.target === stage && drag.btn === 0) {
         const object = hoverObject(ndc(e));
         const eggKind = egg.pick(ndc(e));
@@ -1610,11 +1677,14 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
   };
   addEventListener('pointerup', e => endPointer(e, false));
   addEventListener('pointercancel', e => endPointer(e, true));   // the browser took over (vertical page scroll)
+  stage.addEventListener('click', () => {
+    if (music.ctx?.state === 'suspended') music.ctx.resume?.().catch?.(() => {});
+  });
   stage.addEventListener('pointerleave', () => { hoverId = null; hoverTarget = null; hoverTip.hidden = true; });
   // Once a touch gesture moves the scene, keep the page from scrolling under it.
   stage.addEventListener('touchmove', e => {
     if (e.target !== stage || !e.cancelable) return;
-    if (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch' || drag?.mode === 'bookFlip') e.preventDefault();
+    if (e.touches.length > 1 || drag?.mode === 'pan' || drag?.mode === 'orbit' || drag?.mode === 'pinch' || drag?.mode === 'bookFlip' || drag?.mode === 'globeSpin') e.preventDefault();
   }, { passive: false });
   // Wheel zoom and horizontal trackpad panning in the interactive stage.
   stage.addEventListener('wheel', e => {
@@ -1837,6 +1907,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (id !== openId) closeAlbum(false);
         if (objectFocus && (id !== openId || !keepView)) { closePop(false); restoreObjectView(); }
         openId = id; hoverId = null; hoverTarget = null; hoverTip.hidden = true;
+        if (id) loadRoomAssets(id);
         if (id === 'about' || id === 'writing') loadBookCoversForRoom(id);
         if (id !== 'about' && currentPhotoKey === 'photo') closePhoto(false);
         if (id !== 'writing' && currentPhotoKey === 'speaking') closePhoto(false);
@@ -1844,7 +1915,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (popKey && !popAllowed(id, popKey)) closePop(false);
         if (!keepView) { custom = false; zoom = 1; panOffset.set(0, 0, 0); egg.close(); }
         setGoal();
-        if (objectFocus) focusObject(objectFocus.target, false);
+        if (objectFocus) {
+          if (music.state === 'playing' && !reduced && objectFocus.target?.key === 'globe') frameGlobeMacro();
+          else focusObject(objectFocus.target, false);
+        }
       } finally {
         suppressFocusEmit = prevSuppress;
         syncEmittedFocus();
@@ -1905,7 +1979,10 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       albumBook?.refreshLanguage();
       bookUI.setLanguage(l);
       updateAlbumHud();
-      if (objectFocus) focusObject(objectFocus.target, false);
+      if (objectFocus) {
+        if (music.state === 'playing' && !reduced && objectFocus.target?.key === 'globe') frameGlobeMacro();
+        else focusObject(objectFocus.target, false);
+      }
       updateHoverTip();
       markDirty();
     },

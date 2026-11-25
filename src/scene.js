@@ -80,6 +80,28 @@ export const SLOTS = [
 const SLOT = Object.fromEntries(SLOTS.map(s => [s.name, s]));
 const slotUrl = name => `${import.meta.env.BASE_URL}slots/${name}.webp`;
 
+// Defer room textures (slots, Substack broadsheet images, globe map tiers) until
+// their room opens, keeping Overview light on initial load.
+const roomAssetLoaders = Object.create(null);
+const loadedRooms = new Set();
+function onRoomLoad(room, fn) {
+  if (loadedRooms.has(room)) fn();
+  else (roomAssetLoaders[room] ??= []).push(fn);
+}
+export function loadRoomAssets(room) {
+  if (!room || loadedRooms.has(room)) return;
+  loadedRooms.add(room);
+  const fns = roomAssetLoaders[room];
+  if (!fns) return;
+  delete roomAssetLoaders[room];
+  for (const fn of fns) fn();
+}
+function notifyAssetLoaded() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('scene-asset-loaded'));
+}
+let triggerGlobeHiRes = () => {};
+export function loadGlobeHiRes() { triggerGlobeHiRes(); }
+
 // Fonts: draw with Georgia first, redraw once the page font has loaded.
 const fontRedraws = [];
 function whenFont(fn) { fn(); fontRedraws.push(fn); }
@@ -170,9 +192,10 @@ function slotMaterial(name) {
     if (ia > aspect) { t.repeat.x = aspect / ia; t.offset.x = (1 - t.repeat.x) / 2; }
     else { t.repeat.y = ia / aspect; t.offset.y = (1 - t.repeat.y) / 2; }
     t.needsUpdate = true; placeholder.dispose(); m.map = t; m.needsUpdate = true;
+    notifyAssetLoaded();
   };
   img.onerror = () => {};                                       // no file for this slot: keep the placeholder
-  img.src = slotUrl(name);
+  onRoomLoad(slot.room, () => { if (!img.src) img.src = slotUrl(name); });
   return m;
 }
 // Flat picture on a wall, with a thin wooden frame behind it.
@@ -565,20 +588,36 @@ function antiqueGlobe(parent, x, y, z) {
     cap.position.y = pole * (inner + .002);
   }
 
-  // Map plate based on Natural Earth 1:110m land and lakes. Keep a warm fallback while it loads.
-  const image = new Image();
-  image.decoding = 'async';
-  image.onload = () => {
-    const map = new THREE.Texture(image);
-    map.colorSpace = THREE.SRGBColorSpace;
-    map.wrapS = THREE.RepeatWrapping;
-    map.anisotropy = 4;
-    map.needsUpdate = true;
-    atlas.color.set(0xffffff);
-    atlas.map = map;
-    atlas.needsUpdate = true;
+  // Progressive globe plates: load crisp 1024x512 map on entering About Me (~35 KB),
+  // then swap in the 4096x2048 Natural Earth 1:50m plate only when the globe is focused.
+  let globeTier = null;
+  const startedTiers = new Set();
+  const loadGlobeTier = (tier) => {
+    if (startedTiers.has(tier) || globeTier === 'large') return;
+    startedTiers.add(tier);
+    const image = new Image();
+    image.decoding = 'async';
+    image.onload = () => {
+      if (!image.naturalWidth) return;
+      if (tier === 'small' && globeTier === 'large') return;
+      const prev = atlas.map;
+      const map = new THREE.Texture(image);
+      map.colorSpace = THREE.SRGBColorSpace;
+      map.wrapS = THREE.RepeatWrapping;
+      map.anisotropy = tier === 'large' ? 16 : 8;
+      map.needsUpdate = true;
+      atlas.color.set(0xffffff);
+      atlas.map = map;
+      atlas.needsUpdate = true;
+      globeTier = tier;
+      prev?.dispose();
+      notifyAssetLoaded();
+    };
+    const file = tier === 'large' ? 'antique-globe-map.webp' : 'antique-globe-map-sm.webp';
+    image.src = `${import.meta.env.BASE_URL}models/${file}`;
   };
-  image.src = `${import.meta.env.BASE_URL}models/antique-globe-map.webp`;
+  onRoomLoad('about', () => loadGlobeTier('small'));
+  triggerGlobeHiRes = () => loadGlobeTier('large');
   globe.userData.earth = earth;
   globe.userData.radius = radius;
   return globe;
@@ -838,8 +877,10 @@ function articlePaper(parent, x, y, z, article, rotY = 0) {
   }
 
   whenFont(drawNewspaper);
-  heroImg.onload = () => { if (heroImg.naturalWidth) drawNewspaper(); };
-  heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
+  heroImg.onload = () => { if (heroImg.naturalWidth) { drawNewspaper(); notifyAssetLoaded(); } };
+  onRoomLoad('writing', () => {
+    if (!heroImg.src && article.image) heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
+  });
 
   // Gently waved broadsheet page with a subtle horizontal center fold
   const pageGeo = new THREE.PlaneGeometry(sheetW - 0.004, sheetD - 0.004, 8, 16);

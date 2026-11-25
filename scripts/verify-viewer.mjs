@@ -29,7 +29,13 @@ const textureRequests=[];
 class TextureLoader {setCrossOrigin(){return this;}load(url,onLoad,onProgress,onError){textureRequests.push({url,onLoad,onError});return new Three.Texture();}}
 let openedTabs=[];
 const window={addEventListener(){},dispatchEvent(){},open(url,target){const tab={url,target,focused:false,opener:{},focus(){this.focused=true;}};openedTabs.push(tab);return tab;}};
-const globals={console,document,window,Event:class{constructor(type){this.type=type;}},Image:class{},performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
+const imageRequests=[];
+class MockImage {
+  constructor(){ this.naturalWidth=1024; this.naturalHeight=512; this._src=''; }
+  set src(v){ this._src=v; imageRequests.push({ url:v, img:this }); }
+  get src(){ return this._src; }
+}
+const globals={console,document,window,Event:class{constructor(type){this.type=type;}},Image:MockImage,performance:{now:()=>performance.now()+clockOffset},devicePixelRatio:1,innerHeight:900,Path2D:class{},setTimeout,clearTimeout,requestAnimationFrame:f=>{frame=f;},addEventListener:(k,f)=>(globalListeners[k]??=[]).push(f),ResizeObserver:class{constructor(f){resize=f;}observe(){}},IntersectionObserver:class{observe(){}},URL,URLSearchParams};
 const ctx=vm.createContext(globals);const cache=new Map();
 // Synthetic paths exercise the loader independently of which covers are rights-cleared.
 function testCatalog() {
@@ -49,12 +55,19 @@ const covers = () => textureRequests.filter(r => r.url.includes('/books/'));
 const finishCover = suffix => { const request = covers().find(r => r.url.endsWith(suffix)); assert(request, `missing cover request ${suffix}`); const t = new Three.Texture({width:256,height:384}); request.onLoad(t); return t; };
 const catalog=testCatalog().books;
 assert.equal(covers().length, 0, 'Overview must not request any book covers');
+assert(!imageRequests.some(r => r.url.includes('/slots/') || r.url.includes('/models/article-') || r.url.includes('/models/antique-globe-map')), 'Overview must not eagerly load room slots, newspaper images, or globe map plates');
+const indexHtml = readFileSync('index.html', 'utf8');
+assert(indexHtml.includes('data-src="/reference-four-rooms.webp"') && !/\ssrc=["']\/reference-four-rooms\.webp["']/.test(indexHtml), 'Fallback image must use deferred data-src in index.html');
 // The physical book catalog is resolved from the scene, not decorative proxies.
 assert.equal(api.debug.bookUI.bookCount,27);
 const wright=api.debug.bookUI.getMesh('the-wright-brothers');
 assert(wright && wright.isMesh);
 const initialWright=wright.position.clone();
 api.open('about');draw();
+assert(imageRequests.some(r => r.url.endsWith('/slots/about-wall-1.webp')), 'Entering About Me must load its slot image');
+assert(imageRequests.some(r => r.url.endsWith('/models/antique-globe-map-sm.webp')), 'Entering About Me must load small globe plate');
+assert(!imageRequests.some(r => r.url.endsWith('/models/antique-globe-map.webp')), 'Entering About Me alone must not fetch 4K globe plate');
+assert(!imageRequests.some(r => r.url.includes('/models/article-') || r.url.includes('/slots/projects-board-') || r.url.includes('/slots/ai-wall-') || r.url.includes('/slots/writing-')), 'Entering About Me must not fetch other rooms assets');
 const aboutCovers=catalog.filter(b=>b.room==='about'&&b.coverImages?.small);
 assert.equal(covers().filter(r=>r.url.includes('cover-sm')).length, aboutCovers.length, 'Only local small covers for this room should load');
 assert(covers().every(r=>aboutCovers.some(book=>r.url.includes(`/books/${book.id}/`))));
@@ -91,6 +104,8 @@ assert(!api.debug.bookUI.isActive());
 assert(wright.position.distanceTo(initialWright)<1e-8);
 console.log('books: 27 real meshes, zoom-first, lift, face, BACK: passed');
 api.open('writing');draw();
+assert.equal(imageRequests.filter(r => r.url.includes('/models/article-')).length, 5, 'Entering Writing & Speaking must load the 5 Substack images');
+assert(imageRequests.some(r => r.url.endsWith('/slots/writing-shelf-1.webp')) && imageRequests.some(r => r.url.endsWith('/slots/writing-table-1.webp')), 'Entering Writing & Speaking must load its slot images');
 assert.equal(covers().filter(r=>r.url.includes('factfulness/cover-sm')).length,1,'Only small covers for newly entered room load');
 const standing=api.debug.bookUI.getMesh('factfulness');
 const standingStart=standing.position.clone();
@@ -392,6 +407,16 @@ let ambientRig=false;mv.debug.scene.traverse(o=>{if(o.isHemisphereLight||o.isDir
 assert(mv.debug.inspectionTargets.some(t=>t.room==='about'&&t.key==='globe'),'globe must be an inspectable object');
 mv.debug.inspect('studyDesk');draw();assert.equal(audioMade,0,'other objects must not create audio');assert.equal(loaderCalls,0);mv.closeNote();draw();
 mv.debug.inspect('globe');assert.equal(audioMade,0,'first click on the globe only zooms, no audio');assert.equal(mv.debug.music,'idle');assert.equal(loaderCalls,0);
+const smallGlobe = imageRequests.findLast(r => r.url.endsWith('/models/antique-globe-map-sm.webp'));
+const largeGlobe = imageRequests.findLast(r => r.url.endsWith('/models/antique-globe-map.webp'));
+assert(smallGlobe && largeGlobe, 'Focusing globe upgrades from small to 4K globe map');
+const earth = mv.debug.scene.getObjectByName('Antique shelf globe')?.userData?.earth;
+assert(earth?.material, 'Antique globe earth material must exist');
+largeGlobe.img.onload();
+assert.equal(earth.material.map?.image, largeGlobe.img, '4K globe plate attaches to earth material');
+smallGlobe.img.onload();
+assert.equal(earth.material.map?.image, largeGlobe.img, 'Late small plate must not overwrite 4K plate');
+console.log('lazy room assets and progressive globe plates: passed');
 mv.debug.selectProject('globe');assert.equal(audioMade,1,'audio context must be created inside the second click');assert.equal(mv.debug.music,'loading');assert.equal(played,0);
 await new Promise(r=>setTimeout(r,0));
 assert.equal(mv.debug.music,'playing');assert.equal(played,1,'theme must start on the second click, as soon as it is loaded');

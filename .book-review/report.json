@@ -1,0 +1,18 @@
+{
+  "source": "0c80170d97e54859b624dffdeb6fa7a97506723c",
+  "live": true,
+  "checks": [
+    {
+      "device": "desktop",
+      "live": true,
+      "en": true,
+      "de": true
+    },
+    {
+      "device": "mobile",
+      "live": true,
+      "en": true,
+      "de": true
+    }
+  ]
+}

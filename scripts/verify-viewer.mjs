@@ -712,7 +712,7 @@ api.open(null); draw();
   assert.equal(api.debug.bookUI.activeFace, 'back', 'language change preserves the shown face');
   assert(api.debug.bookUI.isExtracted(), 'language change does not put the book away');
   assert(mesh.material[1].map !== enBack && disposed, 'language changes replace and dispose the personal back texture');
-  assert.equal(ordinary.material[1].map, ordinaryBack, 'ordinary backs stay unchanged');
+  assert.notEqual(ordinary.material[1].map, ordinaryBack, 'additional personal back updates when language changes');
   assert.equal(mesh.material[0], front); assert.equal(mesh.material[4], spine);
   assert(stage.children.find(c => c.classList.contains('book-status')).textContent.includes("Ein Klassiker, zu dem ich immer wieder zurückkehre, um Menschen unterschiedlicher Kulturen besser zu verstehen und zu führen. Extrem wertvoll im Berufs- wie im Privatleben. Wer keine Zeit zum Lesen hat, sollte sich zumindest die Diagramme anschauen."));
   api.debug.tapShelfBook(id); draw();

@@ -181,6 +181,50 @@ const additionalApprovedNotes = {
   "autocracy-inc": {
     "en": "Like Timothy Snyder, Anne Applebaum makes a compelling case that historians may be our best guides to the future. Sadly, what she described in this book in 2024 is already making headlines and will be breaking news for years to come.",
     "de": "Wie Timothy Snyder zeigt auch Anne Applebaum, dass Historiker vielleicht unsere besten Wegweiser für die Zukunft sind. Leider bestimmt das, was sie 2024 in diesem Buch beschrieben hat, bereits heute unsere Nachrichten - und wird es wohl noch über Jahre tun."
+  },
+  "red-plenty": {
+    "en": "We take capitalism for granted. This book offers a fascinating look from inside the Soviet Union at a different path - and how misaligned incentives and growing complexity made it impossible to sustain over the decades.",
+    "de": "Wir nehmen den Kapitalismus als gegeben hin. Dieses Buch bietet einen faszinierenden Blick aus dem Inneren der Sowjetunion auf einen anderen Weg - und darauf, wie falsche Anreize und wachsende Komplexität ihn über Jahrzehnte scheitern ließen."
+  },
+  "a-very-short-history-of-life-on-earth": {
+    "en": "It is hard to grasp the sheer length of life’s history on Earth. Even dinosaurs and the ice ages are just a glimpse of it. This book takes us through ancient forests, strange creatures and mass extinctions - and reminds us that we are only the latest species to have a moment in the spotlight.",
+    "de": "Die Länge der Geschichte des Lebens auf der Erde ist kaum zu begreifen. Selbst Dinosaurier und Eiszeiten sind nur ein kleiner Ausschnitt. Dieses Buch führt durch urzeitliche Wälder, seltsame Lebewesen und Massenaussterben - und erinnert uns daran, dass wir nur die jüngste Art sind, die für einen Moment im Rampenlicht steht."
+  },
+  "the-wandering-earth": {
+    "en": "A collection of short stories written in a language quite different from what we are used to. Some explore truly new ideas. My personal favorite: “How to Climb a Mountain.”",
+    "de": "Eine Sammlung von Kurzgeschichten in einer Sprache, die sich deutlich von dem unterscheidet, was wir gewohnt sind. Einige erzählen von ganz neuen Ideen. Mein persönlicher Favorit: „How to Climb a Mountain“."
+  },
+  "the-master-and-margarita": {
+    "en": "A timeless classic with dense language that explores good and evil. Maybe not everyone’s cup of tea.",
+    "de": "Ein zeitloser Klassiker, der in dichter Sprache Gut und Böse erkundet. Vielleicht nicht jedermanns Sache."
+  },
+  "fathers-and-sons": {
+    "en": "A little book written almost 170 years ago, set in a time of change as society moved from agriculture towards industry. It offers insight into how people behave in such times and how the actions of one generation can echo into the next. It makes you wonder what we are setting in motion today.",
+    "de": "Ein kleines Buch, vor fast 170 Jahren geschrieben, in einer Zeit des Wandels von der Agrar- zur Industriegesellschaft. Es zeigt, wie Menschen sich in solchen Zeiten verhalten und wie die Handlungen einer Generation bis in die nächste nachwirken. Es lässt einen fragen, was wir heute in Gang setzen."
+  },
+  "the-wright-brothers": {
+    "en": "Highly recommended. The story of two decent, hardworking young men from a bicycle shop in Ohio who invented flight is a real page-turner. With determination and belief in their own abilities, they succeeded while scientific societies, nations and militaries were racing towards the same goal. It is hard to believe this is a true story.",
+    "de": "Sehr empfehlenswert. Die Geschichte zweier fleißiger, anständiger junger Männer aus einer Fahrradwerkstatt in Ohio, die das Fliegen erfanden, liest sich wie ein Roman. Mit Entschlossenheit und Vertrauen in ihre Fähigkeiten schafften sie es, während wissenschaftliche Gesellschaften, Staaten und Militärs um dasselbe Ziel rangen. Kaum zu glauben, dass diese Geschichte wahr ist."
+  },
+  "bloodlands": {
+    "en": "I started reading Timothy Snyder in 2008. Bloodlands was a great guide to the history of the lands caught between Germany and Russia. History is not disconnected from the present: patterns repeat, and this book helps explain a region more important today than at any point in the last 30 years. Snyder is now a world-renowned historian and, alongside Anne Applebaum, one of the most insightful voices explaining contemporary politics.",
+    "de": "Ich begann 2008, Timothy Snyder zu lesen. Bloodlands war ein großartiger Wegweiser durch die Geschichte der Länder zwischen Deutschland und Russland. Geschichte ist nicht von der Gegenwart getrennt: Muster wiederholen sich, und dieses Buch hilft, eine Region zu verstehen, die heute wichtiger ist als je zuvor in den vergangenen 30 Jahren. Snyder ist inzwischen ein weltweit bekannter Historiker und neben Anne Applebaum eine der aufschlussreichsten Stimmen zur aktuellen Politik."
+  },
+  "guns-germs-and-steel": {
+    "en": "A book that challenges our assumptions about superiority. How could a small group of Spanish conquistadors defeat far larger Indigenous civilizations? Why did so many domesticated animals originate in one region? And how did the orientation of continents shape the spread of ideas and agriculture? One fascinating perspective on the history of humankind.",
+    "de": "Ein Buch, das unsere Vorstellungen von Überlegenheit hinterfragt. Wie konnte eine kleine Gruppe spanischer Eroberer wesentlich größere indigene Zivilisationen besiegen? Warum stammen so viele Nutztiere aus einer Region? Und wie beeinflusste die Ausrichtung der Kontinente die Verbreitung von Ideen und Landwirtschaft? Eine faszinierende Perspektive auf die Geschichte der Menschheit."
+  },
+  "predictably-irrational": {
+    "en": "A classic of the genre, although some of its research has been challenged. After reading it, I better understood things I had observed while managing people. It helped me think about incentives and how to adapt systems to avoid unintended behavior.",
+    "de": "Ein Klassiker auf seinem Gebiet, auch wenn einige Forschungsergebnisse inzwischen hinterfragt werden. Nach der Lektüre habe ich vieles besser verstanden, was ich im Umgang mit meinen Teams beobachtet hatte. Das Buch hat mir geholfen, Anreize besser zu gestalten und Systeme so anzupassen, dass sie unerwünschtes Verhalten vermeiden helfen."
+  },
+  "the-innovators-dilemma": {
+    "en": "A classic of the genre, perhaps more relevant than ever in times of groundbreaking innovation and economic turmoil. When companies like Nokia or Volkswagen struggle, we often look for someone or something to blame. This book helps us understand the deeper dynamics that can stifle innovation.",
+    "de": "Ein Klassiker seines Fachs, vielleicht heute wichtiger denn je: Wir erleben bahnbrechende Innovationen und wirtschaftliche Umbrüche. Wenn Unternehmen wie Nokia oder Volkswagen ins Straucheln geraten, suchen wir oft nach einem Schuldigen. Dieses Buch hilft, die tieferliegenden Dynamiken zu verstehen, die Innovation behindern."
+  },
+  "we-are-legion-we-are-bob": {
+    "en": "Just fun science fiction built around the idea of a conscious von Neumann machine. Sometimes quite funny, with the lingering question of how much of this could actually be possible.",
+    "de": "Einfach unterhaltsame Science-Fiction rund um die Idee einer bewussten Von-Neumann-Maschine. Manchmal ziemlich lustig - und mit der Frage im Hinterkopf, wie viel davon tatsächlich möglich sein könnte."
   }
 };
 for (const [id, notes] of Object.entries(additionalApprovedNotes)) {
@@ -206,4 +250,10 @@ console.log('Personal book notes: exact approved EN/DE, separate summary, comple
 for (const [id, asin] of Object.entries({ 'thinking-fast-and-slow':'B00555X8OA', 'sapiens':'B00ICN066A', 'the-weirdest-people':'B07RZFCPMD' })) {
   const url = new URL(books.find(b => b.id === id).amazonUrl);
   assert(url.pathname.includes('/dp/' + asin)); assert.equal(url.searchParams.get('tag'), 'aiinmedicine-21');
+}
+
+for (const [id, asin] of Object.entries({"red-plenty":"B0044DEFSC","a-very-short-history-of-life-on-earth":"B08ZNLMCX5","the-wandering-earth":"B0BPCQHNDB","the-master-and-margarita":"B0FV27MJYK","we-are-legion-we-are-bob":"B01LWAESYQ","fathers-and-sons":"B005RBUKK2","the-wright-brothers":"B00LD1RWP6","bloodlands":"B005G37SBK","guns-germs-and-steel":"B06X1CT33R","predictably-irrational":"B002RI9QJE","the-innovators-dilemma":"B012BLTM6I"})) {
+  const url = new URL(books.find(b => b.id === id).amazonUrl);
+  assert(url.pathname.includes('/dp/' + asin), id + ' supplied destination');
+  assert.equal(url.searchParams.get('tag'), 'aiinmedicine-21', id + ' affiliate tag');
 }

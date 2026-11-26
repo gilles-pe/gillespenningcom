@@ -2252,13 +2252,13 @@ function furnish(id, g, r, inspectionTargets) {
 const LAY = Object.fromEntries(Object.keys(ROOMS).map(id => [id, layout(id)]));
 export const HOTSPOTS = {
   ai: [
-    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.ai.cart[0], 1.46, LAY.ai.cart[1] + 0.1, 'wimmelbild'],
+    ['wimmelbild', LINKS.wimmelbild, LAY.ai.cart[0], 1.46, LAY.ai.cart[1] + 0.1, 'wimmelbild'],
     ['monitor', 'https://ai.gillespenning.com/', LAY.ai.desk[0] + 0.20, 1.16, LAY.ai.desk[1] - 0.06, 'monitor'],
     ['rack', null, LAY.ai.rack[0], 0.9, LAY.ai.rack[1], 'rack'],
   ],
   // Above the frames, pointing at the middle of each frame's top edge, so the pictures stay visible.
   projects: [
-    ['wimmelbild', 'https://wimmelbild.gillespenning.com/en/', LAY.projects.xs[0], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'wimmelbild'],
+    ['wimmelbild', LINKS.wimmelbild, LAY.projects.xs[0], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'wimmelbild'],
     ['monitorShort', 'https://ai.gillespenning.com/', LAY.projects.xs[1], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'monitor'],
     ['praxisfaden', null, LAY.projects.xs[2], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'praxisfaden'],
     ['hdrg', 'https://www.hdrg-kompass.de/', LAY.projects.xs[3], LAY.projects.frameTop[0], LAY.projects.frameTop[1], 'hdrg'],

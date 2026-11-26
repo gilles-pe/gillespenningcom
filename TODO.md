@@ -16,7 +16,7 @@
 - [ ] Supply the legal imprint and the privacy policy text (D-020). Nothing has been written.
 - [ ] Texts and links for DocEase and Elbstrand; pictures for `projects-board-3`, `projects-board-4`, `writing-table-1`, `about-wall-1`.
 - [ ] Decide on a share image (Open Graph picture), if wanted.
-- [x] Confirm whether Wimmelbild has a German address (`https://wimmelbild.gillespenning.com/` for DE, `https://wimmelbild.gillespenning.com/en/` for EN; D-115).
+- [x] Confirm whether Wimmelbild has a German address (`https://wimmelbild.gillespenning.com/` for EN, `https://wimmelbild.gillespenning.com/de/` for DE; D-115, D-145).
 
 ## Later
 - [ ] Run `/impeccable init` with the owner and write `PRODUCT.md`.

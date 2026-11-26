@@ -5,8 +5,8 @@
 // The static text in index.html must equal the English values here.
 
 export const LINKS = {
-  wimmelbild: 'https://wimmelbild.gillespenning.com/en/',
-  wimmelbildDe: 'https://wimmelbild.gillespenning.com/',
+  wimmelbild: 'https://wimmelbild.gillespenning.com/',
+  wimmelbildDe: 'https://wimmelbild.gillespenning.com/de/',
   monitor: 'https://ai.gillespenning.com/',
   hdrg: 'https://www.hdrg-kompass.de/',
   signal: 'https://medtechsignal.substack.com/',
@@ -48,7 +48,7 @@ export const content = {
     hero: {
       h1: 'Why is change so hard in healthcare?',
       p1: 'As populations age, the need for care grows. Data and AI open up new possibilities, and people shape what makes it into everyday care.',
-      p2Html: `I look back on 25 years in MedTech, alongside great people and projects. Here I share my projects - the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor\u00A0↗</a> on progress in medical AI and the <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book\u00A0↗</a> to explore AI through play - as well as thoughts on the future of healthcare and analysis in my newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal\u00A0↗</a>.`,
+      p2Html: `I look back on 25 years in MedTech, alongside great people and projects. Here I share my projects - the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI in Medicine Monitor\u00A0↗</a> on progress in medical AI and the <a href="${LINKS.wimmelbild}" target="_blank" rel="noopener noreferrer" class="inline-project-link">AI Medicine Wimmel Book\u00A0↗</a> to explore AI through play - as well as thoughts on the future of healthcare and analysis in my newsletter <a href="https://medtechsignal.substack.com/" target="_blank" rel="noopener noreferrer" class="inline-project-link">MedTech Signal\u00A0↗</a>.`,
       p3: 'Feel free to explore the rooms: take the globe for a spin, launch the Enterprise, pull books from the shelves, or see what else is hidden inside.',
     },
     strip: {

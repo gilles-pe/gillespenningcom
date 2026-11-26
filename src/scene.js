@@ -78,10 +78,22 @@ export const SLOTS = [
   { name: 'about-wall-1',     room: 'about',    size: [0.54, 0.72], text: 'About',        tint: '#b9c7a6' },
 ];
 const SLOT = Object.fromEntries(SLOTS.map(s => [s.name, s]));
-const slotUrl = name => `${import.meta.env.BASE_URL}slots/${name}.webp`;
+const slotUrl = (name, small = false) => `${import.meta.env.BASE_URL}slots/${name}${small ? '-sm' : ''}.webp`;
 
-// Defer room textures (slots, Substack broadsheet images, globe map tiers) until
-// their room opens, keeping Overview light on initial load.
+// Defer full room textures until their room opens, while loading tiny Overview
+// thumbnails right after the first 3D frame so the overview displays real art.
+const overviewAssetLoaders = [];
+let overviewLoaded = false;
+function onOverviewLoad(fn) {
+  if (overviewLoaded) fn();
+  else overviewAssetLoaders.push(fn);
+}
+export function loadOverviewAssets() {
+  if (overviewLoaded) return;
+  overviewLoaded = true;
+  const fns = overviewAssetLoaders.splice(0);
+  for (const fn of fns) fn();
+}
 const roomAssetLoaders = Object.create(null);
 const loadedRooms = new Set();
 function onRoomLoad(room, fn) {
@@ -181,21 +193,46 @@ function slotMaterial(name) {
   const slot = SLOT[name], aspect = slot.size[0] / slot.size[1];
   const long = 512, c = aspect >= 1 ? canvas(long, Math.round(long / aspect)) : canvas(Math.round(long * aspect), long);
   const placeholder = tex(c);
-  whenFont(() => { drawPlaceholder(slot, c); placeholder.needsUpdate = true; });
+  let slotTier = 'placeholder', smallStarted = false, largeStarted = false;
+  whenFont(() => {
+    if (slotTier !== 'placeholder') return;
+    drawPlaceholder(slot, c);
+    placeholder.needsUpdate = true;
+  });
   // Unlit and not tone-mapped: a picture shows its own colours, as bright as the file, whatever the light rig does (D-016: light, friendly look).
   const m = new THREE.MeshBasicMaterial({ map: placeholder, toneMapped: false });
-  const img = new Image(); img.decoding = 'async';
-  img.onload = () => {
+  const attachImage = (img, tier) => {
     if (!img.naturalWidth) return;
-    const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    if (tier === 'small' && slotTier === 'large') return;
+    const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = tier === 'large' ? 8 : 4;
     const ia = img.naturalWidth / img.naturalHeight;            // crop to the slot's ratio instead of stretching
     if (ia > aspect) { t.repeat.x = aspect / ia; t.offset.x = (1 - t.repeat.x) / 2; }
     else { t.repeat.y = ia / aspect; t.offset.y = (1 - t.repeat.y) / 2; }
-    t.needsUpdate = true; placeholder.dispose(); m.map = t; m.needsUpdate = true;
+    t.needsUpdate = true;
+    const prev = m.map;
+    m.map = t; m.needsUpdate = true;
+    slotTier = tier;
+    prev?.dispose();
     notifyAssetLoaded();
   };
-  img.onerror = () => {};                                       // no file for this slot: keep the placeholder
-  onRoomLoad(slot.room, () => { if (!img.src) img.src = slotUrl(name); });
+  const loadLarge = () => {
+    if (largeStarted) return;
+    largeStarted = true;
+    const img = new Image(); img.decoding = 'async';
+    img.onload = () => attachImage(img, 'large');
+    img.onerror = () => {};                                     // no file for this slot: keep current texture
+    img.src = slotUrl(name, false);
+  };
+  const loadSmall = () => {
+    if (smallStarted || largeStarted || slotTier !== 'placeholder') return;
+    smallStarted = true;
+    const img = new Image(); img.decoding = 'async';
+    img.onload = () => attachImage(img, 'small');
+    img.onerror = () => loadLarge();                            // fallback to full slot if -sm thumbnail is absent
+    img.src = slotUrl(name, true);
+  };
+  onOverviewLoad(loadSmall);
+  onRoomLoad(slot.room, loadLarge);
   return m;
 }
 // Flat picture on a wall, with a thin wooden frame behind it.
@@ -616,6 +653,7 @@ function antiqueGlobe(parent, x, y, z) {
     const file = tier === 'large' ? 'antique-globe-map.webp' : 'antique-globe-map-sm.webp';
     image.src = `${import.meta.env.BASE_URL}models/${file}`;
   };
+  onOverviewLoad(() => loadGlobeTier('small'));
   onRoomLoad('about', () => loadGlobeTier('small'));
   triggerGlobeHiRes = () => loadGlobeTier('large');
   globe.userData.earth = earth;
@@ -756,137 +794,173 @@ function articlePaper(parent, x, y, z, article, rotY = 0) {
 
   const pageMat = new THREE.MeshStandardMaterial({ color: 0xf6f4ee, roughness: 0.90 });
 
-  onRoomLoad('writing', () => {
-    const c = canvas(1024, 768), ctx = c.getContext('2d');
+  let paperTier = 'none';
+  let currentTex = null;
+
+  function wrapLines(ctx, text, maxW, maxLines) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const test = cur ? `${cur} ${w}` : w;
+      if (ctx.measureText(test).width > maxW && cur) {
+        lines.push(cur);
+        if (lines.length >= maxLines) return lines;
+        cur = w;
+      } else {
+        cur = test;
+      }
+    }
+    if (cur && lines.length < maxLines) lines.push(cur);
+    return lines;
+  }
+
+  function drawBars(ctx, bx, by, widths, h = 4.5, step = 16, maxY = 720, color = '#9b9fa7') {
+    ctx.fillStyle = color;
+    for (let i = 0; i < widths.length; i++) {
+      const py = by + i * step;
+      if (py + h > maxY) break;
+      ctx.fillRect(bx, py, widths[i], h);
+    }
+  }
+
+  function drawNewspaper(ctx, scale, heroImg, texture) {
+    ctx.save();
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+    ctx.fillStyle = '#f6f4ee';
+    ctx.fillRect(0, 0, 1024, 768);
+
+    // Masthead
+    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(34, 26, 956, 3);
+    ctx.fillStyle = '#18181b'; ctx.fillRect(34, 33, 956, 1);
+
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#4b5563'; ctx.font = `600 13px ${SANS}`;
+    ctx.textAlign = 'left'; ctx.fillText(article.dateLabel || '', 34, 65);
+    ctx.textAlign = 'right'; ctx.fillText('GILLES PENNING', 990, 65);
+    ctx.fillStyle = '#18181b'; ctx.font = `700 30px ${FONT}`;
+    ctx.textAlign = 'center'; ctx.fillText('MEDTECH SIGNAL', 512, 68);
+
+    ctx.fillStyle = '#18181b'; ctx.fillRect(34, 82, 956, 1.5);
+    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, 87, 956, 1);
+
+    // Full-width headline & real article summary lead
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#1e3a8a';
+    ctx.font = `700 44px ${FONT}`;
+    let subY;
+    if (ctx.measureText(article.title).width <= 956) {
+      ctx.fillText(article.title, 34, 140, 956);
+      subY = 172;
+    } else {
+      ctx.font = `700 35px ${FONT}`;
+      const hLines = wrapLines(ctx, article.title, 956, 2);
+      hLines.forEach((line, i) => ctx.fillText(line, 34, 132 + i * 42, 956));
+      subY = 132 + hLines.length * 42 - 6;
+    }
+
+    ctx.fillStyle = '#18181b'; ctx.font = `400 17px ${SANS}`;
+    const sLines = wrapLines(ctx, article.subtitle, 956, 2);
+    sLines.forEach((line, i) => ctx.fillText(line, 34, subY + i * 23, 956));
+
+    const ruleY = subY + Math.max(sLines.length, 1) * 23 + 4;
+    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, ruleY, 956, 1.2);
+    const bodyY = ruleY + 14;
+
+    // Lead left + center columns: aspect-preserved real article graphic + two quiet newsprint columns
+    const frameH = 354;
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(34, bodyY, 630, frameH);
+    ctx.strokeStyle = '#dcd9d0'; ctx.lineWidth = 1; ctx.strokeRect(34, bodyY, 630, frameH);
+    if (heroImg.complete && heroImg.naturalWidth > 0) {
+      const pad = 6, fw = 630 - pad * 2, fh = frameH - pad * 2;
+      const s = Math.min(fw / heroImg.naturalWidth, fh / heroImg.naturalHeight);
+      const dw = heroImg.naturalWidth * s, dh = heroImg.naturalHeight * s;
+      ctx.drawImage(heroImg, 34 + pad + (fw - dw) / 2, bodyY + pad + (fh - dh) / 2, dw, dh);
+    } else {
+      ctx.fillStyle = '#edeae2';
+      ctx.fillRect(46, bodyY + 12, 606, frameH - 24);
+    }
+
+    const colTop = bodyY + frameH + 18;
+    drawBars(ctx, 34, colTop, [296, 284, 294, 276, 210], 4.5, 16, 728);
+    drawBars(ctx, 364, colTop, [294, 298, 282, 288, 195], 4.5, 16, 728);
+
+    // Vertical newspaper column rule
+    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(682, bodyY, 1, 726 - bodyY);
+
+    // Right column: abstract text lines, existing editorial quote, bottom URL
+    drawBars(ctx, 700, bodyY + 4, [286, 272, 288, 264, 210], 4.5, 17, 700);
+
+    const qY = bodyY + 102;
+    ctx.font = `italic 18.5px ${FONT}`;
+    const qLines = wrapLines(ctx, article.quote, 254, 4);
+    const qH = Math.max(84, 34 + qLines.length * 26);
+    ctx.fillStyle = '#e8edf7'; ctx.fillRect(700, qY, 290, qH);
+    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(700, qY, 4, qH);
+    ctx.fillStyle = '#172554';
+    qLines.forEach((line, i) => ctx.fillText(line, 718, qY + 34 + i * 26, 254));
+
+    drawBars(ctx, 700, qY + qH + 22, [284, 290, 270, 286, 276, 282, 264, 198], 4.5, 17, 686);
+
+    ctx.fillStyle = '#1e3a8a'; ctx.font = `600 13px ${SANS}`;
+    ctx.fillText('medtechsignal.substack.com', 700, 720);
+
+    // Whisper-light horizontal newspaper fold crease
+    const fold = ctx.createLinearGradient(0, 368, 0, 400);
+    fold.addColorStop(0, 'rgba(24,24,27,0)');
+    fold.addColorStop(0.5, 'rgba(24,24,27,0.075)');
+    fold.addColorStop(1, 'rgba(24,24,27,0)');
+    ctx.fillStyle = fold;
+    ctx.fillRect(0, 368, 1024, 32);
+
+    ctx.restore();
+    texture.needsUpdate = true;
+  }
+
+  function activateTier(tier) {
+    if (tier === 'small' && paperTier !== 'none') return;
+    if (tier === 'large' && paperTier === 'large') return;
+    const isLarge = tier === 'large';
+    const scale = isLarge ? 1 : 0.25;
+    const c = canvas(isLarge ? 1024 : 256, isLarge ? 768 : 192), ctx = c.getContext('2d');
     const texture = tex(c);
+    texture.anisotropy = isLarge ? 8 : 4;
+    const prevTex = currentTex;
+    currentTex = texture;
+    paperTier = tier;
     pageMat.color.set(0xffffff);
     pageMat.map = texture;
     pageMat.needsUpdate = true;
+    prevTex?.dispose();
+
     const heroImg = new Image();
     heroImg.decoding = 'async';
-
-    function wrapLines(text, maxW, maxLines) {
-      const words = String(text || '').split(/\s+/).filter(Boolean);
-      const lines = [];
-      let cur = '';
-      for (const w of words) {
-        const test = cur ? `${cur} ${w}` : w;
-        if (ctx.measureText(test).width > maxW && cur) {
-          lines.push(cur);
-          if (lines.length >= maxLines) return lines;
-          cur = w;
-        } else {
-          cur = test;
-        }
-      }
-      if (cur && lines.length < maxLines) lines.push(cur);
-      return lines;
-    }
-
-    function drawBars(bx, by, widths, h = 4.5, step = 16, maxY = 720, color = '#9b9fa7') {
-      ctx.fillStyle = color;
-      for (let i = 0; i < widths.length; i++) {
-        const py = by + i * step;
-        if (py + h > maxY) break;
-        ctx.fillRect(bx, py, widths[i], h);
-      }
-    }
-
-    function drawNewspaper() {
-      ctx.fillStyle = '#f6f4ee';
-      ctx.fillRect(0, 0, 1024, 768);
-
-      // Masthead
-      ctx.fillStyle = '#1e3a8a'; ctx.fillRect(34, 26, 956, 3);
-      ctx.fillStyle = '#18181b'; ctx.fillRect(34, 33, 956, 1);
-
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = '#4b5563'; ctx.font = `600 13px ${SANS}`;
-      ctx.textAlign = 'left'; ctx.fillText(article.dateLabel || '', 34, 65);
-      ctx.textAlign = 'right'; ctx.fillText('GILLES PENNING', 990, 65);
-      ctx.fillStyle = '#18181b'; ctx.font = `700 30px ${FONT}`;
-      ctx.textAlign = 'center'; ctx.fillText('MEDTECH SIGNAL', 512, 68);
-
-      ctx.fillStyle = '#18181b'; ctx.fillRect(34, 82, 956, 1.5);
-      ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, 87, 956, 1);
-
-      // Full-width headline & real article summary lead
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = `700 44px ${FONT}`;
-      let subY;
-      if (ctx.measureText(article.title).width <= 956) {
-        ctx.fillText(article.title, 34, 140, 956);
-        subY = 172;
+    whenFont(() => { if (paperTier === tier) drawNewspaper(ctx, scale, heroImg, texture); });
+    heroImg.onload = () => {
+      if (paperTier !== tier || !heroImg.naturalWidth) return;
+      drawNewspaper(ctx, scale, heroImg, texture);
+      notifyAssetLoaded();
+    };
+    if (article.image) {
+      if (isLarge) {
+        heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
       } else {
-        ctx.font = `700 35px ${FONT}`;
-        const hLines = wrapLines(article.title, 956, 2);
-        hLines.forEach((line, i) => ctx.fillText(line, 34, 132 + i * 42, 956));
-        subY = 132 + hLines.length * 42 - 6;
+        let fellBack = false;
+        heroImg.onerror = () => {
+          if (!fellBack && paperTier === tier) {
+            fellBack = true;
+            heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
+          }
+        };
+        heroImg.src = `${import.meta.env.BASE_URL}${article.image.replace(/\.webp$/, '-sm.webp')}`;
       }
-
-      ctx.fillStyle = '#18181b'; ctx.font = `400 17px ${SANS}`;
-      const sLines = wrapLines(article.subtitle, 956, 2);
-      sLines.forEach((line, i) => ctx.fillText(line, 34, subY + i * 23, 956));
-
-      const ruleY = subY + Math.max(sLines.length, 1) * 23 + 4;
-      ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, ruleY, 956, 1.2);
-      const bodyY = ruleY + 14;
-
-      // Lead left + center columns: aspect-preserved real article graphic + two quiet newsprint columns
-      const frameH = 354;
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(34, bodyY, 630, frameH);
-      ctx.strokeStyle = '#dcd9d0'; ctx.lineWidth = 1; ctx.strokeRect(34, bodyY, 630, frameH);
-      if (heroImg.complete && heroImg.naturalWidth > 0) {
-        const pad = 6, fw = 630 - pad * 2, fh = frameH - pad * 2;
-        const s = Math.min(fw / heroImg.naturalWidth, fh / heroImg.naturalHeight);
-        const dw = heroImg.naturalWidth * s, dh = heroImg.naturalHeight * s;
-        ctx.drawImage(heroImg, 34 + pad + (fw - dw) / 2, bodyY + pad + (fh - dh) / 2, dw, dh);
-      } else {
-        ctx.fillStyle = '#edeae2';
-        ctx.fillRect(46, bodyY + 12, 606, frameH - 24);
-      }
-
-      const colTop = bodyY + frameH + 18;
-      drawBars(34, colTop, [296, 284, 294, 276, 210], 4.5, 16, 728);
-      drawBars(364, colTop, [294, 298, 282, 288, 195], 4.5, 16, 728);
-
-      // Vertical newspaper column rule
-      ctx.fillStyle = '#dcd9d0'; ctx.fillRect(682, bodyY, 1, 726 - bodyY);
-
-      // Right column: abstract text lines, existing editorial quote, bottom URL
-      drawBars(700, bodyY + 4, [286, 272, 288, 264, 210], 4.5, 17, 700);
-
-      const qY = bodyY + 102;
-      ctx.font = `italic 18.5px ${FONT}`;
-      const qLines = wrapLines(article.quote, 254, 4);
-      const qH = Math.max(84, 34 + qLines.length * 26);
-      ctx.fillStyle = '#e8edf7'; ctx.fillRect(700, qY, 290, qH);
-      ctx.fillStyle = '#1e3a8a'; ctx.fillRect(700, qY, 4, qH);
-      ctx.fillStyle = '#172554';
-      qLines.forEach((line, i) => ctx.fillText(line, 718, qY + 34 + i * 26, 254));
-
-      drawBars(700, qY + qH + 22, [284, 290, 270, 286, 276, 282, 264, 198], 4.5, 17, 686);
-
-      ctx.fillStyle = '#1e3a8a'; ctx.font = `600 13px ${SANS}`;
-      ctx.fillText('medtechsignal.substack.com', 700, 720);
-
-      // Whisper-light horizontal newspaper fold crease
-      const fold = ctx.createLinearGradient(0, 368, 0, 400);
-      fold.addColorStop(0, 'rgba(24,24,27,0)');
-      fold.addColorStop(0.5, 'rgba(24,24,27,0.075)');
-      fold.addColorStop(1, 'rgba(24,24,27,0)');
-      ctx.fillStyle = fold;
-      ctx.fillRect(0, 368, 1024, 32);
-
-      texture.needsUpdate = true;
     }
-
-    whenFont(drawNewspaper);
-    heroImg.onload = () => { if (heroImg.naturalWidth) { drawNewspaper(); notifyAssetLoaded(); } };
-    if (article.image) heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
     notifyAssetLoaded();
-  });
+  }
+
+  onOverviewLoad(() => activateTier('small'));
+  onRoomLoad('writing', () => activateTier('large'));
 
   // Gently waved broadsheet page with a subtle horizontal center fold
   const pageGeo = new THREE.PlaneGeometry(sheetW - 0.004, sheetD - 0.004, 8, 16);

@@ -4,7 +4,7 @@ import { createGlobeFlight } from './globe-flight.js';
 import substackData from './data/substack-articles.json';
 import booksCatalog from './data/books.json';
 import * as THREE from 'three';
-import { buildScene, setModelLanguage, loadRoomAssets, loadGlobeHiRes, HOTSPOTS } from './scene.js';
+import { buildScene, setModelLanguage, loadOverviewAssets, loadRoomAssets, loadGlobeHiRes, HOTSPOTS } from './scene.js';
 import { loadBookCoversForRoom } from './book-jackets.js';
 import { hitAmazonBack } from './book-note-layout.js';
 import { createBookInteraction } from './book-interaction.js';
@@ -1871,7 +1871,11 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     renderCamera.position.copy(camera.position);
     renderCamera.quaternion.copy(camera.quaternion);
     renderer.render(scene, renderCamera);
-    if (!firstRendered) { firstRendered = true; onProgress?.(4, 1); }
+    if (!firstRendered) {
+      firstRendered = true;
+      onProgress?.(4, 1);
+      if (typeof window !== 'undefined') setTimeout(() => loadOverviewAssets(), 0);
+    }
 
     const vs = !reduced ? roomWarp?.getViewscreenPose?.() : null;
     if (!vs) {

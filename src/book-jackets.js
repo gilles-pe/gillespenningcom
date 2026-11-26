@@ -85,8 +85,6 @@ function drawAmazonLink(ctx, book, w, h, ink) {
   ctx.font = `600 ${30 * scale}px Georgia, serif`;
   ctx.fillText('Book on Amazon ↗', box.x, box.y + 7 * scale);
   const labelWidth = ctx.measureText('Book on Amazon ↗').width;
-  ctx.font = `${23 * scale}px Georgia, serif`;
-  ctx.fillText('(Affiliate)', box.x + labelWidth + 16 * scale, box.y + 12 * scale);
   ctx.fillRect(box.x, box.y + 42 * scale, Math.min(labelWidth, box.width), 2 * scale);
 }
 let jacketLanguage = 'en';
@@ -104,7 +102,10 @@ function personalBack(book, flip180, aspect) {
     drawAmazonLink(ctx, book, w, h, '#1E3A8A');
     const scale = w / 768;
     ctx.fillStyle = '#4B5563'; ctx.font = `${20 * scale}px Georgia, serif`;
-    if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 52 * scale, h - 52 * scale);
+    const footerParts = [];
+    if (book.isbn13) footerParts.push('ISBN ' + book.isbn13);
+    if (amazonBackLink(book, w, h)) footerParts.push('Affiliate');
+    if (footerParts.length) ctx.fillText(footerParts.join(', '), 52 * scale, h - 52 * scale);
   });
 }
 function backReconstruction(book, colors, flip180 = false, aspect = 2 / 3) {
@@ -126,7 +127,10 @@ function backReconstruction(book, colors, flip180 = false, aspect = 2 / 3) {
     ctx.fillStyle = accent; ctx.fillRect(27, h - 49, 42, 3);
     drawAmazonLink(ctx, book, w, h, ink);
     ctx.textBaseline = 'alphabetic'; ctx.font = '10px sans-serif'; ctx.fillStyle = ink;
-    if (book.isbn13) ctx.fillText('ISBN ' + book.isbn13, 27, h - 28);
+    const footerParts = [];
+    if (book.isbn13) footerParts.push('ISBN ' + book.isbn13);
+    if (amazonBackLink(book, w, h)) footerParts.push('Affiliate');
+    if (footerParts.length) ctx.fillText(footerParts.join(', '), 27, h - 28);
   });
 }
 function spineReconstruction(book, colors) {

@@ -11,7 +11,7 @@
 ---
 
 # Gilles Penning - Cross-Project Corporate Identity / Design System
-Version: 1.0 | 20 November 2026 | AI-ready specification
+Version: 1.1 | 26 November 2026 | AI-ready specification (see Section 14 Changelog)
 
 ## 0. Scope and status
 Applies to `gillespenning.com`, `ai.gillespenning.com`, and `wimmelbild.gillespenning.com`, including future webpages, charts, presentations, generated images, editorial graphics and Three.js scenes. This is a **proposed shared design contract derived from the current GitHub code**, not an assertion that all projects already implement every proposed token. Existing assets, layouts, evidence and interactions are not to be replaced automatically.
@@ -74,8 +74,8 @@ Application: 70-85% warm neutral interface surfaces, 10-20% ink/typography/quiet
 
 ## 3. Typography
 - Primary editorial / prominent headings: `Source Serif 4`, `Georgia`, `serif`. Normal or semibold, no fake outline, usually line-height 1.08-1.25.
-- Interface/body/nav/metadata: `Source Sans 3`, `system-ui`, `sans-serif`. Body 16px, line-height ~1.5-1.6.
-- Wimmelbild legacy UI: `Inter` is retained for compatibility and clarity on compact, translucent controls; titles remain `Source Serif 4`. For *new* cross-site UI, prefer `Source Sans 3`.
+- Interface/body/nav/metadata: `Fira Sans`, `system-ui`, `sans-serif` (updated in v1.1 on 2026-11-26 from `Source Sans 3`; self-hosted locally via `@fontsource/fira-sans` in weights `400`, `500`, `600`). Body 16px, line-height ~1.5-1.6.
+- Legacy UI compatibility: `ai.gillespenning.com` (`Source Sans 3`) and `wimmelbild.gillespenning.com` (`Inter` for compact, translucent controls) remain intact until intentionally migrated; titles remain `Source Serif 4`. For `gillespenning.com` and *new* cross-site UI, use `Fira Sans`.
 - Shared suggested size vocabulary (px): `12, 14, 16, 20, 28, 40, 64`. Not every project needs every size. Use fluid clamp for display titles only.
 - Do not use more than two visible type families in a new asset. Set self-hosted font fallbacks; do not send font files along with this CI.
 - Text is sentence case, concise, literal, without tech-marketing buzzwords. Use label spacing conservatively.
@@ -172,7 +172,7 @@ No over-glowing edges, rainbow refractions, excessive saturate, opaque white blu
 - Prefer existing site's token file and acceptance checks to duplicated values or off-scale CSS.
 
 ## 10. Agent instructions - ready to paste
-> Act as an art director and front-end designer for the Gilles Penning visual ecosystem. Preserve the identity across three experiences without homogenizing them. Foundation: warm paper `#F7F6F2`, white, ink `#18181B`, primary Prussian blue `#1E3A8A`, thin warm gray rules `#DCD9D0`, editorial `Source Serif 4` headlines and `Source Sans 3` interface text. Design should feel like a credible journal and crafted architectural exhibition, never a shiny generic AI startup. Use restrained 6px editorial buttons, 12px cards and pill shapes selectively. Existing gillespenning.com uses stricter 0/6/full radii and a seven-step spacing system; preserve its checks. 3D rooms can use oak, limestone, sage, petrol and physical brass with soft daylight. AI Monitor is primarily opaque and evidence-first; no broad frosted glass or decorative gradients. Wimmelbild is allowed saturated illustrative color and stronger frosted glass: light 42-48% warm white/18px blur on bars, optional expanded-card 62%/24px blur, dark glass 66%, and contrast/fallback safeguards. Preserve the underlying artwork and hotspot mapping. Do not invent data or hide sources. Use real text rather than image text. Make responsive, touch- and keyboard-accessible, and reduce motion when requested. Reuse current project tokens and preserve approved assets and functionality. Before making changes, explicitly identify any conflicts between the existing code and the proposed shared system.
+> Act as an art director and front-end designer for the Gilles Penning visual ecosystem. Preserve the identity across three experiences without homogenizing them. Foundation: warm paper `#F7F6F2`, white, ink `#18181B`, primary Prussian blue `#1E3A8A`, thin warm gray rules `#DCD9D0`, editorial `Source Serif 4` headlines and `Fira Sans` interface text. Design should feel like a credible journal and crafted architectural exhibition, never a shiny generic AI startup. Use restrained 6px editorial buttons, 12px cards and pill shapes selectively. Existing gillespenning.com uses stricter 0/6/full radii and a seven-step spacing system; preserve its checks. 3D rooms can use oak, limestone, sage, petrol and physical brass with soft daylight. AI Monitor is primarily opaque and evidence-first; no broad frosted glass or decorative gradients. Wimmelbild is allowed saturated illustrative color and stronger frosted glass: light 42-48% warm white/18px blur on bars, optional expanded-card 62%/24px blur, dark glass 66%, and contrast/fallback safeguards. Preserve the underlying artwork and hotspot mapping. Do not invent data or hide sources. Use real text rather than image text. Make responsive, touch- and keyboard-accessible, and reduce motion when requested. Reuse current project tokens and preserve approved assets and functionality. Before making changes, explicitly identify any conflicts between the existing code and the proposed shared system.
 
 ## 11. Implementation strategy (no blind redesign)
 1. Add this master spec as a *reference* in each project's documentation, or keep one canonical copy and link to it. Each repository retains its local source-of-truth CSS tokens.
@@ -185,7 +185,7 @@ No over-glowing edges, rainbow refractions, excessive saturate, opaque white blu
 | Subject | Already observed in GitHub | Proposed CI decision |
 | --- | --- | --- |
 | Core website/monitor palette | Both use ivory, ink and `#1E3A8A` | Preserve as shared base |
-| Typography | All use Source Serif 4, Wimmel sans = Inter, other sites = Source Sans 3 | Keep compatibility; default new work to Serif 4 + Sans 3 |
+| Typography | All use Source Serif 4; gillespenning.com = Fira Sans, AI Monitor = Source Sans 3, Wimmelbild = Inter | Default new work and portfolio to Source Serif 4 + Fira Sans; keep compatibility in existing sites until intentionally migrated |
 | Radii | 0/6/full vs 6/12/full vs 8/16/full | Preserve existing; new primitives 6/12/16/full by context |
 | Strong glass | Wimmel 42-72% warm white, 18px/7px blur | Optionally add 62%-opacity 24px-strong variant |
 | Imagery | Portfolio crafted 3D / Monitor charts / Wimmel vibrant illustration | Keep intentional contrast under one restrained UI identity |
@@ -193,3 +193,13 @@ No over-glowing edges, rainbow refractions, excessive saturate, opaque white blu
 
 ## 13. Machine-readable companion
 Use `GP_CI_Tokens_2026.json` for semantic values and `GP_CI_Tokens_2026.css` for starter tokens. The CSS starter is **not** a drop-in replacement for any current project's existing stylesheets.
+
+## 14. Changelog
+
+### v1.1 — 2026-11-26
+- Switched primary interface/body/UI sans-serif typeface from `Source Sans 3` to `Fira Sans` (self-hosted via `@fontsource/fira-sans`, weights `400`, `500`, `600`); retained `Source Serif 4` for editorial headings (`h1`, `h2`, brand).
+- Adopted first on `gillespenning.com` alongside refined desktop header and compact room card typography; `ai.gillespenning.com` (`Source Sans 3`) and `wimmelbild.gillespenning.com` (`Inter`) remain untouched until intentional migration.
+- Updated `GP_CI_Tokens_2026.json` (`version: "1.1"`, `typography.interface: "Fira Sans"`, `typography.legacy_interface: "Source Sans 3"`) and `GP_CI_Tokens_2026.css` (`--gp-sans: 'Fira Sans', system-ui, sans-serif;`).
+
+### v1.0 — 2026-11-20
+- Initial cross-project Corporate Identity specification for `gillespenning.com`, `ai.gillespenning.com`, and `wimmelbild.gillespenning.com` (palette, `Source Serif 4` / `Source Sans 3` typography, three-level glass system, radii/spacing scales, imagery, motion, accessibility).

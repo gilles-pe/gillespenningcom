@@ -136,28 +136,52 @@
           <div class="labels" id="labels"></div>
           <div class="spots" id="spots"></div>
           <button class="scene-back" id="scene-back" type="button" aria-label="Previous view" data-i18n-attr="aria-label:ui.previousView" hidden>BACK</button>
+          <div class="stage-loader" id="stage-loader" role="status" aria-live="polite">
+            <svg class="stage-loader-plan" viewBox="0 0 112 76" aria-hidden="true">
+              <path class="bp-guide" d="M6 10h6M12 4v6M100 4v6M100 10h6M6 66h6M12 66v6M100 66v6M100 66h6"/>
+              <rect class="bp-glow" x="14" y="12" width="40" height="24" rx="1"/>
+              <rect class="bp-glow" x="58" y="12" width="40" height="24" rx="1"/>
+              <rect class="bp-glow" x="14" y="40" width="40" height="24" rx="1"/>
+              <rect class="bp-glow" x="58" y="40" width="40" height="24" rx="1"/>
+              <rect class="bp-base" pathLength="100" x="12" y="10" width="88" height="56" rx="1.5"/>
+              <path class="bp-walls" pathLength="100" d="M56 10v12M56 29v18M56 54v12M12 38h18M38 38h36M82 38h18"/>
+              <path class="bp-interior" pathLength="100" d="M19 15h30M64 17h16v8h-16zM91 18a4 4 0 1 0 .1 0M28 52m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0M64 59h26M68 47h12v7h-12z"/>
+              <path class="bp-accent" pathLength="100" d="M49 23h14M49 26h14M38 38h36"/>
+            </svg>
+            <p class="stage-loader-text" id="stage-loader-text"></p>
+          </div>
         </div>
-        <div class="view-controls" id="view-controls" role="group" aria-label="3D view" data-i18n-attr="aria-label:ui.viewControls" hidden>
-          <button class="view-action back" id="back" type="button" data-i18n="ui.allRooms" hidden>Overview</button>
-          <button class="view-action" id="pan-toggle" type="button" aria-pressed="false">
-            <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V7.5a1.5 1.5 0 0 1 3 0V5a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v5a7 7 0 0 1-13 3.6l-2.4-3.8a1.6 1.6 0 0 1 2.4-2l1 1.1Z"/></svg></span>
-            <span data-i18n="ui.panMode">Move</span>
-          </button>
-          <div class="zoom-control">
-            <button class="view-action zoom-step" id="zoom-out" type="button" aria-label="Zoom out" data-i18n-attr="aria-label:ui.zoomOut">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>
+        <div class="scene-dock">
+          <div class="view-controls" id="view-controls" role="group" aria-label="3D view" data-i18n-attr="aria-label:ui.viewControls" hidden>
+            <button class="view-action back" id="back" type="button" hidden>
+              <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg></span>
+              <span class="view-label" data-i18n="ui.allRooms">Overview</span>
             </button>
-            <input id="zoom-view" type="range" min="0" max="100" step="0.1" value="12.3" aria-label="Zoom" data-i18n-attr="aria-label:ui.zoom">
-            <button class="view-action zoom-step" id="zoom-in" type="button" aria-label="Zoom in" data-i18n-attr="aria-label:ui.zoomIn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12M12 6v12"/></svg>
+            <div class="view-center">
+              <button class="view-action" id="pan-toggle" type="button" aria-pressed="false">
+                <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12V7.5a1.5 1.5 0 0 1 3 0V5a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v2a1.5 1.5 0 0 1 3 0v5a7 7 0 0 1-13 3.6l-2.4-3.8a1.6 1.6 0 0 1 2.4-2l1 1.1Z"/></svg></span>
+                <span class="view-label" data-i18n="ui.panMode">Move</span>
+              </button>
+              <div class="zoom-control">
+                <div class="zoom-row">
+                  <button class="view-action zoom-step" id="zoom-out" type="button" aria-label="Zoom out" data-i18n-attr="aria-label:ui.zoomOut">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>
+                  </button>
+                  <input id="zoom-view" type="range" min="0" max="100" step="0.1" value="12.3" aria-label="Zoom" data-i18n-attr="aria-label:ui.zoom">
+                  <button class="view-action zoom-step" id="zoom-in" type="button" aria-label="Zoom in" data-i18n-attr="aria-label:ui.zoomIn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12M12 6v12"/></svg>
+                  </button>
+                </div>
+                <span class="view-label" data-i18n="ui.zoom">Zoom</span>
+              </div>
+            </div>
+            <button class="view-action is-idle" id="reset-view" type="button">
+              <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v5h5M4.5 10a8 8 0 1 1 0 5.5"/></svg></span>
+              <span class="view-label" data-i18n="ui.resetView">Reset view</span>
             </button>
           </div>
-          <button class="view-action" id="reset-view" type="button" hidden>
-            <span class="view-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v5h5M4.5 10a8 8 0 1 1 0 5.5"/></svg></span>
-            <span data-i18n="ui.resetView">Reset view</span>
-          </button>
+          <div class="bar" id="bar" role="group" aria-label="Enter a room" data-i18n-attr="aria-label:stage.bar"></div>
         </div>
-        <div class="bar" id="bar" role="group" aria-label="Enter a room" data-i18n-attr="aria-label:stage.bar"></div>
       </div>
       <aside class="panel" id="panel" aria-labelledby="room-detail-title" hidden></aside>
     </section>
@@ -208,42 +232,124 @@
     <section class="rooms" id="rooms" aria-label="The four rooms" data-i18n-attr="aria-label:rooms.label">
       <article id="projects" data-room="projects">
         <h2 data-i18n="rooms.projects.h">Projects</h2>
-        <p data-i18n="rooms.projects.p">Four projects are linked here. Praxisfaden is coming soon.</p>
-        <ul class="links">
-          <li><a class="pill" href="https://wimmelbild.gillespenning.com/en/" data-i18n-attr="href:links.wimmelbild" target="_blank" rel="noopener noreferrer">Wimmelbild</a><span data-i18n="rooms.projects.wimmelbild">Interactive care world: patient &amp; pharmacist paths</span></li>
-          <li><a class="pill" href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer">AI in Medicine Monitor</a><span data-i18n="rooms.projects.monitor">Studies and benchmarks</span></li>
-          <li><span class="pill muted">Praxisfaden</span><span data-i18n="ui.soon">Coming soon</span></li>
-          <li><a class="pill" href="https://www.hdrg-kompass.de/" target="_blank" rel="noopener noreferrer">hDRG-Kompass</a><span data-i18n="rooms.projects.hdrg">Hybrid-DRG guidance for practices</span></li>
-          <li><a class="pill" href="https://penning.info/" target="_blank" rel="noopener noreferrer">Elbstrand</a></li>
+        <p data-i18n="rooms.projects.p">Five projects — click to inspect in the room.</p>
+        <ul class="room-list">
+          <li class="room-row">
+            <a class="room-jump" href="#wimmelbild" data-focus="projects:wimmelbild">
+              <span class="room-jump-title">Wimmelbild</span>
+              <span class="room-jump-sub" data-i18n="rooms.projects.wimmelbild">Interactive care world: patient &amp; pharmacist paths</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li class="room-row">
+            <a class="room-jump" href="#monitor" data-focus="projects:monitor">
+              <span class="room-jump-title">AI in Medicine Monitor</span>
+              <span class="room-jump-sub" data-i18n="rooms.projects.monitor">Studies and benchmarks</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li class="room-row">
+            <a class="room-jump" href="#praxisfaden" data-focus="projects:praxisfaden">
+              <span class="room-jump-title">Praxisfaden</span>
+              <span class="room-jump-sub" data-i18n="ui.soon">Coming soon</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li class="room-row">
+            <a class="room-jump" href="#hdrg" data-focus="projects:hdrg">
+              <span class="room-jump-title">hDRG-Kompass</span>
+              <span class="room-jump-sub" data-i18n="rooms.projects.hdrg">Hybrid-DRG guidance for practices</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li class="room-row">
+            <a class="room-jump" href="#elbstrand" data-focus="projects:elbstrand">
+              <span class="room-jump-title">Elbstrand</span>
+              <span class="room-jump-sub" data-i18n="rooms.projects.elbstrand">Just chill and relax.</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
         </ul>
       </article>
       <article id="about" data-room="about">
         <h2 data-i18n="rooms.about.h">About Me</h2>
         <p data-i18n="rooms.about.p1">Originally from surgery, I’ve spent 25 years in MedTech, with extensive experience in patient monitoring, digital health, ambulatory care and emergency medical services. Digital health has been part of that journey since 2004, from telemedicine to today’s AI and analytics.</p>
         <p data-i18n="rooms.about.p2">My strength is building businesses and transforming large teams, helping them succeed as healthcare itself changes, and bringing technology into practice to improve how care is delivered.</p>
-        <p class="about-more-row"><a class="about-more-link" href="#leadership-deepdive" data-open-leadership data-i18n="rooms.about.more">More details</a></p>
-        <div class="social-row" data-social="labelled">
-          <a href="https://medtechsignal.substack.com/" target="_blank" rel="me noopener noreferrer">MedTech Signal</a>
-          <a href="https://bsky.app/profile/gillespe.bsky.social" target="_blank" rel="me noopener noreferrer">Bluesky</a>
-          <a href="https://www.linkedin.com/in/gillespenning/" target="_blank" rel="me noopener noreferrer">LinkedIn</a>
+        <div class="room-actions">
+          <a class="room-action-link" href="#leadership-deepdive" data-open-leadership data-i18n="rooms.about.more">More details</a>
+          <a class="room-action-link" href="https://www.linkedin.com/in/gillespenning/" target="_blank" rel="noopener noreferrer"><span data-i18n="rooms.about.linkedin">Full profile</span><svg class="room-arrow room-arrow--ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg></a>
+        </div>
+        <div class="room-jumps">
+          <span class="room-kicker" data-i18n="rooms.inRoom">In this room</span>
+          <div class="room-chips">
+            <button class="room-chip" type="button" data-focus="about:globe"><span data-i18n="rooms.about.jumpGlobe">Globe</span></button>
+            <button class="room-chip" type="button" data-focus="about:enterprise"><span data-i18n="rooms.about.jumpEnterprise">Enterprise</span></button>
+            <button class="room-chip" type="button" data-focus="about:album"><span data-i18n="rooms.about.jumpAlbum">Photo album</span></button>
+            <button class="room-chip" type="button" data-focus="about:photo"><span data-i18n="rooms.about.jumpPhoto">Marathon</span></button>
+          </div>
+          <p class="room-hint" data-i18n="rooms.about.booksHint">16 books with personal notes on the shelf.</p>
         </div>
       </article>
       <article id="ai" data-room="ai">
         <h2 data-i18n="rooms.ai.h">AI &amp; Digital Health</h2>
-        <p data-i18n-html="rooms.ai.pHtml">Longitudinal data and AI in everyday clinical care. Two ways in: <a href="https://wimmelbild.gillespenning.com/en/" target="_blank" rel="noopener noreferrer">Wimmelbild</a> explores connected care along patient and pharmacist paths, the <a href="https://ai.gillespenning.com/" target="_blank" rel="noopener noreferrer">AI in Medicine Monitor</a> follows the evidence.</p>
+        <p data-i18n="rooms.ai.lead">Longitudinal data and AI in everyday clinical care.</p>
+        <ul class="room-list">
+          <li class="room-row">
+            <button class="room-jump" type="button" data-focus="ai:wimmelbild">
+              <span class="room-jump-title">Wimmelbild</span>
+              <span class="room-jump-sub" data-i18n="rooms.projects.wimmelbild">Interactive care world: patient &amp; pharmacist paths</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </button>
+          </li>
+          <li class="room-row">
+            <button class="room-jump" type="button" data-focus="ai:monitor">
+              <span class="room-jump-title">AI in Medicine Monitor</span>
+              <span class="room-jump-sub" data-i18n="rooms.projects.monitor">Studies and benchmarks</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </button>
+          </li>
+        </ul>
+        <div class="room-jumps">
+          <span class="room-kicker" data-i18n="rooms.inRoom">In this room</span>
+          <div class="room-chips">
+            <button class="room-chip" type="button" data-focus="ai:opTable"><span data-i18n="rooms.ai.jumpOpTable">Operating table</span></button>
+            <button class="room-chip" type="button" data-focus="ai:rack"><span data-i18n="rooms.ai.jumpRack">Digital workflows</span></button>
+          </div>
+        </div>
       </article>
       <article id="writing" data-room="writing">
         <h2 data-i18n="rooms.writing.h">Writing &amp; Speaking</h2>
         <p data-i18n="rooms.writing.p">Essays, notes and talks in English and German.</p>
-        <p><a class="contact-link" href="https://www.linkedin.com/in/gillespenning/" data-i18n="rooms.writing.book" target="_blank" rel="noopener noreferrer">Contact</a></p>
-        <!-- Without JavaScript these are plain text links. With JavaScript they get their logo marks (src/icons.js). -->
-        <div class="social-row writing-profiles" data-social="icons">
-          <a href="https://medtechsignal.substack.com/" target="_blank" rel="me noopener noreferrer">MedTech Signal</a>
-          <a href="https://bsky.app/profile/gillespe.bsky.social" target="_blank" rel="me noopener noreferrer">Bluesky</a>
-          <a href="https://www.linkedin.com/in/gillespenning/" target="_blank" rel="me noopener noreferrer">LinkedIn</a>
+        <ul class="room-list">
+          <li class="room-row">
+            <a class="room-jump" href="#latest-article" data-focus="writing:latestArticle">
+              <span class="room-jump-title" data-i18n="rooms.writing.latestTitle">Latest issue</span>
+              <span class="room-jump-sub" data-latest-article-title>MedTech Signal</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </a>
+          </li>
+          <li class="room-row">
+            <button class="room-jump" type="button" data-focus="writing:speaking">
+              <span class="room-jump-title" data-i18n="rooms.writing.speakingTitle">Keynote Marburg</span>
+              <span class="room-jump-sub" data-i18n="rooms.writing.speakingSub">AI, Data and the Future of Pharmacy</span>
+              <svg class="room-arrow room-arrow--in" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+            </button>
+          </li>
+          <li class="room-row">
+            <a class="room-jump" href="https://www.linkedin.com/in/gillespenning/" target="_blank" rel="noopener noreferrer">
+              <span class="room-jump-title" data-i18n="rooms.writing.book">Contact</span>
+              <span class="room-jump-sub" data-i18n="rooms.writing.contactSub">Speaking inquiries &amp; exchange</span>
+              <svg class="room-arrow room-arrow--ext" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg>
+            </a>
+          </li>
+        </ul>
+        <div class="room-jumps">
+          <span class="room-kicker" data-i18n="rooms.inRoom">In this room</span>
+          <div class="room-chips">
+            <button class="room-chip" type="button" data-focus="writing:protein"><span data-i18n="rooms.writing.jumpProtein">AlphaFold</span></button>
+          </div>
+          <p class="room-hint" data-i18n="rooms.writing.booksHint">11 books with personal notes on the shelf.</p>
         </div>
-        <!-- Without JavaScript: one link to the archive. With JavaScript: the latest news (src/news.js). -->
-        <div class="news writing-news" data-news="compact"><a class="pill" href="https://ai.gillespenning.com/news/" target="_blank" rel="noopener noreferrer">All posts</a></div>
       </article>
     </section>
     </div>
@@ -251,15 +357,16 @@
 
   <footer class="strip">
     <nav aria-label="More links" data-i18n-attr="aria-label:strip.label">
-      <a href="https://wimmelbild.gillespenning.com/en/" data-i18n="strip.wimmelbild" data-i18n-attr="href:links.wimmelbild" target="_blank" rel="noopener noreferrer">Wimmelbild</a>
+      <div class="project-links">
+        <a class="social-link project-icon-link" href="https://wimmelbild.gillespenning.com/en/" data-i18n-attr="href:links.wimmelbild;aria-label:strip.wimmelbild;title:strip.wimmelbild" aria-label="Wimmelbild" title="Wimmelbild" target="_blank" rel="noopener noreferrer"><img class="icon project-icon" src="/icons/wimmelbild.webp" alt="" width="28" height="28"></a>
+        <a class="social-link project-icon-link" href="https://ai.gillespenning.com/" data-i18n-attr="aria-label:strip.monitor;title:strip.monitor" aria-label="AI in Medicine Monitor" title="AI in Medicine Monitor" target="_blank" rel="noopener noreferrer"><svg class="icon project-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="#1e3a8a"/><g fill="none" stroke="#f7f6f2" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17v8.5a7.5 7.5 0 0 0 15 0V17M24.5 33v7.5a9.5 9.5 0 0 0 19 0V35"/><circle cx="43.5" cy="30.5" r="4.5" fill="#1e3a8a" stroke-width="3.6"/></g><circle cx="43.5" cy="30.5" r="1.4" fill="#f7f6f2"/><path d="M48.5 9Q49.1 15.9 56 16.5Q49.1 17.1 48.5 24Q47.9 17.1 41 16.5Q47.9 15.9 48.5 9Z" fill="#f59e0b"/></svg></a>
+      </div>
       <!-- Plain text links without JavaScript; with JavaScript they become logo marks with accessible names. -->
       <div id="social" class="social" data-social="icons">
         <a href="https://medtechsignal.substack.com/" target="_blank" rel="me noopener noreferrer">Substack</a>
         <a href="https://bsky.app/profile/gillespe.bsky.social" target="_blank" rel="me noopener noreferrer">Bluesky</a>
         <a href="https://www.linkedin.com/in/gillespenning/" target="_blank" rel="me noopener noreferrer">LinkedIn</a>
       </div>
-      <p class="latest" id="latest" hidden></p>
-      <span class="affiliate-disclosure" data-i18n="strip.amazonDisclosure">As an Amazon Associate I earn from qualifying purchases.</span>
       <a class="legal" href="legal.html" data-i18n="strip.legal">Legal &amp; privacy</a>
     </nav>
   </footer>

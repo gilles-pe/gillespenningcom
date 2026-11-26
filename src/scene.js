@@ -247,15 +247,15 @@ function lettering(parent, id, r) {
 }
 
 // ---- Window light on the floor ---------------------------------------------------
-// Drawn at 128 px per world unit, so stripes keep the same width, spacing and slant in every room.
+// Drawn at 64 px per world unit (4x lighter blur on startup while keeping soft floor light identical).
 function windowLight(parent, r) {
-  const pw = r.w * 0.92, pd = r.d * 0.92, S = 128;
+  const pw = r.w * 0.92, pd = r.d * 0.92, S = 64, q = S / 128;
   const c = canvas(Math.round(pw * S), Math.round(pd * S)), k = c.getContext('2d');
-  if ('filter' in k) k.filter = 'blur(10px)';
+  if ('filter' in k) k.filter = 'blur(5px)';
   k.fillStyle = 'rgba(255,246,222,0.55)';
   const skew = 1.5 * S * pd / 4;                                          // slant over the full depth
-  const widths = [70, 60, 50];
-  for (let x = 40, i = 0; x < c.width; x += 165, i++) {
+  const widths = [70 * q, 60 * q, 50 * q];
+  for (let x = 40 * q, i = 0; x < c.width; x += 165 * q, i++) {
     const wd = widths[i % 3];
     k.beginPath(); k.moveTo(x, 0); k.lineTo(x + wd, 0); k.lineTo(x + wd + skew, c.height); k.lineTo(x + skew, c.height); k.fill();
   }
@@ -754,132 +754,138 @@ function articlePaper(parent, x, y, z, article, rotY = 0) {
   sheet2.rotation.y = 0.011;
   box(group, sheetW, 0.0018, sheetD, 0, 0.0036, 0, mat(0xf6f3eb, { roughness: 0.92 }));
 
-  const c = canvas(1024, 768), ctx = c.getContext('2d');
-  const texture = tex(c);
-  const heroImg = new Image();
-  heroImg.decoding = 'async';
+  const pageMat = new THREE.MeshStandardMaterial({ color: 0xf6f4ee, roughness: 0.90 });
 
-  function wrapLines(text, maxW, maxLines) {
-    const words = String(text || '').split(/\s+/).filter(Boolean);
-    const lines = [];
-    let cur = '';
-    for (const w of words) {
-      const test = cur ? `${cur} ${w}` : w;
-      if (ctx.measureText(test).width > maxW && cur) {
-        lines.push(cur);
-        if (lines.length >= maxLines) return lines;
-        cur = w;
-      } else {
-        cur = test;
+  onRoomLoad('writing', () => {
+    const c = canvas(1024, 768), ctx = c.getContext('2d');
+    const texture = tex(c);
+    pageMat.color.set(0xffffff);
+    pageMat.map = texture;
+    pageMat.needsUpdate = true;
+    const heroImg = new Image();
+    heroImg.decoding = 'async';
+
+    function wrapLines(text, maxW, maxLines) {
+      const words = String(text || '').split(/\s+/).filter(Boolean);
+      const lines = [];
+      let cur = '';
+      for (const w of words) {
+        const test = cur ? `${cur} ${w}` : w;
+        if (ctx.measureText(test).width > maxW && cur) {
+          lines.push(cur);
+          if (lines.length >= maxLines) return lines;
+          cur = w;
+        } else {
+          cur = test;
+        }
+      }
+      if (cur && lines.length < maxLines) lines.push(cur);
+      return lines;
+    }
+
+    function drawBars(bx, by, widths, h = 4.5, step = 16, maxY = 720, color = '#9b9fa7') {
+      ctx.fillStyle = color;
+      for (let i = 0; i < widths.length; i++) {
+        const py = by + i * step;
+        if (py + h > maxY) break;
+        ctx.fillRect(bx, py, widths[i], h);
       }
     }
-    if (cur && lines.length < maxLines) lines.push(cur);
-    return lines;
-  }
 
-  function drawBars(bx, by, widths, h = 4.5, step = 16, maxY = 720, color = '#9b9fa7') {
-    ctx.fillStyle = color;
-    for (let i = 0; i < widths.length; i++) {
-      const py = by + i * step;
-      if (py + h > maxY) break;
-      ctx.fillRect(bx, py, widths[i], h);
+    function drawNewspaper() {
+      ctx.fillStyle = '#f6f4ee';
+      ctx.fillRect(0, 0, 1024, 768);
+
+      // Masthead
+      ctx.fillStyle = '#1e3a8a'; ctx.fillRect(34, 26, 956, 3);
+      ctx.fillStyle = '#18181b'; ctx.fillRect(34, 33, 956, 1);
+
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#4b5563'; ctx.font = `600 13px ${SANS}`;
+      ctx.textAlign = 'left'; ctx.fillText(article.dateLabel || '', 34, 65);
+      ctx.textAlign = 'right'; ctx.fillText('GILLES PENNING', 990, 65);
+      ctx.fillStyle = '#18181b'; ctx.font = `700 30px ${FONT}`;
+      ctx.textAlign = 'center'; ctx.fillText('MEDTECH SIGNAL', 512, 68);
+
+      ctx.fillStyle = '#18181b'; ctx.fillRect(34, 82, 956, 1.5);
+      ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, 87, 956, 1);
+
+      // Full-width headline & real article summary lead
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#1e3a8a';
+      ctx.font = `700 44px ${FONT}`;
+      let subY;
+      if (ctx.measureText(article.title).width <= 956) {
+        ctx.fillText(article.title, 34, 140, 956);
+        subY = 172;
+      } else {
+        ctx.font = `700 35px ${FONT}`;
+        const hLines = wrapLines(article.title, 956, 2);
+        hLines.forEach((line, i) => ctx.fillText(line, 34, 132 + i * 42, 956));
+        subY = 132 + hLines.length * 42 - 6;
+      }
+
+      ctx.fillStyle = '#18181b'; ctx.font = `400 17px ${SANS}`;
+      const sLines = wrapLines(article.subtitle, 956, 2);
+      sLines.forEach((line, i) => ctx.fillText(line, 34, subY + i * 23, 956));
+
+      const ruleY = subY + Math.max(sLines.length, 1) * 23 + 4;
+      ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, ruleY, 956, 1.2);
+      const bodyY = ruleY + 14;
+
+      // Lead left + center columns: aspect-preserved real article graphic + two quiet newsprint columns
+      const frameH = 354;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(34, bodyY, 630, frameH);
+      ctx.strokeStyle = '#dcd9d0'; ctx.lineWidth = 1; ctx.strokeRect(34, bodyY, 630, frameH);
+      if (heroImg.complete && heroImg.naturalWidth > 0) {
+        const pad = 6, fw = 630 - pad * 2, fh = frameH - pad * 2;
+        const s = Math.min(fw / heroImg.naturalWidth, fh / heroImg.naturalHeight);
+        const dw = heroImg.naturalWidth * s, dh = heroImg.naturalHeight * s;
+        ctx.drawImage(heroImg, 34 + pad + (fw - dw) / 2, bodyY + pad + (fh - dh) / 2, dw, dh);
+      } else {
+        ctx.fillStyle = '#edeae2';
+        ctx.fillRect(46, bodyY + 12, 606, frameH - 24);
+      }
+
+      const colTop = bodyY + frameH + 18;
+      drawBars(34, colTop, [296, 284, 294, 276, 210], 4.5, 16, 728);
+      drawBars(364, colTop, [294, 298, 282, 288, 195], 4.5, 16, 728);
+
+      // Vertical newspaper column rule
+      ctx.fillStyle = '#dcd9d0'; ctx.fillRect(682, bodyY, 1, 726 - bodyY);
+
+      // Right column: abstract text lines, existing editorial quote, bottom URL
+      drawBars(700, bodyY + 4, [286, 272, 288, 264, 210], 4.5, 17, 700);
+
+      const qY = bodyY + 102;
+      ctx.font = `italic 18.5px ${FONT}`;
+      const qLines = wrapLines(article.quote, 254, 4);
+      const qH = Math.max(84, 34 + qLines.length * 26);
+      ctx.fillStyle = '#e8edf7'; ctx.fillRect(700, qY, 290, qH);
+      ctx.fillStyle = '#1e3a8a'; ctx.fillRect(700, qY, 4, qH);
+      ctx.fillStyle = '#172554';
+      qLines.forEach((line, i) => ctx.fillText(line, 718, qY + 34 + i * 26, 254));
+
+      drawBars(700, qY + qH + 22, [284, 290, 270, 286, 276, 282, 264, 198], 4.5, 17, 686);
+
+      ctx.fillStyle = '#1e3a8a'; ctx.font = `600 13px ${SANS}`;
+      ctx.fillText('medtechsignal.substack.com', 700, 720);
+
+      // Whisper-light horizontal newspaper fold crease
+      const fold = ctx.createLinearGradient(0, 368, 0, 400);
+      fold.addColorStop(0, 'rgba(24,24,27,0)');
+      fold.addColorStop(0.5, 'rgba(24,24,27,0.075)');
+      fold.addColorStop(1, 'rgba(24,24,27,0)');
+      ctx.fillStyle = fold;
+      ctx.fillRect(0, 368, 1024, 32);
+
+      texture.needsUpdate = true;
     }
-  }
 
-  function drawNewspaper() {
-    ctx.fillStyle = '#f6f4ee';
-    ctx.fillRect(0, 0, 1024, 768);
-
-    // Masthead
-    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(34, 26, 956, 3);
-    ctx.fillStyle = '#18181b'; ctx.fillRect(34, 33, 956, 1);
-
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = '#4b5563'; ctx.font = `600 13px ${SANS}`;
-    ctx.textAlign = 'left'; ctx.fillText(article.dateLabel || '', 34, 65);
-    ctx.textAlign = 'right'; ctx.fillText('GILLES PENNING', 990, 65);
-    ctx.fillStyle = '#18181b'; ctx.font = `700 30px ${FONT}`;
-    ctx.textAlign = 'center'; ctx.fillText('MEDTECH SIGNAL', 512, 68);
-
-    ctx.fillStyle = '#18181b'; ctx.fillRect(34, 82, 956, 1.5);
-    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, 87, 956, 1);
-
-    // Full-width headline & real article summary lead
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#1e3a8a';
-    ctx.font = `700 44px ${FONT}`;
-    let subY;
-    if (ctx.measureText(article.title).width <= 956) {
-      ctx.fillText(article.title, 34, 140, 956);
-      subY = 172;
-    } else {
-      ctx.font = `700 35px ${FONT}`;
-      const hLines = wrapLines(article.title, 956, 2);
-      hLines.forEach((line, i) => ctx.fillText(line, 34, 132 + i * 42, 956));
-      subY = 132 + hLines.length * 42 - 6;
-    }
-
-    ctx.fillStyle = '#18181b'; ctx.font = `400 17px ${SANS}`;
-    const sLines = wrapLines(article.subtitle, 956, 2);
-    sLines.forEach((line, i) => ctx.fillText(line, 34, subY + i * 23, 956));
-
-    const ruleY = subY + Math.max(sLines.length, 1) * 23 + 4;
-    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(34, ruleY, 956, 1.2);
-    const bodyY = ruleY + 14;
-
-    // Lead left + center columns: aspect-preserved real article graphic + two quiet newsprint columns
-    const frameH = 354;
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(34, bodyY, 630, frameH);
-    ctx.strokeStyle = '#dcd9d0'; ctx.lineWidth = 1; ctx.strokeRect(34, bodyY, 630, frameH);
-    if (heroImg.complete && heroImg.naturalWidth > 0) {
-      const pad = 6, fw = 630 - pad * 2, fh = frameH - pad * 2;
-      const s = Math.min(fw / heroImg.naturalWidth, fh / heroImg.naturalHeight);
-      const dw = heroImg.naturalWidth * s, dh = heroImg.naturalHeight * s;
-      ctx.drawImage(heroImg, 34 + pad + (fw - dw) / 2, bodyY + pad + (fh - dh) / 2, dw, dh);
-    } else {
-      ctx.fillStyle = '#edeae2';
-      ctx.fillRect(46, bodyY + 12, 606, frameH - 24);
-    }
-
-    const colTop = bodyY + frameH + 18;
-    drawBars(34, colTop, [296, 284, 294, 276, 210], 4.5, 16, 728);
-    drawBars(364, colTop, [294, 298, 282, 288, 195], 4.5, 16, 728);
-
-    // Vertical newspaper column rule
-    ctx.fillStyle = '#dcd9d0'; ctx.fillRect(682, bodyY, 1, 726 - bodyY);
-
-    // Right column: abstract text lines, existing editorial quote, bottom URL
-    drawBars(700, bodyY + 4, [286, 272, 288, 264, 210], 4.5, 17, 700);
-
-    const qY = bodyY + 102;
-    ctx.font = `italic 18.5px ${FONT}`;
-    const qLines = wrapLines(article.quote, 254, 4);
-    const qH = Math.max(84, 34 + qLines.length * 26);
-    ctx.fillStyle = '#e8edf7'; ctx.fillRect(700, qY, 290, qH);
-    ctx.fillStyle = '#1e3a8a'; ctx.fillRect(700, qY, 4, qH);
-    ctx.fillStyle = '#172554';
-    qLines.forEach((line, i) => ctx.fillText(line, 718, qY + 34 + i * 26, 254));
-
-    drawBars(700, qY + qH + 22, [284, 290, 270, 286, 276, 282, 264, 198], 4.5, 17, 686);
-
-    ctx.fillStyle = '#1e3a8a'; ctx.font = `600 13px ${SANS}`;
-    ctx.fillText('medtechsignal.substack.com', 700, 720);
-
-    // Whisper-light horizontal newspaper fold crease
-    const fold = ctx.createLinearGradient(0, 368, 0, 400);
-    fold.addColorStop(0, 'rgba(24,24,27,0)');
-    fold.addColorStop(0.5, 'rgba(24,24,27,0.075)');
-    fold.addColorStop(1, 'rgba(24,24,27,0)');
-    ctx.fillStyle = fold;
-    ctx.fillRect(0, 368, 1024, 32);
-
-    texture.needsUpdate = true;
-  }
-
-  whenFont(drawNewspaper);
-  heroImg.onload = () => { if (heroImg.naturalWidth) { drawNewspaper(); notifyAssetLoaded(); } };
-  onRoomLoad('writing', () => {
-    if (!heroImg.src && article.image) heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
+    whenFont(drawNewspaper);
+    heroImg.onload = () => { if (heroImg.naturalWidth) { drawNewspaper(); notifyAssetLoaded(); } };
+    if (article.image) heroImg.src = `${import.meta.env.BASE_URL}${article.image}`;
+    notifyAssetLoaded();
   });
 
   // Gently waved broadsheet page with a subtle horizontal center fold
@@ -891,7 +897,7 @@ function articlePaper(parent, x, y, z, article, rotY = 0) {
     pos.setZ(i, ripple);
   }
   pageGeo.computeVertexNormals();
-  const print = new THREE.Mesh(pageGeo, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.90 }));
+  const print = new THREE.Mesh(pageGeo, pageMat);
   print.rotation.x = -Math.PI / 2;
   print.position.y = 0.0056;
   print.castShadow = print.receiveShadow = true;

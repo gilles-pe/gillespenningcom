@@ -1,7 +1,7 @@
 {
   "title": "Gilles Penning Cross-Project CI",
-  "version": "1.0",
-  "date": "2026-11-20",
+  "version": "1.1",
+  "date": "2026-11-26",
   "status": "proposed-shared-contract-not-deployed",
   "domains": {
     "portfolio": "gillespenning.com",
@@ -18,7 +18,8 @@
   ],
   "typography": {
     "editorial": "Source Serif 4",
-    "interface": "Source Sans 3",
+    "interface": "Fira Sans",
+    "legacy_interface": "Source Sans 3",
     "wimmel_existing": "Inter",
     "base_px": 16,
     "scale_px": [
@@ -182,5 +183,22 @@
     "https://github.com/gilles-pe/gillespenningcom",
     "https://github.com/gilles-pe/ai-in-medicine-monitor",
     "https://github.com/gilles-pe/medizin-wimmelbild"
+  ],
+  "changelog": [
+    {
+      "version": "1.1",
+      "date": "2026-11-26",
+      "changes": [
+        "Switched primary interface/body sans-serif typeface from Source Sans 3 to Fira Sans (self-hosted weights 400, 500, 600); retained Source Serif 4 for editorial headings.",
+        "Adopted on gillespenning.com first alongside refined desktop header and compact room card typography; AI Monitor (Source Sans 3) and Wimmelbild (Inter) remain unchanged until intentional migration."
+      ]
+    },
+    {
+      "version": "1.0",
+      "date": "2026-11-20",
+      "changes": [
+        "Initial cross-project Corporate Identity specification for gillespenning.com, ai.gillespenning.com, and wimmelbild.gillespenning.com."
+      ]
+    }
   ]
 }

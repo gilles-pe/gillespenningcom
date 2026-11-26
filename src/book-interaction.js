@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import catalog from './data/books.json';
 import { personalBookNote } from './book-note-layout.js';
-import { showLargeBookCover, releaseLargeBookCover, setBookJacketLanguage } from './book-jackets.js';
+import { showLargeBookCover, releaseLargeBookCover, setBookJacketLanguage, ensureBookBack } from './book-jackets.js';
 
 const byId = new Map(catalog.books.map(book => [book.id, book]));
 const VERTICAL = new THREE.Vector3(0, 1, 0);
@@ -94,6 +94,7 @@ export function createBookInteraction({ stage, scene, camera, reduced, language,
   }
   function showFace(face) {
     if (!selected || !selected.extracted || !['front', 'spine', 'back'].includes(face)) return;
+    if (face === 'spine' || face === 'back') ensureBookBack(selected.id);
     selected.face = face;
     announce(); markDirty();
   }

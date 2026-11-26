@@ -163,20 +163,45 @@ function flatSpineReconstruction(book, colors) {
 const materialCache = new Map();
 const jackets = new Map();
 const MAX_LARGE_TEXTURES = 2;
+const MAX_BACK_TEXTURES = 3;
 let useCounter = 0;
 
+function ensureSpine(record) {
+  if (record.spineReady) return;
+  const map = record.flat ? flatSpineReconstruction(record.book, record.colors) : spineReconstruction(record.book, record.colors);
+  record.spine.color.set(0xffffff);
+  record.spine.map = map;
+  record.spine.needsUpdate = true;
+  record.spineReady = true;
+}
+function ensureFallback(record) {
+  if (!record.fallback) record.fallback = frontFallback(record.book, record.colors);
+}
 function display(record) {
   const image = (record.active && record.large) || record.small || record.fallback;
-  if (record.material.map === image) return;
+  if (!image || record.material.map === image) return;
+  record.material.color.set(0xffffff);
   record.material.map = image;
   record.material.needsUpdate = true;
-  window.dispatchEvent(new Event('book-cover-loaded'));
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('book-cover-loaded'));
 }
 function pruneLarge() {
   const available = [...jackets.values()].filter(r => r.large && !r.active).sort((a, b) => a.used - b.used);
   while ([...jackets.values()].filter(r => r.large).length > MAX_LARGE_TEXTURES && available.length) {
     const r = available.shift();
     r.large.dispose(); r.large = null;
+  }
+}
+function pruneBacks() {
+  const available = [...jackets.values()].filter(r => r.backReady && !r.active).sort((a, b) => a.backUsed - b.backUsed);
+  while ([...jackets.values()].filter(r => r.backReady).length > MAX_BACK_TEXTURES && available.length) {
+    const r = available.shift();
+    r.back.map?.dispose();
+    r.back.map = null;
+    r.back.color.set(personalBookNote(r.book, jacketLanguage) ? 0xf7f6f2 : r.colors[0]);
+    r.back.needsUpdate = true;
+    r.backReady = false;
+    r.backLang = null;
   }
 }
 function load(record, size) {
@@ -199,11 +224,34 @@ function load(record, size) {
   }, undefined, () => { record[`${size}Pending`] = false; record[`${size}Failed`] = true; });
 }
 export function loadBookCoversForRoom(room) {
-  for (const record of jackets.values()) if (record.book.room === room) load(record, 'small');
+  for (const record of jackets.values()) {
+    if (record.book.room !== room) continue;
+    ensureSpine(record);
+    ensureFallback(record);
+    if (!record.small && !record.large) display(record);
+    load(record, 'small');
+  }
+}
+export function ensureBookBack(id) {
+  const record = jackets.get(id);
+  if (!record) return;
+  record.backUsed = ++useCounter;
+  if (record.backReady && record.backLang === jacketLanguage) return;
+  const previous = record.back.map;
+  record.back.color.set(0xffffff);
+  record.back.map = backReconstruction(record.book, record.colors, record.flat, record.backAspect);
+  record.back.needsUpdate = true;
+  record.backReady = true;
+  record.backLang = jacketLanguage;
+  previous?.dispose();
+  pruneBacks();
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('book-cover-loaded'));
 }
 export function showLargeBookCover(id) {
   const record = jackets.get(id);
   if (!record) return;
+  ensureSpine(record);
+  ensureFallback(record);
   record.active = true; record.used = ++useCounter;
   display(record);
   load(record, 'large');
@@ -212,7 +260,7 @@ export function releaseLargeBookCover(id) {
   const record = jackets.get(id);
   if (!record) return;
   record.active = false; record.used = ++useCounter;
-  display(record); pruneLarge();
+  display(record); pruneLarge(); pruneBacks();
 }
 
 function makeMaterials(book, orientation, backAspect) {
@@ -221,13 +269,13 @@ function makeMaterials(book, orientation, backAspect) {
   const colors = palette(book.id);
   const paper = new THREE.MeshStandardMaterial({ color: 0xe8decc, roughness: .88 });
   const flat = !(orientation === 'upright' || orientation === 'leaning');
-  const front = new THREE.MeshStandardMaterial({ map: frontFallback(book, colors), roughness: .76 });
-  const backMap = backReconstruction(book, colors, flat, backAspect);
+  // Defer cover fallbacks, spines, and 1024px reading-note backs until room open / book turn for fast startup.
+  const front = new THREE.MeshStandardMaterial({ color: colors[0], roughness: .76 });
   // Keep owner copy at paper/ink contrast even in the shaded shelf.
   const backMaterial = personalBookNote(book, jacketLanguage)
-    ? new THREE.MeshBasicMaterial({ map: backMap, toneMapped: false })
-    : new THREE.MeshStandardMaterial({ map: backMap, roughness: .79 });
-  const spine = new THREE.MeshStandardMaterial({ map: flat ? flatSpineReconstruction(book, colors) : spineReconstruction(book, colors), roughness: .76 });
+    ? new THREE.MeshBasicMaterial({ color: 0xf7f6f2, toneMapped: false })
+    : new THREE.MeshStandardMaterial({ color: colors[0], roughness: .79 });
+  const spine = new THREE.MeshStandardMaterial({ color: colors[0], roughness: .76 });
   // BoxGeometry material order: +X, -X, +Y, -Y, +Z, -Z.
   // Upright: cover on the leaf-facing (+X) side; spine looks out (+Z).
   // Horizontal: front cover looks up (+Y), back cover down (-Y, rotated 180° in canvas to align head at -Z);
@@ -236,7 +284,7 @@ function makeMaterials(book, orientation, backAspect) {
     ? [front, backMaterial, paper, paper, spine, paper]
     : [paper, spine, front, backMaterial, paper, paper];
   materialCache.set(cacheKey, materials);
-  jackets.set(book.id, { book, material: front, back: backMaterial, backAspect, flat, colors, fallback: front.map, small: null, large: null, active: false, used: 0 });
+  jackets.set(book.id, { book, material: front, spine, back: backMaterial, backAspect, flat, colors, fallback: null, small: null, large: null, spineReady: false, backReady: false, backLang: null, backUsed: 0, active: false, used: 0 });
   return materials;
 }
 
@@ -245,11 +293,13 @@ export function setBookJacketLanguage(language) {
   if (next === jacketLanguage) return;
   jacketLanguage = next;
   for (const record of jackets.values()) {
+    if (!record.backReady) continue;
     if (!record.book.personalNote?.en && !record.book.personalNote?.de) continue;
     const previous = record.back.map;
     record.back.map = backReconstruction(record.book, record.colors, record.flat, record.backAspect);
     record.back.needsUpdate = true;
-    previous.dispose();
+    record.backLang = jacketLanguage;
+    previous?.dispose();
   }
 }
 

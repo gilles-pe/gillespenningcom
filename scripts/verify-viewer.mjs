@@ -651,9 +651,9 @@ api.open(null); draw();
   for (const b of books) {
     api.open(b.room); draw();
     const mesh = api.debug.bookUI.getMesh(b.id), m = mesh.material;
-    assert(m[1].map && m[2].map && m[3].map, `${b.id}: cover (+Y), back (-Y) and spine (-X) carry textures`);
+    assert(m[1].map && m[2].map, `${b.id}: cover (+Y) and spine (-X) carry textures on room open`);
     assert(!m[4].map && !m[5].map && !m[0].map, `${b.id}: short ends and right edge are plain paper`);
-    assert(m[1].map !== m[2].map && m[1].map !== m[3].map, `${b.id}: spine texture is its own`);
+    assert(m[1].map !== m[2].map, `${b.id}: spine texture is its own`);
     api.debug.tapShelfBook(b.id); draw();
     mesh.updateWorldMatrix(true, false);
     // The book turns towards the camera as it was when the book was pulled out, so read that camera before drawing on.
@@ -678,6 +678,7 @@ api.open(null); draw();
 
     api.debug.tapShelfBook(b.id); draw(); settle();
     assert.equal(api.debug.bookUI.activeFace, 'back');
+    assert(m[3].map && m[1].map !== m[3].map, `${b.id}: lazy back (-Y) materializes its own texture on turn`);
     mesh.updateWorldMatrix(true, false);
     const qBack = mesh.getWorldQuaternion(new Three.Quaternion());
     assert(new Three.Vector3(0, -1, 0).applyQuaternion(qBack).dot(eye0) > 0.95, `${b.id}: back step shows back cover (-Y)`);
@@ -703,21 +704,30 @@ api.open(null); draw();
     assert.equal(mesh.name, 'Book: ' + b.title);
     assert.equal(mesh.userData.bookTitle, b.title);
     assert(mesh.material[flat ? 2 : 0].map, b.id + ': front texture');
-    assert(mesh.material[flat ? 3 : 1].map, b.id + ': back texture');
     assert(mesh.material[flat ? 1 : 4].map, b.id + ': spine texture');
     const p = mesh.getWorldPosition(new Three.Vector3()), r = sceneModule.ROOMS[b.room];
     assert(Math.abs(p.x - r.cx) < r.w / 2 && Math.abs(p.z - r.cz) < r.d / 2, b.id + ': correct actual room');
   }
+  const cachedBacks = allMeshes.filter(m => {
+    const b = catalog.find(item => item.id === m.userData.bookId);
+    return Boolean(m.material[b.placement.orientation === 'horizontal' ? 3 : 1].map);
+  }).length;
+  assert(cachedBacks <= 3, `lazy back texture cache stays bounded (got ${cachedBacks})`);
   for (const anchor of new Set(catalog.map(b => b.placement.anchor))) {
     const group = catalog.filter(b => b.placement.anchor === anchor).sort((a,b) => a.placement.order - b.placement.order);
     const axis = group[0].placement.orientation === 'horizontal' ? 'y' : 'x';
     for (let i = 1; i < group.length; i++) assert(api.debug.bookUI.getMesh(group[i].id).position[axis] > api.debug.bookUI.getMesh(group[i-1].id).position[axis], anchor + ': order matches geometry');
   }
   const id = 'riding-the-waves-of-culture', mesh = api.debug.bookUI.getMesh(id);
-  const ordinary = api.debug.bookUI.getMesh('guns-germs-and-steel'), ordinaryBack = ordinary.material[1].map;
+  const ordinary = api.debug.bookUI.getMesh('guns-germs-and-steel');
   const front = mesh.material[0], spine = mesh.material[4];
   const origin = mesh.position.clone();
   api.setLanguage('en'); api.open('writing'); draw();
+  for (let i = 0; i < 4; i++) { api.debug.tapShelfBook('guns-germs-and-steel'); draw(); }
+  assert.equal(api.debug.bookUI.activeFace, 'back');
+  const ordinaryBack = ordinary.material[1].map;
+  assert(ordinaryBack, 'cached additional personal back exists before language switch');
+  api.debug.tapShelfBook('guns-germs-and-steel'); draw();
   api.debug.tapShelfBook(id); draw();
   assert(!api.debug.bookUI.isExtracted());
   api.debug.tapShelfBook(id); draw();

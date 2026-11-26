@@ -30,7 +30,7 @@ const loadWarpSound = async () => {
   };
 };
 
-export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, onFocusChange, musicLoader = loadGlobeMusic, warpLoader = loadWarpSound }) {
+export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick, onAway, onZoom, onBackState, onViewBack, onFocusChange, onProgress, musicLoader = loadGlobeMusic, warpLoader = loadWarpSound }) {
   let renderer = null;
   for (const opts of [
     { canvas, antialias: true, alpha: true, powerPreference: 'high-performance' },
@@ -52,7 +52,9 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
 
   setModelLanguage(lang);
   let curLang = lang;
+  onProgress?.(2, 0.68);
   const { scene, rooms, outline, center, cellar, occluders, photo, speakingPhoto, projectPicks, trophyPicks, storyPicks, albumPicks, albumBook, enterprise, globe, inspectionTargets, projectDisplays } = buildScene();
+  onProgress?.(3, 0.88);
   const roomWarp = enterprise ? createRoomWarp(scene, enterprise.root) : null;
   const globeFlight = globe ? createGlobeFlight(globe) : null;
   // Default light rig, only if the scene does not bring its own. Room point lights and local fixture spots (the operating light) do not count.
@@ -1869,6 +1871,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
     renderCamera.position.copy(camera.position);
     renderCamera.quaternion.copy(camera.quaternion);
     renderer.render(scene, renderCamera);
+    if (!firstRendered) { firstRendered = true; onProgress?.(4, 1); }
 
     const vs = !reduced ? roomWarp?.getViewscreenPose?.() : null;
     if (!vs) {
@@ -1904,6 +1907,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       }
     }
   }
+  let firstRendered = false;
   requestAnimationFrame(frame);
 
   return {
@@ -1942,6 +1946,24 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
       const prev = suppressFocusEmit;
       if (fromRoute) suppressFocusEmit = true;
       try {
+        if (openId === 'about' && key === 'album') {
+          bookUI.close(true); closePop(false); closePhoto(false);
+          if (objectFocus) restoreObjectView();
+          openAlbum();
+          return true;
+        }
+        if (openId === 'about' && key === 'photo') {
+          bookUI.close(true); closePop(false); closeAlbum(false);
+          if (objectFocus) restoreObjectView();
+          openPhoto('photo');
+          return true;
+        }
+        if (openId === 'writing' && key === 'speaking') {
+          bookUI.close(true); closePop(false); closeAlbum(false);
+          if (objectFocus) restoreObjectView();
+          openPhoto('speaking');
+          return true;
+        }
         if (openId === 'writing' && substackByKey.has(key)) {
           if (objectFocus?.target?.key === key) return true;
           bookUI.close(true);
@@ -1957,6 +1979,7 @@ export function startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onP
         if (popAllowed(openId, key)) {
           if (popKey === key && objectFocus?.target?.key === key) return true;
           bookUI.close(true);
+          closePhoto(false); closeAlbum(false);
           openPop(key, { replace: false });
           return true;
         }

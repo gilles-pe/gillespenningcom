@@ -1,4 +1,5 @@
-/* Gilles Penning ecosystem - proposed semantic tokens, 2026-11-20.
+/* Gilles Penning ecosystem - proposed semantic tokens, v1.1 (2026-11-26).
+   Changelog: v1.1 (2026-11-26) --gp-sans switched from Source Sans 3 to Fira Sans; v1.0 (2026-11-20) initial.
    NOT a drop-in replacement for existing project token files.
    Namespaced gp- to avoid collisions with current site variables. */
 :root {
@@ -26,7 +27,7 @@
   --gp-wimmel-gold: #E7B43F;
   --gp-wimmel-focus: #FFE08A;
 
-  --gp-sans: 'Source Sans 3', system-ui, sans-serif;
+  --gp-sans: 'Fira Sans', system-ui, sans-serif;
   --gp-serif: 'Source Serif 4', Georgia, serif;
   --gp-wimmel-sans: Inter, system-ui, sans-serif;
   --gp-type-xs: 12px;

@@ -1,14 +1,16 @@
 import '@fontsource/source-serif-4/400.css';
 import '@fontsource/source-serif-4/600.css';
-import '@fontsource/source-sans-3/400.css';
-import '@fontsource/source-sans-3/600.css';
+import '@fontsource/fira-sans/400.css';
+import '@fontsource/fira-sans/500.css';
+import '@fontsource/fira-sans/600.css';
 import './style.css';
 import { t, initialLang, rememberLang, applyStatic, LANGS } from './i18n.js';
-import { renderSocial, renderNews, renderLatest } from './widgets.js';
+import { renderSocial, renderNews } from './widgets.js';
 import { onNews, refreshNews } from './news.js';
 import { zoomToSlider, sliderToZoom } from './inspection.js';
 import { enableExternalLinks } from './external-links.js';
 import { ROOMS as ORDER, resolveRoute, hashForView } from './routes.js';
+import substackData from './data/substack-articles.json';
 enableExternalLinks();
 
 const stage = document.getElementById('stage');
@@ -217,6 +219,15 @@ addEventListener('keydown', e => {
 document.addEventListener('click', e => {
   const lead = e.target.closest?.('[data-open-leadership]');
   if (lead) { e.preventDefault(); openLeadership(); return; }
+  const focusTrigger = e.target.closest?.('[data-focus]');
+  if (focusTrigger && api && mode === '3d') {
+    e.preventDefault();
+    const [room, key] = focusTrigger.dataset.focus.split(':');
+    if (room && current !== room) openRoom(room, { auto: false });
+    if (key) api.focus(key);
+    stage.focus({ preventScroll: true });
+    return;
+  }
   const a = e.target.closest?.('a[href^="#"]');
   if (!a || mode === 'static' || (a.getAttribute('href').length < 2)) return;
   const route = resolveRoute(a.getAttribute('href'));
@@ -225,7 +236,12 @@ document.addEventListener('click', e => {
 
 // Language switch: static text, room names, 3D lettering and room details.
 // Social links and news are rendered into every placeholder on the page (source sections, footer, open card).
-function renderAll() { renderSocial(lang); renderNews(lang); renderLatest(lang); }
+function renderAll() {
+  renderSocial(lang);
+  renderNews(lang);
+  const latestTitle = substackData.articles[0]?.title || 'MedTech Signal';
+  document.querySelectorAll('[data-latest-article-title]').forEach(el => { el.textContent = latestTitle; });
+}
 onNews(renderAll);
 const langBtns = [...document.querySelectorAll('#lang button')];
 function setLang(next, { save = true } = {}) {
@@ -244,7 +260,25 @@ setLang(lang, { save: false });
 applyLocation();
 refreshNews();   // snapshot is already on screen; the live feed replaces it if it arrives and is valid
 
+const loaderEl = document.getElementById('stage-loader');
+const loaderTextEl = document.getElementById('stage-loader-text');
+let loaderDone = false;
+function setLoader(stepIndex) {
+  if (loaderDone || !loaderEl) return;
+  loaderEl.dataset.step = String(stepIndex);
+  const msgs = t(lang, 'stage.loading');
+  if (loaderTextEl && Array.isArray(msgs) && msgs[stepIndex]) loaderTextEl.textContent = msgs[stepIndex];
+}
+function hideLoader(immediate = false) {
+  if (loaderDone || !loaderEl) return;
+  loaderDone = true;
+  if (immediate || reduced) { loaderEl.hidden = true; return; }
+  loaderEl.classList.add('done');
+  setTimeout(() => { loaderEl.hidden = true; }, 260);
+}
+
 function useStatic() {
+  hideLoader(true);
   mode = 'static'; html.classList.remove('js'); html.classList.add('static'); source.hidden = false;
   const fallback = stage.querySelector('.fallback');
   if (!fallback.getAttribute('src') && fallback.dataset.src) fallback.src = fallback.dataset.src;
@@ -256,21 +290,32 @@ function useStatic() {
 // Text and links are usable before the 3D code arrives. Retry transient chunk/WebGL
 // hiccups twice before falling back to the static view; SEO HTML stays intact throughout.
 function loadViewer(attempt = 0) {
+  setLoader(0, 0.16);
   import('./viewer.js').then(({ startViewer }) => {
-    api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
-      onZoom: syncZoom,
-      onBackState: available => { sceneBack.hidden = !available; stage.classList.toggle('has-view-history', available); },
-      onViewBack: id => { if (id) openRoom(id, { auto: true, keepView: true }); else closeRoom({ fromHistory: true }); writeHash(id); },
-      onFocusChange: (roomId, focusKey, { replace = false } = {}) => { if (mode === '3d') writeHash(hashForView(roomId, focusKey), { replace }); },
-      onAway: away => { const had = resetBtn === document.activeElement; resetBtn.hidden = !away; if (had && !away) stage.focus({ preventScroll: true }); } });
-    if (!api) throw new Error('WebGL unavailable');
-    viewControls.hidden = false;
-    // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
-    stage.tabIndex = 0; stage.setAttribute('role', 'application');
-    stage.closest('.hero').classList.add('hero--rendered');
-    if (import.meta.env.DEV) window.__gp = api.debug;
-    mode = '3d';
-    if (pending) { pending = null; applyLocation(); }
+    setLoader(1, 0.40);
+    requestAnimationFrame(() => {
+      try {
+        api = startViewer({ canvas, stage, labels, spotsEl, reduced, lang, onPick: tapCanvas,
+          onZoom: syncZoom,
+          onProgress: (step, pct) => { setLoader(step, pct); if (pct >= 1) hideLoader(); },
+          onBackState: available => { sceneBack.hidden = !available; stage.classList.toggle('has-view-history', available); },
+          onViewBack: id => { if (id) openRoom(id, { auto: true, keepView: true }); else closeRoom({ fromHistory: true }); writeHash(id); },
+          onFocusChange: (roomId, focusKey, { replace = false } = {}) => { if (mode === '3d') writeHash(hashForView(roomId, focusKey), { replace }); },
+          onAway: away => { resetBtn.classList.toggle('is-idle', !away); } });
+        if (!api) throw new Error('WebGL unavailable');
+        viewControls.hidden = false;
+        // The model is keyboard-operable: arrows turn it, plus and minus zoom, Home resets (see viewer.js).
+        stage.tabIndex = 0; stage.setAttribute('role', 'application');
+        stage.closest('.hero').classList.add('hero--rendered');
+        if (import.meta.env.DEV) window.__gp = api.debug;
+        mode = '3d';
+        if (document.hidden) hideLoader(true);
+        if (pending) { pending = null; applyLocation(); }
+      } catch {
+        if (attempt < 2) setTimeout(() => loadViewer(attempt + 1), attempt === 0 ? 600 : 1500);
+        else useStatic();
+      }
+    });
   }).catch(() => {
     if (attempt < 2) setTimeout(() => loadViewer(attempt + 1), attempt === 0 ? 600 : 1500);
     else useStatic();

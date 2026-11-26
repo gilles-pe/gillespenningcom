@@ -1,6 +1,6 @@
 {
   "title": "Gilles Penning Cross-Project CI",
-  "version": "1.1",
+  "version": "1.2",
   "date": "2026-11-26",
   "status": "proposed-shared-contract-not-deployed",
   "domains": {
@@ -18,9 +18,15 @@
   ],
   "typography": {
     "editorial": "Source Serif 4",
-    "interface": "Fira Sans",
-    "legacy_interface": "Source Sans 3",
+    "interface_personal": "Fira Sans",
+    "interface_professional": "Source Sans 3",
     "wimmel_existing": "Inter",
+    "usage_rules": {
+      "personal_texts_and_portfolio": "Fira Sans (e.g. gillespenning.com)",
+      "professional_and_evidence": "Source Sans 3 (e.g. ai.gillespenning.com)",
+      "wimmel_ui": "Inter",
+      "max_families_per_asset": 2
+    },
     "base_px": 16,
     "scale_px": [
       12,
@@ -186,11 +192,19 @@
   ],
   "changelog": [
     {
+      "version": "1.2",
+      "date": "2026-11-26",
+      "changes": [
+        "Established dual co-equal sans-serif font roles instead of deprecating Source Sans 3: Fira Sans (--gp-sans-personal) for personal texts and gillespenning.com; Source Sans 3 (--gp-sans-professional) for professional, analytical, and evidence-first products such as AI in Medicine Monitor (ai.gillespenning.com).",
+        "Retained Source Serif 4 for editorial headings across all sites and Inter for existing Wimmelbild UI, keeping at most two visible type families per single site or asset."
+      ]
+    },
+    {
       "version": "1.1",
       "date": "2026-11-26",
       "changes": [
-        "Switched primary interface/body sans-serif typeface from Source Sans 3 to Fira Sans (self-hosted weights 400, 500, 600); retained Source Serif 4 for editorial headings.",
-        "Adopted on gillespenning.com first alongside refined desktop header and compact room card typography; AI Monitor (Source Sans 3) and Wimmelbild (Inter) remain unchanged until intentional migration."
+        "Switched primary interface/body sans-serif typeface on gillespenning.com from Source Sans 3 to Fira Sans (self-hosted weights 400, 500, 600); retained Source Serif 4 for editorial headings.",
+        "Applied alongside refined desktop header and compact room card typography."
       ]
     },
     {
